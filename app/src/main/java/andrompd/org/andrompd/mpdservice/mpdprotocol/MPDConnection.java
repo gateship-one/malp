@@ -390,7 +390,7 @@ public class MPDConnection {
             if ( response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if ( !tempTrack.getFileURL().equals("") ) {
                     /* Check the artist filter criteria here */
-                    if ( filterArtist == tempTrack.getTrackArtist() || filterArtist.equals("") ) {
+                    if ( filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("") ) {
                         trackList.add(tempTrack);
                         Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
                     }
@@ -461,8 +461,9 @@ public class MPDConnection {
         /* Add last remaining track to list. */
         if ( !tempTrack.getFileURL().equals("") ) {
             /* Check the artist filter criteria here */
-            if ( filterArtist == tempTrack.getTrackArtist() || filterArtist.equals("") ) {
+            if ( filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("") ) {
                 trackList.add(tempTrack);
+                Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
             }
         }
 
@@ -532,6 +533,40 @@ public class MPDConnection {
             return null;
         }
     }
+
+
+    /**
+     * Returns the list of tracks that are part of albumName
+     * @param albumName Album to get tracks from
+     * @return List of MPDFile track objects
+     */
+    public List<MPDFile> getAlbumTracks(String albumName) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+        try {
+            return parseMPDTracks("");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns the list of tracks that are part of albumName and from artistName
+     * @param albumName Album to get tracks from
+     * @param artistName Artist to filter with
+     * @return List of MPDFile track objects
+     */
+    public List<MPDFile> getArtistAlbumTracks(String albumName, String artistName) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+        try {
+            /* Filter tracks with artistName */
+            return parseMPDTracks(artistName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     /**
      * Requests the currentstatus package from the mpd server.

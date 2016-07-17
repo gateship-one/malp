@@ -20,6 +20,10 @@ public class MPDCommands {
         return "list album artist \"" + artistName + "\" group MUSICBRAINZ_ALBUMID";
     }
 
+    public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {
+        return "find album \"" + albumName + "\"";
+    }
+
     public static final String MPD_COMMAND_REQUEST_ARTISTS = "list artist";
 
     public static final String MPD_COMMAND_REQUEST_ALL_FILES = "listallinfo";
