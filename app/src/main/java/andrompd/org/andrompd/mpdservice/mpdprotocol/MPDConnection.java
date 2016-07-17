@@ -7,7 +7,14 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.lang.reflect.Array;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
+
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
 /**
  * Created by hendrik on 16.07.16.
@@ -113,6 +120,8 @@ public class MPDConnection {
             if ( pWriter == null ) {
                 pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
             }
+
+            waitForResponse();
 
             /* If connected try to get MPDs version */
             String readString = null;
@@ -245,4 +254,255 @@ public class MPDConnection {
             }
         }
     }
+
+
+
+
+    /*
+     * *******************************
+     * * Response handling functions *
+     * *******************************
+     */
+
+    /**
+     * Parses the return of MPD when a list of albums was requested.
+     * @param albumArtist Artist to be added to all MPDAlbum objects. (Useful for later GUI)
+     * @return List of MPDAlbum objects
+     * @throws IOException
+     */
+    private ArrayList<MPDAlbum> parseMPDAlbums(String albumArtist) throws IOException {
+        ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
+
+        /* Parse the MPD response and create a list of MPD albums */
+        String response;
+
+        boolean emptyAlbum = false;
+        String albumName = "";
+        String albumMBID = "";
+
+        MPDAlbum tempAlbum;
+
+        while ( pReader.ready() ) {
+            response = pReader.readLine();
+            if ( response == null ) {
+                /* skip this invalid (empty) response */
+                continue;
+            }
+
+            /* Check if the response is an album */
+            if ( response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME) ) {
+                /* We found an album, add it to the list. */
+                if ( !albumName.equals("") || emptyAlbum ) {
+                    tempAlbum = new MPDAlbum(albumName,albumMBID,albumArtist);
+                    Log.v(TAG,"Add album to list: " + albumName + ":" + albumMBID + ":"  + albumArtist);
+                    albumList.add(tempAlbum);
+                }
+                albumName = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length());
+                if ( albumName.equals("") ) {
+                    emptyAlbum = true;
+                }
+            } else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID) ) {
+                /* Check if the response is a musicbrainz_albumid. */
+                albumMBID = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length());
+            }
+        }
+
+        /* Because of the loop structure the last album has to be added because no
+        "ALBUM:" is sent anymore.
+         */
+        if ( !albumName.equals("") || emptyAlbum ) {
+            tempAlbum = new MPDAlbum(albumName,albumMBID,albumArtist);
+            albumList.add(tempAlbum);
+        }
+
+        return albumList;
+    }
+
+    /**
+     * Parses the return stream of MPD when a list of artists was requested.
+     * @return List of MPDArtists objects
+     * @throws IOException
+     */
+    private ArrayList<MPDArtist> parseMPDArtists() throws IOException {
+        ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
+
+        /* Parse MPD artist return values and create a list of MPDArtist objects */
+        String response;
+
+        /* Artist properties */
+        String artistName;
+        String artistMBID = "";
+
+        MPDArtist tempArtist;
+
+        while ( pReader.ready() ) {
+            response = pReader.readLine();
+            if ( response == null ) {
+                /* skip this invalid (empty) response */
+                continue;
+            }
+
+            if ( response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME) ) {
+                artistName = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length());
+                tempArtist = new MPDArtist(artistName,artistMBID);
+                artistList.add(tempArtist);
+                Log.v(TAG,"Added artist: " + artistName + ":" + artistMBID);
+            } else if ( response.startsWith("OK") ) {
+                break;
+            }
+        }
+
+        return artistList;
+    }
+
+    /**
+     * Parses the resposne of mpd on requests that return track items
+     * @param filterArtist Artist used for filtering. Non-matching tracks get discarded.
+     * @return List of MPDFile objects
+     * @throws IOException
+     */
+    private ArrayList<MPDFile> parseMPDTracks(String filterArtist) throws IOException {
+        ArrayList<MPDFile> trackList = new ArrayList<MPDFile>();
+
+        /* Temporary track item (added to list later */
+        MPDFile tempTrack = new MPDFile();
+
+        /* Response line from MPD */
+        String response;
+        while ( pReader.ready() ) {
+            response = pReader.readLine();
+
+            if ( response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
+                if ( !tempTrack.getFileURL().equals("") ) {
+                    /* Check the artist filter criteria here */
+                    if ( filterArtist == tempTrack.getTrackArtist() || filterArtist.equals("") ) {
+                        trackList.add(tempTrack);
+                        Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
+                    }
+                }
+                tempTrack = new MPDFile();
+                tempTrack.setFileURL(response.substring(MPDResponses.MPD_RESPONSE_FILE.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TITLE) ) {
+                tempTrack.setTrackTitle(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TITLE.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME) ) {
+                tempTrack.setTrackArtist(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME) ) {
+                tempTrack.setTrackAlbumArtist(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME) ) {
+                tempTrack.setTrackAlbum(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_DATE) ) {
+                tempTrack.setDate(response.substring(MPDResponses.MPD_RESPONSE_DATE.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID) ) {
+                tempTrack.setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID) ) {
+                tempTrack.setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_MBID) ) {
+                tempTrack.setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME) ) {
+                tempTrack.setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_DISC_NUMBER) ) {
+                /*
+                * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
+                */
+                String discNumber = response.substring(MPDResponses.MPD_RESPONSE_DISC_NUMBER.length());
+                String[] discNumberSep = discNumber.split("/");
+                if ( discNumberSep.length > 0 ) {
+                    tempTrack.setDiscNumber(Integer.valueOf(discNumberSep[0]));
+                    if ( discNumberSep.length > 1 ) {
+                        tempTrack.psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
+                    }
+                } else {
+                    tempTrack.setDiscNumber(Integer.valueOf(discNumber));
+                }
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER) ) {
+                /*
+                 * Check if MPD returned a tracknumber like: "12" or "12/42" and set albumtrack count accordingly.
+                 */
+                String trackNumber = response.substring(MPDResponses.MPD_RESPONSE_TRACK_NUMBER.length());
+                String[] trackNumbersSep = trackNumber.split("/");
+                if ( trackNumbersSep.length > 0 ) {
+                    tempTrack.setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
+                    if ( trackNumbersSep.length > 1 ) {
+                        tempTrack.setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
+                    }
+                } else {
+                    tempTrack.setTrackNumber(Integer.valueOf(trackNumber));
+                }
+            }
+
+        }
+
+        /* Add last remaining track to list. */
+        if ( !tempTrack.getFileURL().equals("") ) {
+            /* Check the artist filter criteria here */
+            if ( filterArtist == tempTrack.getTrackArtist() || filterArtist.equals("") ) {
+                trackList.add(tempTrack);
+            }
+        }
+
+        return trackList;
+    }
+
+     /*
+     * **********************
+     * * Request functions  *
+     * **********************
+     */
+
+    public List<MPDAlbum> getAlbums() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS);
+        try {
+            /* No artistName here because it is a full list */
+            return parseMPDAlbums("");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<MPDAlbum> getArtistAlbums(String artistName) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName));
+        try {
+            return parseMPDAlbums(artistName);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<MPDArtist> getArtists() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
+        try {
+            return parseMPDArtists();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Gets all tracks from MPD server. This could take a long time to process. Be warned.
+     * @return A list of all tracks in MPDFile objects
+     */
+    public List<MPDFile> getAllTracks() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
+        try {
+            return parseMPDTracks("");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }
