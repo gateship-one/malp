@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.lang.reflect.Array;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +15,6 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-/**
- * Created by hendrik on 16.07.16.
- */
 
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
@@ -255,6 +251,25 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Checks if a simple command was successful or not (OK vs. ACK)
+     * @return True if command was successfully executed, false otherwise.
+     */
+    public boolean checkResponse() {
+        boolean success = false;
+
+        String response;
+        while ( pReader.ready() ) {
+            response = pReader.readLine();
+            if ( response.startsWith("OK") ) {
+                success = true;
+            } else if ( response.startsWith("ACK") ) {
+                success = false;
+            }
+        }
+
+        return success;
+    }
 
 
 
@@ -460,6 +475,10 @@ public class MPDConnection {
      * **********************
      */
 
+    /**
+     * Get a list of all albums available in the database.
+     * @return List of MPDAlbum
+     */
     public List<MPDAlbum> getAlbums() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS);
         try {
@@ -471,6 +490,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Get a list of all albums by an artist.
+     * @param artistName Artist to filter album lsit with.
+     * @return List of MPDAlbum objects
+     */
     public List<MPDAlbum> getArtistAlbums(String artistName) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName));
         try {
@@ -481,6 +505,10 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Get a list of all artists available in MPDs database
+     * @return List of MPDArtist objects
+     */
     public List<MPDArtist> getArtists() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
         try {
@@ -504,5 +532,58 @@ public class MPDConnection {
             return null;
         }
     }
+
+
+    /*
+     ***********************
+     *    Control commands *
+     ***********************
+     */
+
+    /**
+     * Sends the pause commando to MPD.
+     * @param pause 1 if playback should be paused, 0 if resumed
+     * @return
+     */
+    public boolean pause(boolean pause) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
+
+        /* Return the response value of MPD */
+        return checkResponse();
+    }
+
+    /**
+     * Jumps to the next song
+     * @return true if successful, false otherwise
+     */
+    public boolean nextSong() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
+
+        /* Return the response value of MPD */
+        return checkResponse();
+    }
+
+    /**
+     * Jumps to the previous song
+     * @return true if successful, false otherwise
+     */
+    public boolean previousSong() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
+
+        /* Return the response value of MPD */
+        return checkResponse();
+    }
+
+    /**
+     * Stops playback
+     * @return true if successful, false otherwise
+     */
+    public boolean stopPlayback() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_STOP);
+
+        /* Return the response value of MPD */
+        return checkResponse();
+    }
+
 
 }

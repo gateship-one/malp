@@ -1,8 +1,5 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol;
 
-/**
- * Created by hendrik on 16.07.16.
- */
 public class MPDCommands {
 
     public static final String MPD_COMMAND_CLOSE = "close";
@@ -26,4 +23,13 @@ public class MPDCommands {
     public static final String MPD_COMMAND_REQUEST_ARTISTS = "list artist";
 
     public static final String MPD_COMMAND_REQUEST_ALL_FILES = "listallinfo";
+
+    /* Control commands */
+    public static String MPD_COMMAND_PAUSE(boolean pause) {
+        return "pause " + (pause ? "1" : "0");
+    }
+
+    public static final String MPD_COMMAND_NEXT = "next";
+    public static final String MPD_COMMAND_PREVIOUS = "previous";
+    public static final String MPD_COMMAND_STOP = "stop";
 }
