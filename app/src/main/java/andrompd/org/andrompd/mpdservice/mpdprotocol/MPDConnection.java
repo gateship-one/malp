@@ -255,7 +255,7 @@ public class MPDConnection {
      * Checks if a simple command was successful or not (OK vs. ACK)
      * @return True if command was successfully executed, false otherwise.
      */
-    public boolean checkResponse() {
+    public boolean checkResponse() throws IOException {
         boolean success = false;
 
         String response;
@@ -533,6 +533,101 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Requests the currentstatus package from the mpd server.
+     * @return The CurrentStatus object with all gathered information.
+     */
+    public MPDCurrentStatus getCurrentServerStatus() throws IOException {
+        MPDCurrentStatus status = new MPDCurrentStatus();
+
+        /* Request status */
+        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
+
+        /* Response line from MPD */
+        String response;
+        while ( pReader.ready() ) {
+            response = pReader.readLine();
+
+            if ( response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME ) ) {
+                status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_REPEAT )) {
+                status.setRepeat(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_REPEAT.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_RANDOM )) {
+                status.setRandom(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_RANDOM.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_SINGLE )) {
+                status.setSinglePlayback(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SINGLE.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_CONSUME )) {
+                status.setConsume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CONSUME.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION )) {
+                status.setPlaylistVersion(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH )) {
+                status.setPlaylistLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE )) {
+                String state = response.substring(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE.length());
+
+                if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PLAY) ) {
+                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING);
+                }
+                else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PAUSE)) {
+                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING);
+                }
+                else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_STOP)) {
+                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED);
+                }
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX )) {
+                status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX )) {
+                status.setNextSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD )) {
+                String timeInfo = response.substring(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD.length());
+
+                String timeInfoSep[] = timeInfo.split(":");
+                if ( timeInfoSep.length == 2 ) {
+                    status.setElapsedTime(Integer.valueOf(timeInfoSep[0]));
+                    status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
+                }
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME )) {
+                status.setElapsedTime(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_DURATION )) {
+                status.setTrackLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_BITRATE )) {
+                status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION )) {
+                String audioInfo = response.substring(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION.length());
+
+                String audioInfoSep[] = audioInfo.split(":");
+                if ( audioInfoSep.length == 3 ) {
+                    /* Extract the separate pieces */
+                    /* First is sampleRate */
+                    status.setSamplerate(Integer.valueOf(audioInfoSep[0]));
+                    /* Second is bitresolution */
+                    status.setBitDepth(Integer.valueOf(audioInfoSep[1]));
+                    /* Third is channel count */
+                    status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
+                }
+            }
+            else if ( response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB )) {
+                status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
+            }
+        }
+
+        return status;
+    }
+
 
     /*
      ***********************
@@ -549,7 +644,12 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
 
         /* Return the response value of MPD */
-        return checkResponse();
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -560,7 +660,12 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
 
         /* Return the response value of MPD */
-        return checkResponse();
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -571,7 +676,12 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
 
         /* Return the response value of MPD */
-        return checkResponse();
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     /**
@@ -582,7 +692,12 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_STOP);
 
         /* Return the response value of MPD */
-        return checkResponse();
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
 

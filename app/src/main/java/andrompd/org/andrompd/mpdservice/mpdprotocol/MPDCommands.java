@@ -32,4 +32,6 @@ public class MPDCommands {
     public static final String MPD_COMMAND_NEXT = "next";
     public static final String MPD_COMMAND_PREVIOUS = "previous";
     public static final String MPD_COMMAND_STOP = "stop";
+
+    public static final String MPD_COMMAND_GET_CURRENT_STATUS = "currentstatus";
 }
