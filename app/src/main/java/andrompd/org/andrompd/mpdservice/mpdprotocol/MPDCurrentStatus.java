@@ -121,7 +121,23 @@ public class MPDCurrentStatus implements Parcelable{
     }
 
     public MPDCurrentStatus() {
-
+        pVolume = 0;
+        pRepeat = 0;
+        pRandom = 0;
+        pSinglePlayback = 0;
+        pConsume = 0;
+        pPlaylistVersion = 0;
+        pPlaylistLength = 0;
+        pCurrentSongIndex = 0;
+        pNextSongIndex = 0;
+        pSamplerate = 0;
+        pBitDepth = 0;
+        pChannelCount = 0;
+        pBitrate = 0;
+        pElapsedTime = 0;
+        pTrackLength = 0;
+        pUpdateDBJob = 0;
+        pPlaybackState = MPD_PLAYBACK_STATE.MPD_STOPPED;
     }
 
 
@@ -305,4 +321,31 @@ public class MPDCurrentStatus implements Parcelable{
             return new MPDCurrentStatus[size];
         }
     };
+
+
+
+    public String printStatus() {
+        /* String output for debug purposes */
+        String retString = "";
+
+        retString += "Volume: " + String.valueOf(pVolume) + "\n";
+        retString += "Repeat: " + String.valueOf(pRepeat) + "\n";
+        retString += "Random: " + String.valueOf(pRandom) + "\n";
+        retString += "Single: " + String.valueOf(pSinglePlayback) + "\n";
+        retString += "Consume: " + String.valueOf(pConsume) + "\n";
+        retString += "Playlist version: " + String.valueOf(pPlaylistVersion) + "\n";
+        retString += "Playlist length: " + String.valueOf(pPlaylistLength) + "\n";
+        retString += "Current song index: " + String.valueOf(pCurrentSongIndex) + "\n";
+        retString += "Next song index: " + String.valueOf(pNextSongIndex) + "\n";
+        retString += "Samplerate: " + String.valueOf(pSamplerate) + "\n";
+        retString += "Bitdepth: " + String.valueOf(pBitDepth) + "\n";
+        retString += "Channel count: " + String.valueOf(pChannelCount) + "\n";
+        retString += "Bitrate: " + String.valueOf(pBitrate) + "\n";
+        retString += "Elapsed time: " + String.valueOf(pElapsedTime) + "\n";
+        retString += "Track length: " + String.valueOf(pTrackLength) + "\n";
+        retString += "UpdateDB job id: " + String.valueOf(pUpdateDBJob) + "\n";
+        retString += "Playback state: " + String.valueOf(pPlaybackState.ordinal()) + "\n";
+
+        return retString;
+    }
 }
