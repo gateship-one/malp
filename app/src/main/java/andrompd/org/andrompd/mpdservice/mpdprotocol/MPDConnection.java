@@ -49,13 +49,7 @@ public class MPDConnection {
      * @param password password used for authentication. Can be empry.
      * @param port Port to connect to. Default should be 6600 !
      */
-    public MPDConnection(String hostname, String password, int port) {
-        pHostname = hostname;
-        if ( !password.equals("") ) {
-            pPassword = password;
-        }
-        pPort = port;
-
+    public MPDConnection() {
         pSocket = null;
         pReader = null;
     }
@@ -90,6 +84,21 @@ public class MPDConnection {
         /* Clear up connection state variables */
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
+    }
+
+    /**
+     * Set the parameters to connect to. Should be called before the connection attempt
+     * otherwise the connection object does not know where to put it.
+     * @param hostname Hostname to connect to. Can also be an ip.
+     * @param password Password for the server to authenticate with. Can bel eft empty.
+     * @param port TCP port to connect to.
+     */
+    public void setServerParameters(String hostname, String password, int port) {
+        pHostname = hostname;
+        if ( !password.equals("") ) {
+            pPassword = password;
+        }
+        pPort = port;
     }
 
     /**

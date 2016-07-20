@@ -11,6 +11,7 @@ public class MPDHandlerAction {
      * all implemented methods of the MPD protocol.
      */
     public enum NET_HANDLER_ACTION {
+        ACTION_SET_SERVER_PARAMETERS,
         ACTION_CONNECT_MPD_SERVER,
         ACTION_GET_ALBUMS,
         ACTION_GET_ARTIST_ALBUMS,
