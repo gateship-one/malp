@@ -154,6 +154,11 @@ public class MPDHandler extends Handler {
         MPDHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Method to retrieve a list of all albums available on the currently connected MPD server.
+     * @param responseHandler The Handler that is used for asynchronous callback calls when the result
+     *                        of the MPD server is ready and parsed.
+     */
     public static void getAlbums(MPDResponseHandler responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS);
         Message msg = Message.obtain();

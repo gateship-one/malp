@@ -110,10 +110,20 @@ public class MPDHandlerAction {
         pIntExtras.put(type, value);
     }
 
+    /**
+     * Set the handler that is needed for the asynchronous response. Can be a Handler running in
+     * the main UI thread.
+     * @param responseHandler The Handler to be used for the response. Should be of the correct
+     *                        type used for handling the type of resposne.
+     */
     public void setResponseHandler(MPDResponseHandler responseHandler) {
         pResponseHandler = responseHandler;
     }
 
+    /**
+     * Returns the responsehandler that should be used for handling the asynchronous response.
+     * @return The Handler for the MPD response.
+     */
     public MPDResponseHandler getResponseHandler() {
         return pResponseHandler;
     }
