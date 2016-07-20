@@ -1,4 +1,4 @@
-package andrompd.org.andrompd.mpdservice;
+package andrompd.org.andrompd.mpdservice.handlers;
 
 
 import java.util.HashMap;
