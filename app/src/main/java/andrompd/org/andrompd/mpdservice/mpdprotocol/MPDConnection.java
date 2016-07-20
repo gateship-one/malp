@@ -525,6 +525,7 @@ public class MPDConnection {
      * @return A list of all tracks in MPDFile objects
      */
     public List<MPDFile> getAllTracks() {
+        Log.w(TAG,"This command should not be used");
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
         try {
             return parseMPDTracks("");
