@@ -5,12 +5,18 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.IOException;
+import java.util.List;
 
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 
 public class MPDHandler extends Handler {
+    private static final String TAG = "MPDNetHandler";
     private static final String THREAD_NAME = "AndroMPD-NetHandler";
 
     private static HandlerThread pHandlerThread = null;
@@ -75,7 +81,19 @@ public class MPDHandler extends Handler {
                     pMPDConnection.connectToServer();
                     break;
                 case ACTION_GET_ALBUMS:
-                    pMPDConnection.getAlbums();
+                    MPDResponseHandler responseHandler = mpdAction.getResponseHandler();
+                    if ( !(responseHandler instanceof MPDResponseAlbumList) ) {
+                        return;
+                    }
+
+                    List<MPDAlbum> albumList = pMPDConnection.getAlbums();
+
+                    Log.v(TAG,"Send album list response away from thread: " + Thread.currentThread().getId());
+
+                    Message responseMessage = this.obtainMessage();
+                    responseMessage.obj = albumList;
+                    responseHandler.sendMessage(responseMessage);
+
                     break;
                 case ACTION_GET_ARTIST_ALBUMS:
                     /* Parse message objects extras */
@@ -136,12 +154,13 @@ public class MPDHandler extends Handler {
         MPDHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getAlbums() {
+    public static void getAlbums(MPDResponseHandler responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS);
         Message msg = Message.obtain();
         if ( msg == null ) {
             return;
         }
+        action.setResponseHandler(responseHandler);
         msg.obj = action;
         MPDHandler.getHandler().sendMessage(msg);
     }

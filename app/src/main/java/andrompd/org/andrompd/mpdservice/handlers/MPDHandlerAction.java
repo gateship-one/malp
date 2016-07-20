@@ -3,6 +3,8 @@ package andrompd.org.andrompd.mpdservice.handlers;
 
 import java.util.HashMap;
 
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
+
 public class MPDHandlerAction {
 
 
@@ -52,6 +54,8 @@ public class MPDHandlerAction {
      * when it is used.
      */
     HashMap<NET_HANDLER_EXTRA_INT, Integer> pIntExtras = null;
+
+    private MPDResponseHandler pResponseHandler = null;
 
     /**
      * The action type for this message.
@@ -104,6 +108,14 @@ public class MPDHandlerAction {
             pIntExtras = new HashMap<>();
         }
         pIntExtras.put(type, value);
+    }
+
+    public void setResponseHandler(MPDResponseHandler responseHandler) {
+        pResponseHandler = responseHandler;
+    }
+
+    public MPDResponseHandler getResponseHandler() {
+        return pResponseHandler;
     }
 
     /**
