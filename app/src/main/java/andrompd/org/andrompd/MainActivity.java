@@ -1,9 +1,25 @@
+/*
+ * Copyright (C) 2016  Hendrik Borghorst
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package andrompd.org.andrompd;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,11 +30,19 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import andrompd.org.andrompd.mpdservice.service.MPDIntentService;
-import andrompd.org.andrompd.mpdservice.service.MPDIntents;
+import java.util.List;
+
+import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
+import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private static final String TAG = "MainActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +52,16 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent mServiceIntent = new Intent(getApplicationContext(), MPDIntentService.class);
-                mServiceIntent.setAction(MPDIntents.MPD_OPEN_CONNECTION_INTENT);
-                startService(mServiceIntent);
+                MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
+
+                MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
+                Log.v(TAG,"Auto connect profile: " + autoProfile);
+                MPDHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+                MPDHandler.connectToMPDServer();
             }
         });
 
@@ -102,5 +130,13 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public class AlbumResponse extends MPDResponseAlbumList {
+
+        @Override
+        public void handleAlbums(List<MPDAlbum> albumList) {
+            Log.v("Mainactivity", "Got albums list: " + albumList.size() + " elements from thread: " + Thread.currentThread().getId());
+        }
     }
 }
