@@ -17,11 +17,14 @@
 
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
+/**
+ * Generic item to create a sectionizable item
+ */
+public interface MPDGenericItem {
 
-public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
-
-    @Override
-    public String getSectionTitle() {
-        return "";
-    }
+    /**
+     * Generic function to get a string used for section indexing. Like the first letter of a title.
+     * @return The section title used for sectioning in the GUI.
+     */
+    String getSectionTitle();
 }

@@ -18,7 +18,7 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 
-public class MPDFile extends MPDFileEntry {
+public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     private String pTrackTitle;
     private String pFileName;
     private String pFileURL;
@@ -199,5 +199,10 @@ public class MPDFile extends MPDFileEntry {
 
     public void psetAlbumDiscCount(int discCount) {
         pAlbumDiscCount = discCount;
+    }
+
+    @Override
+    public String getSectionTitle() {
+        return pTrackTitle.equals("") ? pFileName : pTrackTitle;
     }
 }

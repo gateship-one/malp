@@ -18,7 +18,7 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 
-public class MPDArtist {
+public class MPDArtist implements MPDGenericItem {
     /* Artist properties */
     private String pArtistName;
 
@@ -36,5 +36,10 @@ public class MPDArtist {
 
     public String getMBID() {
         return pMBID;
+    }
+
+    @Override
+    public String getSectionTitle() {
+        return pArtistName;
     }
 }

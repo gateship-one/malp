@@ -39,8 +39,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".mpdservice.service.MPDIntentService"
-            android:exported="false"/>
     </application>
 
 </manifest>

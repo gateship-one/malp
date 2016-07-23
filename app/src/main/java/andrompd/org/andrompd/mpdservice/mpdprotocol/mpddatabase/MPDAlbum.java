@@ -17,10 +17,8 @@
 
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
-/**
- * Created by hendrik on 16.07.16.
- */
-public class MPDAlbum {
+
+public class MPDAlbum implements MPDGenericItem {
     /* Album properties */
     private String pName;
 
@@ -48,5 +46,10 @@ public class MPDAlbum {
 
     public String getArtistName() {
         return pArtistName;
+    }
+
+    @Override
+    public String getSectionTitle() {
+        return pName;
     }
 }

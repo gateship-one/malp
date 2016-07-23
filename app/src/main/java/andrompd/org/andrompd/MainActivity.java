@@ -19,6 +19,8 @@ package andrompd.org.andrompd;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -32,6 +34,7 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
 import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
@@ -62,6 +65,11 @@ public class MainActivity extends AppCompatActivity
                 Log.v(TAG,"Auto connect profile: " + autoProfile);
                 MPDHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
                 MPDHandler.connectToMPDServer();
+
+                Fragment artistFragment = new ArtistsFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragment_container, artistFragment);
+                transaction.commit();
             }
         });
 

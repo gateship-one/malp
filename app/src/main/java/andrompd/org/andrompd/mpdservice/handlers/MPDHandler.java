@@ -28,9 +28,11 @@ import java.io.IOException;
 import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 
 public class MPDHandler extends Handler {
     private static final String TAG = "MPDNetHandler";
@@ -55,7 +57,7 @@ public class MPDHandler extends Handler {
      * Otherwise android will deny network access because of UI blocks.
      * @return
      */
-    private static MPDHandler getHandler() {
+    private synchronized static MPDHandler getHandler() {
         if ( null == pHandlerSingleton ) {
             pHandlerThread = new HandlerThread(THREAD_NAME);
             pHandlerThread.start();
@@ -118,7 +120,18 @@ public class MPDHandler extends Handler {
                     pMPDConnection.getArtistAlbums(artistName);
                     break;
                 case ACTION_GET_ARTISTS:
+                    MPDResponseHandler artistResponseHandler = mpdAction.getResponseHandler();
 
+                    if ( !(artistResponseHandler instanceof MPDResponseArtistList) ) {
+                        return;
+                    }
+
+                    List<MPDArtist> artistList = pMPDConnection.getArtists();
+
+                    Message artistResponseMsg = this.obtainMessage();
+                    artistResponseMsg.obj = artistList;
+
+                    artistResponseHandler.sendMessage(artistResponseMsg);
                     break;
                 case ACTION_GET_TRACKS:
                     break;
@@ -195,6 +208,18 @@ public class MPDHandler extends Handler {
         }
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artist);
         msg.obj = action;
+        MPDHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getArtists(MPDResponseHandler responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTISTS);
+        Message msg = Message.obtain();
+        if ( null == msg ) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+        msg.obj = action;
+
         MPDHandler.getHandler().sendMessage(msg);
     }
 
