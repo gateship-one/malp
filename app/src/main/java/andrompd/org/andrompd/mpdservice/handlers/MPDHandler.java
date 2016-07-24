@@ -25,6 +25,7 @@ import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
@@ -34,7 +35,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 
-public class MPDHandler extends Handler {
+public class MPDHandler extends Handler implements MPDConnection.MPDConnectionStateChangeListener {
     private static final String TAG = "MPDNetHandler";
     private static final String THREAD_NAME = "AndroMPD-NetHandler";
 
@@ -42,6 +43,9 @@ public class MPDHandler extends Handler {
     private static MPDHandler pHandlerSingleton = null;
 
     private MPDConnection pMPDConnection;
+
+
+    ArrayList<MPDConnectionStateHandler> pConnectionStateListener;
 
     /**
      * Private constructor for use in singleton.
@@ -83,68 +87,60 @@ public class MPDHandler extends Handler {
 
         MPDHandlerAction mpdAction = (MPDHandlerAction)msg.obj;
         /* Catch MPD exceptions here for now. */
-        try {
-            switch ( mpdAction.getAction() ) {
-                case ACTION_SET_SERVER_PARAMETERS:
-                    /* Parse message objects extras */
-                    String hostname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_HOSTNAME);
-                    String password = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_PASSWORD);
-                    Integer port =  mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT);
-                    if ( (null == hostname) || (null == port) ) {
-                        return;
-                    }
-
-                    pMPDConnection.setServerParameters(hostname,password,port);
-                    break;
-                case ACTION_CONNECT_MPD_SERVER:
-                    pMPDConnection.connectToServer();
-                    break;
-                case ACTION_GET_ALBUMS:
-                    MPDResponseHandler responseHandler = mpdAction.getResponseHandler();
-                    if ( !(responseHandler instanceof MPDResponseAlbumList) ) {
-                        return;
-                    }
-
-                    List<MPDAlbum> albumList = pMPDConnection.getAlbums();
-
-                    Log.v(TAG,"Send album list response away from thread: " + Thread.currentThread().getId());
-
-                    Message responseMessage = this.obtainMessage();
-                    responseMessage.obj = albumList;
-                    responseHandler.sendMessage(responseMessage);
-
-                    break;
-                case ACTION_GET_ARTIST_ALBUMS:
-                    /* Parse message objects extras */
-                    String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
-                    pMPDConnection.getArtistAlbums(artistName);
-                    break;
-                case ACTION_GET_ARTISTS:
-                    MPDResponseHandler artistResponseHandler = mpdAction.getResponseHandler();
-
-                    if ( !(artistResponseHandler instanceof MPDResponseArtistList) ) {
-                        return;
-                    }
-
-                    List<MPDArtist> artistList = pMPDConnection.getArtists();
-
-                    Message artistResponseMsg = this.obtainMessage();
-                    artistResponseMsg.obj = artistList;
-
-                    artistResponseHandler.sendMessage(artistResponseMsg);
-                    break;
-                case ACTION_GET_TRACKS:
-                    break;
-                case ACTION_GET_ALBUM_TRACKS:
-                    break;
-                case ACTION_GET_ARTIST_ALBUM_TRACKS:
-                    break;
-                case ACTION_GET_SERVER_STATUS:
-                    break;
-                default: return;
+        MPDResponseHandler responseHandler;
+        MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
+        if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SERVER_PARAMETERS ) {
+            /* Parse message objects extras */
+            String hostname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_HOSTNAME);
+            String password = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_PASSWORD);
+            Integer port =  mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT);
+            if ( (null == hostname) || (null == port) ) {
+                return;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+            pMPDConnection.setServerParameters(hostname,password,port);
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER ) {
+            try {
+                pMPDConnection.connectToServer();
+            } catch (IOException e) {
+                onDisconnected();
+            }
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS) {
+            responseHandler = mpdAction.getResponseHandler();
+            if ( !(responseHandler instanceof MPDResponseAlbumList) ) {
+                return;
+            }
+
+            List<MPDAlbum> albumList = pMPDConnection.getAlbums();
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = albumList;
+            responseHandler.sendMessage(responseMessage);
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUMS ) {
+            String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+            responseHandler = mpdAction.getResponseHandler();
+            if ( !(responseHandler instanceof MPDResponseAlbumList) || (null == artistName) ) {
+                return;
+            }
+
+            List<MPDAlbum> albumList = pMPDConnection.getArtistAlbums(artistName);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = albumList;
+            responseHandler.sendMessage(responseMessage);
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTISTS ) {
+            responseHandler = mpdAction.getResponseHandler();
+
+            if ( !(responseHandler instanceof MPDResponseArtistList) ) {
+                return;
+            }
+
+            List<MPDArtist> artistList = pMPDConnection.getArtists();
+
+            Message artistResponseMsg = this.obtainMessage();
+            artistResponseMsg.obj = artistList;
+
+            responseHandler.sendMessage(artistResponseMsg);
         }
     }
 
@@ -189,7 +185,7 @@ public class MPDHandler extends Handler {
      * @param responseHandler The Handler that is used for asynchronous callback calls when the result
      *                        of the MPD server is ready and parsed.
      */
-    public static void getAlbums(MPDResponseHandler responseHandler) {
+    public static void getAlbums(MPDResponseAlbumList responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS);
         Message msg = Message.obtain();
         if ( msg == null ) {
@@ -200,13 +196,14 @@ public class MPDHandler extends Handler {
         MPDHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getArtistAlbums(String artist) {
+    public static void getArtistAlbums(MPDResponseAlbumList responseHandler,String artist) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUMS);
         Message msg = Message.obtain();
         if ( msg == null ) {
             return;
         }
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artist);
+        action.setResponseHandler(responseHandler);
         msg.obj = action;
         MPDHandler.getHandler().sendMessage(msg);
     }
@@ -224,4 +221,37 @@ public class MPDHandler extends Handler {
     }
 
 
+    public void registerConnectionStateListener(MPDConnectionStateHandler stateHandler) {
+        if ( null == stateHandler ) {
+            return;
+        }
+        pConnectionStateListener.add(stateHandler);
+    }
+
+    public void unregisterConnectionStateListener(MPDConnectionStateHandler stateHandler) {
+        if ( null == stateHandler ) {
+            return;
+        }
+        pConnectionStateListener.remove(stateHandler);
+    }
+
+    @Override
+    public void onConnected() {
+        // Send a message to all registered listen handlers.
+        for ( MPDConnectionStateHandler handler: pConnectionStateListener ) {
+            Message msg = handler.obtainMessage();
+            msg.obj = MPDConnectionStateHandler.CONNECTION_STATE_CHANGE.CONNECTED;
+            handler.sendMessage(msg);
+        }
+    }
+
+    @Override
+    public void onDisconnected() {
+        // Send a message to all registered listen handlers.
+        for ( MPDConnectionStateHandler handler: pConnectionStateListener ) {
+            Message msg = handler.obtainMessage();
+            msg.obj = MPDConnectionStateHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
+            handler.sendMessage(msg);
+        }
+    }
 }

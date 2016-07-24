@@ -51,7 +51,7 @@ public abstract class MPDResponseArtistList extends MPDResponseHandler {
      * Abstract method to be implemented by the user of the MPD implementation.
      * This should be a callback for the UI thread and run in the UI thread.
      * This can be used for updating lists of adapters and views.
-     * @param albumList List of MPDAlbum objects containing a list of mpds album response.
+     * @param artistList List of MPDAlbum objects containing a list of mpds album response.
      */
     abstract public void handleArtists(List<MPDArtist> artistList);
 }

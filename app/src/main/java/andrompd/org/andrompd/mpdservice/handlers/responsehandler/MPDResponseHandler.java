@@ -26,5 +26,4 @@ import android.os.Message;
  */
 public abstract class MPDResponseHandler extends Handler {
 
-
 }

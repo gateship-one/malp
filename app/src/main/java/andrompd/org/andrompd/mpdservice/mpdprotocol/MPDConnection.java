@@ -60,11 +60,10 @@ public class MPDConnection {
     private int pMajorVersion;
     private int pMinorVersion;
 
+    private MPDConnectionStateChangeListener pStateListener = null;
+
     /**
      * Creates disconnected MPDConnection with following parameters
-     * @param hostname to connect to later on
-     * @param password password used for authentication. Can be empry.
-     * @param port Port to connect to. Default should be 6600 !
      */
     public MPDConnection() {
         pSocket = null;
@@ -77,6 +76,9 @@ public class MPDConnection {
      */
     private void handleReadError() {
         Log.e(TAG, "Read error exception. Disconnecting and cleaning up");
+
+        // Notify listener
+        notifyDisconnect();
         try {
             /* Clear reader/writer up */
             if ( null != pReader ) {
@@ -123,10 +125,14 @@ public class MPDConnection {
      * and initiates the connection to the address and the configured tcp-port.
      */
     public void connectToServer() throws IOException {
-        if ( pSocket == null ) {
-            /* Create a new socket used for the TCP-connection. */
-            pSocket = new Socket(pHostname, pPort);
+        /* If a socket is already open, close it and destroy it. */
+        if ((null != pSocket ) && (pSocket.isConnected()) ) {
+            pSocket.close();
+            notifyDisconnect();
         }
+
+        /* Create a new socket used for the TCP-connection. */
+        pSocket = new Socket(pHostname, pPort);
 
         /* Check if the socket is connected */
         if ( pSocket.isConnected() ) {
@@ -147,7 +153,7 @@ public class MPDConnection {
 
             /* If connected try to get MPDs version */
             String readString = null;
-            while ( pReader.ready() ) {
+            while ( readyRead() ) {
                 readString = pReader.readLine();
                 Log.v(TAG,"Read string: " + readString);
                 /* Look out for the greeting message */
@@ -170,6 +176,9 @@ public class MPDConnection {
                 boolean authenticated = authenticateMPDServer();
                 Log.v(TAG, "Authentication successful: " + authenticated);
             }
+
+            // Notify listener
+            notifyConnected();
         }
     }
 
@@ -191,7 +200,7 @@ public class MPDConnection {
         String readString = null;
 
         boolean success = false;
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             readString = pReader.readLine();
             if (readString.startsWith("OK")) {
                 success = true;
@@ -270,7 +279,7 @@ public class MPDConnection {
     private void waitForResponse() {
         if ( null != pReader ) {
             try {
-                while ( !pReader.ready() ) {}
+                while ( !readyRead() ) {}
             } catch (IOException e) {
                 handleReadError();
             }
@@ -285,7 +294,7 @@ public class MPDConnection {
         boolean success = false;
 
         String response;
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             response = pReader.readLine();
             if ( response.startsWith("OK") ) {
                 success = true;
@@ -323,7 +332,7 @@ public class MPDConnection {
 
         MPDAlbum tempAlbum;
 
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             response = pReader.readLine();
             if ( response == null ) {
                 /* skip this invalid (empty) response */
@@ -376,7 +385,7 @@ public class MPDConnection {
 
         MPDArtist tempArtist;
 
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             response = pReader.readLine();
             if ( response == null ) {
                 /* skip this invalid (empty) response */
@@ -410,7 +419,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response;
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             response = pReader.readLine();
 
             if ( response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
@@ -607,7 +616,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response;
-        while ( pReader.ready() ) {
+        while ( readyRead() ) {
             response = pReader.readLine();
 
             if ( response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME ) ) {
@@ -762,5 +771,29 @@ public class MPDConnection {
         return false;
     }
 
+    private boolean readyRead() throws IOException {
+        return (null != pReader ) && pReader.ready();
+    }
+
+    private void notifyConnected() {
+        if ( null != pStateListener ) {
+            pStateListener.onConnected();
+        }
+    }
+
+    private void notifyDisconnect() {
+        if ( null != pStateListener ) {
+            pStateListener.onDisconnected();
+        }
+    }
+
+    public void setStateListener(MPDConnectionStateChangeListener listener) {
+        pStateListener = listener;
+    }
+
+    public interface MPDConnectionStateChangeListener {
+        void onConnected();
+        void onDisconnected();
+    }
 
 }
