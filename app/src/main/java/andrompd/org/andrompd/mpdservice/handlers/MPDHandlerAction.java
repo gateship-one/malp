@@ -40,6 +40,7 @@ public class MPDHandlerAction {
         ACTION_GET_ARTIST_ALBUM_TRACKS,
         ACTION_GET_SERVER_STATUS,
         ACTION_GET_CURRENT_PLAYLIST,
+        ACTION_GET_SAVED_PLAYLIST,
     }
 
 
@@ -52,6 +53,7 @@ public class MPDHandlerAction {
         EXTRA_SERVER_PASSWORD,
         EXTRA_ARTIST_NAME,
         EXTRA_ALBUM_NAME,
+        EXTRA_PLAYLIST_NAME,
     }
 
     /**

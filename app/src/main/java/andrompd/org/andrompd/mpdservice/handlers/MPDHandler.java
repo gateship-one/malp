@@ -179,6 +179,18 @@ public class MPDHandler extends Handler implements MPDConnection.MPDConnectionSt
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST ) {
+            String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
+            responseHandler = mpdAction.getResponseHandler();
+            if ( !(responseHandler instanceof MPDResponseTrackList) ) {
+                return;
+            }
+
+            List<MPDFile> trackList = pMPDConnection.getSavedPlaylist(playlistName);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = trackList;
+            responseHandler.sendMessage(responseMessage);
         }
     }
 
@@ -292,6 +304,20 @@ public class MPDHandler extends Handler implements MPDConnection.MPDConnectionSt
             return;
         }
         action.setResponseHandler(responseHandler);
+        msg.obj = action;
+
+        MPDHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getSavedPlaylist(MPDResponseTrackList responseHandler, String playlistName) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST);
+        Message msg = Message.obtain();
+        if ( null == msg ) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME,playlistName);
+
         msg.obj = action;
 
         MPDHandler.getHandler().sendMessage(msg);

@@ -618,6 +618,21 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Requests the current playlist of the server
+     * @return List of MPDFile items with all tracks of the current playlist
+     */
+    public List<MPDFile> getSavedPlaylist(String playlistName) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
+        try {
+            /* Parse the return */
+            return parseMPDTracks("");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     /**
      * Requests the currentstatus package from the mpd server.

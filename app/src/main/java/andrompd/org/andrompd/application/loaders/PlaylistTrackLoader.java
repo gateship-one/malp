@@ -103,7 +103,7 @@ public class PlaylistTrackLoader extends Loader<List<MPDFile>> {
         if ( (null == mPlaylistPath) || mPlaylistPath.equals("")) {
             MPDHandler.getCurrentPlaylist(pTrackResponseHandler);
         } else {
-            // FIXME when implemented
+            MPDHandler.getSavedPlaylist(pTrackResponseHandler, mPlaylistPath);
         }
     }
 }

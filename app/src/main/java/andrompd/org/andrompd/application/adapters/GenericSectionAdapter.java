@@ -97,7 +97,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
                 currentModel = mModelData.get(i);
 
-                char currentSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
+                char currentSection;
+                if ( currentModel.getSectionTitle().length() > 0 ) {
+                    currentSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
+                } else {
+                    currentSection = ' ';
+                }
 
                 if (lastSection != currentSection) {
                     mSectionList.add("" + currentSection);
