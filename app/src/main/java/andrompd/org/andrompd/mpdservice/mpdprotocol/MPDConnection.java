@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
@@ -62,12 +63,19 @@ public class MPDConnection {
 
     private MPDConnectionStateChangeListener pStateListener = null;
 
+    private Thread pIdleThread = null;
+
+    private String mLineBuffer;
+    private Semaphore mBufferLock;
+
+
     /**
      * Creates disconnected MPDConnection with following parameters
      */
     public MPDConnection() {
         pSocket = null;
         pReader = null;
+        mBufferLock = new Semaphore(1);
     }
 
     /**
@@ -103,6 +111,12 @@ public class MPDConnection {
         /* Clear up connection state variables */
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
+
+        try {
+            connectToServer();
+        } catch (IOException e) {
+            Log.w(TAG,"Reconnecting to server failed");
+        }
     }
 
     /**
@@ -226,7 +240,7 @@ public class MPDConnection {
             otherwise the server will disconnect the client.
              */
             if ( pMPDConnectionIdle ) {
-                cancelIDLEMode();
+                stopIdleMode();
             }
 
             /*
@@ -247,29 +261,77 @@ public class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    private void cancelIDLEMode() {
+    private void stopIdleMode() {
         /* Check if server really is in idling mode */
         if ( !pMPDConnectionIdle || !pMPDConnectionReady ) {
             return;
         }
+        Log.v(TAG,"Deidling MPD");
 
         /* Set flag */
         pMPDConnectionIdle = false;
 
         /* Send the "noidle" command to the server to initiate noidle */
-        pWriter.println(MPDCommands.MPD_COMMAND_NODIDLE);
+        pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
         pWriter.flush();
-        waitForResponse();
 
-        /* Check if successfully deidled when server returns "OK" */
         try {
-            String readString = pReader.readLine();
-            while ( null != readString ) {
-                // FIXME check if OK was send. For now flush the read buffer.
-            }
-        } catch (IOException e) {
-            handleReadError();
+            mBufferLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        Log.v(TAG,"Got Buffer lock in stopIdle, lineBuffer: " + mLineBuffer);
+        if ( (null != mLineBuffer) && mLineBuffer.startsWith("OK") ) {
+            Log.v(TAG,"Deidling ok");
+        } else {
+            try {
+                if ( pReader.ready() && !checkResponse()) {
+                    Log.w(TAG,"Error deidling");
+                    handleReadError();
+                }
+            } catch ( IOException e ) {
+                handleReadError();
+            }
+        }
+        mBufferLock.release();
+
+
+        waitForResponse();
+        try {
+            checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Initiates the idling procedure. A separate thread is started to wait (blocked)
+     * for a deidle from the MPD host. Otherwise it is impossible to get notified on changes
+     * from other mpd clients (eg. volume change)
+     */
+    public void startIdleing() {
+        /* Check if server really is in idling mode */
+        if ( !pMPDConnectionReady ) {
+            return;
+        }
+        Log.v(TAG,"Sending idle command");
+
+        try {
+            mBufferLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mLineBuffer = null;
+        mBufferLock.release();
+
+        pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
+        pWriter.flush();
+        pIdleThread = new IdleThread();
+        pIdleThread.start();
+
+        Log.v(TAG,"Runnable is waiting for idle finish");
+        pMPDConnectionIdle = true;
     }
 
     /**
@@ -296,6 +358,7 @@ public class MPDConnection {
         String response;
         while ( readyRead() ) {
             response = pReader.readLine();
+            Log.v(TAG,"Response: " + response);
             if ( response.startsWith("OK") ) {
                 success = true;
             } else if ( response.startsWith("ACK") ) {
@@ -824,6 +887,65 @@ public class MPDConnection {
     public interface MPDConnectionStateChangeListener {
         void onConnected();
         void onDisconnected();
+    }
+
+
+    /**
+     * This method should only be used by the idling mechanism.
+     * It buffers the read line so that the deidle method can check if deidling was successful.
+     * To guarantee predictable execution order, the buffer is secured by a semaphore. This ensures,
+     * that the read of this waiting thread is always finished before the other handler thread tries
+     * to read it.
+     * @return
+     */
+    private String waitForIdleResponse() {
+        if ( null != pReader ) {
+            try {
+
+                try {
+                    // Lock the semaphore, that a possible later deidling request waits for the read.
+                    mBufferLock.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                // Set thread to sleep, because there should be no line available to read.
+                mLineBuffer = pReader.readLine();
+                // After sucessful writing to the buffer, release the lock. A possible deidling call
+                // can resume its work there.
+                mBufferLock.release();
+                return mLineBuffer;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Simple private thread class used for handling the idling of MPD.
+     * If no line is ready to read, it will suspend itself (blocking readLine() call).
+     * If suddenly a line is ready to read it can mean two things:
+     *  1. A deidling request notified the server to quit idling.
+     *  2. A change in the MPDs internal state changed and the status of this client needs updating.
+     */
+    private class IdleThread extends Thread {
+        @Override
+        public void run() {
+            /* Try to read here. This should block this separate thread because
+               readLine() inside waitForIdleResponse is blocking.
+               If the response was not "OK" it means idling was stopped by us.
+               If the response starts with "changed" we know, that the MPD state was altered from somewhere
+               else and we need to update our status.
+             */
+            String response =  waitForIdleResponse();
+            while ( response == null ) {
+                response =  waitForIdleResponse();
+            }
+            if ( response.startsWith("changed") ) {
+                Log.v(TAG,"MPDs state changed during idling");
+                // FIXME implement callbacks
+            }
+        }
     }
 
 }

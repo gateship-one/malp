@@ -23,7 +23,7 @@ import android.support.v4.content.Loader;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.mpdservice.handlers.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
@@ -106,9 +106,9 @@ public class AlbumTracksLoader extends Loader<List<MPDFile>> {
     @Override
     public void onForceLoad() {
         if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName);
+            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName);
         } else {
-            MPDHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName);
+            MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName);
         }
     }
 }

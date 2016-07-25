@@ -23,7 +23,7 @@ import android.support.v4.content.Loader;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.mpdservice.handlers.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
@@ -101,9 +101,9 @@ public class PlaylistTrackLoader extends Loader<List<MPDFile>> {
     @Override
     public void onForceLoad() {
         if ( (null == mPlaylistPath) || mPlaylistPath.equals("")) {
-            MPDHandler.getCurrentPlaylist(pTrackResponseHandler);
+            MPDQueryHandler.getCurrentPlaylist(pTrackResponseHandler);
         } else {
-            MPDHandler.getSavedPlaylist(pTrackResponseHandler, mPlaylistPath);
+            MPDQueryHandler.getSavedPlaylist(pTrackResponseHandler, mPlaylistPath);
         }
     }
 }

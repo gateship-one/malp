@@ -23,7 +23,7 @@ import android.support.v4.content.Loader;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.mpdservice.handlers.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 
@@ -60,11 +60,11 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
 
     @Override
     public void onReset() {
-        MPDHandler.getArtists(pArtistResponseHandler);
+        MPDQueryHandler.getArtists(pArtistResponseHandler);
     }
 
     @Override
     public void onForceLoad() {
-        MPDHandler.getArtists(pArtistResponseHandler);
+        MPDQueryHandler.getArtists(pArtistResponseHandler);
     }
 }

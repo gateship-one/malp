@@ -41,6 +41,8 @@ public class MPDHandlerAction {
         ACTION_GET_SERVER_STATUS,
         ACTION_GET_CURRENT_PLAYLIST,
         ACTION_GET_SAVED_PLAYLIST,
+        ACTION_START_IDLE,
+        ACTION_STOP_IDLE,
     }
 
 

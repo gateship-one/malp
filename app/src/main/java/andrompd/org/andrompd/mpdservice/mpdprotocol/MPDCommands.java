@@ -20,7 +20,6 @@ package andrompd.org.andrompd.mpdservice.mpdprotocol;
 public class MPDCommands {
 
     public static final String MPD_COMMAND_CLOSE = "close";
-    public static final String MPD_COMMAND_NODIDLE = "noidle";
 
     public static final String MPD_COMMAND_PASSWORD = "password ";
 
@@ -60,4 +59,7 @@ public class MPDCommands {
     public static String MPD_COMMAND_GET_SAVED_PLAYLIST(String playlistName) {
         return "listplaylistinfo \"" + playlistName + "\"";
     }
+
+    public static final String MPD_COMMAND_START_IDLE = "idle";
+    public static final String MPD_COMMAND_STOP_IDLE = "noidle";
 }

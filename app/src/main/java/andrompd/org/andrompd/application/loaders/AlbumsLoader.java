@@ -23,11 +23,9 @@ import android.support.v4.content.Loader;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.mpdservice.handlers.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 
 
 public class AlbumsLoader extends Loader<List<MPDAlbum>> {
@@ -73,9 +71,9 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     @Override
     public void onForceLoad() {
         if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDHandler.getAlbums(pAlbumsResponseHandler);
+            MPDQueryHandler.getAlbums(pAlbumsResponseHandler);
         } else {
-            MPDHandler.getArtistAlbums(pAlbumsResponseHandler,mArtistName);
+            MPDQueryHandler.getArtistAlbums(pAlbumsResponseHandler,mArtistName);
         }
     }
 }
