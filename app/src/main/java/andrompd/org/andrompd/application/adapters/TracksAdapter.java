@@ -29,7 +29,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 /**
  * Adapter class that creates all the listitems for an album track view
  */
-public class AlbumTracksAdapter extends GenericSectionAdapter<MPDFile> {
+public class TracksAdapter extends GenericSectionAdapter<MPDFile> {
 
     Context mContext;
 
@@ -37,7 +37,7 @@ public class AlbumTracksAdapter extends GenericSectionAdapter<MPDFile> {
      * Standard construtor
      * @param context Context used for creating listview items
      */
-    public AlbumTracksAdapter(Context context) {
+    public TracksAdapter(Context context) {
         super();
 
         mContext = context;

@@ -21,7 +21,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,22 +30,17 @@ import java.util.List;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
-import andrompd.org.andrompd.application.loaders.AlbumTracksLoader;
+import andrompd.org.andrompd.application.loaders.PlaylistTrackLoader;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>> {
+public class CurrentPlaylistFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>> {
     /**
-     * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
+     * Parameters for bundled extra arguments for this fragment. Necessary to define which playlist to
      * retrieve from the MPD server.
      */
-    public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
-    public static final String BUNDLE_STRING_EXTRA_ALBUMNAME = "albumname";
+    public static final String BUNDLE_STRING_EXTRA_PLAYLISTNAME = "playlistname";
 
-    /**
-     * Album definition variables
-     */
-    private String mAlbumName;
-    private String mArtistName;
+    private String mPlaylistPath;
 
     /**
      * Main ListView of this fragment
@@ -59,19 +53,19 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
      */
     private TracksAdapter mTracksAdapter;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_album_tracks, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_current_playlist, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.album_tracks_listview);
+        mListView = (ListView)rootView.findViewById(R.id.current_playlist_listview);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
         if ( null != args ) {
-            mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
-            mAlbumName = args.getString(BUNDLE_STRING_EXTRA_ALBUMNAME);
+            mPlaylistPath = args.getString(BUNDLE_STRING_EXTRA_PLAYLISTNAME);
         }
 
         // Create the needed adapter for the ListView
@@ -83,6 +77,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         // Return the ready inflated and configured fragment view.
         return rootView;
     }
+
 
     /**
      * Starts the loader to make sure the data is up-to-date after resuming the fragment (from background)
@@ -103,7 +98,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
      */
     @Override
     public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(),mAlbumName,mArtistName);
+        return new PlaylistTrackLoader(getActivity(), mPlaylistPath);
     }
 
     /**
@@ -126,4 +121,5 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         // Clear the model data of the used adapter
         mTracksAdapter.swapModel(null);
     }
+
 }

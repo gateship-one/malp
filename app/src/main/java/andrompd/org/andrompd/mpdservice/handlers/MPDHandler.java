@@ -168,6 +168,17 @@ public class MPDHandler extends Handler implements MPDConnection.MPDConnectionSt
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
+        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST ) {
+            responseHandler = mpdAction.getResponseHandler();
+            if ( !(responseHandler instanceof MPDResponseTrackList) ) {
+                return;
+            }
+
+            List<MPDFile> trackList = pMPDConnection.getCurrentPlaylist();
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = trackList;
+            responseHandler.sendMessage(responseMessage);
         }
     }
 
@@ -269,6 +280,18 @@ public class MPDHandler extends Handler implements MPDConnection.MPDConnectionSt
         action.setResponseHandler(responseHandler);
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME,albumName);
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME,artistName);
+        msg.obj = action;
+
+        MPDHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getCurrentPlaylist(MPDResponseTrackList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST);
+        Message msg = Message.obtain();
+        if ( null == msg ) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
         msg.obj = action;
 
         MPDHandler.getHandler().sendMessage(msg);

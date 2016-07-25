@@ -55,4 +55,6 @@ public class MPDCommands {
     public static final String MPD_COMMAND_STOP = "stop";
 
     public static final String MPD_COMMAND_GET_CURRENT_STATUS = "status";
+
+    public static final String MPD_COMMAND_GET_CURRENT_PLAYLIST = "playlistinfo";
 }
