@@ -63,6 +63,8 @@ public class MPDConnection {
 
     private MPDConnectionStateChangeListener pStateListener = null;
 
+    private MPDConnectionIdleChangeListener pIdleListener = null;
+
     private Thread pIdleThread = null;
 
     private String mLineBuffer;
@@ -240,7 +242,7 @@ public class MPDConnection {
             otherwise the server will disconnect the client.
              */
             if ( pMPDConnectionIdle ) {
-                stopIdleMode();
+                stopIdleing();
             }
 
             /*
@@ -261,7 +263,7 @@ public class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    private void stopIdleMode() {
+    public void stopIdleing() {
         /* Check if server really is in idling mode */
         if ( !pMPDConnectionIdle || !pMPDConnectionReady ) {
             return;
@@ -332,6 +334,10 @@ public class MPDConnection {
 
         Log.v(TAG,"Runnable is waiting for idle finish");
         pMPDConnectionIdle = true;
+
+        if ( null != pIdleListener ) {
+            pIdleListener.onIdle();
+        }
     }
 
     /**
@@ -793,6 +799,17 @@ public class MPDConnection {
     }
 
 
+    public MPDFile getCurrentSong() throws IOException {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
+        List<MPDFile> retList = parseMPDTracks("");
+        if ( retList.size() == 1 )  {
+            return retList.get(0);
+        } else {
+            return null;
+        }
+    }
+
+
     /*
      ***********************
      *    Control commands *
@@ -884,9 +901,18 @@ public class MPDConnection {
         pStateListener = listener;
     }
 
+    public void setpIdleListener(MPDConnectionIdleChangeListener listener) {
+        pIdleListener = listener;
+    }
+
     public interface MPDConnectionStateChangeListener {
         void onConnected();
         void onDisconnected();
+    }
+
+    public interface MPDConnectionIdleChangeListener {
+        void onIdle();
+        void onNonIdle();
     }
 
 
@@ -942,8 +968,9 @@ public class MPDConnection {
                 response =  waitForIdleResponse();
             }
             if ( response.startsWith("changed") ) {
-                Log.v(TAG,"MPDs state changed during idling");
-                // FIXME implement callbacks
+                if ( null != pIdleListener ) {
+                    pIdleListener.onNonIdle();
+                }
             }
         }
     }

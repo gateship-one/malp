@@ -60,6 +60,11 @@ public class MPDCommands {
         return "listplaylistinfo \"" + playlistName + "\"";
     }
 
+    public static final String MPD_COMMAND_GET_CURRENT_SONG = "currentsong";
+
     public static final String MPD_COMMAND_START_IDLE = "idle";
     public static final String MPD_COMMAND_STOP_IDLE = "noidle";
+
+
+
 }

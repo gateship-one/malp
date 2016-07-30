@@ -157,6 +157,30 @@ public class MPDCurrentStatus implements Parcelable{
         pPlaybackState = MPD_PLAYBACK_STATE.MPD_STOPPED;
     }
 
+    /**
+     * Copy constructor.
+     * @param status Object to copy values from
+     */
+    public MPDCurrentStatus(MPDCurrentStatus status ) {
+        pVolume = status.pVolume;
+        pRepeat = status.pRepeat;
+        pRandom = status.pRandom;
+        pSinglePlayback = status.pSinglePlayback;
+        pConsume = status.pConsume;
+        pPlaylistVersion = status.pPlaylistVersion;
+        pPlaylistLength = status.pPlaylistLength;
+        pCurrentSongIndex = status.pCurrentSongIndex;
+        pNextSongIndex = status.pNextSongIndex;
+        pSamplerate = status.pSamplerate;
+        pBitDepth = status.pBitDepth;
+        pChannelCount = status.pChannelCount;
+        pBitrate = status.pBitrate;
+        pElapsedTime = status.pElapsedTime;
+        pTrackLength = status.pTrackLength;
+        pUpdateDBJob = status.pUpdateDBJob;
+        pPlaybackState = status.pPlaybackState;
+    }
+
 
     public int getVolume() {
         return pVolume;
