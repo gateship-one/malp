@@ -180,14 +180,18 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         mLastTimeBase = System.nanoTime();
         try {
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-            distributeNewStatus(status);
-
 
             if (status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex()) {
                 // New track started playing. Get it and inform the listener.
                 mLastFile = mMPDConnection.getCurrentSong();
                 distributeNewTrack(mLastFile);
             }
+
+            mLastStatus = status;
+            distributeNewStatus(status);
+
+
+
 
             // Go back to idling
             mMPDConnection.startIdleing();
@@ -201,7 +205,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         // Generate a new dummy state
         if (null != mLastStatus) {
             MPDCurrentStatus status = new MPDCurrentStatus(mLastStatus);
-            long timeDiff = (System.nanoTime() - mLastTimeBase) / (1000 * 1000);
+            long timeDiff = (System.nanoTime() - mLastTimeBase) / (1000 * 1000 * 1000);
 
             // FIXME move timestamp to MPDConnection and MPDCurrentStatus (more precise, less time until saved)
 
@@ -256,7 +260,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
 
     private void distributeNewStatus(MPDCurrentStatus status) {
-        Log.v(TAG, "Distribute status: " + status);
+        //Log.v(TAG, "Distribute status: " + status.printStatus());
         for (MPDStatusChangeHandler handler : mStatusListeners) {
             handler.newMPDStatusReady(status);
         }
@@ -296,7 +300,9 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     @Override
     public void onIdle() {
-        startInterpolation();
+        if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+            startInterpolation();
+        }
     }
 
     @Override

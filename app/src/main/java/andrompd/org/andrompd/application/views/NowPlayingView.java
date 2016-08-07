@@ -47,11 +47,16 @@ import java.util.TimerTask;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
+import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
 public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarChangeListener, PopupMenu.OnMenuItemClickListener {
 
     private final ViewDragHelper mDragHelper;
+
+    private ServerStatusListener mStateListener;
 
     /**
      * Upper view part which is dragged up & down
@@ -168,6 +173,7 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
     public NowPlayingView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         mDragHelper = ViewDragHelper.create(this, 1f, new BottomDragCallbackHelper());
+        mStateListener = new ServerStatusListener();
     }
 
     /**
@@ -756,8 +762,8 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
      * Unregister the receiver for NowPlayingInformation intends, not needed anylonger.
      */
     public void onPause() {
-
-
+        // Unregister listener
+        MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
     }
 
     /**
@@ -780,9 +786,73 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         }
 
         invalidate();
+
+        // Register with MPDStateMonitoring system
+        MPDStateMonitoringHandler.registerStatusListener(mStateListener);
     }
 
 
+    private void updateMPDStatus(MPDCurrentStatus status ) {
+
+        MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+
+        // update play buttons
+        switch (state) {
+            case MPD_PLAYING:
+                mTopPlayPauseButton.setImageResource(R.drawable.ic_pause_48dp);
+                mBottomPlayPauseButton.setImageResource(R.drawable.ic_pause_circle_fill_48dp);
+
+
+                break;
+            case MPD_PAUSING:
+            case MPD_STOPPED:
+                mTopPlayPauseButton.setImageResource(R.drawable.ic_play_arrow_48dp);
+                mBottomPlayPauseButton.setImageResource(R.drawable.ic_play_circle_fill_48dp);
+
+
+                break;
+        }
+
+        // update repeat button
+        // FIXME with single playback
+        switch (status.getRepeat()) {
+            case 0:
+                mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
+                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor)));
+                break;
+            case 1:
+                mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
+                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.colorAccent)));
+                break;
+        }
+
+        // update random button
+        switch (status.getRandom()) {
+            case 0:
+                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor)));
+                break;
+            case 1:
+                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.colorAccent)));
+                break;
+        }
+
+        // Update seekbar
+        mPositionSeekbar.setProgress(status.getElapsedTime());
+        mPositionSeekbar.setMax(status.getTrackLength());
+
+        mElapsedTime.setText(FormatHelper.formatTracktimeFromS(status.getElapsedTime()));
+        mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
+    }
+
+    private void updateMPDCurrentTrack(MPDFile track) {
+        mTrackName.setText(track.getTrackTitle());
+        mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());
+
+        // Calculate the margin to avoid cut off textviews
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mHeaderTextLayout.getLayoutParams();
+        layoutParams.setMarginEnd((int) (mTopPlaylistButton.getWidth() * (1.0 - mDragOffset)));
+        mHeaderTextLayout.setLayoutParams(layoutParams);
+    }
 
 
 
@@ -872,5 +942,18 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
 
         // Called when the user starts the drag
         void onStartDrag();
+    }
+
+    private class ServerStatusListener extends MPDStatusChangeHandler {
+
+        @Override
+        protected void onNewStatusReady(MPDCurrentStatus status) {
+            updateMPDStatus(status);
+        }
+
+        @Override
+        protected void onNewTrackReady(MPDFile track) {
+            updateMPDCurrentTrack(track);
+        }
     }
 }

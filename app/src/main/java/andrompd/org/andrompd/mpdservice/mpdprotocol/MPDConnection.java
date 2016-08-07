@@ -970,12 +970,22 @@ public class MPDConnection {
             while ( response == null ) {
                 response =  waitForIdleResponse();
             }
+            Log.v(TAG,"Deidiling response:" + response);
             if ( response.startsWith("changed") ) {
+                try {
+                    if ( checkResponse() ) {
+                        Log.v(TAG,"Deidiling correct");
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                pMPDConnectionIdle = false;
 
+                if ( null != pIdleListener ) {
+                    pIdleListener.onNonIdle();
+                }
             }
-            if ( null != pIdleListener ) {
-                pIdleListener.onNonIdle();
-            }
+
         }
     }
 

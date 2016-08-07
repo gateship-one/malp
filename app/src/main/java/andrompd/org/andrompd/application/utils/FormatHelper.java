@@ -51,6 +51,33 @@ public class FormatHelper {
     }
 
     /**
+     * Helper method to uniformly format length strings in Odyssey.
+     *
+     * @param length Length value in milliseconds
+     * @return the formatted string, usable in the ui
+     */
+    public static String formatTracktimeFromS(long length) {
+
+        String retVal;
+
+        int seconds = (int) (length);
+
+        int hours = seconds / 3600;
+
+        int minutes = (seconds - (hours * 3600)) / 60;
+
+        seconds = seconds - (hours * 3600) - (minutes * 60);
+
+        if (hours == 0) {
+            retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d", minutes, seconds);
+        } else {
+            retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d" + ":" + "%02d", hours, minutes, seconds);
+        }
+
+        return retVal;
+    }
+
+    /**
      * Helper method to format the mediastore track number to a track number string
      *
      * @param trackNumber the tracknumber from the mediastore
