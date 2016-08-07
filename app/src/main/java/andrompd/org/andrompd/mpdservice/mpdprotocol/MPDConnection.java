@@ -883,6 +883,86 @@ public class MPDConnection {
         return false;
     }
 
+    public boolean setRandom(boolean random) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean setRepeat(boolean repeat) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean setSingle(boolean single) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_SINGLE(single));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean setConsume(boolean consume) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean playSongIndex(int index) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean seekSeconds(int seconds) {
+        MPDCurrentStatus status = null;
+        try {
+            status = getCurrentServerStatus();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(),seconds));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
     private boolean readyRead() throws IOException {
         return (null != pReader ) && pReader.ready();
     }

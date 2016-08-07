@@ -56,6 +56,7 @@ public class MPDCommands {
     public static final String MPD_COMMAND_GET_CURRENT_STATUS = "status";
 
     public static final String MPD_COMMAND_GET_CURRENT_PLAYLIST = "playlistinfo";
+
     public static String MPD_COMMAND_GET_SAVED_PLAYLIST(String playlistName) {
         return "listplaylistinfo \"" + playlistName + "\"";
     }
@@ -65,6 +66,29 @@ public class MPDCommands {
     public static final String MPD_COMMAND_START_IDLE = "idle";
     public static final String MPD_COMMAND_STOP_IDLE = "noidle";
 
+    public static String MPD_COMMAND_SET_RANDOM(boolean random) {
+        return "random " + (random ? "1" : "0");
+    }
 
+    public static String MPD_COMMAND_SET_REPEAT(boolean repeat) {
+        return "repeat " + (repeat ? "1" : "0");
+    }
+
+    public static String MPD_COMMAND_SET_SINGLE(boolean single) {
+        return "single " + (single ? "1" : "0");
+    }
+
+    public static String MPD_COMMAND_SET_CONSUME(boolean consume) {
+        return "consume " + (consume ? "1" : "0");
+    }
+
+
+    public static String MPD_COMMAND_PLAY_SONG_INDEX(int index) {
+        return "play " + String.valueOf(index);
+    }
+
+    public static String MPD_COMMAND_SEEK_SECONDS(int index, int seconds) {
+        return "seek " + String.valueOf(index) + ' ' + String.valueOf(seconds);
+    }
 
 }

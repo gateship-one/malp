@@ -19,19 +19,22 @@ package andrompd.org.andrompd.application.views;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 
-public class CurrentPlaylistView extends LinearLayout {
+public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnItemClickListener {
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which playlist to
      * retrieve from the MPD server.
@@ -68,11 +71,19 @@ public class CurrentPlaylistView extends LinearLayout {
         // Combine the two to a happy couple
         mListView.setAdapter(mPlaylistAdapter);
 
+        mListView.setOnItemClickListener(this);
+
         // Return the ready inflated and configured fragment view.
         mContext = context;
     }
 
-
+    /**
+     * Play the selected track.
+     */
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        MPDCommandHandler.playSongIndex(position);
+    }
 
 
 }

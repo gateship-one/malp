@@ -48,6 +48,7 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
@@ -156,6 +157,8 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
     private TextView mElapsedTime;
     private TextView mDuration;
 
+    private MPDCurrentStatus mLastStatus;
+
     /**
      * Name of the last played album. This is used for a optimization of cover fetching. If album
      * did not change with a track, there is no need to refetch the cover.
@@ -218,7 +221,9 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
         if (fromUser) {
-            // FIXME send seek command
+            // FIXME Check if it is better to just update if user releases the seekbar
+            // (network stress)
+            MPDCommandHandler.seekSeconds(progress);
         }
     }
 
@@ -615,7 +620,14 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mTopPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                if ( null != mLastStatus ) {
+                    if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+                        MPDCommandHandler.pause();
+                    } else if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                        MPDCommandHandler.play();
+                    }
+                }
+
             }
         });
 
@@ -664,7 +676,13 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mBottomRepeatButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                if (null != mLastStatus ) {
+                    if ( mLastStatus.getRepeat() == 0) {
+                        MPDCommandHandler.setRepeat(true);
+                    } else {
+                        MPDCommandHandler.setRepeat(false);
+                    }
+                }
             }
         });
 
@@ -672,7 +690,8 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mBottomPreviousButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                MPDCommandHandler.previousSong();
+
             }
         });
 
@@ -680,7 +699,13 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mBottomPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                if ( null != mLastStatus ) {
+                    if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+                        MPDCommandHandler.pause();
+                    } else if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                        MPDCommandHandler.play();
+                    }
+                }
             }
         });
 
@@ -688,7 +713,7 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mBottomNextButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                MPDCommandHandler.nextSong();
             }
         });
 
@@ -696,7 +721,13 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         mBottomRandomButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                // FIXME
+                if (null != mLastStatus ) {
+                    if ( mLastStatus.getRandom() == 0) {
+                        MPDCommandHandler.setRandom(true);
+                    } else {
+                        MPDCommandHandler.setRandom(false);
+                    }
+                }
             }
         });
 
@@ -842,6 +873,8 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
 
         mElapsedTime.setText(FormatHelper.formatTracktimeFromS(status.getElapsedTime()));
         mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
+
+        mLastStatus = status;
     }
 
     private void updateMPDCurrentTrack(MPDFile track) {

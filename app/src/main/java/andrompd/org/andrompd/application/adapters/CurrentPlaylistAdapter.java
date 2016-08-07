@@ -27,6 +27,7 @@ import android.widget.BaseAdapter;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.listviewitems.CurrentPlaylistTrackItem;
 import andrompd.org.andrompd.application.listviewitems.TrackListViewItem;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -120,14 +121,20 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         // Check if reusable object is available
         if (convertView != null) {
-            TrackListViewItem tracksListViewItem = (TrackListViewItem) convertView;
+            CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
             tracksListViewItem.setTrackNumber(String.valueOf(position));
             tracksListViewItem.setTitle(trackTitle);
             tracksListViewItem.setAdditionalInformation(trackInformation);
             tracksListViewItem.setDuration(trackDuration);
         } else {
             // If not create a new Listitem
-            convertView = new TrackListViewItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
+            convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
+        }
+
+        if (track.getPlaying()) {
+            ((CurrentPlaylistTrackItem) convertView).setPlaying(true);
+        } else {
+            ((CurrentPlaylistTrackItem) convertView).setPlaying(false);
         }
 
         return convertView;
@@ -135,7 +142,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
     private void setPlaying(int index, boolean playing) {
         if ((index >= 0) && (null != mPlaylist) && (index < mPlaylist.size())) {
-            mPlaylist.get(index).setPlaying(false);
+            mPlaylist.get(index).setPlaying(playing);
             notifyDataSetChanged();
         }
     }

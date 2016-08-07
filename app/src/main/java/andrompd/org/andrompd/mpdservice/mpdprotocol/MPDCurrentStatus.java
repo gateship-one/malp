@@ -145,7 +145,7 @@ public class MPDCurrentStatus implements Parcelable{
         pConsume = 0;
         pPlaylistVersion = 0;
         pPlaylistLength = 0;
-        pCurrentSongIndex = 0;
+        pCurrentSongIndex = -1;
         pNextSongIndex = 0;
         pSamplerate = 0;
         pBitDepth = 0;

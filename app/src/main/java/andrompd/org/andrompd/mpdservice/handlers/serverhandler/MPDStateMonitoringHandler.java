@@ -230,7 +230,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             mResyncTimer = null;
         }
         mResyncTimer = new Timer();
-        mInterpolateTimer.schedule(new ResyncTask(), IDLE_TIME);
+        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
     }
 
     public static MPDCurrentStatus getLastStatus() {

@@ -43,6 +43,17 @@ public class MPDHandlerAction {
         ACTION_GET_SAVED_PLAYLIST,
         ACTION_START_IDLE,
         ACTION_STOP_IDLE,
+        ACTION_COMMAND_STOP,
+        ACTION_COMMAND_PLAY,
+        ACTION_COMMAND_PAUSE,
+        ACTION_COMMAND_NEXT_SONG,
+        ACTION_COMMAND_PREVIOUS_SONG,
+        ACTION_COMMAND_JUMP_INDEX,
+        ACTION_COMMAND_SEEK_SECONDS,
+        ACTION_SET_REPEAT,
+        ACTION_SET_RANDOM,
+        ACTION_SET_SINGLE,
+        ACTION_SET_CONSUME,
     }
 
 
@@ -63,7 +74,13 @@ public class MPDHandlerAction {
      * Examples are the portnumber, volume, repeat, random state.
      */
     public enum NET_HANDLER_EXTRA_INT {
-        EXTRA_SERVER_PORT
+        EXTRA_SERVER_PORT,
+        EXTRA_REPEAT,
+        EXTRA_RANDOM,
+        EXTRA_SINGLE,
+        EXTRA_CONSUME,
+        EXTRA_SONG_INDEX,
+        EXTRA_SEEK_TIME
     }
 
     /**

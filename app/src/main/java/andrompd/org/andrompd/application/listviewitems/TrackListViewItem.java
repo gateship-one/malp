@@ -30,6 +30,11 @@ import andrompd.org.andrompd.R;
  * Class that can be used for all track type items (albumtracks, playlist tracks, etc)
  */
 public class TrackListViewItem extends LinearLayout {
+    protected TextView mTitleView;
+    protected TextView mSeparator;
+    protected TextView mAdditionalInfoView;
+    protected TextView mNumberView;
+    protected TextView mDurationView;
 
     /**
      * Constructor with basic properties
@@ -46,6 +51,12 @@ public class TrackListViewItem extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.listview_item_track, this, true);
 
+        mTitleView = (TextView)findViewById(R.id.track_title);
+        mAdditionalInfoView = (TextView)findViewById(R.id.track_additional_information);
+        mSeparator = (TextView)findViewById(R.id.track_separator);
+        mDurationView = (TextView) findViewById(R.id.track_duration);
+        mNumberView = (TextView) findViewById(R.id.track_number);
+
         // Call the functions to set the initial information
         setTitle(title);
         setTrackNumber(number);
@@ -58,8 +69,7 @@ public class TrackListViewItem extends LinearLayout {
      * @param title Title to use
      */
     public void setTitle(String title) {
-        TextView textView = (TextView)findViewById(R.id.track_title);
-        textView.setText(title);
+        mTitleView.setText(title);
     }
 
     /**
@@ -67,8 +77,7 @@ public class TrackListViewItem extends LinearLayout {
      * @param duration String of the length
      */
     public void setDuration(String duration) {
-        TextView textView = (TextView)findViewById(R.id.track_duration);
-        textView.setText(duration);
+        mDurationView.setText(duration);
     }
 
     /**
@@ -76,8 +85,7 @@ public class TrackListViewItem extends LinearLayout {
      * @param number Number of this track
      */
     public void setTrackNumber(String number) {
-        TextView textView = (TextView)findViewById(R.id.track_number);
-        textView.setText(number);
+        mNumberView.setText(number);
     }
 
     /**
@@ -85,7 +93,6 @@ public class TrackListViewItem extends LinearLayout {
      * @param information Information string (use R.string.track_item_separator) to separate information
      */
     public void setAdditionalInformation(String information) {
-        TextView textView = (TextView)findViewById(R.id.track_additional_information);
-        textView.setText(information);
+        mAdditionalInfoView.setText(information);
     }
 }
