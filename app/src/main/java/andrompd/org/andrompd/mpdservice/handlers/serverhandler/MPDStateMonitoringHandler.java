@@ -167,7 +167,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         MPDStateMonitoringHandler.getHandler().sendMessage(msg);
     }
 
-    private void resyncState() {
+    private synchronized void resyncState() {
         Log.v(TAG,"Resyncing MPD state");
 
         // Stop the interpolation
@@ -214,7 +214,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         }
     }
 
-    private void startInterpolation() {
+    private synchronized void startInterpolation() {
         if (null != mInterpolateTimer) {
             mInterpolateTimer.cancel();
             mInterpolateTimer.purge();
@@ -317,13 +317,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         @Override
         public void run() {
-            mMPDConnection.stopIdleing();
-            // Stop the interpolation
-            if (null != mInterpolateTimer) {
-                mInterpolateTimer.cancel();
-                mInterpolateTimer.purge();
-                mInterpolateTimer = null;
-            }
             resyncState();
         }
     }
