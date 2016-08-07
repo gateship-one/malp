@@ -231,6 +231,11 @@ public class MPDConnection {
     }
 
     public void disconnectFromServer() {
+        Log.v(TAG,"Disconnecting: " + this);
+
+        if ( pMPDConnectionIdle ) {
+            stopIdleing();
+        }
 
         // Notify listener
         notifyDisconnect();
@@ -258,6 +263,7 @@ public class MPDConnection {
         /* Clear up connection state variables */
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
+        Log.v(TAG,"Disconnecting finished");
     }
 
     /**

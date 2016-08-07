@@ -115,7 +115,7 @@ public class MainActivity extends AppCompatActivity
 //                MPDQueryHandler.connectToMPDServer();
 //                MPDQueryHandler.startIdle();
 
-        ConnectionManager.connectToServer(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+        ConnectionManager.setParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
 
     }
 
