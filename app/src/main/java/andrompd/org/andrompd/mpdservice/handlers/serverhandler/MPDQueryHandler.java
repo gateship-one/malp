@@ -29,11 +29,12 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbu
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-public class MPDQueryHandler extends MPDGenericHandler {
+public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
     private static final String TAG = "MPDQueryHandler";
     private static final String THREAD_NAME = "AndroMPD-NetHandler";
 
@@ -62,6 +63,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
             mHandlerThread = new HandlerThread(THREAD_NAME);
             mHandlerThread.start();
             mHandlerSingleton = new MPDQueryHandler(mHandlerThread.getLooper());
+
+            mHandlerSingleton.mMPDConnection.setpIdleListener(mHandlerSingleton);
         }
         return mHandlerSingleton;
     }
@@ -172,6 +175,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
         }
+        mMPDConnection.startIdleing();
     }
 
 
@@ -317,5 +321,14 @@ public class MPDQueryHandler extends MPDGenericHandler {
     }
 
 
+    @Override
+    public void onIdle() {
 
+    }
+
+    @Override
+    public void onNonIdle() {
+        Log.v(TAG,"Go idle again");
+        mMPDConnection.startIdleing();
+    }
 }

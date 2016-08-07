@@ -316,10 +316,10 @@ public class MPDConnection {
      */
     public void startIdleing() {
         /* Check if server really is in idling mode */
-        if ( !pMPDConnectionReady ) {
+        if ( !pMPDConnectionReady || pMPDConnectionIdle ) {
             return;
         }
-        Log.v(TAG,"Sending idle command");
+        Log.v(TAG,"MPDConnection: " + this + "Sending idle command");
 
         try {
             mBufferLock.acquire();
@@ -970,7 +970,7 @@ public class MPDConnection {
             while ( response == null ) {
                 response =  waitForIdleResponse();
             }
-            Log.v(TAG,"Deidiling response:" + response);
+            Log.v(TAG,"MPDConnection IdleThread: " + this + " Deidiling response:" + response);
             if ( response.startsWith("changed") ) {
                 try {
                     if ( checkResponse() ) {
