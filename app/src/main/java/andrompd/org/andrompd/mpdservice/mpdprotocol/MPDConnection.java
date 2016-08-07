@@ -334,14 +334,6 @@ public class MPDConnection {
         }
         mBufferLock.release();
 
-
-        //waitForResponse();
-        try {
-            checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
 
     /**
@@ -470,7 +462,7 @@ public class MPDConnection {
             tempAlbum = new MPDAlbum(albumName,albumMBID,albumArtist);
             albumList.add(tempAlbum);
         }
-
+        Log.v(TAG,"Albums parsed");
         return albumList;
     }
 
@@ -507,7 +499,7 @@ public class MPDConnection {
                 break;
             }
         }
-
+        Log.v(TAG,"Artists parsed");
         return artistList;
     }
 
@@ -607,6 +599,7 @@ public class MPDConnection {
                 //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
             }
         }
+        Log.v(TAG,"Tracks parsed");
 
         return trackList;
     }
