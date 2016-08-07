@@ -28,4 +28,22 @@
     <dimen name="artists_item_height">136dp</dimen>
     <dimen name="artists_text_height">48dp</dimen>
     <dimen name="artists_cover_height">120dp</dimen>
+
+    <!-- values from: https://material.google.com/layout/metrics-keylines.html -->
+    <dimen name="material_list_item_height">72dp</dimen>
+    <dimen name="material_list_item_height_no_detail">64dp</dimen>
+    <dimen name="material_toolbar_height">56dp</dimen>
+    <dimen name="material_screen_edge_spacing">16dp</dimen>
+    <dimen name="material_content_spacing">8dp</dimen>
+    <dimen name="material_standard_horizontal_spacing">16dp</dimen>
+
+    <!-- divider size -->
+    <dimen name="list_divider_size">1dp</dimen>
+
+    <!-- Font size -->
+    <dimen name="material_font_style_size_headline">24sp</dimen>
+    <dimen name="material_font_style_size_title">20sp</dimen>
+    <dimen name="material_font_style_size_subheading">16sp</dimen>
+    <dimen name="material_font_style_size_body_2">14sp</dimen>
+    <dimen name="material_font_style_size_body_1">14sp</dimen>
 </resources>

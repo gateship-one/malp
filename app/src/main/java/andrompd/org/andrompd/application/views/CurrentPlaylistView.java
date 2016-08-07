@@ -15,20 +15,23 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.views;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
 
-public class CurrentPlaylistFragment extends Fragment {
+public class CurrentPlaylistView extends LinearLayout {
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which playlist to
      * retrieve from the MPD server.
@@ -42,45 +45,34 @@ public class CurrentPlaylistFragment extends Fragment {
      */
     private ListView mListView;
 
+    Context mContext;
+
 
     /**
      * Adapter used by the ListView
      */
     private CurrentPlaylistAdapter mPlaylistAdapter;
 
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public CurrentPlaylistView(Context context, AttributeSet attrs) {
+        super(context, attrs);
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.current_playlist, container, false);
+        LayoutInflater.from(context).inflate(R.layout.current_playlist, this, true);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.current_playlist_listview);
+        mListView = (ListView) this.findViewById(R.id.current_playlist_listview);
 
-        /* Check if an artistname/albumame was given in the extras */
-        Bundle args = getArguments();
-        if (null != args) {
-            mPlaylistPath = args.getString(BUNDLE_STRING_EXTRA_PLAYLISTNAME);
-        }
 
         // Create the needed adapter for the ListView
-        mPlaylistAdapter = new CurrentPlaylistAdapter(getActivity());
+        mPlaylistAdapter = new CurrentPlaylistAdapter(getContext());
 
         // Combine the two to a happy couple
         mListView.setAdapter(mPlaylistAdapter);
 
         // Return the ready inflated and configured fragment view.
-        return rootView;
+        mContext = context;
     }
 
 
-    /**
-     * Starts the loader to make sure the data is up-to-date after resuming the fragment (from background)
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
 
 
 }
