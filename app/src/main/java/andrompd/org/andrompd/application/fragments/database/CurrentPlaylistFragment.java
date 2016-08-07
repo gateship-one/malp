@@ -19,21 +19,16 @@ package andrompd.org.andrompd.application.fragments.database;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import java.util.List;
-
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
-import andrompd.org.andrompd.application.loaders.PlaylistTrackLoader;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-public class CurrentPlaylistFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>> {
+public class CurrentPlaylistFragment extends Fragment {
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which playlist to
      * retrieve from the MPD server.
@@ -51,28 +46,28 @@ public class CurrentPlaylistFragment extends Fragment implements LoaderManager.L
     /**
      * Adapter used by the ListView
      */
-    private TracksAdapter mTracksAdapter;
+    private CurrentPlaylistAdapter mPlaylistAdapter;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_current_playlist, container, false);
+        View rootView = inflater.inflate(R.layout.current_playlist, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.current_playlist_listview);
+        mListView = (ListView) rootView.findViewById(R.id.current_playlist_listview);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
-        if ( null != args ) {
+        if (null != args) {
             mPlaylistPath = args.getString(BUNDLE_STRING_EXTRA_PLAYLISTNAME);
         }
 
         // Create the needed adapter for the ListView
-        mTracksAdapter = new TracksAdapter(getActivity());
+        mPlaylistAdapter = new CurrentPlaylistAdapter(getActivity());
 
         // Combine the two to a happy couple
-        mListView.setAdapter(mTracksAdapter);
+        mListView.setAdapter(mPlaylistAdapter);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -85,41 +80,7 @@ public class CurrentPlaylistFragment extends Fragment implements LoaderManager.L
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
-
     }
 
-    /**
-     * Creates a new Loader that retrieves the list of album tracks
-     * @param id
-     * @param args
-     * @return Newly created loader
-     */
-    @Override
-    public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
-        return new PlaylistTrackLoader(getActivity(), mPlaylistPath);
-    }
-
-    /**
-     * When the loader finished its loading of the data it is transferred to the adapter.
-     * @param loader Loader that finished its loading
-     * @param data Data that was retrieved by the laoder
-     */
-    @Override
-    public void onLoadFinished(Loader<List<MPDFile>> loader, List<MPDFile> data) {
-        // Give the adapter the new retrieved data set
-        mTracksAdapter.swapModel(data);
-    }
-
-    /**
-     * Resets the loader and clears the model data set
-     * @param loader The loader that gets cleared.
-     */
-    @Override
-    public void onLoaderReset(Loader<List<MPDFile>> loader) {
-        // Clear the model data of the used adapter
-        mTracksAdapter.swapModel(null);
-    }
 
 }

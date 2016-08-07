@@ -26,7 +26,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 /**
  * Class to handle status updates handled by the MPDStateMonitoringHandler
  */
-public abstract class MPDStatusResponseHandler extends Handler {
+public abstract class MPDStatusChangeHandler extends Handler {
     public enum MPD_STATUS_RESPONSE_ACTION {
         MPD_STATUS_RESPONSE_ACTION_NEW_STATUS,
         MPD_STATUS_RESPONSE_ACTION_NEW_TRACK,
@@ -62,6 +62,6 @@ public abstract class MPDStatusResponseHandler extends Handler {
         this.sendMessage(msg);
     }
 
-    abstract void onNewStatusReady(MPDCurrentStatus status);
-    abstract void onNewTrackReady(MPDFile track);
+    abstract protected void onNewStatusReady(MPDCurrentStatus status);
+    abstract protected void onNewTrackReady(MPDFile track);
 }

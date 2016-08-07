@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.handlers;
+package andrompd.org.andrompd.mpdservice.handlers.serverhandler;
 
 
 import java.util.HashMap;

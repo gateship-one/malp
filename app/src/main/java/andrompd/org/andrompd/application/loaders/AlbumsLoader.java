@@ -23,7 +23,7 @@ import android.support.v4.content.Loader;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 

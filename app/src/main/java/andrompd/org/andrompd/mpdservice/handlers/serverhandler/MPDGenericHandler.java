@@ -15,33 +15,33 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.handlers.responsehandler;
+package andrompd.org.andrompd.mpdservice.handlers.serverhandler;
 
 
 import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateHandler;
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandlerAction;
+import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 
 public abstract class MPDGenericHandler extends Handler implements MPDConnection.MPDConnectionStateChangeListener {
 
     protected MPDConnection mMPDConnection;
 
+    protected ArrayList<MPDConnectionStateChangeHandler> mConnectionStateListener;
 
-
-    protected ArrayList<MPDConnectionStateHandler> mConnectionStateListener;
 
     protected MPDGenericHandler(Looper looper) {
         super(looper);
         mMPDConnection = new MPDConnection();
+        mConnectionStateListener = new ArrayList<>();
 
+        mMPDConnection.setStateListener(this);
     }
 
 
@@ -84,15 +84,14 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         }
     }
 
-
-    public void registerConnectionStateListener(MPDConnectionStateHandler stateHandler) {
+    public void internalRegisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         if ( null == stateHandler ) {
             return;
         }
         mConnectionStateListener.add(stateHandler);
     }
 
-    public void unregisterConnectionStateListener(MPDConnectionStateHandler stateHandler) {
+    public void internalUnregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         if ( null == stateHandler ) {
             return;
         }
@@ -102,9 +101,9 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     @Override
     public void onConnected() {
         // Send a message to all registered listen handlers.
-        for ( MPDConnectionStateHandler handler: mConnectionStateListener) {
+        for ( MPDConnectionStateChangeHandler handler: mConnectionStateListener) {
             Message msg = handler.obtainMessage();
-            msg.obj = MPDConnectionStateHandler.CONNECTION_STATE_CHANGE.CONNECTED;
+            msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.CONNECTED;
             handler.sendMessage(msg);
         }
     }
@@ -112,9 +111,9 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     @Override
     public void onDisconnected() {
         // Send a message to all registered listen handlers.
-        for ( MPDConnectionStateHandler handler: mConnectionStateListener) {
+        for ( MPDConnectionStateChangeHandler handler: mConnectionStateListener) {
             Message msg = handler.obtainMessage();
-            msg.obj = MPDConnectionStateHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
+            msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
             handler.sendMessage(msg);
         }
     }

@@ -39,6 +39,8 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     private int pDiscNumber;
     private int pAlbumDiscCount;
 
+    private boolean mPlaying;
+
     /**
      * Create empty MPDFile (track). Fill it with setter methods during
      * parsing of mpds output.
@@ -152,15 +154,15 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
         if (hours > 0) {
             minutes = (pLength - (3600 * hours)) / 60;
         } else {
-            minutes = pLength/60;
+            minutes = pLength / 60;
         }
 
-        seconds = pLength - (hours*3600) - (minutes*60);
+        seconds = pLength - (hours * 3600) - (minutes * 60);
 
         if (hours == 0) {
-            returnString = (minutes < 10 ? "0" : "" ) + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+            returnString = (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
         } else {
-            returnString =  (hours < 10 ? "0" : "" ) + hours + ":" + (minutes < 10 ? "0" : "" ) + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+            returnString = (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
         }
         return returnString;
     }
@@ -204,5 +206,13 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     @Override
     public String getSectionTitle() {
         return pTrackTitle.equals("") ? pFileName : pTrackTitle;
+    }
+
+    public void setPlaying(boolean playing) {
+        mPlaying = playing;
+    }
+
+    public boolean getPlaying() {
+        return mPlaying;
     }
 }

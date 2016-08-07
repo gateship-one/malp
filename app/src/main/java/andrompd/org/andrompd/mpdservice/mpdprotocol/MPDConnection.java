@@ -185,6 +185,7 @@ public class MPDConnection {
             }
             Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
             pMPDConnectionReady = true;
+            Log.v(TAG, "MPDConnection: " + this + " ready");
 
             if ( pPassword != null && !pPassword.equals("") ) {
                 Log.v(TAG,"Try to authenticate with mpd server");
@@ -236,6 +237,7 @@ public class MPDConnection {
      * @param command
      */
     public void sendMPDCommand(String command) {
+        Log.v(TAG,"Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
         /* Check if the server is connected. */
         if ( pMPDConnectionReady ) {
             /* Check if server is in idling mode, this needs unidling first,
@@ -298,7 +300,7 @@ public class MPDConnection {
         mBufferLock.release();
 
 
-        waitForResponse();
+        //waitForResponse();
         try {
             checkResponse();
         } catch (IOException e) {
@@ -768,7 +770,7 @@ public class MPDConnection {
                 }
             }
             else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME )) {
-                status.setElapsedTime(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length())));
+                status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
             }
             else if ( response.startsWith(MPDResponses.MPD_RESPONSE_DURATION )) {
                 status.setTrackLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length())));
@@ -898,6 +900,7 @@ public class MPDConnection {
     }
 
     public void setStateListener(MPDConnectionStateChangeListener listener) {
+        Log.v(TAG,"Set state listener:" + listener);
         pStateListener = listener;
     }
 
@@ -968,9 +971,10 @@ public class MPDConnection {
                 response =  waitForIdleResponse();
             }
             if ( response.startsWith("changed") ) {
-                if ( null != pIdleListener ) {
-                    pIdleListener.onNonIdle();
-                }
+
+            }
+            if ( null != pIdleListener ) {
+                pIdleListener.onNonIdle();
             }
         }
     }

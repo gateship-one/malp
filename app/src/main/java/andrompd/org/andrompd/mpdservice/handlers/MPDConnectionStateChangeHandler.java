@@ -21,7 +21,7 @@ package andrompd.org.andrompd.mpdservice.handlers;
 import android.os.Handler;
 import android.os.Message;
 
-public abstract class MPDConnectionStateHandler extends Handler {
+public abstract class MPDConnectionStateChangeHandler extends Handler {
     public enum CONNECTION_STATE_CHANGE {
         CONNECTED,
         DISCONNECTED

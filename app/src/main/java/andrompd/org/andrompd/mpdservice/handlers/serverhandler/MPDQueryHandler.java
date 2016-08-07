@@ -15,31 +15,29 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.handlers;
+package andrompd.org.andrompd.mpdservice.handlers.serverhandler;
 
 
-import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDGenericHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
 public class MPDQueryHandler extends MPDGenericHandler {
-    private static final String TAG = "MPDNetHandler";
+    private static final String TAG = "MPDQueryHandler";
     private static final String THREAD_NAME = "AndroMPD-NetHandler";
+
+
 
     private static HandlerThread mHandlerThread = null;
     private static MPDQueryHandler mHandlerSingleton = null;
@@ -48,9 +46,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
      * Private constructor for use in singleton.
      * @param looper Looper of a HandlerThread (that is NOT the UI thread)
      */
-    private MPDQueryHandler(Looper looper) {
+    protected MPDQueryHandler(Looper looper) {
         super(looper);
-        mMPDConnection = new MPDConnection();
+
+
     }
 
     /**
@@ -86,6 +85,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         /* Catch MPD exceptions here for now. */
         MPDResponseHandler responseHandler;
         MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
+
         if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS) {
             responseHandler = mpdAction.getResponseHandler();
             if ( !(responseHandler instanceof MPDResponseAlbumList) ) {
@@ -154,6 +154,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             }
 
             List<MPDFile> trackList = mMPDConnection.getCurrentPlaylist();
+            Log.v(TAG,"Received current playlist with "  + trackList.size() + " tracks");
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
