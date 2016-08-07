@@ -50,9 +50,9 @@
             android:id="@+id/andrompd_play_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="@dimen/fab_margin"
             android:src="@drawable/ic_play_arrow_48dp"
-            android:tint="?android:attr/textColor" />
+            android:tint="?android:attr/textColor"/>
     </LinearLayout>
 
 
