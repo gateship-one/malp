@@ -42,6 +42,7 @@ import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
 import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -53,9 +54,18 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback {
+        implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
+        NowPlayingView.NowPlayingDragStatusReceiver {
 
     private static final String TAG = "MainActivity";
+
+
+    private DRAG_STATUS mNowPlayingDragStatus;
+    private DRAG_STATUS mSavedNowPlayingDragStatus = null;
+
+    private VIEW_SWITCHER_STATUS mNowPlayingViewSwitcherStatus;
+    private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,7 +139,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
         MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
-
         MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
         Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
         //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
@@ -147,6 +156,13 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+        } else if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            if (nowPlayingView != null) {
+                View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+                coordinatorLayout.setVisibility(View.VISIBLE);
+                nowPlayingView.minimize();
+            }
         } else {
             super.onBackPressed();
         }
@@ -240,6 +256,8 @@ public class MainActivity extends AppCompatActivity
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
             nowPlayingView.onResume();
+
+            nowPlayingView.registerDragStatusReceiver(this);
         }
         ConnectionManager.reconnectLastServer();
     }
@@ -247,7 +265,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.v(TAG,"onDestroy");
+        Log.v(TAG, "onDestroy");
 
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
@@ -290,7 +308,7 @@ public class MainActivity extends AppCompatActivity
         // Create fragment and give it an argument for the selected article
         AlbumsFragment newFragment = new AlbumsFragment();
         Bundle args = new Bundle();
-        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME,artistname);
+        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artistname);
 
 
         newFragment.setArguments(args);
@@ -306,5 +324,38 @@ public class MainActivity extends AppCompatActivity
 
         // Commit the transaction
         transaction.commit();
+    }
+
+    @Override
+    public void onStatusChanged(DRAG_STATUS status) {
+        mNowPlayingDragStatus = status;
+        if (status == DRAG_STATUS.DRAGGED_UP) {
+            View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+            coordinatorLayout.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void onDragPositionChanged(float pos) {
+        // Get the primary color of the active theme from the helper.
+        int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimary);
+
+        // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
+        // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
+        int alphaOffset = (((255 - (int) (255.0 * pos)) << 24) | 0xFFFFFF);
+        // and with this mask to set the new alpha value.
+        newColor &= (alphaOffset);
+        getWindow().setStatusBarColor(newColor);
+    }
+
+    @Override
+    public void onSwitchedViews(VIEW_SWITCHER_STATUS view) {
+        mNowPlayingViewSwitcherStatus = view;
+    }
+
+    @Override
+    public void onStartDrag() {
+        View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+        coordinatorLayout.setVisibility(View.VISIBLE);
     }
 }
