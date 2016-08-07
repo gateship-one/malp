@@ -341,6 +341,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         @Override
         public void run() {
             mMPDConnection.stopIdleing();
+            resyncState();
         }
     }
 

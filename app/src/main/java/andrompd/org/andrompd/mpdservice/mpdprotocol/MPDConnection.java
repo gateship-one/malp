@@ -69,6 +69,8 @@ public class MPDConnection {
 
     private Semaphore mIdleWaitLock;
 
+    private boolean mInternDeidle = false;
+
 
     /**
      * Creates disconnected MPDConnection with following parameters
@@ -272,6 +274,16 @@ public class MPDConnection {
      */
     public void sendMPDCommand(String command) {
         Log.v(TAG,"Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
+        // FIXME remove me too
+        Log.v(TAG,"Prepare to send: " + command);
+        if ( !pMPDConnectionReady ) {
+            try {
+                connectToServer();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         /* Check if the server is connected. */
         if ( pMPDConnectionReady ) {
             /* Check if server is in idling mode, this needs unidling first,
@@ -304,9 +316,9 @@ public class MPDConnection {
         if ( !pMPDConnectionIdle || !pMPDConnectionReady ) {
             return;
         }
-        Log.v(TAG,"Deidling MPD");
+        Log.v(TAG,"Deidling MPD before request");
 
-
+        mInternDeidle = true;
 
         /* Send the "noidle" command to the server to initiate noidle */
         pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
@@ -321,6 +333,8 @@ public class MPDConnection {
 
 
         mIdleWaitLock.release();
+
+        mInternDeidle = false;
 
     }
 
@@ -343,6 +357,7 @@ public class MPDConnection {
 
         Log.v(TAG,"Runnable is waiting for idle finish");
         pMPDConnectionIdle = true;
+        mInternDeidle = false;
 
         if ( null != pIdleListener ) {
             pIdleListener.onIdle();
@@ -1082,13 +1097,17 @@ public class MPDConnection {
                 pMPDConnectionIdle = false;
 
                 if ( null != pIdleListener ) {
-                    pIdleListener.onNonIdle();
+                    if ( !mInternDeidle) {
+                        pIdleListener.onNonIdle();
+                    }
                 }
             } else if (response.startsWith("OK") ) {
                 pMPDConnectionIdle = false;
                 Log.v(TAG,"Deidiling from outside correct");
                 if ( null != pIdleListener ) {
-                    pIdleListener.onNonIdle();
+                    if ( !mInternDeidle) {
+                        pIdleListener.onNonIdle();
+                    }
                 }
             }
 

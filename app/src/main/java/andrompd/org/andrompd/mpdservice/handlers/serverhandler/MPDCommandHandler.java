@@ -23,11 +23,19 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 
 public class MPDCommandHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
+
+    /**
+     * Wait 5 seconds before going to idle again
+     */
+    private static final int IDLE_WAIT_TIME = 5 * 1000;
 
     private static final String TAG = "MPDCommandHandler";
     private static final String THREAD_NAME = "NetCommandHandler";
@@ -37,6 +45,8 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     private static MPDCommandHandler mHandlerSingleton = null;
 
 
+    private Timer mIdleWaitTimer = null;
+
     /**
      * Private constructor for use in singleton.
      *
@@ -44,8 +54,6 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
      */
     protected MPDCommandHandler(Looper looper) {
         super(looper);
-
-
     }
 
     /**
@@ -117,9 +125,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
             int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
             mMPDConnection.setVolume(volume);
         }
-
-        Log.v(TAG,"Go idle after command");
-        mMPDConnection.startIdleing();
+        startIdleWait();
     }
 
     @Override
@@ -129,13 +135,22 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
     @Override
     public void onNonIdle() {
-
+        startIdleWait();
     }
 
     @Override
     public void onConnected() {
         super.onConnected();
         Log.v(TAG,"Go idle after connection");
+    }
+
+    private void startIdleWait() {
+        if ( null != mIdleWaitTimer ) {
+            mIdleWaitTimer.cancel();
+            mIdleWaitTimer.purge();
+        }
+        mIdleWaitTimer = new Timer();
+        mIdleWaitTimer.schedule(new IdleWaitTask(),IDLE_WAIT_TIME);
     }
 
     /**
@@ -340,5 +355,14 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
         msg.obj = action;
         MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    private class IdleWaitTask extends TimerTask {
+
+        @Override
+        public void run() {
+            Log.v(TAG,"Timeout over, go idleing again");
+            mMPDConnection.startIdleing();
+        }
     }
 }
