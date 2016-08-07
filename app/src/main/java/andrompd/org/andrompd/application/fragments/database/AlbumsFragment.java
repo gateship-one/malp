@@ -18,6 +18,7 @@
 package andrompd.org.andrompd.application.fragments.database;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -25,6 +26,7 @@ import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import java.util.List;
@@ -33,9 +35,14 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.AlbumsGridAdapter;
 import andrompd.org.andrompd.application.loaders.AlbumsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
+import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
+import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 
-public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>{
+public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>, AdapterView.OnItemClickListener {
+
 
     /**
      * Definition of bundled extras
@@ -61,6 +68,10 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
     private String mArtistName;
 
+    private AlbumSelectedCallback mAlbumSelectCallback;
+
+    private ConnectionStateListener mConnectionStateListener;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,16 +89,21 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
         /* Check if an artistname was given in the extras */
         Bundle args = getArguments();
-        if ( null != args ) {
+        if (null != args) {
             mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
+        } else {
+            mArtistName = "";
         }
 
         mRootGrid.setAdapter(mAlbumsAdapter);
         mRootGrid.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mRootGrid));
-        //mRootGrid.setOnItemClickListener(this);
+        mRootGrid.setOnItemClickListener(this);
 
         // register for context menu
         registerForContextMenu(mRootGrid);
+
+        mConnectionStateListener = new ConnectionStateListener(this);
+
 
         return rootView;
     }
@@ -97,24 +113,49 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         super.onResume();
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
+        MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getLoaderManager().destroyLoader(0);
+        MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
+    }
+
+    /**
+     * Called when the fragment is first attached to its context.
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mAlbumSelectCallback = (AlbumSelectedCallback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
     }
 
     /**
      * This method creates a new loader for this fragment.
+     *
      * @param id
      * @param args
      * @return
      */
     @Override
     public Loader<List<MPDAlbum>> onCreateLoader(int id, Bundle args) {
-        return new AlbumsLoader(getActivity(),mArtistName);
+        return new AlbumsLoader(getActivity(), mArtistName);
     }
 
     /**
      * Called when the loader finished loading its data.
+     *
      * @param loader The used loader itself
-     * @param data Data of the loader
+     * @param data   Data of the loader
      */
     @Override
     public void onLoadFinished(Loader<List<MPDAlbum>> loader, List<MPDAlbum> data) {
@@ -130,11 +171,47 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
     /**
      * If a loader is reset the model data should be cleared.
+     *
      * @param loader Loader that was resetted.
      */
     @Override
     public void onLoaderReset(Loader<List<MPDAlbum>> loader) {
         // Clear the model data of the adapter.
         mAlbumsAdapter.swapModel(null);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        mLastPosition = position;
+
+        MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
+
+        mAlbumSelectCallback.onAlbumSelected(album.getName(), mArtistName);
+    }
+
+
+
+    public interface AlbumSelectedCallback {
+        void onAlbumSelected(String albumname, String artistname);
+    }
+
+    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
+        private AlbumsFragment pFragment;
+
+        public ConnectionStateListener(AlbumsFragment fragment) {
+            pFragment = fragment;
+        }
+
+        @Override
+        public void onConnected() {
+            // Prepare loader ( start new one or reuse old )
+            getLoaderManager().initLoader(0, getArguments(), pFragment);
+        }
+
+        @Override
+        public void onDisconnected() {
+            // Prepare loader ( start new one or reuse old )
+            getLoaderManager().destroyLoader(0);
+        }
     }
 }

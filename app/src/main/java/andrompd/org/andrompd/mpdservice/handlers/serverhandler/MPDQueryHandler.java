@@ -25,6 +25,7 @@ import android.util.Log;
 
 import java.util.List;
 
+import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
@@ -332,6 +333,15 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
+
+    public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        mHandlerSingleton.internalRegisterConnectionStateListener(stateHandler);
+    }
+
+    public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        mHandlerSingleton.internalUnregisterConnectionStateListener(stateHandler);
+    }
+
 
 
     @Override

@@ -450,7 +450,7 @@ public class MPDConnection {
                 /* We found an album, add it to the list. */
                 if ( !albumName.equals("") || emptyAlbum ) {
                     tempAlbum = new MPDAlbum(albumName,albumMBID,albumArtist);
-                    Log.v(TAG,"Add album to list: " + albumName + ":" + albumMBID + ":"  + albumArtist);
+                    //Log.v(TAG,"Add album to list: " + albumName + ":" + albumMBID + ":"  + albumArtist);
                     albumList.add(tempAlbum);
                 }
                 albumName = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length());
@@ -502,7 +502,7 @@ public class MPDConnection {
                 artistName = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length());
                 tempArtist = new MPDArtist(artistName,artistMBID);
                 artistList.add(tempArtist);
-                Log.v(TAG,"Added artist: " + artistName + ":" + artistMBID);
+                //Log.v(TAG,"Added artist: " + artistName + ":" + artistMBID);
             } else if ( response.startsWith("OK") ) {
                 break;
             }
@@ -533,7 +533,7 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if ( filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("") ) {
                         trackList.add(tempTrack);
-                        Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
+                        //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
                     }
                 }
                 tempTrack = new MPDFile();
@@ -604,7 +604,7 @@ public class MPDConnection {
             /* Check the artist filter criteria here */
             if ( filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("") ) {
                 trackList.add(tempTrack);
-                Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
+                //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
             }
         }
 

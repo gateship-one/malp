@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016  Hendrik Borghorst
+ * Copyright (C) 2016  Hendrik Borghorst & Frederik Luetkes
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
+import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -49,7 +50,7 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback {
 
     private static final String TAG = "MainActivity";
 
@@ -69,15 +70,15 @@ public class MainActivity extends AppCompatActivity
 
 
                 MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
-                Log.v(TAG,"Auto connect profile with statemonitoring: " + autoProfile);
+                Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
                 //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
 //                MPDQueryHandler.connectToMPDServer();
 //                MPDQueryHandler.startIdle();
 
-                MPDStateMonitoringHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+                MPDStateMonitoringHandler.setServerParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
                 MPDStateMonitoringHandler.connectToMPDServer();
 
-                MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+                MPDQueryHandler.setServerParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
                 MPDQueryHandler.connectToMPDServer();
 
                 Fragment artistFragment = new ArtistsFragment();
@@ -89,13 +90,31 @@ public class MainActivity extends AppCompatActivity
                 //args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME,"Alice Through the Looking Glass");
                 //albumTracksFragment.setArguments(args);
 
-                args.putString(CurrentPlaylistView.BUNDLE_STRING_EXTRA_PLAYLISTNAME,"");
+                args.putString(CurrentPlaylistView.BUNDLE_STRING_EXTRA_PLAYLISTNAME, "");
 //
 //                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
 //                transaction.replace(R.id.fragment_container, currentPlaylistFragment);
 //                transaction.commit();
             }
         });
+
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState != null) {
+                return;
+            }
+
+            Fragment fragment = new MyMusicTabsFragment();
+
+            Bundle args = new Bundle();
+            args.putInt(MyMusicTabsFragment.MY_MUSIC_REQUESTED_TAB, 0);
+
+            fragment.setArguments(args);
+
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.replace(R.id.fragment_container, fragment);
+            transaction.commit();
+        }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -110,12 +129,12 @@ public class MainActivity extends AppCompatActivity
 
 
         MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
-        Log.v(TAG,"Auto connect profile with statemonitoring: " + autoProfile);
+        Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
         //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
 //                MPDQueryHandler.connectToMPDServer();
 //                MPDQueryHandler.startIdle();
 
-        ConnectionManager.setParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+        ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
 
     }
 
@@ -200,5 +219,53 @@ public class MainActivity extends AppCompatActivity
 
         // Disconnect from MPD server
         ConnectionManager.disconnectFromServer();
+    }
+
+    @Override
+    public void onAlbumSelected(String albumname, String artistname) {
+        Log.v(TAG, "Album selected: " + albumname + ":" + artistname);
+        // Create fragment and give it an argument for the selected article
+        AlbumTracksFragment newFragment = new AlbumTracksFragment();
+        Bundle args = new Bundle();
+        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME, albumname);
+        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artistname);
+
+        newFragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        // Replace whatever is in the fragment_container view with this
+        // fragment,
+        // and add the transaction to the back stack so the user can navigate
+        // back
+        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.addToBackStack("AlbumTracksFragment");
+
+        // Commit the transaction
+        transaction.commit();
+    }
+
+    @Override
+    public void onArtistSelected(String artistname) {
+        Log.v(TAG, "Artist selected: " + artistname);
+        // Create fragment and give it an argument for the selected article
+        AlbumsFragment newFragment = new AlbumsFragment();
+        Bundle args = new Bundle();
+        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME,artistname);
+
+
+        newFragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        // Replace whatever is in the fragment_container view with this
+        // fragment,
+        // and add the transaction to the back stack so the user can navigate
+        // back
+        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.addToBackStack("ArtistAlbumsFragment");
+
+        // Commit the transaction
+        transaction.commit();
     }
 }
