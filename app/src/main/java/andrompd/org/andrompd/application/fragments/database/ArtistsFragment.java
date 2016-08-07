@@ -24,7 +24,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -162,6 +165,41 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         mArtistAdapter.swapModel(null);
     }
 
+    /**
+     * Create the context menu.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_artist, menu);
+    }
+
+    /**
+     * Hook called when an menu item in the context menu is selected.
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        if (info == null) {
+            return super.onContextItemSelected(item);
+        }
+
+        switch (item.getItemId()) {
+            case R.id.fragment_artist_action_enqueue:
+                enqueueArtist(info.position);
+                return true;
+            case R.id.fragment_artist_action_play:
+                playArtist(info.position);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         mLastPosition = position;
@@ -193,5 +231,17 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         public void onDisconnected() {
             getLoaderManager().destroyLoader(0);
         }
+    }
+
+    private void enqueueArtist(int index) {
+        MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
+
+        MPDQueryHandler.addArtist(artist.getArtistName());
+    }
+
+    private void playArtist(int index) {
+        MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
+
+        MPDQueryHandler.playArtist(artist.getArtistName());
     }
 }

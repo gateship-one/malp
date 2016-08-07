@@ -179,6 +179,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
                 return super.onContextItemSelected(item);
         }
     }
+
     /**
      * This method creates a new loader for this fragment.
      *
