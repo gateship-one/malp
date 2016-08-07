@@ -22,6 +22,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -31,6 +33,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 
 import java.util.List;
 
@@ -127,7 +130,6 @@ public class MainActivity extends AppCompatActivity
 
         MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
 
-
         MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
         Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
         //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
@@ -135,6 +137,8 @@ public class MainActivity extends AppCompatActivity
 //                MPDQueryHandler.startIdle();
 
         ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
+
+        registerForContextMenu(findViewById(R.id.current_playlist_listview));
 
     }
 
@@ -169,6 +173,41 @@ public class MainActivity extends AppCompatActivity
 
         return super.onOptionsItemSelected(item);
     }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        if (v.getId() == R.id.current_playlist_listview) {
+            MenuInflater inflater = getMenuInflater();
+            inflater.inflate(R.menu.context_menu_current_playlist_track, menu);
+        }
+    }
+
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        if (info == null) {
+            return super.onContextItemSelected(item);
+        }
+
+        CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
+
+        if (currentPlaylistView != null) {
+            switch (item.getItemId()) {
+                case R.id.action_song_play_next:
+                    MPDQueryHandler.playIndexAsNext(info.position);
+                    break;
+                case R.id.action_remove_song:
+                    MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
+                    break;
+            }
+        }
+        return false;
+    }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override

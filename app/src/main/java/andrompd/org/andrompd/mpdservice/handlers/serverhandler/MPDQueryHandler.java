@@ -218,12 +218,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
             try {
                 MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1 );
+                mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
             String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
             try {
@@ -235,6 +234,18 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
             mMPDConnection.clearPlaylist();
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT) {
+
+            try {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
+                mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
+            int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
+            mMPDConnection.removeIndex(index);
         }
 
         startIdleWait();
@@ -507,6 +518,30 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
         msg.obj = action;
 
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void removeSongFromCurrentPlaylist(int index) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        msg.obj = action;
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX, index);
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void playIndexAsNext(int index) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        msg.obj = action;
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX, index);
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 

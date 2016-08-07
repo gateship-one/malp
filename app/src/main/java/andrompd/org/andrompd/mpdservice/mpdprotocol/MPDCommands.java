@@ -77,6 +77,14 @@ public class MPDCommands {
         return "addid \"" + url + "\"  " + String.valueOf(index);
     }
 
+    public static String MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(int index) {
+        return "delete " + String.valueOf(index);
+    }
+
+    public static String MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(int from, int to) {
+        return "move " + String.valueOf(from) + ' ' + String.valueOf(to);
+    }
+
     public static final String MPD_COMMAND_CLEAR_PLAYLIST = "clear";
 
     public static String MPD_COMMAND_SET_RANDOM(boolean random) {

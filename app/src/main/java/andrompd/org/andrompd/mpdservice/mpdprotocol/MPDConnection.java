@@ -1184,7 +1184,29 @@ public class MPDConnection {
 
     public boolean clearPlaylist() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
-                /* Return the response value of MPD */
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean removeIndex(int index) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean moveSongFromTo(int from, int to) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
+        /* Return the response value of MPD */
         try {
             return checkResponse();
         } catch (IOException e) {
