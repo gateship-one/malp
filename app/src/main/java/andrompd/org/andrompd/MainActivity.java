@@ -34,10 +34,16 @@ import android.view.MenuItem;
 
 import java.util.List;
 
+import andrompd.org.andrompd.application.ConnectionManager;
+import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
+import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
-import andrompd.org.andrompd.mpdservice.handlers.MPDHandler;
+import andrompd.org.andrompd.application.views.CurrentPlaylistView;
+import andrompd.org.andrompd.application.views.NowPlayingView;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
@@ -61,15 +67,33 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
 
+
                 MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
-                Log.v(TAG,"Auto connect profile: " + autoProfile);
-                MPDHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
-                MPDHandler.connectToMPDServer();
+                Log.v(TAG,"Auto connect profile with statemonitoring: " + autoProfile);
+                //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+//                MPDQueryHandler.connectToMPDServer();
+//                MPDQueryHandler.startIdle();
+
+                MPDStateMonitoringHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+                MPDStateMonitoringHandler.connectToMPDServer();
+
+                MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+                MPDQueryHandler.connectToMPDServer();
 
                 Fragment artistFragment = new ArtistsFragment();
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragment_container, artistFragment);
-                transaction.commit();
+                Fragment albumFragment = new AlbumsFragment();
+                Fragment albumTracksFragment = new AlbumTracksFragment();
+
+                Bundle args = new Bundle();
+                //args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ARTISTNAME,"P!nk");
+                //args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME,"Alice Through the Looking Glass");
+                //albumTracksFragment.setArguments(args);
+
+                args.putString(CurrentPlaylistView.BUNDLE_STRING_EXTRA_PLAYLISTNAME,"");
+//
+//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+//                transaction.replace(R.id.fragment_container, currentPlaylistFragment);
+//                transaction.commit();
             }
         });
 
@@ -81,6 +105,18 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
+
+
+        MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
+        Log.v(TAG,"Auto connect profile with statemonitoring: " + autoProfile);
+        //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+//                MPDQueryHandler.connectToMPDServer();
+//                MPDQueryHandler.startIdle();
+
+        ConnectionManager.connectToServer(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
+
     }
 
     @Override
@@ -140,11 +176,29 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-    public class AlbumResponse extends MPDResponseAlbumList {
-
-        @Override
-        public void handleAlbums(List<MPDAlbum> albumList) {
-            Log.v("Mainactivity", "Got albums list: " + albumList.size() + " elements from thread: " + Thread.currentThread().getId());
+    @Override
+    protected void onResume() {
+        super.onResume();
+        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        if (nowPlayingView != null) {
+            nowPlayingView.onResume();
         }
+        ConnectionManager.reconnectLastServer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+
+        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        if (nowPlayingView != null) {
+            nowPlayingView.registerDragStatusReceiver(null);
+
+            nowPlayingView.onPause();
+        }
+
+        // Disconnect from MPD server
+        ConnectionManager.disconnectFromServer();
     }
 }

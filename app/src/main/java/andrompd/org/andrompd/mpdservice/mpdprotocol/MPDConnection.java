@@ -143,8 +143,7 @@ public class MPDConnection {
     public void connectToServer() throws IOException {
         /* If a socket is already open, close it and destroy it. */
         if ((null != pSocket ) && (pSocket.isConnected()) ) {
-            pSocket.close();
-            notifyDisconnect();
+            disconnectFromServer();
         }
 
         /* Create a new socket used for the TCP-connection. */
@@ -229,6 +228,36 @@ public class MPDConnection {
         }
 
         return success;
+    }
+
+    public void disconnectFromServer() {
+
+        // Notify listener
+        notifyDisconnect();
+        try {
+            /* Clear reader/writer up */
+            if ( null != pReader ) {
+                pReader.close();
+                pReader = null;
+            }
+            if ( null != pWriter ) {
+                pWriter.close();
+                pWriter = null;
+            }
+
+
+            /* Clear TCP-Socket up */
+            if ( null != pSocket ) {
+                pSocket.close();
+                pSocket = null;
+            }
+        } catch (IOException e) {
+            Log.e(TAG, "Error during disconnecting");
+        }
+
+        /* Clear up connection state variables */
+        pMPDConnectionIdle = false;
+        pMPDConnectionReady = false;
     }
 
     /**

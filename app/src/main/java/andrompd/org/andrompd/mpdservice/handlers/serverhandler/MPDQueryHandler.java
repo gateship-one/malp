@@ -215,6 +215,19 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
     }
 
     /**
+     * Disconnect to the previously connected MPD server.
+     */
+    public static void disconnectFromMPDServer() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER);
+        Message msg = Message.obtain();
+        if ( msg == null ) {
+            return;
+        }
+        msg.obj = action;
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
      * Method to retrieve a list of all albums available on the currently connected MPD server.
      * @param responseHandler The Handler that is used for asynchronous callback calls when the result
      *                        of the MPD server is ready and parsed.

@@ -164,6 +164,19 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     }
 
     /**
+     * Disconnect to the previously connected MPD server.
+     */
+    public static void disconnectFromMPDServer() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER);
+        Message msg = Message.obtain();
+        if ( msg == null ) {
+            return;
+        }
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
      * Static command methods
      */
     public static void play() {

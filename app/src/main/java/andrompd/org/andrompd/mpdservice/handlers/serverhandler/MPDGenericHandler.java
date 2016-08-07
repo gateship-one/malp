@@ -48,51 +48,54 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     /**
      * This is the main entry point of messages.
      * Here all possible messages types need to be handled with the MPDConnection.
+     *
      * @param msg Message to process.
      */
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
 
-        if ( !(msg.obj instanceof MPDHandlerAction) ) {
+        if (!(msg.obj instanceof MPDHandlerAction)) {
             /* Check if the message object is of correct type. Otherwise just abort here. */
             return;
         }
 
-        MPDHandlerAction mpdAction = (MPDHandlerAction)msg.obj;
+        MPDHandlerAction mpdAction = (MPDHandlerAction) msg.obj;
         /* Catch MPD exceptions here for now. */
         MPDResponseHandler responseHandler;
         MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
-        if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SERVER_PARAMETERS ) {
+        if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SERVER_PARAMETERS) {
             /* Parse message objects extras */
             String hostname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_HOSTNAME);
             String password = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_PASSWORD);
-            Integer port =  mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT);
-            if ( (null == hostname) || (null == port) ) {
+            Integer port = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT);
+            if ((null == hostname) || (null == port)) {
                 return;
             }
 
-            mMPDConnection.setServerParameters(hostname,password,port);
-        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER ) {
+            mMPDConnection.setServerParameters(hostname, password, port);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER) {
             try {
                 mMPDConnection.connectToServer();
             } catch (IOException e) {
                 onDisconnected();
             }
-        } else if ( action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_START_IDLE ) {
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_START_IDLE) {
             mMPDConnection.startIdleing();
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
+            mMPDConnection.disconnectFromServer();
         }
     }
 
     public void internalRegisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        if ( null == stateHandler ) {
+        if (null == stateHandler) {
             return;
         }
         mConnectionStateListener.add(stateHandler);
     }
 
     public void internalUnregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        if ( null == stateHandler ) {
+        if (null == stateHandler) {
             return;
         }
         mConnectionStateListener.remove(stateHandler);
@@ -101,7 +104,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     @Override
     public void onConnected() {
         // Send a message to all registered listen handlers.
-        for ( MPDConnectionStateChangeHandler handler: mConnectionStateListener) {
+        for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
             Message msg = handler.obtainMessage();
             msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.CONNECTED;
             handler.sendMessage(msg);
@@ -111,7 +114,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     @Override
     public void onDisconnected() {
         // Send a message to all registered listen handlers.
-        for ( MPDConnectionStateChangeHandler handler: mConnectionStateListener) {
+        for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
             Message msg = handler.obtainMessage();
             msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
             handler.sendMessage(msg);

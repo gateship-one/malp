@@ -167,6 +167,19 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         MPDStateMonitoringHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Disconnect to the previously connected MPD server.
+     */
+    public static void disconnectFromMPDServer() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER);
+        Message msg = Message.obtain();
+        if ( msg == null ) {
+            return;
+        }
+        msg.obj = action;
+        MPDStateMonitoringHandler.getHandler().sendMessage(msg);
+    }
+
     private synchronized void resyncState() {
         Log.v(TAG,"Resyncing MPD state");
 
