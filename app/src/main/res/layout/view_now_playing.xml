@@ -211,6 +211,25 @@
                 </RelativeLayout>
 
                 <LinearLayout
+                    android:id="@+id/volume_seekbar_layout"
+                    android:background="?attr/colorPrimary"
+                    android:paddingStart="@dimen/material_screen_edge_spacing"
+                    android:paddingEnd="@dimen/material_screen_edge_spacing"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:tint="?android:textColor"
+                        android:src="@drawable/ic_volume_up_black_48dp"/>
+                    <SeekBar
+                        android:id="@+id/volume_seekbar"
+                        android:layout_gravity="center_vertical"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" />
+                </LinearLayout>
+
+                <LinearLayout
                     android:id="@+id/now_playing_buttonLayout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

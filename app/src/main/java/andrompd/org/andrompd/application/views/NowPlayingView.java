@@ -53,7 +53,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitorin
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarChangeListener, PopupMenu.OnMenuItemClickListener {
+public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener {
 
     private final ViewDragHelper mDragHelper;
 
@@ -145,6 +145,11 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
      */
     private SeekBar mPositionSeekbar;
 
+    /**
+     * Seekbar used for volume control of host
+     */
+    private SeekBar mVolumeSeekbar;
+
     private LinearLayout mHeaderTextLayout;
     private LayoutParams mHeaderTextLayoutParams;
 
@@ -210,42 +215,7 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
         return false;
     }
 
-    /**
-     * Called if the user drags the seekbar to a new position or the seekbar is altered from
-     * outside. Just do some seeking, if the action is done by the user.
-     *
-     * @param seekBar  Seekbar of which the progress was changed.
-     * @param progress The new position of the seekbar.
-     * @param fromUser If the action was initiated by the user.
-     */
-    @Override
-    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (fromUser) {
-            // FIXME Check if it is better to just update if user releases the seekbar
-            // (network stress)
-            MPDCommandHandler.seekSeconds(progress);
-        }
-    }
 
-    /**
-     * Called if the user starts moving the seekbar. We do not handle this for now.
-     *
-     * @param seekBar SeekBar that is used for dragging.
-     */
-    @Override
-    public void onStartTrackingTouch(SeekBar seekBar) {
-        // TODO Auto-generated method stub
-    }
-
-    /**
-     * Called if the user ends moving the seekbar. We do not handle this for now.
-     *
-     * @param seekBar SeekBar that is used for dragging.
-     */
-    @Override
-    public void onStopTrackingTouch(SeekBar seekBar) {
-        // TODO Auto-generated method stub
-    }
 
     /**
      * Set the position of the draggable view to the given offset. This is done without an animation.
@@ -608,7 +578,11 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
 
         // seekbar (position)
         mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
-        mPositionSeekbar.setOnSeekBarChangeListener(this);
+        mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
+
+        mVolumeSeekbar = (SeekBar)findViewById(R.id.volume_seekbar);
+        mVolumeSeekbar.setMax(100);
+        mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
         // set dragging part default to bottom
         mDragOffset = 1.0f;
@@ -867,12 +841,15 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
                 break;
         }
 
-        // Update seekbar
+        // Update position seekbar & textviews
         mPositionSeekbar.setProgress(status.getElapsedTime());
         mPositionSeekbar.setMax(status.getTrackLength());
 
         mElapsedTime.setText(FormatHelper.formatTracktimeFromS(status.getElapsedTime()));
         mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
+
+        // Update volume seekbar
+        mVolumeSeekbar.setProgress(status.getVolume());
 
         mLastStatus = status;
     }
@@ -989,4 +966,83 @@ public class NowPlayingView extends RelativeLayout implements SeekBar.OnSeekBarC
             updateMPDCurrentTrack(track);
         }
     }
+
+    private class PositionSeekbarListener implements SeekBar.OnSeekBarChangeListener {
+        /**
+         * Called if the user drags the seekbar to a new position or the seekbar is altered from
+         * outside. Just do some seeking, if the action is done by the user.
+         *
+         * @param seekBar  Seekbar of which the progress was changed.
+         * @param progress The new position of the seekbar.
+         * @param fromUser If the action was initiated by the user.
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                // FIXME Check if it is better to just update if user releases the seekbar
+                // (network stress)
+                MPDCommandHandler.seekSeconds(progress);
+            }
+        }
+
+        /**
+         * Called if the user starts moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        /**
+         * Called if the user ends moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+    }
+
+    private class VolumeSeekBarListener implements SeekBar.OnSeekBarChangeListener {
+        /**
+         * Called if the user drags the seekbar to a new position or the seekbar is altered from
+         * outside. Just do some seeking, if the action is done by the user.
+         *
+         * @param seekBar  Seekbar of which the progress was changed.
+         * @param progress The new position of the seekbar.
+         * @param fromUser If the action was initiated by the user.
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                // FIXME Check if it is better to just update if user releases the seekbar
+                // (network stress)
+                MPDCommandHandler.setVolume(progress);
+            }
+        }
+
+        /**
+         * Called if the user starts moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        /**
+         * Called if the user ends moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+    }
+
 }

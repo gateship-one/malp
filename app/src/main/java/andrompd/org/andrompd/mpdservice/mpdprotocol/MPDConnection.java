@@ -962,6 +962,18 @@ public class MPDConnection {
         return false;
     }
 
+    public boolean setVolume(int volume) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     private boolean readyRead() throws IOException {
         return (null != pReader ) && pReader.ready();

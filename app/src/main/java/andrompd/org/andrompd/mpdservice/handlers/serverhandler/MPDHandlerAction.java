@@ -54,6 +54,7 @@ public class MPDHandlerAction {
         ACTION_SET_RANDOM,
         ACTION_SET_SINGLE,
         ACTION_SET_CONSUME,
+        ACTION_SET_VOLUME
     }
 
 
@@ -80,7 +81,8 @@ public class MPDHandlerAction {
         EXTRA_SINGLE,
         EXTRA_CONSUME,
         EXTRA_SONG_INDEX,
-        EXTRA_SEEK_TIME
+        EXTRA_SEEK_TIME,
+        EXTRA_VOLUME
     }
 
     /**
