@@ -18,7 +18,7 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 
-public class MPDAlbum implements MPDGenericItem {
+public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
     /* Album properties */
     private String pName;
 
@@ -48,8 +48,26 @@ public class MPDAlbum implements MPDGenericItem {
         return pArtistName;
     }
 
+
+
     @Override
     public String getSectionTitle() {
         return pName;
+    }
+
+    public boolean equals(MPDAlbum album) {
+        if ( (pName.equals(album.pName)) && (pArtistName.equals(album.pArtistName)) &&
+                (pMBID.equals(album.pMBID))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int compareTo(MPDAlbum another) {
+        if ( another.equals(this) ) {
+            return 0;
+        }
+        return pName.toLowerCase().compareTo(another.pName.toLowerCase());
     }
 }

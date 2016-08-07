@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -593,6 +594,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Albums parsed");
         mBusyLock.release();
+        Collections.sort(albumList);
         return albumList;
     }
 
@@ -632,6 +634,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Artists parsed");
         mBusyLock.release();
+        Collections.sort(artistList);
         return artistList;
     }
 

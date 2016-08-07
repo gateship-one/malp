@@ -89,7 +89,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
                 lastSection = ' ';
             }
 
-            mSectionList.add("" + lastSection);
+            mSectionList.add(String.valueOf(lastSection));
             mSectionPositions.add(0);
             mPositionSectionMap.put(lastSection, mSectionList.size() - 1);
 

@@ -18,12 +18,12 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 
-public class MPDArtist implements MPDGenericItem {
+public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
     /* Artist properties */
     private String pArtistName;
 
     /* Musicbrainz ID */
-    private  String pMBID;
+    private String pMBID;
 
     public MPDArtist(String name, String mbid) {
         pArtistName = name;
@@ -41,5 +41,21 @@ public class MPDArtist implements MPDGenericItem {
     @Override
     public String getSectionTitle() {
         return pArtistName;
+    }
+
+    public boolean equals(MPDArtist artist) {
+        if ((pArtistName.equals(artist.pArtistName)) &&
+                (pMBID.equals(artist.pMBID))) {
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public int compareTo(MPDArtist another) {
+        if (another.equals(this)) {
+            return 0;
+        }
+        return pArtistName.toLowerCase().compareTo(another.pArtistName.toLowerCase());
     }
 }
