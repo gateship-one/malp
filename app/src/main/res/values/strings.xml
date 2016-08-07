@@ -25,4 +25,26 @@
 
     <!-- seperator -->
     <string name="track_item_separator" translatable="false">" - "</string>
+
+    <!-- context menu titles -->
+    <string name="context_menu_action_enqueue">add to playlist</string>
+    <string name="context_menu_action_enqueueasnext">play after current song</string>
+    <string name="context_menu_action_playsong">play song</string>
+    <string name="context_menu_action_playalbum">play album</string>
+    <string name="context_menu_action_playalbums">play albums</string>
+    <string name="context_menu_action_showartist">show artist</string>
+    <string name="context_menu_action_showalbum">show album</string>
+    <string name="context_menu_action_removetrack">remove track</string>
+    <string name="context_menu_action_playplaylist">play playlist</string>
+    <string name="context_menu_action_deleteplaylist">delete playlist</string>
+    <string name="context_menu_action_resumebookmark">Resume Bookmark</string>
+    <string name="context_menu_action_deletebookmark">Delete Bookmark</string>
+    <string name="context_menu_action_enqueue_folder">add folder to playlist</string>
+    <string name="context_menu_action_play_folder">play folder</string>
+    <string name="context_menu_action_enqueue_file">add file to playlist</string>
+    <string name="context_menu_action_play_file">play file</string>
+
+    <!-- popup menu titles -->
+    <string name="popup_menu_action_clearplaylist">clear playlist</string>
+    <string name="popup_menu_action_saveplaylist">save playlist</string>
 </resources>

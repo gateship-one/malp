@@ -49,6 +49,7 @@ import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
@@ -274,7 +275,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     @Override
     public boolean onMenuItemClick(MenuItem item) {
-        // FIXME
+        switch (item.getItemId()) {
+            case R.id.view_nowplaying_action_clearplaylist:
+                MPDQueryHandler.clearPlaylist();
+                break;
+            case R.id.view_nowplaying_action_saveplaylist:
+                break;
+            default:
+                return false;
+        }
         return false;
     }
 
@@ -717,7 +726,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private void showAdditionalOptionsMenu(View v) {
         PopupMenu menu = new PopupMenu(getContext(), v);
         // Inflate the menu from a menu xml file
-        // FIXME
+        menu.inflate(R.menu.popup_menu_nowplaying);
         // Set the main NowPlayingView as a listener (directly implements callback)
         menu.setOnMenuItemClickListener(this);
         // Open the menu itself

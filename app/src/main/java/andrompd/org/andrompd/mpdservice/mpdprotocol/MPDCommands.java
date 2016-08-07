@@ -66,6 +66,19 @@ public class MPDCommands {
     public static final String MPD_COMMAND_START_IDLE = "idle";
     public static final String MPD_COMMAND_STOP_IDLE = "noidle";
 
+    public static final String MPD_START_COMMAND_LIST = "command_list_begin";
+    public static final String MPD_END_COMMAND_LIST = "command_list_end";
+
+    public static  String MPD_COMMAND_ADD_FILE(String url) {
+        return "add \"" + url + "\"";
+    }
+
+    public static  String MPD_COMMAND_ADD_FILE_AT_INDEX(String url, int index) {
+        return "addid \"" + url + "\"  " + String.valueOf(index);
+    }
+
+    public static final String MPD_COMMAND_CLEAR_PLAYLIST = "clear";
+
     public static String MPD_COMMAND_SET_RANDOM(boolean random) {
         return "random " + (random ? "1" : "0");
     }

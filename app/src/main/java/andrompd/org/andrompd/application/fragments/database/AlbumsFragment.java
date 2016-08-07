@@ -24,7 +24,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -141,6 +144,41 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+
+    /**
+     * Create the context menu.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_album, menu);
+    }
+
+    /**
+     * Hook called when an menu item in the context menu is selected.
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        if (info == null) {
+            return super.onContextItemSelected(item);
+        }
+
+        switch (item.getItemId()) {
+            case R.id.fragment_albums_action_enqueue:
+                enqueueAlbum(info.position);
+                return true;
+            case R.id.fragment_albums_action_play:
+                playAlbum(info.position);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
     /**
      * This method creates a new loader for this fragment.
      *
@@ -215,5 +253,17 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
             // Prepare loader ( start new one or reuse old )
             getLoaderManager().destroyLoader(0);
         }
+    }
+
+    private void enqueueAlbum(int index) {
+        MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
+
+        MPDQueryHandler.addArtistAlbum(album.getName(), mArtistName);
+    }
+
+    private void playAlbum(int index) {
+        MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
+
+        MPDQueryHandler.playArtistAlbum(album.getName(), mArtistName);
     }
 }

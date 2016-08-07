@@ -23,6 +23,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -33,6 +34,7 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArti
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
@@ -185,6 +187,54 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST_ALBUM) {
+            String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
+            String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+
+            mMPDConnection.addAlbumTracks(albumname, artistname);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM) {
+            String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
+            String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+
+            mMPDConnection.clearPlaylist();
+            mMPDConnection.addAlbumTracks(albumname, artistname);
+            mMPDConnection.playSongIndex(0);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST) {
+            String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+
+            mMPDConnection.addArtist(artistname);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST) {
+            String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+
+            mMPDConnection.clearPlaylist();
+            mMPDConnection.addArtist(artistname);
+            mMPDConnection.playSongIndex(0);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG) {
+            String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
+
+            mMPDConnection.addSong(url);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG_NEXT) {
+            String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
+
+            try {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1 );
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
+            String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
+
+            try {
+                mMPDConnection.addSong(url);
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
+            mMPDConnection.clearPlaylist();
         }
 
         startIdleWait();
@@ -346,6 +396,120 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
+
+    public static void addArtistAlbum(String albumname, String artistname) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST_ALBUM);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME, albumname);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void playArtistAlbum(String albumname, String artistname) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME, albumname);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void addArtist(String artistname) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void playArtist(String artistname) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void addSong(String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+
+    public static void playSong(String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void playSongNext(String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG_NEXT);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void clearPlaylist() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
 
     public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         mHandlerSingleton.internalRegisterConnectionStateListener(stateHandler);

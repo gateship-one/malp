@@ -22,9 +22,13 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -32,9 +36,11 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
 import andrompd.org.andrompd.application.loaders.AlbumTracksLoader;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
-public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>> {
+public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>, AdapterView.OnItemClickListener {
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
      * retrieve from the MPD server.
@@ -79,6 +85,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
 
         // Combine the two to a happy couple
         mListView.setAdapter(mTracksAdapter);
+        registerForContextMenu(mListView);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -126,4 +133,70 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         // Clear the model data of the used adapter
         mTracksAdapter.swapModel(null);
     }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    /**
+     * Create the context menu.
+     */
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getActivity().getMenuInflater();
+        inflater.inflate(R.menu.context_menu_track, menu);
+    }
+
+    /**
+     * Hook called when an menu item in the context menu is selected.
+     *
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+
+        if (info == null) {
+            return super.onContextItemSelected(item);
+        }
+
+        switch (item.getItemId()) {
+            case R.id.action_song_enqueue:
+                enqueueTrack(info.position);
+                return true;
+            case R.id.action_song_play:
+                play(info.position);
+                return true;
+            case R.id.action_song_play_next:
+                playNext(info.position);
+                return true;
+            default:
+                return super.onContextItemSelected(item);
+        }
+    }
+
+    private void enqueueTrack(int index) {
+        MPDFile track = (MPDFile)mTracksAdapter.getItem(index);
+
+        MPDQueryHandler.addSong(track.getFileURL());
+    }
+
+    private void play(int index) {
+        MPDFile track = (MPDFile)mTracksAdapter.getItem(index);
+
+        MPDQueryHandler.playSong(track.getFileURL());
+    }
+
+
+    private void playNext(int index) {
+        MPDFile track = (MPDFile)mTracksAdapter.getItem(index);
+
+        MPDQueryHandler.playSongNext(track.getFileURL());
+    }
+
+
+
 }
