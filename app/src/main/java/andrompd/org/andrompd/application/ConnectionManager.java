@@ -19,6 +19,9 @@ package andrompd.org.andrompd.application;
 
 import android.util.Log;
 
+import java.util.Timer;
+
+import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
@@ -28,12 +31,28 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 /**
  * Simple class that manages the three MPD Connections (Queries, State monitoring, Commands)
  */
-public class ConnectionManager {
+public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private static final String TAG = "ConnectionManager";
+
+    /**
+     * Short time to wait for reconnect
+     */
+    private static final int SHORT_RECONNECT_TIME = 10 * 1000;
+
+    /**
+     * Long time to wait for reconnect
+     */
+    private static final int LONG_RECONNECT_TIME = 5 * 60 * 1000;
 
     private String mHostname;
     private String mPassword;
     private int mPort;
+
+    private boolean mConnected;
+    private boolean mDisconnectRequested;
+
+    private Timer mReconnectTimer;
+    private int mReconnectCounter;
 
     private static ConnectionManager mConnectionManager = null;
 
@@ -60,6 +79,8 @@ public class ConnectionManager {
     public static void reconnectLastServer() {
         ConnectionManager instance = getInstance();
 
+        instance.mDisconnectRequested = false;
+
         String hostname = instance.mHostname;
         String password = instance.mPassword;
         int port = instance.mPort;
@@ -78,8 +99,31 @@ public class ConnectionManager {
     public static void disconnectFromServer() {
         Log.v(TAG,"Disconnecting from server");
 
+        getInstance().mDisconnectRequested = true;
+
         MPDStateMonitoringHandler.disconnectFromMPDServer();
         MPDQueryHandler.disconnectFromMPDServer();
         MPDCommandHandler.disconnectFromMPDServer();
     }
+
+
+    @Override
+    public void onConnected() {
+        mConnected = true;
+
+        mReconnectCounter = 0;
+    }
+
+    @Override
+    public void onDisconnected() {
+        if ( !mDisconnectRequested ) {
+            if ( mReconnectCounter <= 3 ) {
+                // FIXME, start timer short
+            } else {
+                // FIXME start timer long
+            }
+        }
+    }
+
+    // FIXME create timertask
 }

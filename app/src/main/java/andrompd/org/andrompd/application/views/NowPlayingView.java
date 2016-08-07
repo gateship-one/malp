@@ -47,6 +47,7 @@ import java.util.TimerTask;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
+import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -59,6 +60,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private final ViewDragHelper mDragHelper;
 
     private ServerStatusListener mStateListener;
+
+    private ServerConnectionListener mConnectionStateListener;
 
     /**
      * Upper view part which is dragged up & down
@@ -183,6 +186,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         super(context, attrs, defStyle);
         mDragHelper = ViewDragHelper.create(this, 1f, new BottomDragCallbackHelper());
         mStateListener = new ServerStatusListener();
+        mConnectionStateListener = new ServerConnectionListener();
     }
 
     /**
@@ -778,6 +782,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     public void onPause() {
         // Unregister listener
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
+        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
         mPlaylistView.onPause();
     }
 
@@ -804,6 +809,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Register with MPDStateMonitoring system
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
+        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
 
         mPlaylistView.onResume();
     }
@@ -976,6 +982,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         @Override
         protected void onNewTrackReady(MPDFile track) {
             updateMPDCurrentTrack(track);
+        }
+    }
+
+    private class ServerConnectionListener extends MPDConnectionStateChangeHandler {
+
+        @Override
+        public void onConnected() {
+            updateMPDStatus(MPDStateMonitoringHandler.getLastStatus());
+        }
+
+        @Override
+        public void onDisconnected() {
+            updateMPDStatus(new MPDCurrentStatus());
         }
     }
 

@@ -42,9 +42,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     private Context mContext;
 
     private List<MPDFile> mPlaylist = null;
-    private int mPlaylistVersion = 0;
 
-    private int mActiveIndex = 0;
 
     private MPDCurrentStatus mLastStatus = null;
 
@@ -112,7 +110,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
 
         // Get the number of the track
-        String trackNumber = String.valueOf(track.getTrackNumber());
+        String trackNumber = String.valueOf(position + 1);
 
         // Get the preformatted duration of the track.
         String trackDuration = track.getLengthString();
@@ -120,7 +118,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         // Check if reusable object is available
         if (convertView != null) {
             CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
-            tracksListViewItem.setTrackNumber(String.valueOf(position));
+            tracksListViewItem.setTrackNumber(trackNumber);
             tracksListViewItem.setTitle(trackTitle);
             tracksListViewItem.setAdditionalInformation(trackInformation);
             tracksListViewItem.setDuration(trackDuration);
@@ -229,7 +227,9 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         @Override
         public void onDisconnected() {
-
+            mPlaylist = null;
+            mLastStatus = new MPDCurrentStatus();
+            notifyDataSetInvalidated();
         }
     }
 

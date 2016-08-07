@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
+
+    private static final int SOCKET_TIMEOUT = 30 * 1000;
 
     /* Internal server parameters used for initiating the connection */
     private String pHostname;
@@ -150,8 +153,12 @@ public class MPDConnection {
             disconnectFromServer();
         }
 
+        if ( (null == pHostname) || pHostname.equals("")) {
+            return;
+        }
         /* Create a new socket used for the TCP-connection. */
-        pSocket = new Socket(pHostname, pPort);
+        pSocket = new Socket();
+        pSocket.connect(new InetSocketAddress(pHostname,pPort),SOCKET_TIMEOUT);
 
         /* Check if the socket is connected */
         if (pSocket.isConnected()) {
@@ -199,6 +206,9 @@ public class MPDConnection {
 
             // Notify listener
             notifyConnected();
+
+            // Set the timeout to infinite again
+            pSocket.setSoTimeout(0);
         }
     }
 
