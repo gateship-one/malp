@@ -59,11 +59,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         mConnectionListener = new ConnectionStateChangeListener();
 
 
-        mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getLastStatus());
-        MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler);
-
-
-        Log.v(TAG, "CPL adaptor created");
     }
 
     @Override
@@ -237,12 +232,19 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         // Register to the MPDStateNotifyHandler singleton
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
+
+
+        mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getLastStatus());
+        MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler);
     }
 
     public void onPause() {
         // Unregister to the MPDStateNotifyHandler singleton
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
+
+        mPlaylist = null;
+        mLastStatus = new MPDCurrentStatus();
 
     }
 
