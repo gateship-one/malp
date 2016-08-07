@@ -190,6 +190,14 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             mInterpolateTimer = null;
         }
 
+        // If a resync timer is running kill it also. It will be restarted when idling again
+
+        if ( null != mResyncTimer ) {
+            mResyncTimer.cancel();
+            mResyncTimer.purge();
+            mResyncTimer = null;
+        }
+
         mLastTimeBase = System.nanoTime();
         try {
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
@@ -237,13 +245,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
 
-        if (null != mResyncTimer) {
-            mResyncTimer.cancel();
-            mResyncTimer.purge();
-            mResyncTimer = null;
-        }
-        mResyncTimer = new Timer();
-        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
     }
 
     public static MPDCurrentStatus getLastStatus() {
@@ -316,6 +317,15 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
             startInterpolation();
         }
+
+        if (null != mResyncTimer) {
+            mResyncTimer.cancel();
+            mResyncTimer.purge();
+            mResyncTimer = null;
+        }
+        mResyncTimer = new Timer();
+        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
+        Log.v(TAG,"Resyncing state in: " + IDLE_TIME + " ms");
     }
 
     @Override
@@ -330,7 +340,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         @Override
         public void run() {
-            resyncState();
+            mMPDConnection.stopIdleing();
         }
     }
 

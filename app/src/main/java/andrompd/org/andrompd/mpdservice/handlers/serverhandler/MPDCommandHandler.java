@@ -21,6 +21,7 @@ package andrompd.org.andrompd.mpdservice.handlers.serverhandler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
@@ -116,6 +117,9 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
             int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
             mMPDConnection.setVolume(volume);
         }
+
+        Log.v(TAG,"Go idle after command");
+        mMPDConnection.startIdleing();
     }
 
     @Override
@@ -125,8 +129,13 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
     @Override
     public void onNonIdle() {
-        // Go idle again
-        mMPDConnection.startIdleing();
+
+    }
+
+    @Override
+    public void onConnected() {
+        super.onConnected();
+        Log.v(TAG,"Go idle after connection");
     }
 
     /**

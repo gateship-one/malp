@@ -176,6 +176,8 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
         }
+
+        Log.v(TAG,"Go idle after query");
         mMPDConnection.startIdleing();
     }
 
@@ -351,7 +353,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
     @Override
     public void onNonIdle() {
-        Log.v(TAG,"Go idle again");
-        mMPDConnection.startIdleing();
+    }
+
+    @Override
+    public void onConnected() {
+        super.onConnected();
+        Log.v(TAG,"Go idle after connection");
     }
 }

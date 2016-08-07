@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 
 public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>, AdapterView.OnItemClickListener {
-
+    private static final String TAG = "AlbumFragment";
 
     /**
      * Definition of bundled extras
@@ -119,6 +120,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onPause() {
         super.onPause();
+        Log.v(TAG,"onPause");
         getLoaderManager().destroyLoader(0);
         MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
     }

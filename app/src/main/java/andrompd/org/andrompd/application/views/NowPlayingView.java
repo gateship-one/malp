@@ -769,6 +769,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     public void onPause() {
         // Unregister listener
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
+        mPlaylistView.onPause();
     }
 
     /**
@@ -794,6 +795,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Register with MPDStateMonitoring system
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
+
+        mPlaylistView.onResume();
     }
 
 

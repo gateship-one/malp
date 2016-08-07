@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -206,9 +206,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.v(TAG,"onDestroy");
 
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {

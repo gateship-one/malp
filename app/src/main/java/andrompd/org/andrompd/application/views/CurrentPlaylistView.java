@@ -85,5 +85,13 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         MPDCommandHandler.playSongIndex(position);
     }
 
+    public void onResume() {
+        mPlaylistAdapter.onResume();
+    }
+
+    public void onPause() {
+        mPlaylistAdapter.onPause();
+    }
+
 
 }

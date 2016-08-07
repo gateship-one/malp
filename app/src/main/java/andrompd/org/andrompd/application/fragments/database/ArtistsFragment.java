@@ -100,6 +100,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onPause() {
         super.onPause();
+        Log.v(TAG,"onPause");
         getLoaderManager().destroyLoader(0);
         MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
     }

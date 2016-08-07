@@ -67,8 +67,7 @@ public class MPDConnection {
 
     private Thread pIdleThread = null;
 
-    private String mLineBuffer;
-    private Semaphore mBufferLock;
+    private Semaphore mIdleWaitLock;
 
 
     /**
@@ -77,7 +76,7 @@ public class MPDConnection {
     public MPDConnection() {
         pSocket = null;
         pReader = null;
-        mBufferLock = new Semaphore(1);
+        mIdleWaitLock = new Semaphore(1);
     }
 
     /**
@@ -307,32 +306,21 @@ public class MPDConnection {
         }
         Log.v(TAG,"Deidling MPD");
 
-        /* Set flag */
-        pMPDConnectionIdle = false;
+
 
         /* Send the "noidle" command to the server to initiate noidle */
         pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
         pWriter.flush();
 
+        /* Wait for idle thread to release the lock, which means we are finished waiting */
         try {
-            mBufferLock.acquire();
+            mIdleWaitLock.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Log.v(TAG,"Got Buffer lock in stopIdle, lineBuffer: " + mLineBuffer);
-        if ( (null != mLineBuffer) && mLineBuffer.startsWith("OK") ) {
-            Log.v(TAG,"Deidling ok");
-        } else {
-            try {
-                if ( pReader.ready() && !checkResponse()) {
-                    Log.w(TAG,"Error deidling");
-                    handleReadError();
-                }
-            } catch ( IOException e ) {
-                handleReadError();
-            }
-        }
-        mBufferLock.release();
+
+
+        mIdleWaitLock.release();
 
     }
 
@@ -347,14 +335,6 @@ public class MPDConnection {
             return;
         }
         Log.v(TAG,"MPDConnection: " + this + "Sending idle command");
-
-        try {
-            mBufferLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        mLineBuffer = null;
-        mBufferLock.release();
 
         pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
         pWriter.flush();
@@ -393,7 +373,7 @@ public class MPDConnection {
         String response;
         while ( readyRead() ) {
             response = pReader.readLine();
-            Log.v(TAG,"Response: " + response);
+            Log.v(TAG,"Con: " + this + " Response: " + response);
             if ( response.startsWith("OK") ) {
                 success = true;
             } else if ( response.startsWith("ACK") ) {
@@ -1050,19 +1030,10 @@ public class MPDConnection {
     private String waitForIdleResponse() {
         if ( null != pReader ) {
             try {
-
-                try {
-                    // Lock the semaphore, that a possible later deidling request waits for the read.
-                    mBufferLock.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
                 // Set thread to sleep, because there should be no line available to read.
-                mLineBuffer = pReader.readLine();
-                // After sucessful writing to the buffer, release the lock. A possible deidling call
-                // can resume its work there.
-                mBufferLock.release();
-                return mLineBuffer;
+                String response = pReader.readLine();
+
+                return response;
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1086,6 +1057,15 @@ public class MPDConnection {
                If the response starts with "changed" we know, that the MPD state was altered from somewhere
                else and we need to update our status.
              */
+
+            try {
+                mIdleWaitLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Log.v(TAG,"Starting blocking read operation");
+
             String response =  waitForIdleResponse();
             while ( response == null ) {
                 response =  waitForIdleResponse();
@@ -1094,7 +1074,7 @@ public class MPDConnection {
             if ( response.startsWith("changed") ) {
                 try {
                     if ( checkResponse() ) {
-                        Log.v(TAG,"Deidiling correct");
+                        Log.v(TAG,"Deidiling from outside correct");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -1104,7 +1084,15 @@ public class MPDConnection {
                 if ( null != pIdleListener ) {
                     pIdleListener.onNonIdle();
                 }
+            } else if (response.startsWith("OK") ) {
+                pMPDConnectionIdle = false;
+                Log.v(TAG,"Deidiling from outside correct");
+                if ( null != pIdleListener ) {
+                    pIdleListener.onNonIdle();
+                }
             }
+
+            mIdleWaitLock.release();
 
         }
     }
