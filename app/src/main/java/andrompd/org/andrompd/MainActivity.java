@@ -20,6 +20,7 @@ package andrompd.org.andrompd;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -34,10 +35,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 
 import java.util.List;
 
 import andrompd.org.andrompd.application.ConnectionManager;
+import andrompd.org.andrompd.application.fragments.EditProfileFragment;
+import andrompd.org.andrompd.application.fragments.ProfilesFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
@@ -55,6 +59,7 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
+        ProfilesFragment.ProfileActionCallback,
         NowPlayingView.NowPlayingDragStatusReceiver {
 
     private static final String TAG = "MainActivity";
@@ -147,7 +152,7 @@ public class MainActivity extends AppCompatActivity
 
         ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
 
-        registerForContextMenu(findViewById(R.id.current_playlist_listview));
+        registerForContextMenu(findViewById(R.id.main_listview));
 
     }
 
@@ -193,8 +198,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-
-        if (v.getId() == R.id.current_playlist_listview) {
+        if (v.getId() == R.id.main_listview && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_menu_current_playlist_track, menu);
         }
@@ -231,22 +235,37 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+        coordinatorLayout.setVisibility(View.VISIBLE);
+
+        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        if (nowPlayingView != null) {
+            nowPlayingView.minimize();
+        }
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        // clear backstack
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        Fragment fragment = null;
+
+        if (id == R.id.nav_library) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
+            fragment = new MyMusicTabsFragment();
+        } else if (id == R.id.nav_profiles) {
+            fragment = new ProfilesFragment();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
+
+        // Do the actual fragment trnas
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.fragment_container, fragment);
+        transaction.commit();
+
         return true;
     }
 
@@ -357,5 +376,33 @@ public class MainActivity extends AppCompatActivity
     public void onStartDrag() {
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void editProfile(MPDServerProfile profile) {
+        Log.v(TAG, "Profile selected: " + profile.getProfileName());
+        // Create fragment and give it an argument for the selected article
+        EditProfileFragment newFragment = new EditProfileFragment();
+        Bundle args = new Bundle();
+        args.putString(EditProfileFragment.EXTRA_PROFILENAME, profile.getProfileName());
+        args.putString(EditProfileFragment.EXTRA_HOSTNAME, profile.getHostname());
+        args.putString(EditProfileFragment.EXTRA_PASSWORD, profile.getPassword());
+        args.putInt(EditProfileFragment.EXTRA_PORT, profile.getPort());
+
+
+
+        newFragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        // Replace whatever is in the fragment_container view with this
+        // fragment,
+        // and add the transaction to the back stack so the user can navigate
+        // back
+        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.addToBackStack("EditProfileFragment");
+
+        // Commit the transaction
+        transaction.commit();
     }
 }

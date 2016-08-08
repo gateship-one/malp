@@ -68,10 +68,10 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_album_tracks, container, false);
+        View rootView = inflater.inflate(R.layout.listview_layout, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.album_tracks_listview);
+        mListView = (ListView)rootView.findViewById(R.id.main_listview);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();

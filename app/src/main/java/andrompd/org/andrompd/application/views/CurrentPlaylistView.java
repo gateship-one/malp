@@ -18,20 +18,15 @@
 package andrompd.org.andrompd.application.views;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.os.RemoteException;
-import android.support.v4.app.Fragment;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
-import andrompd.org.andrompd.application.adapters.TracksAdapter;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 
 public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnItemClickListener {
@@ -59,10 +54,10 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
     public CurrentPlaylistView(Context context, AttributeSet attrs) {
         super(context, attrs);
         // Inflate the layout for this fragment
-        LayoutInflater.from(context).inflate(R.layout.current_playlist, this, true);
+        LayoutInflater.from(context).inflate(R.layout.listview_layout, this, true);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) this.findViewById(R.id.current_playlist_listview);
+        mListView = (ListView) this.findViewById(R.id.main_listview);
 
 
         // Create the needed adapter for the ListView

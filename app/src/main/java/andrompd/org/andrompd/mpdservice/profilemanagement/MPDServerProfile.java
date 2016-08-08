@@ -18,7 +18,9 @@
 package andrompd.org.andrompd.mpdservice.profilemanagement;
 
 
-public class MPDServerProfile {
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDGenericItem;
+
+public class MPDServerProfile implements MPDGenericItem {
     /**
      * Profile parameters
      */
@@ -141,4 +143,8 @@ public class MPDServerProfile {
         return retString;
     }
 
+    @Override
+    public String getSectionTitle() {
+        return mProfileName;
+    }
 }
