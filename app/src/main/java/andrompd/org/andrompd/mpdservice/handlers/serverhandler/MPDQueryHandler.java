@@ -239,7 +239,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             try {
                 MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
                 int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
-                mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
+                if ( index < status.getCurrentSongIndex() ) {
+                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex());
+                } else {
+                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
