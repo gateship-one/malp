@@ -26,9 +26,12 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
@@ -40,6 +43,8 @@ public class MPDConnection {
     private static final String TAG = "MPDConnection";
 
     private static final int SOCKET_TIMEOUT = 30 * 1000;
+
+    private static final int IDLE_WAIT_TIME = 5 * 1000;
 
     /* Internal server parameters used for initiating the connection */
     private String pHostname;
@@ -71,10 +76,11 @@ public class MPDConnection {
 
     private Thread pIdleThread = null;
 
+    private Timer mIdleWait = null;
+
     private Semaphore mIdleWaitLock;
     private Semaphore mBusyLock;
 
-    private boolean mInternDeidle = false;
 
 
     /**
@@ -157,6 +163,8 @@ public class MPDConnection {
         if ( (null == pHostname) || pHostname.equals("")) {
             return;
         }
+        pMPDConnectionIdle = false;
+        pMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
         pSocket = new Socket();
         pSocket.connect(new InetSocketAddress(pHostname,pPort),SOCKET_TIMEOUT);
@@ -208,6 +216,8 @@ public class MPDConnection {
             // Notify listener
             notifyConnected();
 
+            startIdleWait();
+
             // Set the timeout to infinite again
             pSocket.setSoTimeout(0);
         }
@@ -219,6 +229,8 @@ public class MPDConnection {
      * try to authenticate with the server
      */
     private boolean authenticateMPDServer() throws IOException {
+        Log.v(TAG, "authenticateMPDServer: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
+
         /* Check if connection really is good to go. */
         if (!pMPDConnectionReady || pMPDConnectionIdle) {
             return false;
@@ -250,37 +262,39 @@ public class MPDConnection {
     public void disconnectFromServer() {
         Log.v(TAG, "Disconnecting: " + this);
 
+        stopIdleWait();
+
         if (pMPDConnectionIdle) {
             stopIdleing();
         }
 
-        // Notify listener
-        notifyDisconnect();
+
         try {
             /* Clear reader/writer up */
             if (null != pReader) {
-                pReader.close();
                 pReader = null;
             }
             if (null != pWriter) {
-                pWriter.close();
                 pWriter = null;
             }
 
-
             /* Clear TCP-Socket up */
-            if (null != pSocket) {
+            if (null != pSocket && pSocket.isConnected()) {
+                pSocket.setSoTimeout(1000);
                 pSocket.close();
                 pSocket = null;
             }
         } catch (IOException e) {
-            Log.e(TAG, "Error during disconnecting");
+            Log.e(TAG, "Error during disconnecting:" + e.toString());
         }
 
         /* Clear up connection state variables */
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
         Log.v(TAG, "Disconnecting finished");
+
+        // Notify listener
+        notifyDisconnect();
     }
 
     /**
@@ -290,11 +304,8 @@ public class MPDConnection {
      * @param command
      */
     private void sendMPDCommand(String command) {
-        try {
-            mBusyLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        stopIdleWait();
+
 
         Log.v(TAG, "Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
         // FIXME remove me too
@@ -307,8 +318,17 @@ public class MPDConnection {
             }
         }
 
+
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
+            Log.v(TAG,"Acquiring lock: " + this);
+            try {
+                mBusyLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Log.v(TAG,"Acquired lock: " + this);
+
             /* Check if server is in idling mode, this needs unidling first,
             otherwise the server will disconnect the client.
              */
@@ -434,14 +454,13 @@ public class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    public void stopIdleing() {
+    private void stopIdleing() {
         /* Check if server really is in idling mode */
         if (!pMPDConnectionIdle || !pMPDConnectionReady) {
             return;
         }
         Log.v(TAG, "Deidling MPD before request");
 
-        mInternDeidle = true;
 
         /* Send the "noidle" command to the server to initiate noidle */
         pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
@@ -457,8 +476,6 @@ public class MPDConnection {
 
         mIdleWaitLock.release();
 
-        mInternDeidle = false;
-
     }
 
     /**
@@ -466,7 +483,7 @@ public class MPDConnection {
      * for a deidle from the MPD host. Otherwise it is impossible to get notified on changes
      * from other mpd clients (eg. volume change)
      */
-    public void startIdleing() {
+    private void startIdleing() {
         /* Check if server really is in idling mode */
         if (!pMPDConnectionReady || pMPDConnectionIdle) {
             return;
@@ -486,7 +503,6 @@ public class MPDConnection {
 
         Log.v(TAG, "Runnable is waiting for idle finish");
         pMPDConnectionIdle = true;
-        mInternDeidle = false;
 
         if (null != pIdleListener) {
             pIdleListener.onIdle();
@@ -529,6 +545,8 @@ public class MPDConnection {
             }
         }
         mBusyLock.release();
+
+        startIdleWait();
 
         return success;
     }
@@ -594,6 +612,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Albums parsed");
         mBusyLock.release();
+        startIdleWait();
         Collections.sort(albumList);
         return albumList;
     }
@@ -634,6 +653,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Artists parsed");
         mBusyLock.release();
+        startIdleWait();
         Collections.sort(artistList);
         return artistList;
     }
@@ -726,6 +746,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Tracks parsed");
         mBusyLock.release();
+        startIdleWait();
 
         return trackList;
     }
@@ -944,6 +965,7 @@ public class MPDConnection {
         }
 
         mBusyLock.release();
+        startIdleWait();
         return status;
     }
 
@@ -1330,17 +1352,13 @@ public class MPDConnection {
                 pMPDConnectionIdle = false;
 
                 if (null != pIdleListener) {
-                    if (!mInternDeidle) {
                         pIdleListener.onNonIdle();
-                    }
                 }
             } else if (response.startsWith("OK")) {
                 pMPDConnectionIdle = false;
                 Log.v(TAG, "Deidiling from outside correct");
                 if (null != pIdleListener) {
-                    if (!mInternDeidle) {
                         pIdleListener.onNonIdle();
-                    }
                 }
             }
 
@@ -1349,4 +1367,32 @@ public class MPDConnection {
         }
     }
 
+
+    private void startIdleWait() {
+        Log.v(TAG,"Start idle wait");
+        if ( null != mIdleWait ) {
+            mIdleWait.cancel();
+            mIdleWait.purge();
+        }
+        mIdleWait = new Timer();
+        mIdleWait.schedule(new IdleWaitTask(),IDLE_WAIT_TIME);
+    }
+
+    private void stopIdleWait() {
+        if ( null != mIdleWait ) {
+            Log.v(TAG,"Stop idle wait");
+            mIdleWait.cancel();
+            mIdleWait.purge();
+            mIdleWait = null;
+        }
+    }
+
+    private class IdleWaitTask extends TimerTask {
+
+        @Override
+        public void run() {
+            Log.v(TAG,"Timeout over, go idleing again");
+            startIdleing();
+        }
+    }
 }

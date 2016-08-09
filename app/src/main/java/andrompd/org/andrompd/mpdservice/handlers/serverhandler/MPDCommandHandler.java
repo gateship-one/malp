@@ -44,9 +44,6 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     private static HandlerThread mHandlerThread = null;
     private static MPDCommandHandler mHandlerSingleton = null;
 
-
-    private Timer mIdleWaitTimer = null;
-
     /**
      * Private constructor for use in singleton.
      *
@@ -125,7 +122,6 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
             int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
             mMPDConnection.setVolume(volume);
         }
-        startIdleWait();
     }
 
     @Override
@@ -135,7 +131,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
     @Override
     public void onNonIdle() {
-        startIdleWait();
+
     }
 
     @Override
@@ -144,14 +140,12 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         Log.v(TAG,"Go idle after connection");
     }
 
-    private void startIdleWait() {
-        if ( null != mIdleWaitTimer ) {
-            mIdleWaitTimer.cancel();
-            mIdleWaitTimer.purge();
-        }
-        mIdleWaitTimer = new Timer();
-        mIdleWaitTimer.schedule(new IdleWaitTask(),IDLE_WAIT_TIME);
+    @Override
+    public void onDisconnected() {
+        super.onDisconnected();
+        Log.v(TAG,"Disconnected stop idling");
     }
+
 
     /**
      * Set the server parameters for the connection. MUST be called before trying to
@@ -357,12 +351,5 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
-    private class IdleWaitTask extends TimerTask {
 
-        @Override
-        public void run() {
-            Log.v(TAG,"Timeout over, go idleing again");
-            mMPDConnection.startIdleing();
-        }
-    }
 }

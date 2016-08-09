@@ -50,9 +50,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
     private static HandlerThread mHandlerThread = null;
     private static MPDQueryHandler mHandlerSingleton = null;
-
-    private Timer mIdleWaitTimer = null;
-
     /**
      * Private constructor for use in singleton.
      *
@@ -251,8 +248,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
             mMPDConnection.removeIndex(index);
         }
-
-        startIdleWait();
     }
 
 
@@ -558,15 +553,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         mHandlerSingleton.internalUnregisterConnectionStateListener(stateHandler);
     }
 
-    private void startIdleWait() {
-        if (null != mIdleWaitTimer) {
-            mIdleWaitTimer.cancel();
-            mIdleWaitTimer.purge();
-        }
-        mIdleWaitTimer = new Timer();
-        mIdleWaitTimer.schedule(new IdleWaitTask(), IDLE_WAIT_TIME);
-    }
-
 
     @Override
     public void onIdle() {
@@ -575,21 +561,20 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
     @Override
     public void onNonIdle() {
-        startIdleWait();
+
     }
 
     @Override
     public void onConnected() {
         super.onConnected();
-        Log.v(TAG, "Go idle after connection");
+        Log.v(TAG,"Go idle after connection");
     }
 
-    private class IdleWaitTask extends TimerTask {
-
-        @Override
-        public void run() {
-            Log.v(TAG, "Timeout over, go idleing again");
-            mMPDConnection.startIdleing();
-        }
+    @Override
+    public void onDisconnected() {
+        Log.v(TAG,"Disconnected stop idling");
+        super.onDisconnected();
     }
+
+
 }

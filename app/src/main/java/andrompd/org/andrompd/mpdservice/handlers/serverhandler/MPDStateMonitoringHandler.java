@@ -211,11 +211,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             mLastStatus = status;
             distributeNewStatus(status);
 
-
-
-
-            // Go back to idling
-            mMPDConnection.startIdleing();
+            startInterpolation();
         } catch (IOException e) {
             // FIXME
             e.printStackTrace();
@@ -236,14 +232,25 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     }
 
     private synchronized void startInterpolation() {
-        if (null != mInterpolateTimer) {
-            mInterpolateTimer.cancel();
-            mInterpolateTimer.purge();
-            mInterpolateTimer = null;
-        }
-        mInterpolateTimer = new Timer();
+        if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+            if (null != mInterpolateTimer) {
+                mInterpolateTimer.cancel();
+                mInterpolateTimer.purge();
+                mInterpolateTimer = null;
+            }
+            mInterpolateTimer = new Timer();
 
-        mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
+            mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
+        }
+
+        if (null != mResyncTimer) {
+            mResyncTimer.cancel();
+            mResyncTimer.purge();
+            mResyncTimer = null;
+        }
+        mResyncTimer = new Timer();
+        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
+        Log.v(TAG,"Resyncing state in: " + IDLE_TIME + " ms");
 
     }
 
@@ -276,6 +283,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     private void distributeNewStatus(MPDCurrentStatus status) {
         //Log.v(TAG, "Distribute status: " + status.printStatus());
         for (MPDStatusChangeHandler handler : mStatusListeners) {
+            Log.v(TAG,"Distribute new status to: " + handler);
             handler.newMPDStatusReady(status);
         }
     }
@@ -314,18 +322,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     @Override
     public void onIdle() {
-        if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
-            startInterpolation();
-        }
 
-        if (null != mResyncTimer) {
-            mResyncTimer.cancel();
-            mResyncTimer.purge();
-            mResyncTimer = null;
-        }
-        mResyncTimer = new Timer();
-        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
-        Log.v(TAG,"Resyncing state in: " + IDLE_TIME + " ms");
     }
 
     @Override
@@ -340,7 +337,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         @Override
         public void run() {
-            mMPDConnection.stopIdleing();
             resyncState();
         }
     }

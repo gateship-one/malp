@@ -80,8 +80,6 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
             } catch (IOException e) {
                 onDisconnected();
             }
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_START_IDLE) {
-            mMPDConnection.startIdleing();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
             mMPDConnection.disconnectFromServer();
         }
