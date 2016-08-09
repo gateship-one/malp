@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ListView;
 
 import java.util.List;
 
@@ -50,7 +51,9 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     private PlaylistStateListener mStateListener;
     private MPDConnectionStateChangeHandler mConnectionListener;
 
-    public CurrentPlaylistAdapter(Context context) {
+    private ListView mListView;
+
+    public CurrentPlaylistAdapter(Context context, ListView listView) {
         super();
         mContext = context;
 
@@ -58,7 +61,11 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         mStateListener = new PlaylistStateListener();
         mConnectionListener = new ConnectionStateChangeListener();
 
-
+        if ( null != listView) {
+            listView.setAdapter(this);
+            mListView = listView;
+            mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
+        }
     }
 
     @Override
@@ -134,7 +141,12 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     private void setPlaying(int index, boolean playing) {
         if ((index >= 0) && (null != mPlaylist) && (index < mPlaylist.size())) {
             mPlaylist.get(index).setPlaying(playing);
+
             notifyDataSetChanged();
+            if ( playing ) {
+                Log.v(TAG,"Move listview to: " + index);
+                mListView.setSelection(index);
+            }
         }
     }
 
@@ -175,13 +187,12 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                 MPDCurrentStatus.MPD_PLAYBACK_STATE newState = status.getPlaybackState();
                 if ((oldState != newState) && (newState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED)) {
                     setPlaying(status.getCurrentSongIndex(), false);
-                } else {
+                } else if ( (oldState != newState) && (newState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) ){
                     setPlaying(status.getCurrentSongIndex(), true);
                 }
             }
 
             mLastStatus = status;
-            notifyDataSetChanged();
         }
 
         protected void onNewTrackReady(MPDFile track) {

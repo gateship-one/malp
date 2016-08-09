@@ -61,10 +61,7 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
 
 
         // Create the needed adapter for the ListView
-        mPlaylistAdapter = new CurrentPlaylistAdapter(getContext());
-
-        // Combine the two to a happy couple
-        mListView.setAdapter(mPlaylistAdapter);
+        mPlaylistAdapter = new CurrentPlaylistAdapter(getContext(),mListView);
 
         mListView.setOnItemClickListener(this);
 
@@ -87,6 +84,5 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
     public void onPause() {
         mPlaylistAdapter.onPause();
     }
-
 
 }
