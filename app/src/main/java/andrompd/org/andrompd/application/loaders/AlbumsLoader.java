@@ -65,7 +65,7 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
     @Override
     public void onReset() {
-        forceLoad();
+        deliverResult(null);
     }
 
     @Override

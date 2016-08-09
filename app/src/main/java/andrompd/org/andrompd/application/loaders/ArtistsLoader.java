@@ -60,7 +60,7 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
 
     @Override
     public void onReset() {
-        MPDQueryHandler.getArtists(pArtistResponseHandler);
+        deliverResult(null);
     }
 
     @Override

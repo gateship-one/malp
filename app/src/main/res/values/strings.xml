@@ -60,4 +60,5 @@
     <string name="fragment_profile_hostname">Hostname:</string>
     <string name="fragment_profile_password">Password:</string>
     <string name="fragment_profile_port">Port:</string>
+    <string name="fragment_profile_auto_connect">Connect automatically:</string>
 </resources>
