@@ -332,7 +332,7 @@ public class MPDConnection {
              * FIXME Should be validated in the future.
              */
             // FIXME Remove me, seriously
-            Log.v(TAG, "Sending command: " + command);
+            Log.v(TAG,"Connection: " + this +  "Sending command: " + command);
             pWriter.println(command);
             pWriter.flush();
             waitForResponse();
@@ -418,17 +418,11 @@ public class MPDConnection {
 
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
-            /* Check if server is in idling mode, this needs unidling first,
-            otherwise the server will disconnect the client.
-             */
-            if (pMPDConnectionIdle) {
-                stopIdleing();
-            }
-
             /*
              * Send the command to the server
              * FIXME Should be validated in the future.
              */
+            Log.v(TAG,"Con: " + this + " sending: " + MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.println(MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.flush();
 
@@ -479,6 +473,8 @@ public class MPDConnection {
         }
         Log.v(TAG, "MPDConnection: " + this + "Sending idle command");
 
+        mRequestedDeidle = false;
+
 
         pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
         pWriter.flush();
@@ -515,7 +511,7 @@ public class MPDConnection {
      */
     public boolean checkResponse() throws IOException {
         boolean success = false;
-
+        waitForResponse();
         String response;
         while (readyRead()) {
             response = pReader.readLine();
@@ -526,7 +522,7 @@ public class MPDConnection {
                 success = false;
             }
         }
-
+        Log.v(TAG,"Con: " + this + " check response: " + success);
         startIdleWait();
 
         return success;
@@ -654,7 +650,6 @@ public class MPDConnection {
         String response;
         while (readyRead()) {
             response = pReader.readLine();
-
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (!tempTrack.getFileURL().equals("")) {
                     /* Check the artist filter criteria here */
@@ -723,7 +718,7 @@ public class MPDConnection {
                 //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
             }
         }
-        Log.v(TAG, "Tracks parsed");
+        Log.v(TAG, "Tracks parsed: " + trackList.size());
         startIdleWait();
 
         return trackList;
@@ -1170,6 +1165,7 @@ public class MPDConnection {
     }
 
     public boolean addSong(String url) {
+        Log.v(TAG,"Add: " + url);
         sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
 
         /* Return the response value of MPD */
@@ -1178,6 +1174,7 @@ public class MPDConnection {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        Log.v(TAG,"Added: " + url);
         return false;
     }
 
