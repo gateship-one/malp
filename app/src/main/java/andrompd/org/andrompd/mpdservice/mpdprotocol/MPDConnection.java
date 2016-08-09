@@ -44,7 +44,7 @@ public class MPDConnection {
 
     private static final int SOCKET_TIMEOUT = 30 * 1000;
 
-    private static final int IDLE_WAIT_TIME = 5 * 1000;
+    private static final int IDLE_WAIT_TIME = 500;
 
     /* Internal server parameters used for initiating the connection */
     private String pHostname;
@@ -78,8 +78,9 @@ public class MPDConnection {
 
     private Timer mIdleWait = null;
 
+    private boolean mRequestedDeidle = false;
+
     private Semaphore mIdleWaitLock;
-    private Semaphore mBusyLock;
 
 
 
@@ -90,7 +91,6 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
-        mBusyLock = new Semaphore(1);
     }
 
     /**
@@ -254,7 +254,6 @@ public class MPDConnection {
             }
         }
 
-        mBusyLock.release();
 
         return success;
     }
@@ -321,14 +320,6 @@ public class MPDConnection {
 
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
-            Log.v(TAG,"Acquiring lock: " + this);
-            try {
-                mBusyLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Log.v(TAG,"Acquired lock: " + this);
-
             /* Check if server is in idling mode, this needs unidling first,
             otherwise the server will disconnect the client.
              */
@@ -355,6 +346,7 @@ public class MPDConnection {
      * @param command
      */
     public void sendMPDRAWCommand(String command) {
+        stopIdleWait();
         Log.v(TAG, "Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
         // FIXME remove me too
         Log.v(TAG, "Prepare to send: " + command);
@@ -387,11 +379,7 @@ public class MPDConnection {
     }
 
     private void startCommandList() {
-        try {
-            mBusyLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         if (!pMPDConnectionReady) {
             try {
                 connectToServer();
@@ -445,7 +433,6 @@ public class MPDConnection {
             pWriter.flush();
 
         }
-        mBusyLock.release();
     }
 
 
@@ -461,6 +448,7 @@ public class MPDConnection {
         }
         Log.v(TAG, "Deidling MPD before request");
 
+        mRequestedDeidle = true;
 
         /* Send the "noidle" command to the server to initiate noidle */
         pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
@@ -476,6 +464,7 @@ public class MPDConnection {
 
         mIdleWaitLock.release();
 
+        mRequestedDeidle = false;
     }
 
     /**
@@ -490,11 +479,6 @@ public class MPDConnection {
         }
         Log.v(TAG, "MPDConnection: " + this + "Sending idle command");
 
-        try {
-            mBusyLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
         pWriter.flush();
@@ -507,8 +491,6 @@ public class MPDConnection {
         if (null != pIdleListener) {
             pIdleListener.onIdle();
         }
-
-        mBusyLock.release();
     }
 
     /**
@@ -544,7 +526,6 @@ public class MPDConnection {
                 success = false;
             }
         }
-        mBusyLock.release();
 
         startIdleWait();
 
@@ -611,7 +592,6 @@ public class MPDConnection {
             albumList.add(tempAlbum);
         }
         Log.v(TAG, "Albums parsed");
-        mBusyLock.release();
         startIdleWait();
         Collections.sort(albumList);
         return albumList;
@@ -652,7 +632,6 @@ public class MPDConnection {
             }
         }
         Log.v(TAG, "Artists parsed");
-        mBusyLock.release();
         startIdleWait();
         Collections.sort(artistList);
         return artistList;
@@ -745,7 +724,6 @@ public class MPDConnection {
             }
         }
         Log.v(TAG, "Tracks parsed");
-        mBusyLock.release();
         startIdleWait();
 
         return trackList;
@@ -963,8 +941,6 @@ public class MPDConnection {
                 status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
             }
         }
-
-        mBusyLock.release();
         startIdleWait();
         return status;
     }
@@ -1350,25 +1326,27 @@ public class MPDConnection {
                     e.printStackTrace();
                 }
                 pMPDConnectionIdle = false;
+                mIdleWaitLock.release();
 
-                if (null != pIdleListener) {
+                if (!mRequestedDeidle && null != pIdleListener) {
                         pIdleListener.onNonIdle();
                 }
             } else if (response.startsWith("OK")) {
                 pMPDConnectionIdle = false;
+                mIdleWaitLock.release();
                 Log.v(TAG, "Deidiling from outside correct");
-                if (null != pIdleListener) {
+                if (!mRequestedDeidle && null != pIdleListener) {
                         pIdleListener.onNonIdle();
                 }
             }
 
-            mIdleWaitLock.release();
 
+            startIdleWait();
         }
     }
 
 
-    private void startIdleWait() {
+    private synchronized void startIdleWait() {
         Log.v(TAG,"Start idle wait");
         if ( null != mIdleWait ) {
             mIdleWait.cancel();
@@ -1378,7 +1356,7 @@ public class MPDConnection {
         mIdleWait.schedule(new IdleWaitTask(),IDLE_WAIT_TIME);
     }
 
-    private void stopIdleWait() {
+    private synchronized void stopIdleWait() {
         if ( null != mIdleWait ) {
             Log.v(TAG,"Stop idle wait");
             mIdleWait.cancel();
