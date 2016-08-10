@@ -122,8 +122,7 @@ public class MainActivity extends AppCompatActivity
 
         mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
 
         mProfileManager = new MPDProfileManager(getApplicationContext());
         MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
@@ -263,6 +262,9 @@ public class MainActivity extends AppCompatActivity
             nowPlayingView.registerDragStatusReceiver(this);
         }
         ConnectionManager.reconnectLastServer();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -445,6 +447,10 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void setupFAB(boolean active, View.OnClickListener listener) {
+        mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
+        if ( null == mFAB) {
+            return;
+        }
         if (active) {
             mFAB.show();
         } else {
