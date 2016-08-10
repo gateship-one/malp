@@ -17,9 +17,7 @@
 
 package andrompd.org.andrompd.mpdservice.mpdprotocol;
 
-/**
- * Created by hendrik on 17.07.16.
- */
+
 public class MPDResponses {
     public static final String MPD_RESPONSE_ALBUM_NAME = "Album: ";
     public static final String MPD_RESPONSE_ALBUM_MBID = "MUSICBRAINZ_ALBUMID: ";
@@ -34,6 +32,9 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_ARTIST_MBID = "MUSICBRAINZ_ARTISTID: ";
     public static final String MPD_RESPONSE_TRACK_NUMBER = "Track: ";
     public static final String MPD_RESPONSE_DISC_NUMBER = "Disc: ";
+
+    public static final String MPD_RESPONSE_PLAYLIST = "playlist: ";
+    public static final String MPD_RESPONSE_LAST_MODIFIED = "Last-Modified: ";
 
     /* MPD currentstatus responses */
     public static final String MPD_RESPONSE_VOLUME = "volume: ";

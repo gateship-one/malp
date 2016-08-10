@@ -308,14 +308,12 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         // Stop the interpolation
         if (null != mInterpolateTimer) {
             mInterpolateTimer.cancel();
-            mInterpolateTimer.purge();
             mInterpolateTimer = null;
         }
 
         // Stop the resync timeout timer
         if (null != mResyncTimer) {
             mResyncTimer.cancel();
-            mResyncTimer.purge();
             mResyncTimer = null;
         }
     }

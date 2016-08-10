@@ -19,13 +19,16 @@ package andrompd.org.andrompd.application.fragments.database;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -39,6 +42,7 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.AlbumsGridAdapter;
 import andrompd.org.andrompd.application.loaders.AlbumsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -108,6 +112,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
         mConnectionStateListener = new ConnectionStateListener(this);
 
+        setHasOptionsMenu(true);
 
         return rootView;
     }
@@ -179,6 +184,48 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
                 return super.onContextItemSelected(item);
         }
     }
+
+    /**
+     * Initialize the options menu.
+     * Be sure to call {@link #setHasOptionsMenu} before.
+     *
+     * @param menu         The container for the custom options menu.
+     * @param menuInflater The inflater to instantiate the layout.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if ( null != mArtistName && !mArtistName.equals("")) {
+            menuInflater.inflate(R.menu.fragment_menu_albums, menu);
+
+            // get tint color
+            int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+
+            Drawable drawable = menu.findItem(R.id.action_add_artist).getIcon();
+            drawable = DrawableCompat.wrap(drawable);
+            DrawableCompat.setTint(drawable, tintColor);
+            menu.findItem(R.id.action_add_artist).setIcon(drawable);
+        }
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
+    /**
+     * Hook called when an menu item in the options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_artist:
+                enqueueArtist();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     /**
      * This method creates a new loader for this fragment.
@@ -266,5 +313,9 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
 
         MPDQueryHandler.playArtistAlbum(album.getName(), mArtistName);
+    }
+
+    private void enqueueArtist() {
+        MPDQueryHandler.addArtist(mArtistName);
     }
 }

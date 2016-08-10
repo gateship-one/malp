@@ -23,9 +23,13 @@
             android:id="@+id/nav_library"
             android:icon="@drawable/ic_my_library_music_24dp"
             android:title="@string/menu_library" />
+        <item
+            android:id="@+id/nav_saved_playlists"
+            android:icon="@drawable/ic_queue_music_24dp"
+            android:title="@string/menu_playlists" />
     </group>
 
-    <item android:title="Settings">
+    <item android:title="@string/menu_settings">
         <menu>
             <item
                 android:id="@+id/nav_profiles"

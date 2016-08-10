@@ -38,6 +38,7 @@ import java.util.concurrent.locks.Lock;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 
 public class MPDConnection {
@@ -316,15 +317,6 @@ public class MPDConnection {
 
 
         Log.v(TAG, "Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
-        // FIXME remove me too
-        Log.v(TAG, "Prepare to send: " + command);
-        if (!pMPDConnectionReady) {
-            try {
-                connectToServer();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
 
 
         /* Check if the server is connected. */
@@ -744,6 +736,59 @@ public class MPDConnection {
         return trackList;
     }
 
+    /**
+     * Parses the return stream of MPD when a list of playlists was requested.
+     *
+     * @return List of MPDArtists objects
+     * @throws IOException
+     */
+    private ArrayList<MPDPlaylist> parseMPDPlaylists() throws IOException {
+        ArrayList<MPDPlaylist> playlistList = new ArrayList<MPDPlaylist>();
+        if (!pMPDConnectionReady) {
+            return playlistList;
+        }
+
+        /* Parse MPD artist return values and create a list of MPDArtist objects */
+        String response = pReader.readLine();
+
+        /* Artist properties */
+        String playlistName = null;
+        String lastModified = "";
+
+
+
+        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+
+            if (response == null) {
+                /* skip this invalid (empty) response */
+                continue;
+            }
+
+            if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST)) {
+                if ( null != playlistName) {
+                    playlistList.add(new MPDPlaylist(playlistName, lastModified));
+                    Log.v(TAG,"Playlist added: " + playlistName + ':' + lastModified);
+                }
+                playlistName = response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST.length());
+
+            } else if ( response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
+                lastModified = response.substring(MPDResponses.MPD_RESPONSE_LAST_MODIFIED.length());
+            } else if (response.startsWith("OK")) {
+                break;
+            }
+            response = pReader.readLine();
+        }
+        if ( null != playlistName ) {
+            playlistList.add(new MPDPlaylist(playlistName, lastModified));
+            Log.v(TAG,"Playlist added: " + playlistName + ':' + lastModified);
+        }
+        Log.v(TAG, "Playlists parsed");
+
+        startIdleWait();
+
+        return playlistList;
+    }
+
      /*
      * **********************
      * * Request functions  *
@@ -796,6 +841,23 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
             try {
                 return parseMPDArtists();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Get a list of all playlists available in MPDs database
+     *
+     * @return List of MPDArtist objects
+     */
+    public List<MPDPlaylist> getPlaylists() {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
+            try {
+                return parseMPDPlaylists();
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1292,6 +1354,48 @@ public class MPDConnection {
     public boolean moveSongFromTo(int from, int to) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    public boolean savePlaylist(String name) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SAVE_PLAYLIST(name));
+
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    public boolean removePlaylist(String name) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_PLAYLIST(name));
+
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    public boolean loadPlaylist(String name) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_LOAD_PLAYLIST(name));
+
         /* Return the response value of MPD */
             try {
                 return checkResponse();

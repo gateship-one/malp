@@ -55,10 +55,24 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_GET_CURRENT_STATUS = "status";
 
+    public static final String MPD_COMMAND_GET_SAVED_PLAYLISTS = "listplaylists";
+
     public static final String MPD_COMMAND_GET_CURRENT_PLAYLIST = "playlistinfo";
 
     public static String MPD_COMMAND_GET_SAVED_PLAYLIST(String playlistName) {
         return "listplaylistinfo \"" + playlistName + "\"";
+    }
+
+    public static String MPD_COMMAND_SAVE_PLAYLIST(String playlistName) {
+        return "save \"" + playlistName + "\"";
+    }
+
+    public static String MPD_COMMAND_REMOVE_PLAYLIST(String playlistName) {
+        return "rm \"" + playlistName + "\"";
+    }
+
+    public static String MPD_COMMAND_LOAD_PLAYLIST(String playlistName) {
+        return "load \"" + playlistName + "\"";
     }
 
     public static final String MPD_COMMAND_GET_CURRENT_SONG = "currentsong";

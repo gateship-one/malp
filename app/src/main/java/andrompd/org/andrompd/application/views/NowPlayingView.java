@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.os.RemoteException;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -45,6 +46,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.fragments.database.ChoosePlaylistDialog;
 import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -284,6 +286,9 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 MPDQueryHandler.clearPlaylist();
                 break;
             case R.id.view_nowplaying_action_saveplaylist:
+                // open dialog in order to save the current playlist as a playlist in the mediastore
+                ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
+                choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 break;
             default:
                 return false;

@@ -40,13 +40,17 @@ import android.widget.LinearLayout;
 import java.util.List;
 
 import andrompd.org.andrompd.application.ConnectionManager;
+import andrompd.org.andrompd.application.callbacks.OnSaveDialogListener;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.fragments.EditProfileFragment;
 import andrompd.org.andrompd.application.fragments.ProfilesFragment;
+import andrompd.org.andrompd.application.fragments.SaveDialog;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
 import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
+import andrompd.org.andrompd.application.fragments.database.PlaylistTracksFragment;
+import andrompd.org.andrompd.application.fragments.database.SavedPlaylistsFragment;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
@@ -60,8 +64,8 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
-        ProfileManageCallbacks,
-        NowPlayingView.NowPlayingDragStatusReceiver {
+        ProfileManageCallbacks, SavedPlaylistsFragment.SavedPlaylistsCallback,
+        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener {
 
     private static final String TAG = "MainActivity";
 
@@ -149,7 +153,7 @@ public class MainActivity extends AppCompatActivity
         MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
 
 
-        if ( null != autoProfile ) {
+        if (null != autoProfile) {
             Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
             ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
         }
@@ -189,10 +193,6 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
 
         return super.onOptionsItemSelected(item);
     }
@@ -217,14 +217,14 @@ public class MainActivity extends AppCompatActivity
 
         CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
 
-        if (currentPlaylistView != null) {
+        if (currentPlaylistView != null && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             switch (item.getItemId()) {
                 case R.id.action_song_play_next:
                     MPDQueryHandler.playIndexAsNext(info.position);
-                    break;
+                    return true;
                 case R.id.action_remove_song:
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
-                    break;
+                    return true;
             }
         }
         return false;
@@ -255,6 +255,8 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_library) {
             // Handle the camera action
             fragment = new MyMusicTabsFragment();
+        } else if (id == R.id.nav_saved_playlists) {
+            fragment = new SavedPlaylistsFragment();
         } else if (id == R.id.nav_profiles) {
             fragment = new ProfilesFragment();
         }
@@ -284,9 +286,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.v(TAG, "onDestroy");
+    protected void onPause() {
+        super.onPause();
+        Log.v(TAG, "onPause");
 
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
@@ -295,8 +297,10 @@ public class MainActivity extends AppCompatActivity
             nowPlayingView.onPause();
         }
 
-        // Disconnect from MPD server
-        ConnectionManager.disconnectFromServer();
+        if ( !isChangingConfigurations() ) {
+            // Disconnect from MPD server
+            ConnectionManager.disconnectFromServer();
+        }
     }
 
     @Override
@@ -385,12 +389,9 @@ public class MainActivity extends AppCompatActivity
         // Create fragment and give it an argument for the selected article
         EditProfileFragment newFragment = new EditProfileFragment();
         Bundle args = new Bundle();
-        if ( null != profile ) {
+        if (null != profile) {
             args.putParcelable(EditProfileFragment.EXTRA_PROFILE, profile);
         }
-
-
-
 
 
         newFragment.setArguments(args);
@@ -423,5 +424,40 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void removeProfile(MPDServerProfile profile) {
         mProfileManager.deleteProfile(profile);
+    }
+
+    @Override
+    public void onSaveObject(String title, SaveDialog.OBJECTTYPE type) {
+        // check type to identify which object should be saved
+        switch (type) {
+            case PLAYLIST:
+                MPDQueryHandler.savePlaylist(title);
+                break;
+
+        }
+    }
+
+    @Override
+    public void openPlaylist(String name) {
+        // Create fragment and give it an argument for the selected article
+        PlaylistTracksFragment newFragment = new PlaylistTracksFragment();
+        Bundle args = new Bundle();
+        args.putString(PlaylistTracksFragment.EXTRA_PLAYLIST_NAME, name);
+
+
+
+        newFragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        // Replace whatever is in the fragment_container view with this
+        // fragment,
+        // and add the transaction to the back stack so the user can navigate
+        // back
+        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.addToBackStack("PlaylistTracksFragment");
+
+        // Commit the transaction
+        transaction.commit();
     }
 }

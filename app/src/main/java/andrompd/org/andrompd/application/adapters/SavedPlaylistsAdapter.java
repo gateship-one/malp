@@ -23,35 +23,33 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import andrompd.org.andrompd.application.listviewitems.ProfileListItem;
+import andrompd.org.andrompd.application.listviewitems.SavedPlaylistListItem;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
-public class ProfileAdapter extends GenericSectionAdapter<MPDServerProfile> {
+public class SavedPlaylistsAdapter extends GenericSectionAdapter<MPDPlaylist> {
     private Context mContext;
 
-    public ProfileAdapter(Context context) {
+    public SavedPlaylistsAdapter(Context context) {
         mContext = context;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDServerProfile profile = mModelData.get(position);
+        MPDPlaylist playlist = mModelData.get(position);
 
-        // Profile name
-        String profileName = profile.getProfileName();
+        // title
+        String playlistName = playlist.getName();
+        String lastModified = playlist.getLastModified();
 
-        int port = profile.getPort();
-        String portString = String.valueOf(port);
-
-        String hostname = profile.getHostname();
 
         if (convertView != null) {
-            ProfileListItem bookmarksListViewItem = (ProfileListItem) convertView;
+            SavedPlaylistListItem savedPlaylistListItem = (SavedPlaylistListItem) convertView;
 
-            bookmarksListViewItem.setProfileName(profileName);
-            bookmarksListViewItem.setHostname(hostname);
-            bookmarksListViewItem.setPort(portString);
+            savedPlaylistListItem.setPlaylistName(playlistName);
+            savedPlaylistListItem.setLastModified(lastModified);
         } else {
-            convertView = new ProfileListItem(mContext, profileName, hostname, portString);
+            convertView = new SavedPlaylistListItem(mContext, playlistName, lastModified);
         }
 
         return convertView;

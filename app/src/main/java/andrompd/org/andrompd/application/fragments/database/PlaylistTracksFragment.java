@@ -17,12 +17,12 @@
 
 package andrompd.org.andrompd.application.fragments.database;
 
+
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -37,37 +37,34 @@ import android.widget.ListView;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.adapters.SavedPlaylistsAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
-import andrompd.org.andrompd.application.loaders.AlbumTracksLoader;
+import andrompd.org.andrompd.application.loaders.PlaylistTrackLoader;
+import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
-public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>, AdapterView.OnItemClickListener {
-    /**
-     * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
-     * retrieve from the MPD server.
-     */
-    public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
-    public static final String BUNDLE_STRING_EXTRA_ALBUMNAME = "albumname";
-
-    /**
-     * Album definition variables
-     */
-    private String mAlbumName;
-    private String mArtistName;
-
-    /**
-     * Main ListView of this fragment
-     */
-    private ListView mListView;
+public class PlaylistTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>{
+    public final static String EXTRA_PLAYLIST_NAME = "name";
 
 
     /**
      * Adapter used by the ListView
      */
     private TracksAdapter mTracksAdapter;
+
+    /**
+     * Main ListView of this fragment
+     */
+    private ListView mListView;
+
+    /**
+     * Name of the playlist to load
+     */
+    private String mPath;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -77,11 +74,9 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
 
-        /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
-        if (null != args) {
-            mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
-            mAlbumName = args.getString(BUNDLE_STRING_EXTRA_ALBUMNAME);
+        if ( null != args ) {
+            mPath = args.getString(EXTRA_PLAYLIST_NAME);
         }
 
         // Create the needed adapter for the ListView
@@ -91,7 +86,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         mListView.setAdapter(mTracksAdapter);
         registerForContextMenu(mListView);
 
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(truea);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -109,46 +104,6 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     }
 
     /**
-     * Creates a new Loader that retrieves the list of album tracks
-     *
-     * @param id
-     * @param args
-     * @return Newly created loader
-     */
-    @Override
-    public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(), mAlbumName, mArtistName);
-    }
-
-    /**
-     * When the loader finished its loading of the data it is transferred to the adapter.
-     *
-     * @param loader Loader that finished its loading
-     * @param data   Data that was retrieved by the laoder
-     */
-    @Override
-    public void onLoadFinished(Loader<List<MPDFile>> loader, List<MPDFile> data) {
-        // Give the adapter the new retrieved data set
-        mTracksAdapter.swapModel(data);
-    }
-
-    /**
-     * Resets the loader and clears the model data set
-     *
-     * @param loader The loader that gets cleared.
-     */
-    @Override
-    public void onLoaderReset(Loader<List<MPDFile>> loader) {
-        // Clear the model data of the used adapter
-        mTracksAdapter.swapModel(null);
-    }
-
-    @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-    }
-
-    /**
      * Create the context menu.
      */
     @Override
@@ -157,6 +112,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_track, menu);
     }
+
 
     /**
      * Hook called when an menu item in the context menu is selected.
@@ -197,15 +153,15 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.fragment_menu_album_tracks, menu);
+        menuInflater.inflate(R.menu.fragment_playlist_tracks, menu);
 
         // get tint color
         int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
 
-        Drawable drawable = menu.findItem(R.id.action_add_album).getIcon();
+        Drawable drawable = menu.findItem(R.id.action_add_playlist).getIcon();
         drawable = DrawableCompat.wrap(drawable);
         DrawableCompat.setTint(drawable, tintColor);
-        menu.findItem(R.id.action_add_album).setIcon(drawable);
+        menu.findItem(R.id.action_add_playlist).setIcon(drawable);
 
         super.onCreateOptionsMenu(menu, menuInflater);
     }
@@ -219,12 +175,46 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_add_album:
-                enqueueAlbum();
+            case R.id.action_add_playlist:
+                MPDQueryHandler.loadPlaylist(mPath);
                 return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Creates a new Loader that retrieves the list of playlists
+     *
+     * @param id
+     * @param args
+     * @return Newly created loader
+     */
+    @Override
+    public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
+        return new PlaylistTrackLoader(getActivity(),mPath);
+    }
+
+    /**
+     * When the loader finished its loading of the data it is transferred to the adapter.
+     *
+     * @param loader Loader that finished its loading
+     * @param data   Data that was retrieved by the laoder
+     */
+    @Override
+    public void onLoadFinished(Loader<List<MPDFile>> loader, List<MPDFile> data) {
+        mTracksAdapter.swapModel(data);
+    }
+
+    /**
+     * Resets the loader and clears the model data set
+     *
+     * @param loader The loader that gets cleared.
+     */
+    @Override
+    public void onLoaderReset(Loader<List<MPDFile>> loader) {
+        // Clear the model data of the used adapter
+        mTracksAdapter.swapModel(null);
     }
 
     private void enqueueTrack(int index) {
@@ -245,9 +235,4 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
 
         MPDQueryHandler.playSongNext(track.getFileURL());
     }
-
-    private void enqueueAlbum() {
-        MPDQueryHandler.addArtistAlbum(mAlbumName, mArtistName);
-    }
-
 }
