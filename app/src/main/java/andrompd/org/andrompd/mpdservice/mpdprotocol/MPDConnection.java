@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.Lock;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
@@ -44,7 +45,7 @@ public class MPDConnection {
 
     private static final int SOCKET_TIMEOUT = 30 * 1000;
 
-    private static final int IDLE_WAIT_TIME = 5 * 1000;
+    private static final int IDLE_WAIT_TIME = 500;
 
     /* Internal server parameters used for initiating the connection */
     private String pHostname;
@@ -78,8 +79,7 @@ public class MPDConnection {
 
     private Timer mIdleWait = null;
 
-    private Semaphore mIdleWaitLock;
-    private Semaphore mBusyLock;
+    Semaphore mIdleWaitLock;
 
     boolean mRequestedDeidle;
 
@@ -90,7 +90,7 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
-        mBusyLock = new Semaphore(1);
+
     }
 
     /**
@@ -100,8 +100,7 @@ public class MPDConnection {
     private void handleReadError() {
         Log.e(TAG, "Read error exception. Disconnecting and cleaning up");
 
-        // Notify listener
-        notifyDisconnect();
+
         try {
             /* Clear reader/writer up */
             if (null != pReader) {
@@ -127,11 +126,16 @@ public class MPDConnection {
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
 
+        notifyDisconnect();
+
         try {
             connectToServer();
         } catch (IOException e) {
             Log.w(TAG, "Reconnecting to server failed");
         }
+
+        // Notify listener
+
     }
 
     /**
@@ -155,71 +159,74 @@ public class MPDConnection {
      * and initiates the connection to the address and the configured tcp-port.
      */
     public void connectToServer() throws IOException {
+        synchronized (this) {
         /* If a socket is already open, close it and destroy it. */
-        if ((null != pSocket) && (pSocket.isConnected())) {
-            disconnectFromServer();
-        }
+            if ((null != pSocket) && (pSocket.isConnected())) {
+                disconnectFromServer();
+            }
 
-        if ( (null == pHostname) || pHostname.equals("")) {
-            return;
-        }
-        pMPDConnectionIdle = false;
-        pMPDConnectionReady = false;
+            if ((null == pHostname) || pHostname.equals("")) {
+                return;
+            }
+            pMPDConnectionIdle = false;
+            pMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
-        pSocket = new Socket();
-        pSocket.connect(new InetSocketAddress(pHostname,pPort),SOCKET_TIMEOUT);
+            pSocket = new Socket();
+            pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
 
         /* Check if the socket is connected */
-        if (pSocket.isConnected()) {
-            Log.v(TAG, "MPD server is connected");
+            if (pSocket.isConnected()) {
+                Log.v(TAG, "MPD server is connected");
             /* Try reading from the stream */
 
             /* Create the reader used for reading from the socket. */
-            if (pReader == null) {
-                pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
-            }
+                if (pReader == null) {
+                    pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
+                }
 
             /* Create the writer used for writing to the socket */
-            if (pWriter == null) {
-                pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
-            }
+                if (pWriter == null) {
+                    pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
+                }
 
-            waitForResponse();
+                waitForResponse();
 
             /* If connected try to get MPDs version */
-            String readString = null;
-            while (readyRead()) {
-                readString = pReader.readLine();
-                Log.v(TAG, "Read string: " + readString);
+                String readString = null;
+                while (readyRead()) {
+                    readString = pReader.readLine();
+                    Log.v(TAG, "Read string: " + readString);
                 /* Look out for the greeting message */
-                if (readString.startsWith("OK MPD ")) {
-                    pVersionString = readString.substring(7);
-                    String[] versions = pVersionString.split("\\.");
-                    if (versions.length == 3) {
-                        pMajorVersion = Integer.valueOf(versions[0]);
-                        pMinorVersion = Integer.valueOf(versions[1]);
+                    if (readString.startsWith("OK MPD ")) {
+                        pVersionString = readString.substring(7);
+                        String[] versions = pVersionString.split("\\.");
+                        if (versions.length == 3) {
+                            pMajorVersion = Integer.valueOf(versions[0]);
+                            pMinorVersion = Integer.valueOf(versions[1]);
+                        }
+
                     }
-
                 }
-            }
-            Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
-            pMPDConnectionReady = true;
-            Log.v(TAG, "MPDConnection: " + this + " ready");
+                Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
+                pMPDConnectionReady = true;
+                Log.v(TAG, "MPDConnection: " + this + " ready");
 
-            if (pPassword != null && !pPassword.equals("")) {
-                Log.v(TAG, "Try to authenticate with mpd server");
+                if (pPassword != null && !pPassword.equals("")) {
+                    Log.v(TAG, "Try to authenticate with mpd server");
                     /* Authenticate with server because password is set. */
-                boolean authenticated = authenticateMPDServer();
-                Log.v(TAG, "Authentication successful: " + authenticated);
+                    boolean authenticated = authenticateMPDServer();
+                    Log.v(TAG, "Authentication successful: " + authenticated);
+                }
+
+
+                startIdleWait();
+
+                // Set the timeout to infinite again
+                pSocket.setSoTimeout(0);
+
+                // Notify listener
+                notifyConnected();
             }
-
-            // Notify listener
-            notifyConnected();
-
-            startIdleWait();
-
-            // Set the timeout to infinite again
-            pSocket.setSoTimeout(0);
         }
     }
 
@@ -254,47 +261,48 @@ public class MPDConnection {
             }
         }
 
-        mBusyLock.release();
 
         return success;
     }
 
     public void disconnectFromServer() {
-        Log.v(TAG, "Disconnecting: " + this);
+        synchronized (this) {
+            Log.v(TAG, "Disconnecting: " + this);
 
-        stopIdleWait();
+            stopIdleWait();
 
-        if (pMPDConnectionIdle) {
-            stopIdleing();
-        }
+            if (pMPDConnectionIdle) {
+                stopIdleing();
+            }
 
 
-        try {
+            try {
             /* Clear reader/writer up */
-            if (null != pReader) {
-                pReader = null;
-            }
-            if (null != pWriter) {
-                pWriter = null;
-            }
+                if (null != pReader) {
+                    pReader = null;
+                }
+                if (null != pWriter) {
+                    pWriter = null;
+                }
 
             /* Clear TCP-Socket up */
-            if (null != pSocket && pSocket.isConnected()) {
-                pSocket.setSoTimeout(1000);
-                pSocket.close();
-                pSocket = null;
+                if (null != pSocket && pSocket.isConnected()) {
+                    pSocket.setSoTimeout(1000);
+                    pSocket.close();
+                    pSocket = null;
+                }
+            } catch (IOException e) {
+                Log.e(TAG, "Error during disconnecting:" + e.toString());
             }
-        } catch (IOException e) {
-            Log.e(TAG, "Error during disconnecting:" + e.toString());
-        }
 
         /* Clear up connection state variables */
-        pMPDConnectionIdle = false;
-        pMPDConnectionReady = false;
-        Log.v(TAG, "Disconnecting finished");
+            pMPDConnectionIdle = false;
+            pMPDConnectionReady = false;
+            Log.v(TAG, "Disconnecting finished");
 
-        // Notify listener
-        notifyDisconnect();
+            // Notify listener
+            notifyDisconnect();
+        }
     }
 
     /**
@@ -321,13 +329,6 @@ public class MPDConnection {
 
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
-            Log.v(TAG,"Acquiring lock: " + this);
-            try {
-                mBusyLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            Log.v(TAG,"Acquired lock: " + this);
 
             /* Check if server is in idling mode, this needs unidling first,
             otherwise the server will disconnect the client.
@@ -341,7 +342,7 @@ public class MPDConnection {
              * FIXME Should be validated in the future.
              */
             // FIXME Remove me, seriously
-            Log.v(TAG,"Connection: " + this +  "Sending command: " + command);
+            Log.v(TAG, "Connection: " + this + "Sending command: " + command);
             pWriter.println(command);
             pWriter.flush();
             waitForResponse();
@@ -387,11 +388,6 @@ public class MPDConnection {
     }
 
     private void startCommandList() {
-        try {
-            mBusyLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         if (!pMPDConnectionReady) {
             try {
                 connectToServer();
@@ -434,12 +430,11 @@ public class MPDConnection {
              * Send the command to the server
              * FIXME Should be validated in the future.
              */
-            Log.v(TAG,"Con: " + this + " sending: " + MPDCommands.MPD_END_COMMAND_LIST);
+            Log.v(TAG, "Con: " + this + " sending: " + MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.println(MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.flush();
 
         }
-        mBusyLock.release();
     }
 
 
@@ -478,33 +473,27 @@ public class MPDConnection {
      * from other mpd clients (eg. volume change)
      */
     private void startIdleing() {
+        synchronized (this) {
         /* Check if server really is in idling mode */
-        if (!pMPDConnectionReady || pMPDConnectionIdle) {
-            return;
+            if (!pMPDConnectionReady || pMPDConnectionIdle) {
+                return;
+            }
+            Log.v(TAG, "MPDConnection: " + this + "Sending idle command");
+
+            mRequestedDeidle = false;
+
+            pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
+            pWriter.flush();
+            pIdleThread = new IdleThread();
+            pIdleThread.start();
+
+            Log.v(TAG, "Runnable is waiting for idle finish");
+            pMPDConnectionIdle = true;
+
+            if (null != pIdleListener) {
+                pIdleListener.onIdle();
+            }
         }
-        Log.v(TAG, "MPDConnection: " + this + "Sending idle command");
-
-        mRequestedDeidle = false;
-
-        try {
-            mBusyLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        pWriter.println(MPDCommands.MPD_COMMAND_START_IDLE);
-        pWriter.flush();
-        pIdleThread = new IdleThread();
-        pIdleThread.start();
-
-        Log.v(TAG, "Runnable is waiting for idle finish");
-        pMPDConnectionIdle = true;
-
-        if (null != pIdleListener) {
-            pIdleListener.onIdle();
-        }
-
-        mBusyLock.release();
     }
 
     /**
@@ -540,8 +529,7 @@ public class MPDConnection {
                 success = false;
             }
         }
-        Log.v(TAG,"Con: " + this + " check response: " + success);
-        mBusyLock.release();
+        Log.v(TAG, "Con: " + this + " check response: " + success);
 
         startIdleWait();
 
@@ -565,9 +553,11 @@ public class MPDConnection {
      */
     private ArrayList<MPDAlbum> parseMPDAlbums(String albumArtist) throws IOException {
         ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
-
+        if (!pMPDConnectionReady) {
+            return albumList;
+        }
         /* Parse the MPD response and create a list of MPD albums */
-        String response;
+        String response = pReader.readLine();
 
         boolean emptyAlbum = false;
         String albumName = "";
@@ -575,8 +565,8 @@ public class MPDConnection {
 
         MPDAlbum tempAlbum;
 
-        while (readyRead()) {
-            response = pReader.readLine();
+        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+
             if (response == null) {
                 /* skip this invalid (empty) response */
                 continue;
@@ -598,6 +588,7 @@ public class MPDConnection {
                 /* Check if the response is a musicbrainz_albumid. */
                 albumMBID = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length());
             }
+            response = pReader.readLine();
         }
 
         /* Because of the loop structure the last album has to be added because no
@@ -608,7 +599,6 @@ public class MPDConnection {
             albumList.add(tempAlbum);
         }
         Log.v(TAG, "Albums parsed");
-        mBusyLock.release();
         startIdleWait();
         Collections.sort(albumList);
         return albumList;
@@ -622,9 +612,12 @@ public class MPDConnection {
      */
     private ArrayList<MPDArtist> parseMPDArtists() throws IOException {
         ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
+        if (!pMPDConnectionReady) {
+            return artistList;
+        }
 
         /* Parse MPD artist return values and create a list of MPDArtist objects */
-        String response;
+        String response = pReader.readLine();
 
         /* Artist properties */
         String artistName;
@@ -632,8 +625,8 @@ public class MPDConnection {
 
         MPDArtist tempArtist;
 
-        while (readyRead()) {
-            response = pReader.readLine();
+        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+
             if (response == null) {
                 /* skip this invalid (empty) response */
                 continue;
@@ -647,9 +640,10 @@ public class MPDConnection {
             } else if (response.startsWith("OK")) {
                 break;
             }
+            response = pReader.readLine();
         }
         Log.v(TAG, "Artists parsed");
-        mBusyLock.release();
+
         startIdleWait();
         Collections.sort(artistList);
         return artistList;
@@ -664,14 +658,17 @@ public class MPDConnection {
      */
     private ArrayList<MPDFile> parseMPDTracks(String filterArtist) throws IOException {
         ArrayList<MPDFile> trackList = new ArrayList<MPDFile>();
+        if (!pMPDConnectionReady) {
+            return trackList;
+        }
 
         /* Temporary track item (added to list later */
         MPDFile tempTrack = new MPDFile();
 
         /* Response line from MPD */
-        String response;
-        while (readyRead()) {
-            response = pReader.readLine();
+        String response = pReader.readLine();
+        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (!tempTrack.getFileURL().equals("")) {
                     /* Check the artist filter criteria here */
@@ -729,6 +726,7 @@ public class MPDConnection {
                     tempTrack.setTrackNumber(Integer.valueOf(trackNumber));
                 }
             }
+            response = pReader.readLine();
 
         }
 
@@ -741,7 +739,6 @@ public class MPDConnection {
             }
         }
         Log.v(TAG, "Tracks parsed: " + trackList.size());
-        mBusyLock.release();
         startIdleWait();
 
         return trackList;
@@ -759,13 +756,15 @@ public class MPDConnection {
      * @return List of MPDAlbum
      */
     public List<MPDAlbum> getAlbums() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS);
-        try {
-            /* No artistName here because it is a full list */
-            return parseMPDAlbums("");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS);
+            try {
+        /* No artistName here because it is a full list */
+                return parseMPDAlbums("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -776,12 +775,14 @@ public class MPDConnection {
      * @return List of MPDAlbum objects
      */
     public List<MPDAlbum> getArtistAlbums(String artistName) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName));
-        try {
-            return parseMPDAlbums(artistName);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName));
+            try {
+                return parseMPDAlbums(artistName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -791,12 +792,14 @@ public class MPDConnection {
      * @return List of MPDArtist objects
      */
     public List<MPDArtist> getArtists() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
-        try {
-            return parseMPDArtists();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
+            try {
+                return parseMPDArtists();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -806,13 +809,15 @@ public class MPDConnection {
      * @return A list of all tracks in MPDFile objects
      */
     public List<MPDFile> getAllTracks() {
-        Log.w(TAG, "This command should not be used");
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
-        try {
-            return parseMPDTracks("");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        synchronized (this) {
+            Log.w(TAG, "This command should not be used");
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
+            try {
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -824,12 +829,14 @@ public class MPDConnection {
      * @return List of MPDFile track objects
      */
     public List<MPDFile> getAlbumTracks(String albumName) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
-        try {
-            return parseMPDTracks("");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+            try {
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -841,13 +848,15 @@ public class MPDConnection {
      * @return List of MPDFile track objects
      */
     public List<MPDFile> getArtistAlbumTracks(String albumName, String artistName) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
-        try {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+            try {
             /* Filter tracks with artistName */
-            return parseMPDTracks(artistName);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+                return parseMPDTracks(artistName);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -857,13 +866,15 @@ public class MPDConnection {
      * @return List of MPDFile items with all tracks of the current playlist
      */
     public List<MPDFile> getCurrentPlaylist() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
-        try {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
+            try {
             /* Parse the return */
-            return parseMPDTracks("");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -873,13 +884,15 @@ public class MPDConnection {
      * @return List of MPDFile items with all tracks of the current playlist
      */
     public List<MPDFile> getSavedPlaylist(String playlistName) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
-        try {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
+            try {
             /* Parse the return */
-            return parseMPDTracks("");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 
@@ -890,89 +903,92 @@ public class MPDConnection {
      * @return The CurrentStatus object with all gathered information.
      */
     public MPDCurrentStatus getCurrentServerStatus() throws IOException {
-        MPDCurrentStatus status = new MPDCurrentStatus();
+        synchronized (this) {
+            MPDCurrentStatus status = new MPDCurrentStatus();
 
         /* Request status */
-        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
         /* Response line from MPD */
-        String response;
-        while (readyRead()) {
-            response = pReader.readLine();
+            String response;
+            while (readyRead()) {
+                response = pReader.readLine();
 
-            if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
-                status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_REPEAT)) {
-                status.setRepeat(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_REPEAT.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_RANDOM)) {
-                status.setRandom(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_RANDOM.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SINGLE)) {
-                status.setSinglePlayback(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SINGLE.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CONSUME)) {
-                status.setConsume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CONSUME.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION)) {
-                status.setPlaylistVersion(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH)) {
-                status.setPlaylistLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE)) {
-                String state = response.substring(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE.length());
+                if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
+                    status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_REPEAT)) {
+                    status.setRepeat(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_REPEAT.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_RANDOM)) {
+                    status.setRandom(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_RANDOM.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SINGLE)) {
+                    status.setSinglePlayback(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SINGLE.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CONSUME)) {
+                    status.setConsume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CONSUME.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION)) {
+                    status.setPlaylistVersion(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH)) {
+                    status.setPlaylistLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE)) {
+                    String state = response.substring(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE.length());
 
-                if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PLAY)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING);
-                } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PAUSE)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING);
-                } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_STOP)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED);
-                }
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX)) {
-                status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX)) {
-                status.setNextSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD)) {
-                String timeInfo = response.substring(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD.length());
+                    if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PLAY)) {
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING);
+                    } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PAUSE)) {
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING);
+                    } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_STOP)) {
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED);
+                    }
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX)) {
+                    status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX)) {
+                    status.setNextSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD)) {
+                    String timeInfo = response.substring(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD.length());
 
-                String timeInfoSep[] = timeInfo.split(":");
-                if (timeInfoSep.length == 2) {
-                    status.setElapsedTime(Integer.valueOf(timeInfoSep[0]));
-                    status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
-                }
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME)) {
-                status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DURATION)) {
-                status.setTrackLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_BITRATE)) {
-                status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION)) {
-                String audioInfo = response.substring(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION.length());
+                    String timeInfoSep[] = timeInfo.split(":");
+                    if (timeInfoSep.length == 2) {
+                        status.setElapsedTime(Integer.valueOf(timeInfoSep[0]));
+                        status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
+                    }
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME)) {
+                    status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DURATION)) {
+                    status.setTrackLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_BITRATE)) {
+                    status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION)) {
+                    String audioInfo = response.substring(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION.length());
 
-                String audioInfoSep[] = audioInfo.split(":");
-                if (audioInfoSep.length == 3) {
+                    String audioInfoSep[] = audioInfo.split(":");
+                    if (audioInfoSep.length == 3) {
                     /* Extract the separate pieces */
                     /* First is sampleRate */
-                    status.setSamplerate(Integer.valueOf(audioInfoSep[0]));
+                        status.setSamplerate(Integer.valueOf(audioInfoSep[0]));
                     /* Second is bitresolution */
-                    status.setBitDepth(Integer.valueOf(audioInfoSep[1]));
+                        status.setBitDepth(Integer.valueOf(audioInfoSep[1]));
                     /* Third is channel count */
-                    status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
+                        status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
+                    }
+                } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
+                    status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
                 }
-            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
-                status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
             }
-        }
 
-        mBusyLock.release();
-        startIdleWait();
-        return status;
+            startIdleWait();
+            return status;
+        }
     }
 
 
     public MPDFile getCurrentSong() throws IOException {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
-        List<MPDFile> retList = parseMPDTracks("");
-        if (retList.size() == 1) {
-            return retList.get(0);
-        } else {
-            return null;
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
+            List<MPDFile> retList = parseMPDTracks("");
+            if (retList.size() == 1) {
+                return retList.get(0);
+            } else {
+                return null;
+            }
         }
     }
 
@@ -990,15 +1006,17 @@ public class MPDConnection {
      * @return
      */
     public boolean pause(boolean pause) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     /**
@@ -1007,15 +1025,17 @@ public class MPDConnection {
      * @return true if successful, false otherwise
      */
     public boolean nextSong() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     /**
@@ -1024,15 +1044,17 @@ public class MPDConnection {
      * @return true if successful, false otherwise
      */
     public boolean previousSong() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     /**
@@ -1041,106 +1063,122 @@ public class MPDConnection {
      * @return true if successful, false otherwise
      */
     public boolean stopPlayback() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_STOP);
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_STOP);
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean setRandom(boolean random) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean setRepeat(boolean repeat) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean setSingle(boolean single) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_SINGLE(single));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SET_SINGLE(single));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean setConsume(boolean consume) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean playSongIndex(int index) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean seekSeconds(int seconds) {
-        MPDCurrentStatus status = null;
-        try {
-            status = getCurrentServerStatus();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        synchronized (this) {
+            MPDCurrentStatus status = null;
+            try {
+                status = getCurrentServerStatus();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(), seconds));
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(), seconds));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean setVolume(int volume) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     /*
@@ -1150,102 +1188,118 @@ public class MPDConnection {
      */
 
     private boolean addTrackList(List<MPDFile> tracks) {
-        if (null == tracks) {
-            return false;
-        }
-        startCommandList();
+        synchronized (this) {
+            if (null == tracks) {
+                return false;
+            }
+            startCommandList();
 
-        for (MPDFile track : tracks) {
-            sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getFileURL()));
-        }
-        endCommandList();
+            for (MPDFile track : tracks) {
+                sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getFileURL()));
+            }
+            endCommandList();
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean addAlbumTracks(String albumname, String artistname) {
-        List<MPDFile> tracks = getArtistAlbumTracks(albumname, artistname);
-        return addTrackList(tracks);
+        synchronized (this) {
+            List<MPDFile> tracks = getArtistAlbumTracks(albumname, artistname);
+            return addTrackList(tracks);
+        }
     }
 
     public boolean addArtist(String artistname) {
-        List<MPDAlbum> albums = getArtistAlbums(artistname);
-        if (null == albums) {
-            return false;
-        }
-
-        boolean success = true;
-        for (MPDAlbum album : albums) {
-            if (!(addAlbumTracks(album.getName(), artistname))) {
-                success = false;
+        synchronized (this) {
+            List<MPDAlbum> albums = getArtistAlbums(artistname);
+            if (null == albums) {
+                return false;
             }
+
+            boolean success = true;
+            for (MPDAlbum album : albums) {
+                if (!(addAlbumTracks(album.getName(), artistname))) {
+                    success = false;
+                }
+            }
+            return success;
         }
-        return success;
     }
 
     public boolean addSong(String url) {
-        Log.v(TAG,"Add: " + url);
-        sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
+        synchronized (this) {
+            Log.v(TAG, "Add: " + url);
+            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            Log.v(TAG, "Added: " + url);
+            return false;
         }
-        Log.v(TAG,"Added: " + url);
-        return false;
     }
 
     public boolean addSongatIndex(String url, int index) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE_AT_INDEX(url, index));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE_AT_INDEX(url, index));
 
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean clearPlaylist() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean removeIndex(int index) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     public boolean moveSongFromTo(int from, int to) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
         /* Return the response value of MPD */
-        try {
-            return checkResponse();
-        } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
 
     private boolean readyRead() throws IOException {
@@ -1347,38 +1401,35 @@ public class MPDConnection {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                pMPDConnectionIdle = false;
-
-                if (null != pIdleListener) {
-                        pIdleListener.onNonIdle();
-                }
             } else if (response.startsWith("OK")) {
-                pMPDConnectionIdle = false;
                 Log.v(TAG, "Deidiling from outside correct");
-                if (null != pIdleListener) {
-                        pIdleListener.onNonIdle();
-                }
+
             }
 
+            pMPDConnectionIdle = false;
+
             mIdleWaitLock.release();
+            if (null != pIdleListener) {
+                pIdleListener.onNonIdle();
+            }
 
         }
     }
 
 
     private void startIdleWait() {
-        Log.v(TAG,"Start idle wait");
-        if ( null != mIdleWait ) {
+        Log.v(TAG, "Start idle wait: " + this);
+        if (null != mIdleWait) {
             mIdleWait.cancel();
             mIdleWait.purge();
         }
         mIdleWait = new Timer();
-        mIdleWait.schedule(new IdleWaitTask(),IDLE_WAIT_TIME);
+        mIdleWait.schedule(new IdleWaitTask(), IDLE_WAIT_TIME);
     }
 
     private void stopIdleWait() {
-        if ( null != mIdleWait ) {
-            Log.v(TAG,"Stop idle wait");
+        if (null != mIdleWait) {
+            Log.v(TAG, "Stop idle wait: " + this);
             mIdleWait.cancel();
             mIdleWait.purge();
             mIdleWait = null;
@@ -1389,7 +1440,7 @@ public class MPDConnection {
 
         @Override
         public void run() {
-            Log.v(TAG,"Timeout over, go idleing again");
+            Log.v(TAG, "Timeout over, go idleing again");
             startIdleing();
         }
     }

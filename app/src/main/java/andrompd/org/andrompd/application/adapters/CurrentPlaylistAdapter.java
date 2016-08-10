@@ -234,7 +234,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         @Override
         public void onDisconnected() {
             mPlaylist = null;
-            mLastStatus = new MPDCurrentStatus();
+            mLastStatus = null;
             notifyDataSetInvalidated();
         }
     }
