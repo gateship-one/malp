@@ -40,6 +40,7 @@ import java.util.List;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.AlbumsGridAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.AlbumsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
@@ -50,7 +51,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 
 public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>, AdapterView.OnItemClickListener {
-    private static final String TAG = "AlbumFragment";
+    public final static String TAG = AlbumsFragment.class.getSimpleName();
 
     /**
      * Definition of bundled extras
@@ -79,6 +80,9 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     private AlbumSelectedCallback mAlbumSelectCallback;
 
     private ConnectionStateListener mConnectionStateListener;
+
+    private FABFragmentCallback mFABCallback = null;
+
 
 
     @Override
@@ -123,6 +127,14 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
         MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
+
+        if ( null != mFABCallback  ) {
+            if ( null != mArtistName && !mArtistName.equals("")) {
+                mFABCallback.setupFAB(true, new FABOnClickListener());
+            } else {
+                mFABCallback.setupFAB(false, null);
+            }
+        }
     }
 
     @Override
@@ -146,6 +158,15 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
             mAlbumSelectCallback = (AlbumSelectedCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
+
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
         }
     }
 
@@ -317,5 +338,13 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void enqueueArtist() {
         MPDQueryHandler.addArtist(mArtistName);
+    }
+
+    private class FABOnClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            MPDQueryHandler.playArtist(mArtistName);
+        }
     }
 }

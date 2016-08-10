@@ -37,11 +37,13 @@ import java.util.List;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.SavedPlaylistsAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDPlaylist>>, AbsListView.OnItemClickListener{
+    public final static String TAG = SavedPlaylistsFragment.class.getSimpleName();
     /**
      * Adapter used by the ListView
      */
@@ -56,6 +58,8 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
      * Callback for activity this fragment gets attached to
      */
     private SavedPlaylistsCallback mCallback;
+
+    private FABFragmentCallback mFABCallback = null;
 
 
     @Override
@@ -87,7 +91,9 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
         super.onResume();
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
-
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(false,null);
+        }
     }
 
     /**
@@ -103,6 +109,14 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
             mCallback = (SavedPlaylistsCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
         }
     }
 

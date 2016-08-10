@@ -37,6 +37,7 @@ import java.util.List;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.ArtistsGridAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.ArtistsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -45,7 +46,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
 
 public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDArtist>>, AdapterView.OnItemClickListener {
-    private static final String TAG = "ArtistFragment";
+    public final static String TAG = ArtistsFragment.class.getSimpleName();
     /**
      * GridView adapter object used for this GridView
      */
@@ -65,6 +66,9 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     private ArtistSelectedCallback mSelectedCallback;
 
     private ConnectionStateListener mConnectionStateListener;
+
+    private FABFragmentCallback mFABCallback = null;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -98,6 +102,10 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
         MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
+
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(false,null);
+        }
     }
 
     @Override
@@ -121,6 +129,14 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
             mSelectedCallback = (ArtistSelectedCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
         }
     }
 

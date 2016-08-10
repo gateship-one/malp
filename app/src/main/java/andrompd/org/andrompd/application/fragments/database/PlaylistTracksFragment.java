@@ -18,6 +18,7 @@
 package andrompd.org.andrompd.application.fragments.database;
 
 
+import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -39,6 +40,7 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.SavedPlaylistsAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.PlaylistTrackLoader;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
@@ -47,6 +49,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 public class PlaylistTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>{
+    public final static String TAG = PlaylistTracksFragment.class.getSimpleName();
     public final static String EXTRA_PLAYLIST_NAME = "name";
 
 
@@ -64,6 +67,9 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
      * Name of the playlist to load
      */
     private String mPath;
+
+    private FABFragmentCallback mFABCallback = null;
+
 
 
     @Override
@@ -86,7 +92,7 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
         mListView.setAdapter(mTracksAdapter);
         registerForContextMenu(mListView);
 
-        setHasOptionsMenu(truea);
+        setHasOptionsMenu(true);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -101,6 +107,25 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
 
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(true,new FABOnClickListener());
+        }
+    }
+
+    /**
+     * Called when the fragment is first attached to its context.
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
+        }
     }
 
     /**
@@ -234,5 +259,13 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
         MPDFile track = (MPDFile) mTracksAdapter.getItem(index);
 
         MPDQueryHandler.playSongNext(track.getFileURL());
+    }
+
+    private class FABOnClickListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            MPDQueryHandler.playPlaylist(mPath);
+        }
     }
 }

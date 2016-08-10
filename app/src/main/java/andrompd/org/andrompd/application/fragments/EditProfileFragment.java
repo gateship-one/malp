@@ -33,12 +33,14 @@ import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class EditProfileFragment extends Fragment {
-    private static final String TAG = "EditProfileFragment";
+    public final static String TAG = EditProfileFragment.class.getSimpleName();
     public static final String EXTRA_PROFILE = "profile";
 
     
@@ -60,6 +62,9 @@ public class EditProfileFragment extends Fragment {
     private MPDServerProfile mOldProfile;
 
     private ProfileManageCallbacks mCallback;
+
+    private FABFragmentCallback mFABCallback = null;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -116,6 +121,13 @@ public class EditProfileFragment extends Fragment {
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
+        }
     }
 
     @Override
@@ -156,6 +168,16 @@ public class EditProfileFragment extends Fragment {
             mCallback.addProfile(profile);
         }
 
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(false,null);
+        }
     }
 
 }

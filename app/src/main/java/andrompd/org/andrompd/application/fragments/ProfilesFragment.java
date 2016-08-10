@@ -42,12 +42,14 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.adapters.ProfileAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.loaders.ProfilesLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDServerProfile>>, AbsListView.OnItemClickListener{
+    public final static String TAG = ProfilesFragment.class.getSimpleName();
     /**
      * Main ListView of this fragment
      */
@@ -56,6 +58,9 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     private ProfileAdapter mAdapter;
 
     private ProfileManageCallbacks mCallback;
+
+    private FABFragmentCallback mFABCallback = null;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -174,6 +179,14 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
+        }
     }
 
     /**
@@ -186,6 +199,10 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
+
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(false,null);
+        }
     }
 
     @Override

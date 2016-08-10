@@ -35,6 +35,7 @@ import android.view.ViewGroup;
 import andrompd.org.andrompd.R;
 
 public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener{
+    public final static String TAG = MyMusicTabsFragment.class.getSimpleName();
     public final static String MY_MUSIC_REQUESTED_TAB = "ARG_REQUESTED_TAB";
 
 

@@ -35,7 +35,7 @@ public class SaveDialog extends DialogFragment {
     public final static String ARG_OBJECTTYPE = "objecttype";
 
     public enum OBJECTTYPE {
-        PLAYLIST
+        PLAYLIST, BOOKMARK
     }
 
     OnSaveDialogListener mSaveCallback;

@@ -40,6 +40,7 @@ import android.widget.LinearLayout;
 import java.util.List;
 
 import andrompd.org.andrompd.application.ConnectionManager;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.OnSaveDialogListener;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.fragments.EditProfileFragment;
@@ -65,7 +66,9 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, SavedPlaylistsFragment.SavedPlaylistsCallback,
-        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener {
+        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener,
+        FABFragmentCallback{
+
 
     private static final String TAG = "MainActivity";
 
@@ -78,6 +81,13 @@ public class MainActivity extends AppCompatActivity
 
     private MPDProfileManager mProfileManager;
 
+
+    private String mArtistName;
+    private String mAlbumName;
+    private String mPlaylistName;
+
+    private FloatingActionButton mFAB;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,42 +95,6 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
-
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
-
-
-                MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
-                Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
-                //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
-//                MPDQueryHandler.connectToMPDServer();
-//                MPDQueryHandler.startIdle();
-
-                MPDStateMonitoringHandler.setServerParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
-                MPDStateMonitoringHandler.connectToMPDServer();
-
-                MPDQueryHandler.setServerParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
-                MPDQueryHandler.connectToMPDServer();
-
-                Fragment artistFragment = new ArtistsFragment();
-                Fragment albumFragment = new AlbumsFragment();
-                Fragment albumTracksFragment = new AlbumTracksFragment();
-
-                Bundle args = new Bundle();
-                //args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ARTISTNAME,"P!nk");
-                //args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME,"Alice Through the Looking Glass");
-                //albumTracksFragment.setArguments(args);
-
-                args.putString(CurrentPlaylistView.BUNDLE_STRING_EXTRA_PLAYLISTNAME, "");
-//
-//                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-//                transaction.replace(R.id.fragment_container, currentPlaylistFragment);
-//                transaction.commit();
-            }
-        });
 
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState != null) {
@@ -145,6 +119,8 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.setDrawerListener(toggle);
         toggle.syncState();
+
+        mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -251,23 +227,27 @@ public class MainActivity extends AppCompatActivity
         fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
         Fragment fragment = null;
+        String fragmentTag = "";
 
         if (id == R.id.nav_library) {
             // Handle the camera action
             fragment = new MyMusicTabsFragment();
+            fragmentTag = MyMusicTabsFragment.TAG;
         } else if (id == R.id.nav_saved_playlists) {
             fragment = new SavedPlaylistsFragment();
+            fragmentTag = SavedPlaylistsFragment.TAG;
         } else if (id == R.id.nav_profiles) {
             fragment = new ProfilesFragment();
+            fragmentTag = ProfilesFragment.TAG;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
 
-        // Do the actual fragment trnas
+        // Do the actual fragment transaction
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment);
+        transaction.replace(R.id.fragment_container, fragment,fragmentTag);
         transaction.commit();
 
         return true;
@@ -297,7 +277,7 @@ public class MainActivity extends AppCompatActivity
             nowPlayingView.onPause();
         }
 
-        if ( !isChangingConfigurations() ) {
+        if (!isChangingConfigurations()) {
             // Disconnect from MPD server
             ConnectionManager.disconnectFromServer();
         }
@@ -320,7 +300,7 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.replace(R.id.fragment_container, newFragment,AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
         // Commit the transaction
@@ -344,7 +324,7 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.replace(R.id.fragment_container, newFragment,AlbumsFragment.TAG);
         transaction.addToBackStack("ArtistAlbumsFragment");
 
         // Commit the transaction
@@ -402,8 +382,9 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment);
+        transaction.replace(R.id.fragment_container, newFragment,EditProfileFragment.TAG);
         transaction.addToBackStack("EditProfileFragment");
+
 
         // Commit the transaction
         transaction.commit();
@@ -445,7 +426,6 @@ public class MainActivity extends AppCompatActivity
         args.putString(PlaylistTracksFragment.EXTRA_PLAYLIST_NAME, name);
 
 
-
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -459,5 +439,17 @@ public class MainActivity extends AppCompatActivity
 
         // Commit the transaction
         transaction.commit();
+
+    }
+
+
+    @Override
+    public void setupFAB(boolean active, View.OnClickListener listener) {
+        if (active) {
+            mFAB.show();
+        } else {
+            mFAB.hide();
+        }
+        mFAB.setOnClickListener(listener);
     }
 }
