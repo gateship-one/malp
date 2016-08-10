@@ -18,6 +18,7 @@
 package andrompd.org.andrompd.application.fragments;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
@@ -32,15 +33,14 @@ import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
+import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class EditProfileFragment extends Fragment {
     private static final String TAG = "EditProfileFragment";
-    public static final String EXTRA_PROFILENAME = "profilename";
-    public static final String EXTRA_HOSTNAME = "hostname";
-    public static final String EXTRA_PASSWORD = "password";
-    public static final String EXTRA_PORT = "port";
-    public static final String EXTRA_AUTOCONNECT = "autoconnect";
+    public static final String EXTRA_PROFILE = "profile";
+
     
 
     private String mProfilename;
@@ -57,6 +57,10 @@ public class EditProfileFragment extends Fragment {
 
     private Switch mAutoConnectView;
 
+    private MPDServerProfile mOldProfile;
+
+    private ProfileManageCallbacks mCallback;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -65,11 +69,20 @@ public class EditProfileFragment extends Fragment {
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
         if (null != args) {
-            mProfilename = args.getString(EXTRA_PROFILENAME);
-            mHostname = args.getString(EXTRA_HOSTNAME);
-            mPassword = args.getString(EXTRA_PASSWORD);
-            mPort = args.getInt(EXTRA_PORT);
-            mAutoconnect = args.getBoolean(EXTRA_AUTOCONNECT);
+            mOldProfile = args.getParcelable(EXTRA_PROFILE);
+            if ( mOldProfile != null ) {
+                mProfilename = mOldProfile.getProfileName();
+                mHostname = mOldProfile.getHostname();
+                mPassword = mOldProfile.getPassword();
+                mPort = mOldProfile.getPort();
+                mAutoconnect = mOldProfile.getAutoconnect();
+            } else {
+                mHostname = "";
+                mProfilename = "";
+                mPassword = "";
+                mPort = 6600;
+                mAutoconnect = false;
+            }
         }
 
         mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
@@ -89,6 +102,21 @@ public class EditProfileFragment extends Fragment {
         return rootView;
     }
 
+    /**
+     * Called when the fragment is first attached to its context.
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (ProfileManageCallbacks) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
+    }
 
     @Override
     public void onPause() {
@@ -118,6 +146,14 @@ public class EditProfileFragment extends Fragment {
 
         if ( profileChanged ) {
             Log.v(TAG,"Profile changed: " + mProfilename + ':' + mHostname + ':' + String.valueOf(mPort) + ':' + String.valueOf(mAutoconnect));
+            if ( null != mOldProfile ) {
+                mCallback.removeProfile(mOldProfile);
+            }
+            MPDServerProfile profile = new MPDServerProfile(mProfilename,mAutoconnect);
+            profile.setHostname(mHostname);
+            profile.setPassword(mPassword);
+            profile.setPort(mPort);
+            mCallback.addProfile(profile);
         }
 
     }

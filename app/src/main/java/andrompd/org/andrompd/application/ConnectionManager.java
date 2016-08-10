@@ -76,6 +76,16 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         getInstance().mPort = port;
     }
 
+    public static void setParameters(MPDServerProfile profile) {
+
+        Log.v(TAG, "Connection to: " + profile.getHostname() + ':' + String.valueOf(profile.getPort()));
+
+
+        getInstance().mHostname = profile.getHostname();
+        getInstance().mPassword = profile.getPassword();
+        getInstance().mPort = profile.getPort();
+    }
+
     public static void reconnectLastServer() {
         ConnectionManager instance = getInstance();
 

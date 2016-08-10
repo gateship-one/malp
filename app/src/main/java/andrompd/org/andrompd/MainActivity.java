@@ -40,6 +40,7 @@ import android.widget.LinearLayout;
 import java.util.List;
 
 import andrompd.org.andrompd.application.ConnectionManager;
+import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.fragments.EditProfileFragment;
 import andrompd.org.andrompd.application.fragments.ProfilesFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
@@ -59,7 +60,7 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
-        ProfilesFragment.ProfileActionCallback,
+        ProfileManageCallbacks,
         NowPlayingView.NowPlayingDragStatusReceiver {
 
     private static final String TAG = "MainActivity";
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity
     private VIEW_SWITCHER_STATUS mNowPlayingViewSwitcherStatus;
     private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus = null;
 
+    private MPDProfileManager mProfileManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -143,14 +145,14 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        MPDProfileManager profileManager = new MPDProfileManager(getApplicationContext());
-        MPDServerProfile autoProfile = profileManager.getAutoconnectProfile();
-        Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
-        //MPDQueryHandler.setServerParameters(autoProfile.getHostname(),autoProfile.getPassword(),autoProfile.getPort());
-//                MPDQueryHandler.connectToMPDServer();
-//                MPDQueryHandler.startIdle();
+        mProfileManager = new MPDProfileManager(getApplicationContext());
+        MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
 
-        ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
+
+        if ( null != autoProfile ) {
+            Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
+            ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
+        }
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
@@ -380,14 +382,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void editProfile(MPDServerProfile profile) {
-        Log.v(TAG, "Profile selected: " + profile.getProfileName());
         // Create fragment and give it an argument for the selected article
         EditProfileFragment newFragment = new EditProfileFragment();
         Bundle args = new Bundle();
-        args.putString(EditProfileFragment.EXTRA_PROFILENAME, profile.getProfileName());
-        args.putString(EditProfileFragment.EXTRA_HOSTNAME, profile.getHostname());
-        args.putString(EditProfileFragment.EXTRA_PASSWORD, profile.getPassword());
-        args.putInt(EditProfileFragment.EXTRA_PORT, profile.getPort());
+        if ( null != profile ) {
+            args.putParcelable(EditProfileFragment.EXTRA_PROFILE, profile);
+        }
+
+
 
 
 
@@ -404,5 +406,22 @@ public class MainActivity extends AppCompatActivity
 
         // Commit the transaction
         transaction.commit();
+    }
+
+    @Override
+    public void connectProfile(MPDServerProfile profile) {
+        ConnectionManager.disconnectFromServer();
+        ConnectionManager.setParameters(profile);
+        ConnectionManager.reconnectLastServer();
+    }
+
+    @Override
+    public void addProfile(MPDServerProfile profile) {
+        mProfileManager.addProfile(profile);
+    }
+
+    @Override
+    public void removeProfile(MPDServerProfile profile) {
+        mProfileManager.deleteProfile(profile);
     }
 }

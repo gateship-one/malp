@@ -18,9 +18,12 @@
 package andrompd.org.andrompd.mpdservice.profilemanagement;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDGenericItem;
 
-public class MPDServerProfile implements MPDGenericItem {
+public class MPDServerProfile implements MPDGenericItem, Parcelable {
     /**
      * Profile parameters
      */
@@ -47,6 +50,14 @@ public class MPDServerProfile implements MPDGenericItem {
 
         /* Just set the default mpd port here */
         mPort = 6600;
+    }
+
+    protected MPDServerProfile(Parcel in) {
+        mProfileName = in.readString();
+        mHostname = in.readString();
+        mPassword = in.readString();
+        mPort = in.readInt();
+        mAutoconnect = in.readInt() == 1;
     }
 
     /**
@@ -146,5 +157,32 @@ public class MPDServerProfile implements MPDGenericItem {
     @Override
     public String getSectionTitle() {
         return mProfileName;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MPDServerProfile> CREATOR = new Creator<MPDServerProfile>() {
+        @Override
+        public MPDServerProfile createFromParcel(Parcel in) {
+            return new MPDServerProfile(in);
+        }
+
+        @Override
+        public MPDServerProfile[] newArray(int size) {
+            return new MPDServerProfile[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        // Serialize profile
+        dest.writeString(mProfileName);
+        dest.writeString(mHostname);
+        dest.writeString(mPassword);
+        dest.writeInt(mPort);
+        dest.writeInt(mAutoconnect ? 1 : 0);
     }
 }

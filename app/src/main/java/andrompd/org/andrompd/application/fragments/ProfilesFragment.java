@@ -19,16 +19,20 @@ package andrompd.org.andrompd.application.fragments;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
@@ -38,10 +42,12 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.adapters.ProfileAdapter;
 import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.loaders.ProfilesLoader;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
-public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDServerProfile>>{
+public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDServerProfile>>, AbsListView.OnItemClickListener{
     /**
      * Main ListView of this fragment
      */
@@ -49,7 +55,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private ProfileAdapter mAdapter;
 
-    private ProfileActionCallback mCallback;
+    private ProfileManageCallbacks mCallback;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -65,7 +71,10 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
         // Combine the two to a happy couple
         mListView.setAdapter(mAdapter);
+        mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
+
+        setHasOptionsMenu(true);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -111,6 +120,45 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
         }
     }
 
+    /**
+     * Initialize the options menu.
+     * Be sure to call {@link #setHasOptionsMenu} before.
+     *
+     * @param menu         The container for the custom options menu.
+     * @param menuInflater The inflater to instantiate the layout.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.fragment_menu_profiles, menu);
+
+        // get tint color
+        int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+
+        Drawable drawable = menu.findItem(R.id.action_add).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_add).setIcon(drawable);
+
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
+    /**
+     * Hook called when an menu item in the options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add:
+                mCallback.editProfile(null);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * Called when the fragment is first attached to its context.
@@ -122,7 +170,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (ProfileActionCallback) context;
+            mCallback = (ProfileManageCallbacks) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
@@ -157,7 +205,9 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
 
     private void connectProfile(int index) {
-
+        if ( null != mCallback ) {
+            mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(index));
+        }
     }
 
     private void editProfile(int index) {
@@ -167,12 +217,15 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     }
 
     private void removeProfile(int index) {
-
+        if ( null != mCallback ) {
+            mCallback.removeProfile((MPDServerProfile)mAdapter.getItem(index));
+        }
     }
 
-    public interface ProfileActionCallback {
-
-        // Should show the EditProfileFragment to the user
-        void editProfile(MPDServerProfile profile);
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if ( null != mCallback ) {
+            mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(position));
+        }
     }
 }
