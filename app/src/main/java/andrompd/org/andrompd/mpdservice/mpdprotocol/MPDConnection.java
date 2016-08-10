@@ -160,7 +160,6 @@ public class MPDConnection {
      * and initiates the connection to the address and the configured tcp-port.
      */
     public void connectToServer() throws IOException {
-        synchronized (this) {
         /* If a socket is already open, close it and destroy it. */
             if ((null != pSocket) && (pSocket.isConnected())) {
                 disconnectFromServer();
@@ -228,7 +227,6 @@ public class MPDConnection {
                 // Notify listener
                 notifyConnected();
             }
-        }
     }
 
 
