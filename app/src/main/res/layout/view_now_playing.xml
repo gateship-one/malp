@@ -266,6 +266,15 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_play_circle_fill_48dp"
                         android:tint="@color/colorTextLight" />
+                    <ImageButton
+                        android:id="@+id/now_playing_bottomStopButton"
+                        android:layout_width="0px"
+                        android:layout_height="48dp"
+                        android:layout_weight="1"
+                        android:background="?android:selectableItemBackground"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_stop_black_48dp"
+                        android:tint="@color/colorTextLight" />
 
                     <ImageButton
                         android:id="@+id/now_playing_bottomNextButton"

@@ -115,7 +115,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private ViewSwitcher mViewSwitcher;
 
 
-
     /**
      * Timer that periodically updates the state of the view (seekbar)
      */
@@ -143,6 +142,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private ImageButton mBottomRepeatButton;
     private ImageButton mBottomPreviousButton;
     private ImageButton mBottomPlayPauseButton;
+    private ImageButton mBottomStopButton;
     private ImageButton mBottomNextButton;
     private ImageButton mBottomRandomButton;
 
@@ -221,7 +221,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
         return false;
     }
-
 
 
     /**
@@ -561,6 +560,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomRepeatButton = (ImageButton) findViewById(R.id.now_playing_bottomRepeatButton);
         mBottomPreviousButton = (ImageButton) findViewById(R.id.now_playing_bottomPreviousButton);
         mBottomPlayPauseButton = (ImageButton) findViewById(R.id.now_playing_bottomPlayPauseButton);
+        mBottomStopButton = (ImageButton) findViewById(R.id.now_playing_bottomStopButton);
         mBottomNextButton = (ImageButton) findViewById(R.id.now_playing_bottomNextButton);
         mBottomRandomButton = (ImageButton) findViewById(R.id.now_playing_bottomRandomButton);
 
@@ -598,7 +598,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
-        mVolumeSeekbar = (SeekBar)findViewById(R.id.volume_seekbar);
+        mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
@@ -612,14 +612,18 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mTopPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if ( null != mLastStatus ) {
-                    if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
-                        MPDCommandHandler.pause();
-                    } else if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
-                        MPDCommandHandler.play();
+                if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                    MPDCommandHandler.pause();
+                } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                    MPDCommandHandler.play();
+                } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+                    int lastIndex = mLastStatus.getCurrentSongIndex();
+                    if ( lastIndex >= 0 ) {
+                        MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
+                    } else {
+                        MPDCommandHandler.playSongIndex(0);
                     }
                 }
-
             }
         });
 
@@ -668,8 +672,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomRepeatButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if (null != mLastStatus ) {
-                    if ( mLastStatus.getRepeat() == 0) {
+                if (null != mLastStatus) {
+                    if (mLastStatus.getRepeat() == 0) {
                         MPDCommandHandler.setRepeat(true);
                     } else {
                         MPDCommandHandler.setRepeat(false);
@@ -691,13 +695,27 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if ( null != mLastStatus ) {
-                    if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+                if (null != mLastStatus) {
+                    if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                         MPDCommandHandler.pause();
-                    } else if ( mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
                         MPDCommandHandler.play();
+                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+                        int lastIndex = mLastStatus.getCurrentSongIndex();
+                        if ( lastIndex >= 0 ) {
+                            MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
+                        } else {
+                            MPDCommandHandler.playSongIndex(0);
+                        }
                     }
                 }
+            }
+        });
+
+        mBottomStopButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.stop();
             }
         });
 
@@ -713,8 +731,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomRandomButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if (null != mLastStatus ) {
-                    if ( mLastStatus.getRandom() == 0) {
+                if (null != mLastStatus) {
+                    if (mLastStatus.getRandom() == 0) {
                         MPDCommandHandler.setRandom(true);
                     } else {
                         MPDCommandHandler.setRandom(false);
@@ -820,7 +838,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     }
 
 
-    private void updateMPDStatus(MPDCurrentStatus status ) {
+    private void updateMPDStatus(MPDCurrentStatus status) {
 
         MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
 
@@ -888,7 +906,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     }
 
 
-
     /**
      * Can be used to register an observer to this view, that is notified when a change of the dragstatus,offset happens.
      *
@@ -948,7 +965,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // tint the button according to the requested view
         mTopPlaylistButton.setImageTintList(ColorStateList.valueOf(color));
     }
-
 
 
     /**
