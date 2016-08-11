@@ -202,6 +202,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);
+            mFABCallback.setupToolbar(getString(R.string.menu_profiles), false, true, false);
         }
     }
 

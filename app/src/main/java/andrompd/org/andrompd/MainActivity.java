@@ -17,7 +17,11 @@
 
 package andrompd.org.andrompd;
 
+import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -35,6 +39,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import java.util.List;
@@ -72,9 +77,16 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "MainActivity";
 
+    private final static String MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW = "org.malp.requestedview";
+    private final static String MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW = "org.malp.requestedview.nowplaying";
+
+    private final static String MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_DRAG_STATUS = "MainActivity.NowPlayingDragStatus";
+    private final static String MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_VIEW_SWITCHER_CURRENT_VIEW = "MainActivity.NowPlayingViewSwitcherCurrentView";
 
     private DRAG_STATUS mNowPlayingDragStatus;
     private DRAG_STATUS mSavedNowPlayingDragStatus = null;
+
+    private ActionBarDrawerToggle mDrawerToggle;
 
     private VIEW_SWITCHER_STATUS mNowPlayingViewSwitcherStatus;
     private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus = null;
@@ -88,19 +100,27 @@ public class MainActivity extends AppCompatActivity
 
     private FloatingActionButton mFAB;
 
+    private NavigationView navigationView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // restore drag state
+        if (savedInstanceState != null) {
+            mSavedNowPlayingDragStatus = DRAG_STATUS.values()[savedInstanceState.getInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_DRAG_STATUS)];
+            mSavedNowPlayingViewSwitcherStatus = VIEW_SWITCHER_STATUS.values()[savedInstanceState.getInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_VIEW_SWITCHER_CURRENT_VIEW)];
+        }
+
+
         setContentView(R.layout.activity_main);
+
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
 
         if (findViewById(R.id.fragment_container) != null) {
-            if (savedInstanceState != null) {
-                return;
-            }
-
             Fragment fragment = new MyMusicTabsFragment();
 
             Bundle args = new Bundle();
@@ -114,13 +134,29 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
 
+        // enable back navigation
+        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        if (drawer != null) {
+            mDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(mDrawerToggle);
+            mDrawerToggle.syncState();
+        }
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            Log.v(TAG,"Nav viewer");
+            navigationView.setNavigationItemSelectedListener(this);
+            navigationView.setCheckedItem(0);
+        }
 
         mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
+        Log.v(TAG,"FAB: " + mFAB);
 
 
 
@@ -140,6 +176,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
@@ -151,14 +190,17 @@ public class MainActivity extends AppCompatActivity
             }
         } else {
             super.onBackPressed();
+
+            // enable navigation bar when backstack empty
+            if (fragmentManager.getBackStackEntryCount() == 0) {
+                mDrawerToggle.setDrawerIndicatorEnabled(true);
+            }
         }
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
+        return false;
     }
 
     @Override
@@ -166,7 +208,23 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                if (fragmentManager.getBackStackEntryCount() > 0) {
+                    onBackPressed();
+                } else {
+                    // back stack empty so enable navigation drawer
+
+                    mDrawerToggle.setDrawerIndicatorEnabled(true);
+
+                    if (mDrawerToggle.onOptionsItemSelected(item)) {
+                        return true;
+                    }
+                }
+        }
 
 
         return super.onOptionsItemSelected(item);
@@ -206,12 +264,11 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        Log.v(TAG,"Navdrawer item selected");
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
 
@@ -255,16 +312,43 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        Log.v(TAG,"onResume");
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
-            nowPlayingView.onResume();
+
 
             nowPlayingView.registerDragStatusReceiver(this);
+
+            /*
+             * Check if the activity got an extra in its intend to show the nowplayingview directly.
+             * If yes then pre set the dragoffset of the draggable helper.
+             */
+            Intent resumeIntent = getIntent();
+            if (resumeIntent != null && resumeIntent.getExtras() != null && resumeIntent.getExtras().getString(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW) != null &&
+                    resumeIntent.getExtras().getString(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW).equals(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW)) {
+                nowPlayingView.setDragOffset(0.0f);
+                getIntent().removeExtra(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW);
+            } else {
+                // set drag status
+                if (mSavedNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+                    nowPlayingView.setDragOffset(0.0f);
+                } else if (mSavedNowPlayingDragStatus == DRAG_STATUS.DRAGGED_DOWN) {
+                    nowPlayingView.setDragOffset(1.0f);
+                }
+                mSavedNowPlayingDragStatus = null;
+
+                // set view switcher status
+                if (mSavedNowPlayingViewSwitcherStatus != null) {
+                    nowPlayingView.setViewSwitcherStatus(mSavedNowPlayingViewSwitcherStatus);
+                    mNowPlayingViewSwitcherStatus = mSavedNowPlayingViewSwitcherStatus;
+                }
+                mSavedNowPlayingViewSwitcherStatus = null;
+            }
+            nowPlayingView.onResume();
         }
         ConnectionManager.reconnectLastServer();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
@@ -283,6 +367,16 @@ public class MainActivity extends AppCompatActivity
             // Disconnect from MPD server
             ConnectionManager.disconnectFromServer();
         }
+    }
+
+    protected void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        // save drag status of the nowplayingview
+        savedInstanceState.putInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_DRAG_STATUS, mNowPlayingDragStatus.ordinal());
+
+        // save the cover/playlist view status of the nowplayingview
+        savedInstanceState.putInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_VIEW_SWITCHER_CURRENT_VIEW, mNowPlayingViewSwitcherStatus.ordinal());
     }
 
     @Override
@@ -457,5 +551,89 @@ public class MainActivity extends AppCompatActivity
             mFAB.hide();
         }
         mFAB.setOnClickListener(listener);
+    }
+
+    @Override
+    public void setupToolbar(String title, boolean scrollingEnabled, boolean drawerIndicatorEnabled, boolean showImage) {
+        // set drawer state
+        mDrawerToggle.setDrawerIndicatorEnabled(drawerIndicatorEnabled);
+
+
+        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
+        View collapsingImageGradientTop = findViewById(R.id.collapsing_image_gradient_top);
+        View collapsingImageGradientBottom = findViewById(R.id.collapsing_image_gradient_bottom);
+        if (collapsingImage != null && collapsingImageGradientTop != null && collapsingImageGradientBottom != null) {
+            if (showImage) {
+                collapsingImage.setVisibility(View.VISIBLE);
+                collapsingImageGradientTop.setVisibility(View.VISIBLE);
+                collapsingImageGradientBottom.setVisibility(View.VISIBLE);
+            } else {
+                collapsingImage.setVisibility(View.GONE);
+                collapsingImageGradientTop.setVisibility(View.GONE);
+                collapsingImageGradientBottom.setVisibility(View.GONE);
+            }
+        }
+        // set scrolling behaviour
+        CollapsingToolbarLayout toolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+
+        // set title for both the activity and the collapsingToolbarlayout for both cases
+        // where and image is shown and not.
+        if (toolbar != null) {
+            toolbar.setTitle(title);
+
+            setTitle(title);
+
+
+            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+            AppBarLayout layout = (AppBarLayout) findViewById(R.id.appbar);
+            if (layout != null) {
+                layout.setExpanded(true, false);
+            }
+
+            if (scrollingEnabled) {
+                params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+            } else {
+                params.setScrollFlags(0);
+            }
+
+            if (showImage && collapsingImage != null) {
+                // Enable title of collapsingToolbarlayout for smooth transition
+                toolbar.setTitleEnabled(true);
+                setToolbarImage(getResources().getDrawable(R.drawable.cover_placeholder, null));
+                params.setScrollFlags(params.getScrollFlags() | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
+
+                // Reset the previously added padding again.
+                toolbar.setPadding(0, 0, 0, 0);
+            } else {
+                // Disable title for collapsingToolbarLayout and show normal title
+                toolbar.setTitleEnabled(false);
+                // Set the padding to match the statusbar height if a picture is shown.
+                toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+            }
+
+        }
+    }
+
+
+    /**
+     * Method to retrieve the height of the statusbar to compensate in non-transparent cases.
+     *
+     * @return The Dimension of the statusbar. Used to compensate the padding.
+     */
+    private int getStatusBarHeight() {
+        int resHeight = 0;
+        int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+        if (resId > 0) {
+            resHeight = getResources().getDimensionPixelSize(resId);
+        }
+        return resHeight;
+    }
+
+
+    public void setToolbarImage(Drawable drawable) {
+        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
+        if (collapsingImage != null) {
+            collapsingImage.setImageDrawable(drawable);
+        }
     }
 }

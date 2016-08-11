@@ -177,6 +177,7 @@ public class EditProfileFragment extends Fragment {
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);
+            mFABCallback.setupToolbar(getString(R.string.fragment_profile_title),false, false, false);
         }
     }
 

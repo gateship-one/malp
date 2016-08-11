@@ -22,4 +22,6 @@ import android.view.View;
 
 public interface FABFragmentCallback {
     void setupFAB(boolean active, View.OnClickListener listener);
+
+    void setupToolbar(String title, boolean scrollingEnabled, boolean drawerIndicatorEnabled, boolean showImage);
 }

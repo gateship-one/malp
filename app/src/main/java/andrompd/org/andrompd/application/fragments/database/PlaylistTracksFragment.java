@@ -48,7 +48,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
-public class PlaylistTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>{
+public class PlaylistTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>> {
     public final static String TAG = PlaylistTracksFragment.class.getSimpleName();
     public final static String EXTRA_PLAYLIST_NAME = "name";
 
@@ -71,7 +71,6 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
     private FABFragmentCallback mFABCallback = null;
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -81,7 +80,7 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
 
         Bundle args = getArguments();
-        if ( null != args ) {
+        if (null != args) {
             mPath = args.getString(EXTRA_PLAYLIST_NAME);
         }
 
@@ -107,8 +106,9 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
 
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(true,new FABOnClickListener());
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(true, new FABOnClickListener());
+            mFABCallback.setupToolbar(mPath, false, true, false);
         }
     }
 
@@ -217,7 +217,7 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
      */
     @Override
     public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
-        return new PlaylistTrackLoader(getActivity(),mPath);
+        return new PlaylistTrackLoader(getActivity(), mPath);
     }
 
     /**

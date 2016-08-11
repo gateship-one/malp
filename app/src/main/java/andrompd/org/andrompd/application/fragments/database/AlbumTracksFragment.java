@@ -111,8 +111,9 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         getLoaderManager().initLoader(0, getArguments(), this);
 
 
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(true,new FABOnClickListener());
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(true, new FABOnClickListener());
+            mFABCallback.setupToolbar(mAlbumName, false, false, false);
         }
     }
 
@@ -279,7 +280,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
 
         @Override
         public void onClick(View v) {
-            MPDQueryHandler.playArtistAlbum(mAlbumName,mArtistName);
+            MPDQueryHandler.playArtistAlbum(mAlbumName, mArtistName);
         }
     }
 

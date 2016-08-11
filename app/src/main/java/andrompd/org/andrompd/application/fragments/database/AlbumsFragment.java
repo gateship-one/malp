@@ -131,8 +131,12 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         if ( null != mFABCallback  ) {
             if ( null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupToolbar(mArtistName, true, false, false);
+
             } else {
                 mFABCallback.setupFAB(false, null);
+                mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
+
             }
         }
     }

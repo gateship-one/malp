@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    <string name="app_name">AndroMPD</string>
+    <string name="app_name">MALP</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -43,6 +43,9 @@
     <string name="menu_settings">Settings</string>
     <string name="menu_profiles">Profiles</string>
     <string name="menu_playlists">Playlists</string>
+
+    <string name="menu_albums">Albums</string>
+    <string name="menu_artists">Artists</string>
 
     <!-- seperator -->
     <string name="track_item_separator" translatable="false">" - "</string>
@@ -71,6 +74,7 @@
     <string name="popup_menu_action_saveplaylist">save playlist</string>
 
     <!-- edit profile fragment strings -->
+    <string name="fragment_profile_title">Edit profile</string>
     <string name="fragment_profile_profilename">Profile name:</string>
     <string name="fragment_profile_hostname">Hostname:</string>
     <string name="fragment_profile_password">Password:</string>

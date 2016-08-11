@@ -919,6 +919,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+
     /**
      * Set the viewswitcher of cover/playlist view to the requested state.
      *

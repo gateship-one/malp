@@ -105,6 +105,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);
+            mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
     }
 

@@ -42,7 +42,7 @@ import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
-public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDPlaylist>>, AbsListView.OnItemClickListener{
+public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDPlaylist>>, AbsListView.OnItemClickListener {
     public final static String TAG = SavedPlaylistsFragment.class.getSimpleName();
     /**
      * Adapter used by the ListView
@@ -91,8 +91,9 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
         super.onResume();
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(false,null);
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(false, null);
+            mFABCallback.setupToolbar(getString(R.string.menu_playlists), false, false, false);
         }
     }
 
@@ -146,7 +147,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
             return super.onContextItemSelected(item);
         }
 
-        MPDPlaylist playlist = (MPDPlaylist)mPlaylistAdapter.getItem(info.position);
+        MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(info.position);
         switch (item.getItemId()) {
             case R.id.action_add_playlist:
                 MPDQueryHandler.loadPlaylist(playlist.getName());
@@ -201,8 +202,8 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if ( null != mCallback ) {
-            MPDPlaylist playlist = (MPDPlaylist)mPlaylistAdapter.getItem(position);
+        if (null != mCallback) {
+            MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(position);
             mCallback.openPlaylist(playlist.getName());
         }
     }
