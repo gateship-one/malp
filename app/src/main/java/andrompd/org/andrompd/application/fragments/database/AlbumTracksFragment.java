@@ -248,6 +248,12 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
             case R.id.action_add_album:
                 enqueueAlbum();
                 return true;
+            case R.id.action_show_all_tracks:
+                mArtistName = "";
+                getLoaderManager().destroyLoader(0);
+
+                getLoaderManager().initLoader(0, getArguments(), this);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

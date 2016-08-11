@@ -32,6 +32,7 @@
 
     <string name="action_add_album">Add album</string>
     <string name="action_play_album">Play album</string>
+    <string name="action_show_all_tracks">Show all tracks</string>
 
     <string name="action_add_artist">Add artist</string>
     <string name="action_play_artist">Play artist</string>

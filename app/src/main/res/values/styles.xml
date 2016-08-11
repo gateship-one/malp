@@ -113,6 +113,7 @@
         <item name="preferenceTheme">@style/AppTheme.Preference</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:popupMenuStyle">@android:style/ThemeOverlay.Material.Light</item>
     </style>
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat">
@@ -120,7 +121,7 @@
     </style>
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat">
-        <item name="android:textColor">@color/colorTextDark</item>
+        <item name="android:textColor">?android:textColor</item>
     </style>
 
     <style name="AppTheme.NavDrawer" parent="ThemeOverlay.AppCompat.Dark">
