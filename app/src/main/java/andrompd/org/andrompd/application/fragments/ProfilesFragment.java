@@ -237,7 +237,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
             mCallback.removeProfile((MPDServerProfile)mAdapter.getItem(index));
             mAdapter.swapModel(null);
             // Prepare loader ( start new one or reuse old )
-            getLoaderManager().initLoader(0, getArguments(), this);
+            getLoaderManager().restartLoader(0, getArguments(), this);
         }
     }
 
