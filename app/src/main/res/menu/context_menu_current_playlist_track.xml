@@ -30,4 +30,14 @@
         android:orderInCategory="100"
         app:showAsAction="never"
         android:title="@string/context_menu_action_removetrack"/>
+    <item
+        android:id="@+id/action_show_artist"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_show_artist"/>
+    <item
+        android:id="@+id/action_show_album"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_show_album"/>
 </menu>

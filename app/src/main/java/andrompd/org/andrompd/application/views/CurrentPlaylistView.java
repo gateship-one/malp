@@ -28,6 +28,7 @@ import android.widget.ListView;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
 public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnItemClickListener {
     /**
@@ -83,6 +84,13 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
 
     public void onPause() {
         mPlaylistAdapter.onPause();
+    }
+
+    public MPDFileEntry getItem(int position) {
+        if (null != mPlaylistAdapter ) {
+            return (MPDFileEntry)mPlaylistAdapter.getItem(position);
+        }
+        return null;
     }
 
 }

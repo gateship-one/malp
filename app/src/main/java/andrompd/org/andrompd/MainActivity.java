@@ -63,6 +63,7 @@ import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -272,6 +273,12 @@ public class MainActivity extends AppCompatActivity
                 case R.id.action_remove_song:
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
                     return true;
+                case R.id.action_show_artist:
+                    onArtistSelected(((MPDFile)currentPlaylistView.getItem(info.position)).getTrackArtist());
+                    return true;
+                case R.id.action_show_album:
+                    onAlbumSelected(((MPDFile)currentPlaylistView.getItem(info.position)).getTrackAlbum(),"");
+                    return true;
             }
         }
         return false;
@@ -406,6 +413,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onAlbumSelected(String albumname, String artistname) {
         Log.v(TAG, "Album selected: " + albumname + ":" + artistname);
+
+        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP ) {
+            NowPlayingView nowPlayingView =(NowPlayingView)  findViewById(R.id.now_playing_layout);
+            if (nowPlayingView != null) {
+                View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+                coordinatorLayout.setVisibility(View.VISIBLE);
+                nowPlayingView.minimize();
+            }
+        }
+
         // Create fragment and give it an argument for the selected article
         AlbumTracksFragment newFragment = new AlbumTracksFragment();
         Bundle args = new Bundle();
@@ -430,6 +447,15 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onArtistSelected(String artistname) {
         Log.v(TAG, "Artist selected: " + artistname);
+
+        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP ) {
+            NowPlayingView nowPlayingView =(NowPlayingView)  findViewById(R.id.now_playing_layout);
+            if (nowPlayingView != null) {
+                View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+                coordinatorLayout.setVisibility(View.VISIBLE);
+                nowPlayingView.minimize();
+            }
+        }
         // Create fragment and give it an argument for the selected article
         AlbumsFragment newFragment = new AlbumsFragment();
         Bundle args = new Bundle();
