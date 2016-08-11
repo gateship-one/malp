@@ -55,6 +55,7 @@ public class GenericFileListItem extends LinearLayout {
         mLastModifiedView.setText(file.getLastModified());
 
 
+        LinearLayout textLayout = (LinearLayout)findViewById(R.id.item_text_layout);
 
         ImageView imageView = (ImageView) findViewById(R.id.item_icon);
         if ( showIcon ) {
@@ -75,6 +76,7 @@ public class GenericFileListItem extends LinearLayout {
                 DrawableCompat.setTint(icon, tintColor);
             }
             imageView.setImageDrawable(icon);
+            textLayout.setPadding(0,textLayout.getPaddingTop(),textLayout.getPaddingRight(),textLayout.getBottom());
         } else {
             imageView.setVisibility(GONE);
         }

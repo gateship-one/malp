@@ -28,8 +28,6 @@ import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 
 /**
@@ -69,6 +67,8 @@ public class TrackListViewItem extends LinearLayout {
         setAdditionalInformation(information);
         setDuration(duration);
 
+        LinearLayout textLayout = (LinearLayout)findViewById(R.id.item_track_text_layout);
+
         ImageView imageView = (ImageView) findViewById(R.id.item_icon);
         if ( showIcon ) {
             imageView.setVisibility(VISIBLE);
@@ -80,6 +80,7 @@ public class TrackListViewItem extends LinearLayout {
                 // tint the icon
                 DrawableCompat.setTint(icon, tintColor);
             }
+            textLayout.setPadding(0,textLayout.getPaddingTop(),textLayout.getPaddingRight(),textLayout.getBottom());
             imageView.setImageDrawable(icon);
         } else {
             imageView.setVisibility(GONE);

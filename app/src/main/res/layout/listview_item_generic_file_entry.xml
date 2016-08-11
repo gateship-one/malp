@@ -20,6 +20,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
+    android:paddingEnd="@dimen/material_screen_edge_spacing"
     android:minHeight="@dimen/material_list_item_height">
 
     <ImageView
@@ -34,9 +35,10 @@
         android:scaleType="center"/>
 
     <LinearLayout
+        android:id="@+id/item_text_layout"
         android:layout_width="wrap_content"
         android:layout_height="@dimen/material_list_item_height"
-        android:paddingStart="@dimen/material_standard_horizontal_spacing"
+        android:paddingStart="@dimen/material_screen_edge_spacing"
         android:layout_toEndOf="@+id/item_icon"
         android:gravity="center_vertical"
         android:orientation="vertical">
