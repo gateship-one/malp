@@ -18,13 +18,20 @@
 package andrompd.org.andrompd.mpdservice.handlers.responsehandler;
 
 
+import android.os.Bundle;
 import android.os.Message;
+import android.util.Log;
+
 import java.util.List;
+import java.util.Set;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
 public abstract class MPDResponseFileList extends MPDResponseHandler {
+    public static final String EXTRA_WINDOW_START = "windowstart";
+    public static final String EXTRA_WINDOW_END = "windowend";
+
     public MPDResponseFileList() {
 
     }
@@ -38,9 +45,13 @@ public abstract class MPDResponseFileList extends MPDResponseHandler {
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
 
+        Bundle args = msg.getData();
+        int windowStart = msg.getData().getInt(EXTRA_WINDOW_START);
+        int windowEnd = msg.getData().getInt(EXTRA_WINDOW_END);
+
         /* Call album response handler */
         List<MPDFileEntry> trackList = (List<MPDFileEntry>)msg.obj;
-        handleTracks(trackList);
+        handleTracks(trackList, windowStart, windowEnd);
     }
 
     /**
@@ -49,5 +60,5 @@ public abstract class MPDResponseFileList extends MPDResponseHandler {
      * This can be used for updating lists of adapters and views.
      * @param trackList List of MPDFile objects containing a list of mpds tracks response.
      */
-    abstract public void handleTracks(List<MPDFileEntry> fileList);
+    abstract public void handleTracks(List<MPDFileEntry> fileList, int windowstart, int windowend);
 }

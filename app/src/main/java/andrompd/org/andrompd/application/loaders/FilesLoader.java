@@ -26,7 +26,7 @@ public class FilesLoader extends Loader<List<MPDFileEntry>> {
 
     private class FilesResponseHandler extends MPDResponseFileList {
         @Override
-        public void handleTracks(List<MPDFileEntry> fileList) {
+        public void handleTracks(List<MPDFileEntry> fileList, int start, int end) {
             deliverResult(fileList);
         }
     }

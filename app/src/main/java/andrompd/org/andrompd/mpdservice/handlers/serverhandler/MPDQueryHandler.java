@@ -18,6 +18,7 @@
 package andrompd.org.andrompd.mpdservice.handlers.serverhandler;
 
 
+import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
@@ -171,6 +172,24 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST_WINDOW) {
+            int start = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START);
+            int end = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END);
+            responseHandler = mpdAction.getResponseHandler();
+            if (!(responseHandler instanceof MPDResponseFileList)) {
+                return;
+            }
+
+            List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylistWindow(start, end);
+            Log.v(TAG, "Received current playlist with " + trackList.size() + " tracks for window: " + start + ':' + end);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = trackList;
+            Bundle data = new Bundle();
+            data.putInt(MPDResponseFileList.EXTRA_WINDOW_START, start);
+            data.putInt(MPDResponseFileList.EXTRA_WINDOW_END, end);
+            responseMessage.setData(data);
+            responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST) {
             String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
             responseHandler = mpdAction.getResponseHandler();
@@ -295,7 +314,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_DIRECTORY) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
-            Log.v(TAG,"Add directory: " + path);
+            Log.v(TAG, "Add directory: " + path);
             mMPDConnection.addSong(path);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_DIRECTORY) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
@@ -431,6 +450,21 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             return;
         }
         action.setResponseHandler(responseHandler);
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getCurrentPlaylist(MPDResponseFileList responseHandler, int start, int end) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST_WINDOW);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        Log.v(TAG,"Current playlist window requested: " + start + ':' + end);
+        action.setResponseHandler(responseHandler);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START, start);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END, end);
         msg.obj = action;
 
         MPDQueryHandler.getHandler().sendMessage(msg);

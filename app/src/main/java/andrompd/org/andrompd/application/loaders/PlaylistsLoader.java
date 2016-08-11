@@ -47,7 +47,7 @@ public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
 
     private class PlaylistResponseHandler extends MPDResponseFileList {
         @Override
-        public void handleTracks(List<MPDFileEntry> fileList) {
+        public void handleTracks(List<MPDFileEntry> fileList, int start, int end) {
             if ( mAddHeader ) {
                 fileList.add(0, new MPDPlaylist(mContext.getString(R.string.create_new_playlist)));
             }

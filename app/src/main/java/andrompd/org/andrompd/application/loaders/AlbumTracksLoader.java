@@ -70,7 +70,7 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
      */
     private class TrackResponseHandler extends MPDResponseFileList {
         @Override
-        public void handleTracks(List<MPDFileEntry> trackList) {
+        public void handleTracks(List<MPDFileEntry> trackList, int start, int end) {
             deliverResult(trackList);
         }
     }

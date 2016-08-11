@@ -59,6 +59,10 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_GET_CURRENT_PLAYLIST = "playlistinfo";
 
+    public static final String MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(int start, int end) {
+        return "playlistinfo " + String.valueOf(start) + ':' + String.valueOf(end);
+    }
+
     public static String MPD_COMMAND_GET_SAVED_PLAYLIST(String playlistName) {
         return "listplaylistinfo \"" + playlistName + "\"";
     }

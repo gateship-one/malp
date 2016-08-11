@@ -922,6 +922,24 @@ public class MPDConnection {
     }
 
     /**
+     * Requests the current playlist of the server with a window
+     *
+     * @return List of MPDFile items with all tracks of the current playlist
+     */
+    public List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start,end));
+            try {
+            /* Parse the return */
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    /**
      * Requests the current playlist of the server
      *
      * @return List of MPDFile items with all tracks of the current playlist
