@@ -85,8 +85,17 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().initLoader(0, getArguments(), this);
         if (null != mFABCallback) {
-            mFABCallback.setupFAB(false, null);
-            mFABCallback.setupToolbar(getString(R.string.menu_files), false, false, false);
+            mFABCallback.setupFAB(true, new FABListener());
+            if (mPath.equals("")) {
+                mFABCallback.setupToolbar(getString(R.string.menu_files), false, true, false);
+            } else {
+                String[] pathSplit = mPath.split("/");
+                if ( pathSplit.length > 0 ) {
+                    mFABCallback.setupToolbar(pathSplit[pathSplit.length-1], false, false, false);
+                } else {
+                    mFABCallback.setupToolbar(mPath, false, false, false);
+                }
+            }
         }
     }
 
@@ -221,5 +230,13 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
 
     public interface FilesCallback {
         void openPath(String path);
+    }
+
+    private class FABListener implements View.OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            MPDQueryHandler.playDirectory(mPath);
+        }
     }
 }
