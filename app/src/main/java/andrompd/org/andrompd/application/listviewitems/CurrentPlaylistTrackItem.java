@@ -32,7 +32,7 @@ public class CurrentPlaylistTrackItem extends TrackListViewItem {
      * Constructor that already sets the values for each view.
      */
     public CurrentPlaylistTrackItem(Context context, String number, String title, String information, String duration) {
-        super(context, number, title, information, duration);
+        super(context, number, title, information, duration, false);
 
     }
 

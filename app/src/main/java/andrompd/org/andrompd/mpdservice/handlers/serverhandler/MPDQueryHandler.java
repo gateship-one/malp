@@ -280,6 +280,29 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
             int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
             mMPDConnection.removeIndex(index);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES) {
+            String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+
+            responseHandler = mpdAction.getResponseHandler();
+            if (!(responseHandler instanceof MPDResponseFileList)) {
+                return;
+            }
+
+            List<MPDFileEntry> fileList = mMPDConnection.getFiles(path);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = fileList;
+            responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_DIRECTORY) {
+            String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+            Log.v(TAG,"Add directory: " + path);
+            mMPDConnection.addSong(path);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_DIRECTORY) {
+            String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+
+            mMPDConnection.clearPlaylist();
+            mMPDConnection.addSong(path);
+            mMPDConnection.playSongIndex(0);
         }
     }
 
@@ -440,13 +463,14 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void startIdle() {
-        Log.v(TAG, "sending idling to MPDConnection");
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_START_IDLE);
+    public static void getFiles(MPDResponseFileList responseHandler, String path) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES);
         Message msg = Message.obtain();
         if (null == msg) {
             return;
         }
+        action.setResponseHandler(responseHandler);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, path);
 
         msg.obj = action;
 
@@ -519,6 +543,34 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         }
 
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void addDirectory(String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_DIRECTORY);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void playDirectory(String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_DIRECTORY);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, url);
 
         msg.obj = action;
 

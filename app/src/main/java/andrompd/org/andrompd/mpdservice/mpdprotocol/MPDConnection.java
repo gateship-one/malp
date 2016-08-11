@@ -939,6 +939,24 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Requests the files for a specific path with info
+     *
+     * @return List of MPDFile items with all tracks of the current playlist
+     */
+    public List<MPDFileEntry> getFiles(String path) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
+            try {
+            /* Parse the return */
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
 
     /**
      * Requests the currentstatus package from the mpd server.
@@ -1388,6 +1406,7 @@ public class MPDConnection {
             return false;
         }
     }
+
 
     private boolean readyRead() throws IOException {
         return (null != pReader) && pReader.ready();

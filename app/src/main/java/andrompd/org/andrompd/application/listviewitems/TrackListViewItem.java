@@ -19,11 +19,17 @@ package andrompd.org.andrompd.application.listviewitems;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.LayoutInflater;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 
 /**
@@ -44,7 +50,7 @@ public class TrackListViewItem extends LinearLayout {
      * @param information Additional bottom line information of this item (e.g. Artistname - Albumname)
      * @param duration String of formatted duration of this track (eg.: 3:21 )
      */
-    public TrackListViewItem(Context context, String number, String title, String information, String duration) {
+    public TrackListViewItem(Context context, String number, String title, String information, String duration, boolean showIcon) {
         super(context);
 
         // Inflate the view with the given layout
@@ -62,6 +68,22 @@ public class TrackListViewItem extends LinearLayout {
         setTrackNumber(number);
         setAdditionalInformation(information);
         setDuration(duration);
+
+        ImageView imageView = (ImageView) findViewById(R.id.item_icon);
+        if ( showIcon ) {
+            imageView.setVisibility(VISIBLE);
+            Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
+
+            if (icon != null) {
+                // get tint color
+                int tintColor = ThemeUtils.getThemeColor(context, android.R.attr.textColor);
+                // tint the icon
+                DrawableCompat.setTint(icon, tintColor);
+            }
+            imageView.setImageDrawable(icon);
+        } else {
+            imageView.setVisibility(GONE);
+        }
     }
 
     /**

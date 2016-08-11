@@ -40,9 +40,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
-import java.util.List;
 
 import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
@@ -54,6 +52,7 @@ import andrompd.org.andrompd.application.fragments.SaveDialog;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
+import andrompd.org.andrompd.application.fragments.database.FilesFragment;
 import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
 import andrompd.org.andrompd.application.fragments.database.PlaylistTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.SavedPlaylistsFragment;
@@ -71,7 +70,7 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, SavedPlaylistsFragment.SavedPlaylistsCallback,
-        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener,
+        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener, FilesFragment.FilesCallback,
         FABFragmentCallback{
 
 
@@ -292,6 +291,13 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_saved_playlists) {
             fragment = new SavedPlaylistsFragment();
             fragmentTag = SavedPlaylistsFragment.TAG;
+        } else if (id == R.id.nav_files) {
+            fragment = new FilesFragment();
+            fragmentTag = FilesFragment.TAG;
+
+            Bundle args = new Bundle();
+            args.putString(FilesFragment.EXTRA_FILENAME,"");
+
         } else if (id == R.id.nav_profiles) {
             fragment = new ProfilesFragment();
             fragmentTag = ProfilesFragment.TAG;
@@ -635,5 +641,27 @@ public class MainActivity extends AppCompatActivity
         if (collapsingImage != null) {
             collapsingImage.setImageDrawable(drawable);
         }
+    }
+
+    @Override
+    public void openPath(String path) {
+        // Create fragment and give it an argument for the selected directory
+        FilesFragment newFragment = new FilesFragment();
+        Bundle args = new Bundle();
+        args.putString(FilesFragment.EXTRA_FILENAME, path);
+
+        newFragment.setArguments(args);
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        transaction.addToBackStack("FilesFragment");
+        transaction.replace(R.id.fragment_container, newFragment);
+
+        // Commit the transaction
+        transaction.commit();
+
     }
 }

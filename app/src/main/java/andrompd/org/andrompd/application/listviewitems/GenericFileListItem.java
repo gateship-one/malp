@@ -42,8 +42,14 @@ public class GenericFileListItem extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.listview_item_generic_file_entry, this, true);
 
+        String path = file.getPath();
+        String[] pathSplit = path.split("/");
+        if ( pathSplit.length > 0 ) {
+            path = pathSplit[pathSplit.length - 1];
+        }
+
         mNameView = (TextView) findViewById(R.id.item_filename);
-        mNameView.setText(file.getPath());
+        mNameView.setText(path);
 
         mLastModifiedView = (TextView) findViewById(R.id.item_last_modified);
         mLastModifiedView.setText(file.getLastModified());

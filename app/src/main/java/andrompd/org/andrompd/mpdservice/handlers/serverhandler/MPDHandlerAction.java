@@ -43,11 +43,14 @@ public class MPDHandlerAction {
         ACTION_GET_CURRENT_PLAYLIST,
         ACTION_GET_SAVED_PLAYLIST,
         ACTION_GET_SAVED_PLAYLISTS,
+        ACTION_GET_FILES,
         ACTION_ADD_ARTIST_ALBUM,
         ACTION_ADD_ARTIST,
         ACTION_ADD_SONG,
+        ACTION_ADD_DIRECTORY,
         ACTION_PLAY_ARTIST_ALBUM,
         ACTION_PLAY_ARTIST,
+        ACTION_PLAY_DIRECTORY,
         ACTION_PLAY_SONG,
         ACTION_PLAY_SONG_NEXT,
         ACTION_START_IDLE,
@@ -86,6 +89,7 @@ public class MPDHandlerAction {
         EXTRA_ALBUM_NAME,
         EXTRA_PLAYLIST_NAME,
         EXTRA_SONG_URL,
+        EXTRA_PATH,
     }
 
     /**

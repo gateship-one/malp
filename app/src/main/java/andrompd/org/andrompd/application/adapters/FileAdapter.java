@@ -82,7 +82,7 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             // Check if reusable object is available
 
             // If not create a new Listitem
-            convertView = new TrackListViewItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
+            convertView = new TrackListViewItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration,mShowIcons);
 
 
             return convertView;
@@ -93,6 +93,6 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
             return convertView;
         }
-        return new TrackListViewItem(mContext, "", "", "", "");
+        return new TrackListViewItem(mContext, "", "", "", "",mShowIcons);
     }
 }

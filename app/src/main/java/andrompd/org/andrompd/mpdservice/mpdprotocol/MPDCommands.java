@@ -63,6 +63,10 @@ public class MPDCommands {
         return "listplaylistinfo \"" + playlistName + "\"";
     }
 
+    public static String MPD_COMMAND_GET_FILES_INFO(String path) {
+        return "lsinfo \"" + path + "\"";
+    }
+
     public static String MPD_COMMAND_SAVE_PLAYLIST(String playlistName) {
         return "save \"" + playlistName + "\"";
     }
