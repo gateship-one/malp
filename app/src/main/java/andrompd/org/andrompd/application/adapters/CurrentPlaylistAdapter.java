@@ -103,11 +103,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
     @Override
     public Object getItem(int position) {
-        if (null == mPlaylist) {
-            return 0;
-        } else {
-            return mPlaylist.get(position);
-        }
+        return getTrack(position);
 
     }
 
