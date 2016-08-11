@@ -17,6 +17,9 @@
 
 <resources>
     <string name="app_name">MALP</string>
+    <string name="app_name_nice">M.A.L.P.</string>
+    <string name="authors" translatable="false">Hendrik Borghorst</string>
+
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -47,6 +50,7 @@
     <string name="menu_profiles">Profiles</string>
     <string name="menu_playlists">Playlists</string>
     <string name="menu_files">Files</string>
+    <string name="menu_app_settings">App settings</string>
 
     <string name="menu_albums">Albums</string>
     <string name="menu_artists">Artists</string>
@@ -95,4 +99,34 @@
     <!-- dialog default names  -->
     <string name="default_playlist_title">New Playlist</string>
     <string name="create_new_playlist">Create new playlist</string>
+
+    <string name="preference_launch_about">About</string>
+
+    <string name="preference_theme_title">Theme</string>
+    <string name="preference_theme_summary">Select a different design for the application.</string>
+    <string name="preference_theme_message">Select a theme</string>
+
+    <string name="preference_theme_item_indigo">Indigo</string>
+    <string name="preference_theme_item_orange">Orange</string>
+    <string name="preference_theme_item_deep_orange">Deep Orange</string>
+    <string name="preference_theme_item_blue">Blue</string>
+    <string name="preference_theme_item_dark_grey">Dark Grey</string>
+    <string name="preference_theme_item_brown">Brown</string>
+    <string name="preference_theme_item_light_green">Light Green</string>
+
+    <string-array name="preference_odyssey_styles">
+        <item>@string/preference_theme_item_indigo</item>
+        <item>@string/preference_theme_item_orange</item>
+        <item>@string/preference_theme_item_deep_orange</item>
+        <item>@string/preference_theme_item_blue</item>
+        <item>@string/preference_theme_item_dark_grey</item>
+        <item>@string/preference_theme_item_brown</item>
+        <item>@string/preference_theme_item_light_green</item>
+    </string-array>
+
+    <!-- About activity -->
+    <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>
+    <string name="license_text">This application is licensed under the GPLv3 license.\nMaterial icons are licensed under the CC-BY license by Google.</string>
+    <string name="sources_text">The source code is available on GitHub:\nhttps://github.com/djselbeck/AndroMPD</string>
+    <string name="activity_about_version">Version: </string>
 </resources>

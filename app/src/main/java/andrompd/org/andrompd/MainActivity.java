@@ -18,8 +18,10 @@
 package andrompd.org.andrompd;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -49,6 +51,7 @@ import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.fragments.EditProfileFragment;
 import andrompd.org.andrompd.application.fragments.ProfilesFragment;
 import andrompd.org.andrompd.application.fragments.SaveDialog;
+import andrompd.org.andrompd.application.fragments.SettingsFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
@@ -67,7 +70,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, SavedPlaylistsFragment.SavedPlaylistsCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener, FilesFragment.FilesCallback,
-        FABFragmentCallback{
+        FABFragmentCallback {
 
 
     private static final String TAG = "MainActivity";
@@ -100,6 +103,34 @@ public class MainActivity extends AppCompatActivity
         if (savedInstanceState != null) {
             mSavedNowPlayingDragStatus = DRAG_STATUS.values()[savedInstanceState.getInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_DRAG_STATUS)];
             mSavedNowPlayingViewSwitcherStatus = VIEW_SWITCHER_STATUS.values()[savedInstanceState.getInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_VIEW_SWITCHER_CURRENT_VIEW)];
+        }
+
+        // Read theme preference
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String themePref = sharedPref.getString("pref_theme", "indigo");
+
+        switch (themePref) {
+            case "indigo":
+                setTheme(R.style.AppTheme_indigo);
+                break;
+            case "orange":
+                setTheme(R.style.AppTheme_orange);
+                break;
+            case "deeporange":
+                setTheme(R.style.AppTheme_deepOrange);
+                break;
+            case "blue":
+                setTheme(R.style.AppTheme_blue);
+                break;
+            case "darkgrey":
+                setTheme(R.style.AppTheme_darkGrey);
+                break;
+            case "brown":
+                setTheme(R.style.AppTheme_brown);
+                break;
+            case "lightgreen":
+                setTheme(R.style.AppTheme_lightGreen);
+                break;
         }
 
 
@@ -144,9 +175,7 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-
-        mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
-
+        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
 
 
         mProfileManager = new MPDProfileManager(getApplicationContext());
@@ -253,7 +282,7 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.v(TAG,"Navdrawer item selected");
+        Log.v(TAG, "Navdrawer item selected");
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
 
@@ -282,11 +311,14 @@ public class MainActivity extends AppCompatActivity
             fragmentTag = FilesFragment.TAG;
 
             Bundle args = new Bundle();
-            args.putString(FilesFragment.EXTRA_FILENAME,"");
+            args.putString(FilesFragment.EXTRA_FILENAME, "");
 
         } else if (id == R.id.nav_profiles) {
             fragment = new ProfilesFragment();
             fragmentTag = ProfilesFragment.TAG;
+        } else if (id == R.id.nav_app_settings) {
+            fragment = new SettingsFragment();
+            fragmentTag = SettingsFragment.TAG;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -295,7 +327,7 @@ public class MainActivity extends AppCompatActivity
 
         // Do the actual fragment transaction
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.replace(R.id.fragment_container, fragment,fragmentTag);
+        transaction.replace(R.id.fragment_container, fragment, fragmentTag);
         transaction.commit();
 
         return true;
@@ -304,7 +336,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG,"onResume");
+        Log.v(TAG, "onResume");
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
 
@@ -388,7 +420,7 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment,AlbumTracksFragment.TAG);
+        transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
         // Commit the transaction
@@ -412,7 +444,7 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment,AlbumsFragment.TAG);
+        transaction.replace(R.id.fragment_container, newFragment, AlbumsFragment.TAG);
         transaction.addToBackStack("ArtistAlbumsFragment");
 
         // Commit the transaction
@@ -470,7 +502,7 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        transaction.replace(R.id.fragment_container, newFragment,EditProfileFragment.TAG);
+        transaction.replace(R.id.fragment_container, newFragment, EditProfileFragment.TAG);
         transaction.addToBackStack("EditProfileFragment");
 
 
@@ -533,8 +565,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void setupFAB(boolean active, View.OnClickListener listener) {
-        mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
-        if ( null == mFAB) {
+        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
+        if (null == mFAB) {
             return;
         }
         if (active) {
@@ -549,8 +581,6 @@ public class MainActivity extends AppCompatActivity
     public void setupToolbar(String title, boolean scrollingEnabled, boolean drawerIndicatorEnabled, boolean showImage) {
         // set drawer state
         mDrawerToggle.setDrawerIndicatorEnabled(drawerIndicatorEnabled);
-        mDrawerToggle.syncState();
-
 
         ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
         View collapsingImageGradientTop = findViewById(R.id.collapsing_image_gradient_top);

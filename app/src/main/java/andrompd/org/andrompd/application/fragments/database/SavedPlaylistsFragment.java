@@ -95,7 +95,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
         getLoaderManager().initLoader(0, getArguments(), this);
         if (null != mFABCallback) {
             mFABCallback.setupFAB(false, null);
-            mFABCallback.setupToolbar(getString(R.string.menu_playlists), false, false, false);
+            mFABCallback.setupToolbar(getString(R.string.menu_playlists), false, true, false);
         }
     }
 

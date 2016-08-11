@@ -41,6 +41,11 @@
                 android:id="@+id/nav_profiles"
                 android:icon="@drawable/ic_settings_profiles_24dp"
                 android:title="@string/menu_profiles" />
+            <item
+                android:checkable="true"
+                android:id="@+id/nav_app_settings"
+                android:icon="@drawable/ic_settings_24dp"
+                android:title="@string/menu_app_settings" />
         </menu>
     </item>
 
