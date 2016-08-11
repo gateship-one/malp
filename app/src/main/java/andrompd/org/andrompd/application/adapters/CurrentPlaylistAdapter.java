@@ -144,7 +144,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
             notifyDataSetChanged();
             if ( playing ) {
-                Log.v(TAG,"Move listview to: " + index);
                 mListView.setSelection(index);
             }
         }
@@ -153,7 +152,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
     private class PlaylistStateListener extends MPDStatusChangeHandler {
         protected void onNewStatusReady(MPDCurrentStatus status) {
-            Log.v(TAG, "Received new status: " + status + " last status: " + mLastStatus);
             if ((null == mLastStatus) || (mLastStatus.getPlaylistVersion() != status.getPlaylistVersion())) {
                 // The playlist has changed and we need to fetch a new one.
                 MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler);

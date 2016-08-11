@@ -285,13 +285,11 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     private void distributeNewStatus(MPDCurrentStatus status) {
         //Log.v(TAG, "Distribute status: " + status.printStatus());
         for (MPDStatusChangeHandler handler : mStatusListeners) {
-            Log.v(TAG, "Distribute new status to: " + handler);
             handler.newMPDStatusReady(status);
         }
     }
 
     private void distributeNewTrack(MPDFile track) {
-        Log.v(TAG, "Distribute track: " + track);
         for (MPDStatusChangeHandler handler : mStatusListeners) {
             handler.newMPDTrackReady(track);
         }
