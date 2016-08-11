@@ -27,15 +27,18 @@
             android:id="@+id/nav_saved_playlists"
             android:icon="@drawable/ic_queue_music_24dp"
             android:title="@string/menu_playlists" />
-    </group>
 
-    <item android:title="@string/menu_settings">
+    </group>
+    <item android:title="@string/menu_settings"
+        android:checkable="true">
         <menu>
             <item
+                android:checkable="true"
                 android:id="@+id/nav_profiles"
                 android:icon="@drawable/ic_settings_profiles_24dp"
                 android:title="@string/menu_profiles" />
         </menu>
     </item>
+
 
 </menu>

@@ -20,6 +20,10 @@ package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
 
+    public MPDDirectory(String path) {
+        super(path);
+    }
+
     @Override
     public String getSectionTitle() {
         return "";

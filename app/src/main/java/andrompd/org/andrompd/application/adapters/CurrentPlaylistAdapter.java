@@ -29,20 +29,20 @@ import java.util.List;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.listviewitems.CurrentPlaylistTrackItem;
-import andrompd.org.andrompd.application.listviewitems.TrackListViewItem;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
 public class CurrentPlaylistAdapter extends BaseAdapter {
     private static final String TAG = "CurrentPLAdapter";
     private Context mContext;
 
-    private List<MPDFile> mPlaylist = null;
+    private List<MPDFileEntry> mPlaylist = null;
 
 
     private MPDCurrentStatus mLastStatus = null;
@@ -103,7 +103,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
-        MPDFile track = mPlaylist.get(position);
+        MPDFile track = (MPDFile)mPlaylist.get(position);
 
         // Get track title
         String trackTitle = track.getTrackTitle();
@@ -140,7 +140,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
     private void setPlaying(int index, boolean playing) {
         if ((index >= 0) && (null != mPlaylist) && (index < mPlaylist.size())) {
-            mPlaylist.get(index).setPlaying(playing);
+            ((MPDFile)mPlaylist.get(index)).setPlaying(playing);
 
             notifyDataSetChanged();
             if ( playing ) {
@@ -200,10 +200,10 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         }
     }
 
-    private class PlaylistFetchResponseHandler extends MPDResponseTrackList {
+    private class PlaylistFetchResponseHandler extends MPDResponseFileList {
 
         @Override
-        public void handleTracks(List<MPDFile> trackList) {
+        public void handleTracks(List<MPDFileEntry> trackList) {
             Log.v(TAG, "Received new playlist with size: " + trackList.size());
             // Save the new playlist
             mPlaylist = trackList;

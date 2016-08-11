@@ -18,28 +18,18 @@
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 
-public class MPDPlaylist implements MPDGenericItem {
+public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
 
-    private String mName;
 
-    // FIXME to some date format of java
-    private String mLastModified;
 
-    public MPDPlaylist(String name, String lastModified) {
-        mName = name;
-        mLastModified = lastModified;
+    public MPDPlaylist(String path) {
+        super(path);
     }
 
-    public String getName() {
-        return mName;
-    }
 
-    public String getLastModified() {
-        return mLastModified;
-    }
 
     @Override
     public String getSectionTitle() {
-        return mName;
+        return mPath;
     }
 }

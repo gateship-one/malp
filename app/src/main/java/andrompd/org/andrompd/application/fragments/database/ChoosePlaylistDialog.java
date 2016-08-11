@@ -34,13 +34,14 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.adapters.SavedPlaylistsAdapter;
+import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.OnSaveDialogListener;
 import andrompd.org.andrompd.application.fragments.SaveDialog;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
-public class ChoosePlaylistDialog extends DialogFragment implements LoaderManager.LoaderCallbacks<List<MPDPlaylist>> {
+public class ChoosePlaylistDialog extends DialogFragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>> {
 
     /**
      * Listener to save the bookmark
@@ -50,7 +51,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
     /**
      * Adapter used for the ListView
      */
-    private SavedPlaylistsAdapter mPlaylistsListViewAdapter;
+    private FileAdapter mPlaylistsListViewAdapter;
 
     @Override
     public void onAttach(Activity activity) {
@@ -73,7 +74,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
      * @return Return a new Loader instance that is ready to start loading.
      */
     @Override
-    public Loader<List<MPDPlaylist>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
         return new PlaylistsLoader(getActivity(),true);
     }
 
@@ -84,7 +85,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
      * @param data   Data of the loader
      */
     @Override
-    public void onLoadFinished(Loader<List<MPDPlaylist>> loader, List<MPDPlaylist> data) {
+    public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mPlaylistsListViewAdapter.swapModel(data);
     }
 
@@ -94,7 +95,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
      * @param loader Loader that was resetted.
      */
     @Override
-    public void onLoaderReset(Loader<List<MPDPlaylist>> loader) {
+    public void onLoaderReset(Loader<List<MPDFileEntry>> loader) {
         mPlaylistsListViewAdapter.swapModel(null);
     }
 
@@ -107,7 +108,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        mPlaylistsListViewAdapter = new SavedPlaylistsAdapter(getActivity());
+        mPlaylistsListViewAdapter = new FileAdapter(getActivity(), false);
 
         builder.setTitle(getString(R.string.dialog_choose_playlist)).setAdapter(mPlaylistsListViewAdapter, new DialogInterface.OnClickListener() {
             @Override
@@ -123,7 +124,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
                 } else {
                     // override existing bookmark
                     MPDPlaylist playlist = (MPDPlaylist) mPlaylistsListViewAdapter.getItem(which);
-                    String objectTitle = playlist.getName();
+                    String objectTitle = playlist.getPath();
                     mSaveCallback.onSaveObject(objectTitle, SaveDialog.OBJECTTYPE.PLAYLIST);
                 }
             }

@@ -39,9 +39,7 @@ import android.widget.ListView;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.adapters.ProfileAdapter;
-import andrompd.org.andrompd.application.adapters.TracksAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.loaders.ProfilesLoader;

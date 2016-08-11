@@ -25,21 +25,17 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponsePlaylistList;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
 public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
     private static final String TAG = "MPDQueryHandler";
@@ -141,11 +137,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUM_TRACKS) {
             String albumName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
             responseHandler = mpdAction.getResponseHandler();
-            if (!(responseHandler instanceof MPDResponseTrackList) || (null == albumName)) {
+            if (!(responseHandler instanceof MPDResponseFileList) || (null == albumName)) {
                 return;
             }
 
-            List<MPDFile> trackList = mMPDConnection.getAlbumTracks(albumName);
+            List<MPDFileEntry> trackList = mMPDConnection.getAlbumTracks(albumName);
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
@@ -154,22 +150,22 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
             String albumName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
             responseHandler = mpdAction.getResponseHandler();
-            if (!(responseHandler instanceof MPDResponseTrackList) || (null == albumName) || (null == artistName)) {
+            if (!(responseHandler instanceof MPDResponseFileList) || (null == albumName) || (null == artistName)) {
                 return;
             }
 
-            List<MPDFile> trackList = mMPDConnection.getArtistAlbumTracks(albumName, artistName);
+            List<MPDFileEntry> trackList = mMPDConnection.getArtistAlbumTracks(albumName, artistName);
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST) {
             responseHandler = mpdAction.getResponseHandler();
-            if (!(responseHandler instanceof MPDResponseTrackList)) {
+            if (!(responseHandler instanceof MPDResponseFileList)) {
                 return;
             }
 
-            List<MPDFile> trackList = mMPDConnection.getCurrentPlaylist();
+            List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylist();
             Log.v(TAG, "Received current playlist with " + trackList.size() + " tracks");
 
             Message responseMessage = this.obtainMessage();
@@ -178,22 +174,22 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST) {
             String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
             responseHandler = mpdAction.getResponseHandler();
-            if (!(responseHandler instanceof MPDResponseTrackList)) {
+            if (!(responseHandler instanceof MPDResponseFileList)) {
                 return;
             }
 
-            List<MPDFile> trackList = mMPDConnection.getSavedPlaylist(playlistName);
+            List<MPDFileEntry> trackList = mMPDConnection.getSavedPlaylist(playlistName);
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLISTS) {
             responseHandler = mpdAction.getResponseHandler();
-            if (!(responseHandler instanceof MPDResponsePlaylistList)) {
+            if (!(responseHandler instanceof MPDResponseFileList)) {
                 return;
             }
 
-            List<MPDPlaylist> playlistList = mMPDConnection.getPlaylists();
+            List<MPDFileEntry> playlistList = mMPDConnection.getPlaylists();
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = playlistList;
@@ -378,7 +374,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getAlbumTracks(MPDResponseTrackList responseHandler, String albumName) {
+    public static void getAlbumTracks(MPDResponseFileList responseHandler, String albumName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUM_TRACKS);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -391,7 +387,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getArtistAlbumTracks(MPDResponseTrackList responseHandler, String albumName, String artistName) {
+    public static void getArtistAlbumTracks(MPDResponseFileList responseHandler, String albumName, String artistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUM_TRACKS);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -405,7 +401,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getCurrentPlaylist(MPDResponseTrackList responseHandler) {
+    public static void getCurrentPlaylist(MPDResponseFileList responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -417,7 +413,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getSavedPlaylists(MPDResponsePlaylistList responseHandler) {
+    public static void getSavedPlaylists(MPDResponseFileList responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLISTS);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -430,7 +426,7 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getSavedPlaylist(MPDResponseTrackList responseHandler, String playlistName) {
+    public static void getSavedPlaylist(MPDResponseFileList responseHandler, String playlistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST);
         Message msg = Message.obtain();
         if (null == msg) {

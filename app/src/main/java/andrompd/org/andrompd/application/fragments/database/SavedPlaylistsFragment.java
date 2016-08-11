@@ -33,21 +33,23 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import java.io.File;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.adapters.SavedPlaylistsAdapter;
+import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
-public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDPlaylist>>, AbsListView.OnItemClickListener {
+public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AbsListView.OnItemClickListener {
     public final static String TAG = SavedPlaylistsFragment.class.getSimpleName();
     /**
      * Adapter used by the ListView
      */
-    private SavedPlaylistsAdapter mPlaylistAdapter;
+    private FileAdapter mPlaylistAdapter;
 
     /**
      * Main ListView of this fragment
@@ -72,7 +74,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
 
 
         // Create the needed adapter for the ListView
-        mPlaylistAdapter = new SavedPlaylistsAdapter(getActivity());
+        mPlaylistAdapter = new FileAdapter(getActivity(), false);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mPlaylistAdapter);
@@ -150,16 +152,16 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
         MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(info.position);
         switch (item.getItemId()) {
             case R.id.action_add_playlist:
-                MPDQueryHandler.loadPlaylist(playlist.getName());
+                MPDQueryHandler.loadPlaylist(playlist.getPath());
                 return true;
             case R.id.action_remove_playlist:
-                MPDQueryHandler.removePlaylist(playlist.getName());
+                MPDQueryHandler.removePlaylist(playlist.getPath());
                 mPlaylistAdapter.swapModel(null);
                 getLoaderManager().destroyLoader(0);
                 getLoaderManager().initLoader(0, getArguments(), this);
                 return true;
             case R.id.action_play_playlist:
-                MPDQueryHandler.playPlaylist(playlist.getName());
+                MPDQueryHandler.playPlaylist(playlist.getPath());
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -174,7 +176,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
      * @return Newly created loader
      */
     @Override
-    public Loader<List<MPDPlaylist>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
         return new PlaylistsLoader(getActivity(), false);
     }
 
@@ -185,7 +187,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
      * @param data   Data that was retrieved by the laoder
      */
     @Override
-    public void onLoadFinished(Loader<List<MPDPlaylist>> loader, List<MPDPlaylist> data) {
+    public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mPlaylistAdapter.swapModel(data);
     }
 
@@ -195,7 +197,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
      * @param loader The loader that gets cleared.
      */
     @Override
-    public void onLoaderReset(Loader<List<MPDPlaylist>> loader) {
+    public void onLoaderReset(Loader<List<MPDFileEntry>> loader) {
         // Clear the model data of the used adapter
         mPlaylistAdapter.swapModel(null);
     }
@@ -204,7 +206,7 @@ public class SavedPlaylistsFragment extends Fragment implements LoaderManager.Lo
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (null != mCallback) {
             MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(position);
-            mCallback.openPlaylist(playlist.getName());
+            mCallback.openPlaylist(playlist.getPath());
         }
     }
 

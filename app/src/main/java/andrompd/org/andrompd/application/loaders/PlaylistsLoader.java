@@ -24,12 +24,13 @@ import android.support.v4.content.Loader;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponsePlaylistList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 
-public class PlaylistsLoader extends Loader<List<MPDPlaylist>> {
+public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
 
     private PlaylistResponseHandler mPlaylistResponseHandler;
 
@@ -44,13 +45,13 @@ public class PlaylistsLoader extends Loader<List<MPDPlaylist>> {
     }
 
 
-    private class PlaylistResponseHandler extends MPDResponsePlaylistList {
+    private class PlaylistResponseHandler extends MPDResponseFileList {
         @Override
-        public void handleAlbums(List<MPDPlaylist> playlistList) {
+        public void handleTracks(List<MPDFileEntry> fileList) {
             if ( mAddHeader ) {
-                playlistList.add(0, new MPDPlaylist(mContext.getString(R.string.create_new_playlist), ""));
+                fileList.add(0, new MPDPlaylist(mContext.getString(R.string.create_new_playlist)));
             }
-            deliverResult(playlistList);
+            deliverResult(fileList);
         }
     }
 

@@ -17,8 +17,29 @@
 
 package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
-/**
- * Created by hendrik on 16.07.16.
- */
-public class MPDFileEntry {
+public abstract class MPDFileEntry implements MPDGenericItem {
+    protected String mPath;
+
+    // FIXME to some date format of java
+    protected String mLastModified;
+
+    protected MPDFileEntry(String path) {
+        mPath = path;
+    }
+
+    public void setPath(String path) {
+        mPath = path;
+    }
+
+    public String getPath() {
+        return mPath;
+    }
+
+    public void setLastModified(String lastModified) {
+        mLastModified = lastModified;
+    }
+
+    public String getLastModified() {
+        return mLastModified;
+    }
 }

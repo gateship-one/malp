@@ -20,8 +20,7 @@ package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
 
 public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     private String pTrackTitle;
-    private String pFileName;
-    private String pFileURL;
+
 
     private String pTrackArtist;
     private String pTrackAlbum;
@@ -45,10 +44,9 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
      * Create empty MPDFile (track). Fill it with setter methods during
      * parsing of mpds output.
      */
-    public MPDFile() {
+    public MPDFile(String path) {
+        super(path);
         pTrackTitle = "";
-        pFileName = "";
-        pFileURL = "";
 
         pTrackArtist = "";
         pTrackAlbum = "";
@@ -71,21 +69,6 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
         this.pTrackTitle = pTrackTitle;
     }
 
-    public String getFileName() {
-        return pFileName;
-    }
-
-    public void setFileName(String pFileName) {
-        this.pFileName = pFileName;
-    }
-
-    public String getFileURL() {
-        return pFileURL;
-    }
-
-    public void setFileURL(String pFileURL) {
-        this.pFileURL = pFileURL;
-    }
 
     public String getTrackArtist() {
         return pTrackArtist;
@@ -205,7 +188,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
 
     @Override
     public String getSectionTitle() {
-        return pTrackTitle.equals("") ? pFileName : pTrackTitle;
+        return pTrackTitle.equals("") ? mPath : pTrackTitle;
     }
 
     public void setPlaying(boolean playing) {

@@ -26,18 +26,18 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.Lock;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 
@@ -161,72 +161,72 @@ public class MPDConnection {
      */
     public void connectToServer() throws IOException {
         /* If a socket is already open, close it and destroy it. */
-            if ((null != pSocket) && (pSocket.isConnected())) {
-                disconnectFromServer();
-            }
+        if ((null != pSocket) && (pSocket.isConnected())) {
+            disconnectFromServer();
+        }
 
-            if ((null == pHostname) || pHostname.equals("")) {
-                return;
-            }
-            pMPDConnectionIdle = false;
-            pMPDConnectionReady = false;
+        if ((null == pHostname) || pHostname.equals("")) {
+            return;
+        }
+        pMPDConnectionIdle = false;
+        pMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
-            pSocket = new Socket();
-            pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
+        pSocket = new Socket();
+        pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
 
         /* Check if the socket is connected */
-            if (pSocket.isConnected()) {
-                Log.v(TAG, "MPD server is connected");
+        if (pSocket.isConnected()) {
+            Log.v(TAG, "MPD server is connected");
             /* Try reading from the stream */
 
             /* Create the reader used for reading from the socket. */
-                if (pReader == null) {
-                    pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
-                }
+            if (pReader == null) {
+                pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
+            }
 
             /* Create the writer used for writing to the socket */
-                if (pWriter == null) {
-                    pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
-                }
+            if (pWriter == null) {
+                pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
+            }
 
-                waitForResponse();
+            waitForResponse();
 
             /* If connected try to get MPDs version */
-                String readString = null;
-                while (readyRead()) {
-                    readString = pReader.readLine();
-                    Log.v(TAG, "Read string: " + readString);
+            String readString = null;
+            while (readyRead()) {
+                readString = pReader.readLine();
+                Log.v(TAG, "Read string: " + readString);
                 /* Look out for the greeting message */
-                    if (readString.startsWith("OK MPD ")) {
-                        pVersionString = readString.substring(7);
-                        String[] versions = pVersionString.split("\\.");
-                        if (versions.length == 3) {
-                            pMajorVersion = Integer.valueOf(versions[0]);
-                            pMinorVersion = Integer.valueOf(versions[1]);
-                        }
-
+                if (readString.startsWith("OK MPD ")) {
+                    pVersionString = readString.substring(7);
+                    String[] versions = pVersionString.split("\\.");
+                    if (versions.length == 3) {
+                        pMajorVersion = Integer.valueOf(versions[0]);
+                        pMinorVersion = Integer.valueOf(versions[1]);
                     }
+
                 }
-                Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
-                pMPDConnectionReady = true;
-                Log.v(TAG, "MPDConnection: " + this + " ready");
-
-                if (pPassword != null && !pPassword.equals("")) {
-                    Log.v(TAG, "Try to authenticate with mpd server");
-                    /* Authenticate with server because password is set. */
-                    boolean authenticated = authenticateMPDServer();
-                    Log.v(TAG, "Authentication successful: " + authenticated);
-                }
-
-
-                startIdleWait();
-
-                // Set the timeout to infinite again
-                pSocket.setSoTimeout(0);
-
-                // Notify listener
-                notifyConnected();
             }
+            Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
+            pMPDConnectionReady = true;
+            Log.v(TAG, "MPDConnection: " + this + " ready");
+
+            if (pPassword != null && !pPassword.equals("")) {
+                Log.v(TAG, "Try to authenticate with mpd server");
+                    /* Authenticate with server because password is set. */
+                boolean authenticated = authenticateMPDServer();
+                Log.v(TAG, "Authentication successful: " + authenticated);
+            }
+
+
+            startIdleWait();
+
+            // Set the timeout to infinite again
+            pSocket.setSoTimeout(0);
+
+            // Notify listener
+            notifyConnected();
+        }
     }
 
 
@@ -646,47 +646,50 @@ public class MPDConnection {
      * @return List of MPDFile objects
      * @throws IOException
      */
-    private ArrayList<MPDFile> parseMPDTracks(String filterArtist) throws IOException {
-        ArrayList<MPDFile> trackList = new ArrayList<MPDFile>();
+    private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
+        ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!pMPDConnectionReady) {
             return trackList;
         }
 
         /* Temporary track item (added to list later */
-        MPDFile tempTrack = new MPDFile();
+        MPDFileEntry tempFileEntry = null;
 
         /* Response line from MPD */
         String response = pReader.readLine();
         while (!response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
-                if (!tempTrack.getFileURL().equals("")) {
+                if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
-                    if (filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("")) {
-                        trackList.add(tempTrack);
-                        //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
+                    if (tempFileEntry instanceof MPDFile) {
+                        MPDFile file = (MPDFile) tempFileEntry;
+                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                            trackList.add(tempFileEntry);
+                        }
+                    } else {
+                        trackList.add(tempFileEntry);
                     }
                 }
-                tempTrack = new MPDFile();
-                tempTrack.setFileURL(response.substring(MPDResponses.MPD_RESPONSE_FILE.length()));
+                tempFileEntry = new MPDFile(response.substring(MPDResponses.MPD_RESPONSE_FILE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TITLE)) {
-                tempTrack.setTrackTitle(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TITLE.length()));
+                ((MPDFile) tempFileEntry).setTrackTitle(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TITLE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME)) {
-                tempTrack.setTrackArtist(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length()));
+                ((MPDFile) tempFileEntry).setTrackArtist(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME)) {
-                tempTrack.setTrackAlbumArtist(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
+                ((MPDFile) tempFileEntry).setTrackAlbumArtist(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME)) {
-                tempTrack.setTrackAlbum(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length()));
+                ((MPDFile) tempFileEntry).setTrackAlbum(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DATE)) {
-                tempTrack.setDate(response.substring(MPDResponses.MPD_RESPONSE_DATE.length()));
+                ((MPDFile) tempFileEntry).setDate(response.substring(MPDResponses.MPD_RESPONSE_DATE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID)) {
-                tempTrack.setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
+                ((MPDFile) tempFileEntry).setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID)) {
-                tempTrack.setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
+                ((MPDFile) tempFileEntry).setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_MBID)) {
-                tempTrack.setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
+                ((MPDFile) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME)) {
-                tempTrack.setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+                ((MPDFile) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DISC_NUMBER)) {
                 /*
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
@@ -694,12 +697,12 @@ public class MPDConnection {
                 String discNumber = response.substring(MPDResponses.MPD_RESPONSE_DISC_NUMBER.length());
                 String[] discNumberSep = discNumber.split("/");
                 if (discNumberSep.length > 0) {
-                    tempTrack.setDiscNumber(Integer.valueOf(discNumberSep[0]));
+                    ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
                     if (discNumberSep.length > 1) {
-                        tempTrack.psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
+                        ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
                     }
                 } else {
-                    tempTrack.setDiscNumber(Integer.valueOf(discNumber));
+                    ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER)) {
                 /*
@@ -708,83 +711,63 @@ public class MPDConnection {
                 String trackNumber = response.substring(MPDResponses.MPD_RESPONSE_TRACK_NUMBER.length());
                 String[] trackNumbersSep = trackNumber.split("/");
                 if (trackNumbersSep.length > 0) {
-                    tempTrack.setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
+                    ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
                     if (trackNumbersSep.length > 1) {
-                        tempTrack.setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
+                        ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
                     }
                 } else {
-                    tempTrack.setTrackNumber(Integer.valueOf(trackNumber));
+                    ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
                 }
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
+                tempFileEntry.setLastModified(response.substring(MPDResponses.MPD_RESPONSE_LAST_MODIFIED.length()));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST)) {
+                if (null != tempFileEntry) {
+                    /* Check the artist filter criteria here */
+                    if (tempFileEntry instanceof MPDFile) {
+                        MPDFile file = (MPDFile) tempFileEntry;
+                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                            trackList.add(tempFileEntry);
+                        }
+                    } else {
+                        trackList.add(tempFileEntry);
+                    }
+                }
+                tempFileEntry = new MPDPlaylist(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST.length()));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DIRECTORY)) {
+                if (null != tempFileEntry) {
+                    /* Check the artist filter criteria here */
+                    if (tempFileEntry instanceof MPDFile) {
+                        MPDFile file = (MPDFile) tempFileEntry;
+                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                            trackList.add(tempFileEntry);
+                        }
+                    } else {
+                        trackList.add(tempFileEntry);
+                    }
+                }
+                tempFileEntry = new MPDDirectory(response.substring(MPDResponses.MPD_RESPONSE_DIRECTORY.length()));
             }
+
             response = pReader.readLine();
 
         }
 
         /* Add last remaining track to list. */
-        if (!tempTrack.getFileURL().equals("")) {
-            /* Check the artist filter criteria here */
-            if (filterArtist.equals(tempTrack.getTrackArtist()) || filterArtist.equals("")) {
-                trackList.add(tempTrack);
-                //Log.v(TAG,"Added track: " + tempTrack.getTrackTitle() + ":" + tempTrack.getFileURL());
+        if (null != tempFileEntry) {
+                    /* Check the artist filter criteria here */
+            if (tempFileEntry instanceof MPDFile) {
+                MPDFile file = (MPDFile) tempFileEntry;
+                if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                    trackList.add(tempFileEntry);
+                }
+            } else {
+                trackList.add(tempFileEntry);
             }
         }
-        Log.v(TAG, "Tracks parsed: " + trackList.size());
+        Log.v(TAG, "File entries parsed: " + trackList.size());
         startIdleWait();
 
         return trackList;
-    }
-
-    /**
-     * Parses the return stream of MPD when a list of playlists was requested.
-     *
-     * @return List of MPDArtists objects
-     * @throws IOException
-     */
-    private ArrayList<MPDPlaylist> parseMPDPlaylists() throws IOException {
-        ArrayList<MPDPlaylist> playlistList = new ArrayList<MPDPlaylist>();
-        if (!pMPDConnectionReady) {
-            return playlistList;
-        }
-
-        /* Parse MPD artist return values and create a list of MPDArtist objects */
-        String response = pReader.readLine();
-
-        /* Artist properties */
-        String playlistName = null;
-        String lastModified = "";
-
-
-
-        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
-
-            if (response == null) {
-                /* skip this invalid (empty) response */
-                continue;
-            }
-
-            if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST)) {
-                if ( null != playlistName) {
-                    playlistList.add(new MPDPlaylist(playlistName, lastModified));
-                    Log.v(TAG,"Playlist added: " + playlistName + ':' + lastModified);
-                }
-                playlistName = response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST.length());
-
-            } else if ( response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
-                lastModified = response.substring(MPDResponses.MPD_RESPONSE_LAST_MODIFIED.length());
-            } else if (response.startsWith("OK")) {
-                break;
-            }
-            response = pReader.readLine();
-        }
-        if ( null != playlistName ) {
-            playlistList.add(new MPDPlaylist(playlistName, lastModified));
-            Log.v(TAG,"Playlist added: " + playlistName + ':' + lastModified);
-        }
-        Log.v(TAG, "Playlists parsed");
-
-        startIdleWait();
-
-        return playlistList;
     }
 
      /*
@@ -851,11 +834,11 @@ public class MPDConnection {
      *
      * @return List of MPDArtist objects
      */
-    public List<MPDPlaylist> getPlaylists() {
+    public List<MPDFileEntry> getPlaylists() {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
             try {
-                return parseMPDPlaylists();
+                return parseMPDTracks("");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -868,7 +851,7 @@ public class MPDConnection {
      *
      * @return A list of all tracks in MPDFile objects
      */
-    public List<MPDFile> getAllTracks() {
+    public List<MPDFileEntry> getAllTracks() {
         synchronized (this) {
             Log.w(TAG, "This command should not be used");
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
@@ -888,7 +871,7 @@ public class MPDConnection {
      * @param albumName Album to get tracks from
      * @return List of MPDFile track objects
      */
-    public List<MPDFile> getAlbumTracks(String albumName) {
+    public List<MPDFileEntry> getAlbumTracks(String albumName) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
@@ -907,7 +890,7 @@ public class MPDConnection {
      * @param artistName Artist to filter with
      * @return List of MPDFile track objects
      */
-    public List<MPDFile> getArtistAlbumTracks(String albumName, String artistName) {
+    public List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
@@ -925,7 +908,7 @@ public class MPDConnection {
      *
      * @return List of MPDFile items with all tracks of the current playlist
      */
-    public List<MPDFile> getCurrentPlaylist() {
+    public List<MPDFileEntry> getCurrentPlaylist() {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
             try {
@@ -943,7 +926,7 @@ public class MPDConnection {
      *
      * @return List of MPDFile items with all tracks of the current playlist
      */
-    public List<MPDFile> getSavedPlaylist(String playlistName) {
+    public List<MPDFileEntry> getSavedPlaylist(String playlistName) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
             try {
@@ -1043,9 +1026,9 @@ public class MPDConnection {
     public MPDFile getCurrentSong() throws IOException {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
-            List<MPDFile> retList = parseMPDTracks("");
+            List<MPDFileEntry> retList = parseMPDTracks("");
             if (retList.size() == 1) {
-                return retList.get(0);
+                return (MPDFile)retList.get(0);
             } else {
                 return null;
             }
@@ -1247,15 +1230,17 @@ public class MPDConnection {
      ***********************
      */
 
-    private boolean addTrackList(List<MPDFile> tracks) {
+    private boolean addTrackList(List<MPDFileEntry> tracks) {
         synchronized (this) {
             if (null == tracks) {
                 return false;
             }
             startCommandList();
 
-            for (MPDFile track : tracks) {
-                sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getFileURL()));
+            for (MPDFileEntry track : tracks) {
+                if ( track instanceof  MPDFile) {
+                    sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getPath()));
+                }
             }
             endCommandList();
 
@@ -1271,7 +1256,7 @@ public class MPDConnection {
 
     public boolean addAlbumTracks(String albumname, String artistname) {
         synchronized (this) {
-            List<MPDFile> tracks = getArtistAlbumTracks(albumname, artistname);
+            List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname);
             return addTrackList(tracks);
         }
     }

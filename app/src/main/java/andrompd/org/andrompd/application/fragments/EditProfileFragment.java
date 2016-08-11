@@ -23,20 +23,14 @@ import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.Switch;
-import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.adapters.TracksAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class EditProfileFragment extends Fragment {

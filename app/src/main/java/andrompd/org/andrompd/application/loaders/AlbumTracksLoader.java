@@ -24,17 +24,18 @@ import android.support.v4.content.Loader;
 import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseTrackList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
 /**
  * Loader class for albumtracks and artist album tracks
  */
-public class AlbumTracksLoader extends Loader<List<MPDFile>> {
+public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
     /**
      * Response handler used for the asynchronous callback of the networking thread
      */
-    private MPDResponseTrackList pTrackResponseHandler;
+    private MPDResponseFileList pTrackResponseHandler;
 
     /**
      * Artist name of this album. Can be left empty
@@ -67,9 +68,9 @@ public class AlbumTracksLoader extends Loader<List<MPDFile>> {
     /**
      * Private class for the response handler.
      */
-    private class TrackResponseHandler extends MPDResponseTrackList {
+    private class TrackResponseHandler extends MPDResponseFileList {
         @Override
-        public void handleTracks(List<MPDFile> trackList) {
+        public void handleTracks(List<MPDFileEntry> trackList) {
             deliverResult(trackList);
         }
     }

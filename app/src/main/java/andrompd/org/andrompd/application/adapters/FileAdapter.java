@@ -23,62 +23,76 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.listviewitems.GenericFileListItem;
 import andrompd.org.andrompd.application.listviewitems.TrackListViewItem;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
 
 /**
  * Adapter class that creates all the listitems for an album track view
  */
-public class TracksAdapter extends GenericSectionAdapter<MPDFile> {
+public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
     Context mContext;
 
+    boolean mShowIcons;
+
     /**
      * Standard construtor
+     *
      * @param context Context used for creating listview items
      */
-    public TracksAdapter(Context context) {
+    public FileAdapter(Context context, boolean showIcons) {
         super();
 
+        mShowIcons = showIcons;
         mContext = context;
     }
 
     /**
      * Create the actual listview items if no reusable object is provided.
-     * @param position Index of the item to create.
+     *
+     * @param position    Index of the item to create.
      * @param convertView If != null this view can be reused to optimize performance.
-     * @param parent Parent of the view
+     * @param parent      Parent of the view
      * @return
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
-        MPDFile track = mModelData.get(position);
+        MPDFileEntry file = mModelData.get(position);
+        if (file instanceof MPDFile) {
 
-        // Get track title
-        String trackTitle = track.getTrackTitle();
+            MPDFile track = (MPDFile) mModelData.get(position);
 
-        // additional information (artist + album)
-        String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
+            // Get track title
+            String trackTitle = track.getTrackTitle();
 
-        // Get the number of the track
-        String trackNumber = String.valueOf(track.getTrackNumber());
+            // additional information (artist + album)
+            String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
 
-        // Get the preformatted duration of the track.
-        String trackDuration = track.getLengthString();
+            // Get the number of the track
+            String trackNumber = String.valueOf(track.getTrackNumber());
 
-        // Check if reusable object is available
-        if(convertView != null) {
-            TrackListViewItem tracksListViewItem = (TrackListViewItem) convertView;
-            tracksListViewItem.setTrackNumber(trackNumber);
-            tracksListViewItem.setTitle(trackTitle);
-            tracksListViewItem.setAdditionalInformation(trackInformation);
-            tracksListViewItem.setDuration(trackDuration);
-        } else {
+            // Get the preformatted duration of the track.
+            String trackDuration = track.getLengthString();
+
+            // Check if reusable object is available
+
             // If not create a new Listitem
             convertView = new TrackListViewItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
-        }
 
-        return convertView;
+
+            return convertView;
+        } else if (file instanceof MPDPlaylist || file instanceof MPDDirectory) {
+
+            convertView = new GenericFileListItem(mContext, mModelData.get(position), mShowIcons);
+
+
+            return convertView;
+        }
+        return new TrackListViewItem(mContext, "", "", "", "");
     }
 }

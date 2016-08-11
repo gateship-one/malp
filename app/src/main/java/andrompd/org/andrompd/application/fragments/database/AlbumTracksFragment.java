@@ -38,15 +38,15 @@ import android.widget.ListView;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.adapters.TracksAdapter;
+import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.AlbumTracksLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
-public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFile>>, AdapterView.OnItemClickListener {
+public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AdapterView.OnItemClickListener {
     public final static String TAG = AlbumTracksFragment.class.getSimpleName();
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
@@ -71,7 +71,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     /**
      * Adapter used by the ListView
      */
-    private TracksAdapter mTracksAdapter;
+    private FileAdapter mFileAdapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -89,10 +89,10 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
         }
 
         // Create the needed adapter for the ListView
-        mTracksAdapter = new TracksAdapter(getActivity());
+        mFileAdapter = new FileAdapter(getActivity(), false);
 
         // Combine the two to a happy couple
-        mListView.setAdapter(mTracksAdapter);
+        mListView.setAdapter(mFileAdapter);
         registerForContextMenu(mListView);
 
         setHasOptionsMenu(true);
@@ -142,7 +142,7 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
      * @return Newly created loader
      */
     @Override
-    public Loader<List<MPDFile>> onCreateLoader(int id, Bundle args) {
+    public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
         return new AlbumTracksLoader(getActivity(), mAlbumName, mArtistName);
     }
 
@@ -153,9 +153,9 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
      * @param data   Data that was retrieved by the laoder
      */
     @Override
-    public void onLoadFinished(Loader<List<MPDFile>> loader, List<MPDFile> data) {
+    public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         // Give the adapter the new retrieved data set
-        mTracksAdapter.swapModel(data);
+        mFileAdapter.swapModel(data);
     }
 
     /**
@@ -164,9 +164,9 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
      * @param loader The loader that gets cleared.
      */
     @Override
-    public void onLoaderReset(Loader<List<MPDFile>> loader) {
+    public void onLoaderReset(Loader<List<MPDFileEntry>> loader) {
         // Clear the model data of the used adapter
-        mTracksAdapter.swapModel(null);
+        mFileAdapter.swapModel(null);
     }
 
     @Override
@@ -254,22 +254,22 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     }
 
     private void enqueueTrack(int index) {
-        MPDFile track = (MPDFile) mTracksAdapter.getItem(index);
+        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
 
-        MPDQueryHandler.addSong(track.getFileURL());
+        MPDQueryHandler.addSong(track.getPath());
     }
 
     private void play(int index) {
-        MPDFile track = (MPDFile) mTracksAdapter.getItem(index);
+        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
 
-        MPDQueryHandler.playSong(track.getFileURL());
+        MPDQueryHandler.playSong(track.getPath());
     }
 
 
     private void playNext(int index) {
-        MPDFile track = (MPDFile) mTracksAdapter.getItem(index);
+        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
 
-        MPDQueryHandler.playSongNext(track.getFileURL());
+        MPDQueryHandler.playSongNext(track.getPath());
     }
 
     private void enqueueAlbum() {

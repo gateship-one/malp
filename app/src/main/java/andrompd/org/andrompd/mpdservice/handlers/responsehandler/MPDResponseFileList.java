@@ -22,9 +22,10 @@ import android.os.Message;
 import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
 
-public abstract class MPDResponseTrackList extends MPDResponseHandler {
-    public MPDResponseTrackList() {
+public abstract class MPDResponseFileList extends MPDResponseHandler {
+    public MPDResponseFileList() {
 
     }
 
@@ -38,7 +39,7 @@ public abstract class MPDResponseTrackList extends MPDResponseHandler {
         super.handleMessage(msg);
 
         /* Call album response handler */
-        List<MPDFile> trackList = (List<MPDFile>)msg.obj;
+        List<MPDFileEntry> trackList = (List<MPDFileEntry>)msg.obj;
         handleTracks(trackList);
     }
 
@@ -48,5 +49,5 @@ public abstract class MPDResponseTrackList extends MPDResponseHandler {
      * This can be used for updating lists of adapters and views.
      * @param trackList List of MPDFile objects containing a list of mpds tracks response.
      */
-    abstract public void handleTracks(List<MPDFile> trackList);
+    abstract public void handleTracks(List<MPDFileEntry> fileList);
 }

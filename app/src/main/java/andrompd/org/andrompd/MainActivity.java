@@ -152,7 +152,7 @@ public class MainActivity extends AppCompatActivity
         if (navigationView != null) {
             Log.v(TAG,"Nav viewer");
             navigationView.setNavigationItemSelectedListener(this);
-            navigationView.setCheckedItem(0);
+            navigationView.setCheckedItem(R.id.nav_library);
         }
 
         mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
