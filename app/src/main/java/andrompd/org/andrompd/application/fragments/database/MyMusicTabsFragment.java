@@ -17,6 +17,7 @@
 
 package andrompd.org.andrompd.application.fragments.database;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -28,11 +29,14 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import andrompd.org.andrompd.R;
+import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 
 public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener{
     public final static String TAG = MyMusicTabsFragment.class.getSimpleName();
@@ -42,6 +46,9 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     public enum DEFAULTTAB {
         ARTISTS, ALBUMS
     }
+
+    private FABFragmentCallback mFABCallback = null;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -130,6 +137,33 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
                     break;
             }
 
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if ( null != mFABCallback ) {
+            mFABCallback.setupFAB(false,null);
+            mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
+        }
+    }
+
+    /**
+     * Called when the fragment is first attached to its context.
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
         }
     }
 

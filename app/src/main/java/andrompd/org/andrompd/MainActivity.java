@@ -59,11 +59,7 @@ import andrompd.org.andrompd.application.fragments.database.SavedPlaylistsFragme
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDProfileManager;
 import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -93,13 +89,8 @@ public class MainActivity extends AppCompatActivity
     private MPDProfileManager mProfileManager;
 
 
-    private String mArtistName;
-    private String mAlbumName;
-    private String mPlaylistName;
-
     private FloatingActionButton mFAB;
 
-    private NavigationView navigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +108,25 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        // enable back navigation
+        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer != null) {
+            mDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+            drawer.addDrawerListener(mDrawerToggle);
+            mDrawerToggle.syncState();
+        }
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView != null) {
+            navigationView.setNavigationItemSelectedListener(this);
+            navigationView.setCheckedItem(R.id.nav_library);
+        }
 
 
         if (findViewById(R.id.fragment_container) != null) {
@@ -133,29 +143,9 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
 
-        // enable back navigation
-        final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
 
-        if (actionBar != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer != null) {
-            mDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.addDrawerListener(mDrawerToggle);
-            mDrawerToggle.syncState();
-        }
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
-            Log.v(TAG,"Nav viewer");
-            navigationView.setNavigationItemSelectedListener(this);
-            navigationView.setCheckedItem(R.id.nav_library);
-        }
 
         mFAB = (FloatingActionButton)findViewById(R.id.andrompd_play_button);
-        Log.v(TAG,"FAB: " + mFAB);
 
 
 
@@ -197,10 +187,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        return false;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -563,6 +549,7 @@ public class MainActivity extends AppCompatActivity
     public void setupToolbar(String title, boolean scrollingEnabled, boolean drawerIndicatorEnabled, boolean showImage) {
         // set drawer state
         mDrawerToggle.setDrawerIndicatorEnabled(drawerIndicatorEnabled);
+        mDrawerToggle.syncState();
 
 
         ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
