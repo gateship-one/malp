@@ -143,4 +143,9 @@ public class MPDCommands {
         return "setvol " + volume;
     }
 
+    public static final String MPD_COMMAND_GET_OUTPUTS = "outputs";
+
+    public static String MPD_COMMAND_TOGGLE_OUTPUT(int id) {
+        return "toggleoutput " + String.valueOf(id);
+    }
 }

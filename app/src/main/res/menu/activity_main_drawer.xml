@@ -48,6 +48,16 @@
                 android:title="@string/menu_app_settings" />
         </menu>
     </item>
+    <item android:title="@string/menu_server"
+        android:checkable="true">
+        <menu>
+            <item
+                android:checkable="true"
+                android:id="@+id/nav_outputs"
+                android:icon="@drawable/ic_hearing_black_24dp"
+                android:title="@string/menu_outputs" />
+        </menu>
+    </item>
 
 
 </menu>

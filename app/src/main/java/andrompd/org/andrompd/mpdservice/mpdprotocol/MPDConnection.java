@@ -38,6 +38,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
@@ -928,7 +929,7 @@ public class MPDConnection {
      */
     public List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start,end));
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
             try {
             /* Parse the return */
                 return parseMPDTracks("");
@@ -1064,7 +1065,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
             List<MPDFileEntry> retList = parseMPDTracks("");
             if (retList.size() == 1) {
-                return (MPDFile)retList.get(0);
+                return (MPDFile) retList.get(0);
             } else {
                 return null;
             }
@@ -1274,7 +1275,7 @@ public class MPDConnection {
             startCommandList();
 
             for (MPDFileEntry track : tracks) {
-                if ( track instanceof  MPDFile) {
+                if (track instanceof MPDFile) {
                     sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getPath()));
                 }
             }
@@ -1420,6 +1421,73 @@ public class MPDConnection {
                 return checkResponse();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    private List<MPDOutput> parseMPDOutputs() throws IOException {
+        ArrayList<MPDOutput> outputList = new ArrayList<>();
+        // Parse outputs
+        String outputName = null;
+        boolean outputActive = false;
+        int outputId = -1;
+
+        /* Response line from MPD */
+        String response = pReader.readLine();
+        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+            if ( response.startsWith(MPDResponses.MPD_OUTPUT_ID) ) {
+                if ( null != outputName ) {
+                    MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
+                    outputList.add(tempOutput);
+                }
+                outputId = Integer.valueOf(response.substring(MPDResponses.MPD_OUTPUT_ID.length()));
+            } else if ( response.startsWith(MPDResponses.MPD_OUTPUT_NAME)) {
+                outputName = response.substring(MPDResponses.MPD_OUTPUT_NAME.length());
+            } else if ( response.startsWith(MPDResponses.MPD_OUTPUT_ACTIVE)) {
+                String activeRespsonse = response.substring(MPDResponses.MPD_OUTPUT_ACTIVE.length());
+                Log.v(TAG,"Active response: " + activeRespsonse);
+                if ( activeRespsonse.equals("1") ) {
+                    outputActive = true;
+                } else {
+                    outputActive = false;
+                }
+            }
+            response = pReader.readLine();
+        }
+
+        // Add remaining output to list
+        if ( null != outputName ) {
+            MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
+            outputList.add(tempOutput);
+        }
+
+        return outputList;
+
+    }
+
+    public List<MPDOutput> getOutputs() {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_OUTPUTS);
+
+            try {
+                return parseMPDOutputs();
+            } catch (IOException e) {
+                handleReadError();
+            }
+            return null;
+        }
+    }
+
+    public boolean toggleOutput(int id) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
+
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                handleReadError();
             }
             return false;
         }

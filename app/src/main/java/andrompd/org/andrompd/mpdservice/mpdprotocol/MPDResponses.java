@@ -61,4 +61,8 @@ public class MPDResponses {
     public static final String MPD_PLAYBACK_STATE_RESPONSE_PLAY = "play";
     public static final String MPD_PLAYBACK_STATE_RESPONSE_PAUSE = "pause";
     public static final String MPD_PLAYBACK_STATE_RESPONSE_STOP = "stop";
+
+    public static final String MPD_OUTPUT_ID = "outputid: ";
+    public static final String MPD_OUTPUT_NAME = "outputname: ";
+    public static final String MPD_OUTPUT_ACTIVE = "outputenabled: ";
 }

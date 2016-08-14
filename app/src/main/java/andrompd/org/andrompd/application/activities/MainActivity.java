@@ -57,6 +57,7 @@ import andrompd.org.andrompd.application.fragments.database.AlbumsFragment;
 import andrompd.org.andrompd.application.fragments.database.ArtistsFragment;
 import andrompd.org.andrompd.application.fragments.database.FilesFragment;
 import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
+import andrompd.org.andrompd.application.fragments.database.OutputsFragment;
 import andrompd.org.andrompd.application.fragments.database.PlaylistTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.SavedPlaylistsFragment;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
@@ -326,6 +327,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_app_settings) {
             fragment = new SettingsFragment();
             fragmentTag = SettingsFragment.TAG;
+        } else if (id == R.id.nav_outputs) {
+            fragment = new OutputsFragment();
+            fragmentTag = OutputsFragment.TAG;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

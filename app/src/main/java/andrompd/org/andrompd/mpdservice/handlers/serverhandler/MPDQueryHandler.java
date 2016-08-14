@@ -32,11 +32,13 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbu
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 
 public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
     private static final String TAG = "MPDQueryHandler";
@@ -322,6 +324,14 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             mMPDConnection.clearPlaylist();
             mMPDConnection.addSong(path);
             mMPDConnection.playSongIndex(0);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_OUTPUTS) {
+            responseHandler = mpdAction.getResponseHandler();
+
+            List<MPDOutput> outputList = mMPDConnection.getOutputs();
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = outputList;
+            responseHandler.sendMessage(responseMessage);
         }
     }
 
@@ -728,6 +738,19 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         }
 
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME, name);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getOutputs(MPDResponseOutputList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_OUTPUTS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
 
         msg.obj = action;
 

@@ -45,6 +45,7 @@ public class MPDHandlerAction {
         ACTION_GET_SAVED_PLAYLIST,
         ACTION_GET_SAVED_PLAYLISTS,
         ACTION_GET_FILES,
+        ACTION_GET_OUTPUTS,
         ACTION_ADD_ARTIST_ALBUM,
         ACTION_ADD_ARTIST,
         ACTION_ADD_SONG,
@@ -75,7 +76,8 @@ public class MPDHandlerAction {
         ACTION_SET_RANDOM,
         ACTION_SET_SINGLE,
         ACTION_SET_CONSUME,
-        ACTION_SET_VOLUME
+        ACTION_SET_VOLUME,
+        ACTION_TOGGLE_OUTPUT,
     }
 
 
@@ -108,7 +110,8 @@ public class MPDHandlerAction {
         EXTRA_SEEK_TIME,
         EXTRA_VOLUME,
         EXTRA_WINDOW_START,
-        EXTRA_WINDOW_END
+        EXTRA_WINDOW_END,
+        EXTRA_OUTPUT_ID,
     }
 
     /**

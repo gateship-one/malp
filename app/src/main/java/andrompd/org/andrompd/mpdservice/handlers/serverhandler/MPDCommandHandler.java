@@ -121,6 +121,9 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME) {
             int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
             mMPDConnection.setVolume(volume);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
+            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+            mMPDConnection.toggleOutput(outputID);
         }
     }
 
@@ -346,6 +349,19 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         }
 
         action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME, volume);
+
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void toggleOutput(int outputID) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID, outputID);
 
         msg.obj = action;
         MPDCommandHandler.getHandler().sendMessage(msg);
