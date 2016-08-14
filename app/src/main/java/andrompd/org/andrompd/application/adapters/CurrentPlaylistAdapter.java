@@ -224,7 +224,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                     }
                 }
                 // Notify the listener for this adapter
-                notifyDataSetInvalidated();
+                notifyDataSetChanged();
             } else {
                 mWindowedPlaylists[start / WINDOW_SIZE] = trackList;
                 mWindowedListStates[start / WINDOW_SIZE] = LIST_STATE.LIST_READY;
@@ -247,7 +247,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         public void onDisconnected() {
             mPlaylist = null;
             mLastStatus = null;
-            notifyDataSetInvalidated();
+            notifyDataSetChanged();
         }
     }
 
@@ -296,7 +296,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             }
 
         }
-        notifyDataSetInvalidated();
+        notifyDataSetChanged();
     }
 
     private void fetchWindow(int index) {
