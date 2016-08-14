@@ -46,6 +46,12 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     private String mPath;
 
     /**
+     * Save the last position here. Gets reused when the user returns to this view after selecting sme
+     * albums.
+     */
+    private int mLastPosition;
+
+    /**
      * Adapter used by the ListView
      */
     private FileAdapter mAdapter;
@@ -237,6 +243,12 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         mAdapter.swapModel(data);
         // change refresh state
         mSwipeRefreshLayout.setRefreshing(false);
+
+        // Reset old scroll position
+        if (mLastPosition >= 0) {
+            mListView.setSelection(mLastPosition);
+            mLastPosition = -1;
+        }
     }
 
     /**
@@ -252,6 +264,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        mLastPosition = i;
+
         MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(i);
 
         if (file instanceof MPDDirectory) {
