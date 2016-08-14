@@ -114,7 +114,7 @@
     <string name="server_statistic_albums_count">Number of albums:</string>
     <string name="server_statistic_songs_count">Number of songs:</string>
 
-    <string name="server_statistic_uptime">Number of songs:</string>
+    <string name="server_statistic_uptime">Uptime of MPD server:</string>
     <string name="server_statistic_db_playtime">Duration of whole database:</string>
     <string name="server_statistic_playtime">Recorded play time:</string>
     <string name="server_statistic_db_update">Last database update:</string>
