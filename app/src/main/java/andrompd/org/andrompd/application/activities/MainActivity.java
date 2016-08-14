@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
-
         setContentView(R.layout.activity_main);
 
 
@@ -172,21 +171,52 @@ public class MainActivity extends AppCompatActivity
 
 
         if (null != autoProfile) {
-            Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
             ConnectionManager.setParameters(autoProfile, this);
         }
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
+        // Read default view preference
+        String defaultView = sharedPref.getString("pref_default_view", "my_music_albums");
+
+        // the default tab for mymusic
+        MyMusicTabsFragment.DEFAULTTAB defaultTab = null;
+        // the nav ressource id to mark the right item in the nav drawer
+        int navId = R.id.nav_library;
+
+        switch (defaultView) {
+            case "my_music_artists":
+                defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
+                break;
+            case "my_music_albums":
+                defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
+                break;
+            case "playlists":
+                navId = R.id.nav_saved_playlists;
+                break;
+            case "files":
+                navId = R.id.nav_files;
+                break;
+        }
+
+        navigationView.setCheckedItem(navId);
+
         if ((findViewById(R.id.fragment_container) != null) && (savedInstanceState == null)) {
 
-            Fragment fragment = new MyMusicTabsFragment();
+            Fragment fragment = null;
 
-            Bundle args = new Bundle();
-            args.putInt(MyMusicTabsFragment.MY_MUSIC_REQUESTED_TAB, 0);
+            if (navId == R.id.nav_library) {
+                fragment = new MyMusicTabsFragment();
 
-            fragment.setArguments(args);
+                Bundle args = new Bundle();
+                args.putInt(MyMusicTabsFragment.MY_MUSIC_REQUESTED_TAB, defaultTab.ordinal());
 
+                fragment.setArguments(args);
+            } else if (navId == R.id.nav_saved_playlists) {
+                fragment = new SavedPlaylistsFragment();
+            } else if (navId == R.id.nav_files) {
+                fragment = new FilesFragment();
+            }
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
             transaction.replace(R.id.fragment_container, fragment);

@@ -156,6 +156,22 @@
         <item>@string/preference_theme_item_light_green</item>
     </string-array>
 
+    <string name="preference_default_view_title">Default view</string>
+    <string name="preference_default_view_message">Select default view</string>
+    <string name="preference_default_view_summary">Select the default view of the application.</string>
+
+    <string name="preference_default_view_my_music_artists">Artists</string>
+    <string name="preference_default_view_my_music_albums">Albums</string>
+    <string name="preference_default_view_my_music_playlists">Playlists</string>
+    <string name="preference_default_view_my_music_files">Files</string>
+
+    <string-array name="preference_default_views">
+        <item>@string/preference_default_view_my_music_artists</item>
+        <item>@string/preference_default_view_my_music_albums</item>
+        <item>@string/preference_default_view_my_music_playlists</item>
+        <item>@string/preference_default_view_my_music_files</item>
+    </string-array>
+
     <!-- About activity -->
     <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>
     <string name="license_text">This application is licensed under the GPLv3 license.\nMaterial icons are licensed under the CC-BY license by Google.</string>

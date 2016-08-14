@@ -47,6 +47,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         LIST_LOADING,
         LIST_READY
     }
+
     private static final int CLEANUP_TIMEOUT = 30 * 1000;
 
     private static final String TAG = "CurrentPLAdapter";
@@ -159,12 +160,10 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         return convertView;
     }
 
-    private void setPlaying(int index, boolean playing) {
+    private void setCurrentIndex(int index) {
         if ((index >= 0) && (index < getCount())) {
             notifyDataSetChanged();
-            if ( playing ) {
-                mListView.setSelection(index);
-            }
+            mListView.setSelection(index);
         }
     }
 
@@ -177,38 +176,25 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             }
 
             if (null == mLastStatus) {
+                Log.v(TAG, "First status");
                 // The current song index has changed. Set the old one to false and the new one to true.
                 int index = status.getCurrentSongIndex();
 
                 if (index < getCount()) {
                     if (status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                        setPlaying(index, true);
+                        setCurrentIndex(index);
                     }
                 }
             } else {
                 if (mLastStatus.getCurrentSongIndex() != status.getCurrentSongIndex()) {
+                    Log.v(TAG, "New song index");
                     // The current song index has changed. Set the old one to false and the new one to true.
                     int index = status.getCurrentSongIndex();
-                    int oldIndex = mLastStatus.getCurrentSongIndex();
 
-                    if ((index < getCount()) && (oldIndex < getCount())) {
-                        // Set the old track playing to false
-                        setPlaying(oldIndex, false);
-                        if (status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                            setPlaying(index, true);
-                        }
-                    }
-                }
-
-                MPDCurrentStatus.MPD_PLAYBACK_STATE oldState = mLastStatus.getPlaybackState();
-                MPDCurrentStatus.MPD_PLAYBACK_STATE newState = status.getPlaybackState();
-                if ((oldState != newState) && (newState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED)) {
-                    setPlaying(status.getCurrentSongIndex(), false);
-                } else if ((oldState != newState) && (newState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING)) {
-                    setPlaying(status.getCurrentSongIndex(), true);
-
+                    setCurrentIndex(index);
                 }
             }
+
 
             mLastStatus = status;
             if (newPl) {
@@ -234,9 +220,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                 if (null != mLastStatus) {
                     int index = mLastStatus.getCurrentSongIndex();
                     if ((null != mPlaylist) && (index < mPlaylist.size())) {
-                        if (mLastStatus.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                            setPlaying(index, true);
-                        }
+                        setCurrentIndex(index);
                     }
                 }
                 // Notify the listener for this adapter
@@ -273,8 +257,9 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
 
 
+        mLastStatus = null;
+        updatePlaylist();
         mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getLastStatus());
-        MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler);
     }
 
     public void onPause() {
@@ -283,8 +268,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
 
         mPlaylist = null;
-        mLastStatus = new MPDCurrentStatus();
-
     }
 
     private void updatePlaylist() {
@@ -293,13 +276,13 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler);
         } else {
             if (null != mLastStatus) {
+                Log.v(TAG, "PL Update with length: " + mLastStatus.getPlaylistLength());
                 try {
                     mListsLock.acquire();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
                 int listCount = (mLastStatus.getPlaylistLength() / WINDOW_SIZE) + 1;
-                Log.v(TAG, "Create " + listCount + " sublists");
                 mWindowedPlaylists = (List<MPDFileEntry>[]) new List[listCount];
                 mWindowedListStates = new LIST_STATE[listCount];
                 mLastAccessedList = 0;
@@ -307,11 +290,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                     mWindowedPlaylists[i] = null;
                     mWindowedListStates[i] = LIST_STATE.LIST_EMPTY;
 
-                    int start = i * WINDOW_SIZE;
-                    int end = start + WINDOW_SIZE;
-                    if (end > mLastStatus.getPlaylistLength()) {
-                        end = mLastStatus.getPlaylistLength();
-                    }
                 }
 
                 mListsLock.release();
@@ -322,7 +300,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     }
 
     private void fetchWindow(int index) {
-        Log.v(TAG, "Item: " + index + "requested");
         int tableIndex = index / WINDOW_SIZE;
 
         int start = tableIndex * WINDOW_SIZE;
@@ -330,6 +307,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         if (end > mLastStatus.getPlaylistLength()) {
             end = mLastStatus.getPlaylistLength();
         }
+        Log.v(TAG, "PL Window requested: " + start + ':' + end);
         MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler, start, end);
     }
 
@@ -340,7 +318,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             int listIndex = position / WINDOW_SIZE;
             if (mWindowedListStates[position / WINDOW_SIZE] == LIST_STATE.LIST_READY) {
                 mLastAccessedList = listIndex;
-                if ( null != mClearTimer ) {
+                if (null != mClearTimer) {
                     mClearTimer.cancel();
                 }
                 mClearTimer = new Timer();
@@ -363,8 +341,8 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            for ( int i = 0; i < mWindowedPlaylists.length; i++) {
-                if ( i != mLastAccessedList ) {
+            for (int i = 0; i < mWindowedPlaylists.length; i++) {
+                if (i != mLastAccessedList) {
                     mWindowedPlaylists[i] = null;
                     mWindowedListStates[i] = LIST_STATE.LIST_EMPTY;
                 }
