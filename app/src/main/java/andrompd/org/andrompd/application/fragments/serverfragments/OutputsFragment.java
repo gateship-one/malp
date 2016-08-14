@@ -15,13 +15,11 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,7 +37,7 @@ import andrompd.org.andrompd.application.loaders.OutputsLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 
-public class OutputsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDOutput>>, AbsListView.OnItemClickListener{
+public class OutputsFragment extends GenericMPDFragment<List<MPDOutput>> implements  AbsListView.OnItemClickListener{
     public final static String TAG = OutputsFragment.class.getSimpleName();
     /**
      * Main ListView of this fragment
@@ -98,8 +96,6 @@ public class OutputsFragment extends Fragment implements LoaderManager.LoaderCal
     public void onResume() {
         super.onResume();
 
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);

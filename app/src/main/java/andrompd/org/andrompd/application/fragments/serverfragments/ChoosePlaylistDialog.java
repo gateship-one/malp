@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;

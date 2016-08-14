@@ -1,9 +1,25 @@
-package andrompd.org.andrompd.application.fragments.database;
+/*
+ * Copyright (C) 2016  Hendrik Borghorst
+ *
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package andrompd.org.andrompd.application.fragments.serverfragments;
+
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
@@ -21,62 +37,54 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
-import andrompd.org.andrompd.application.loaders.FilesLoader;
+import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
-public class FilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AbsListView.OnItemClickListener {
-    public static final String EXTRA_FILENAME = "filename";
-    public static final String TAG = FilesFragment.class.getSimpleName();
+public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AbsListView.OnItemClickListener {
+    public final static String TAG = SavedPlaylistsFragment.class.getSimpleName();
+    /**
+     * Adapter used by the ListView
+     */
+    private FileAdapter mPlaylistAdapter;
 
     /**
      * Main ListView of this fragment
      */
     private ListView mListView;
 
-    private FABFragmentCallback mFABCallback = null;
-
-    private FilesCallback mCallback;
-
-    private String mPath;
-
     /**
-     * Adapter used by the ListView
+     * Callback for activity this fragment gets attached to
      */
-    private FileAdapter mAdapter;
+    private SavedPlaylistsCallback mCallback;
 
     /**
      * Save the swipe layout for later usage
      */
     private SwipeRefreshLayout mSwipeRefreshLayout;
 
+    private FABFragmentCallback mFABCallback = null;
+
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
 
-        Bundle args = getArguments();
-        if (null != args) {
-            mPath = args.getString(EXTRA_FILENAME);
-        } else {
-            mPath = "";
-        }
 
         // Create the needed adapter for the ListView
-        mAdapter = new FileAdapter(getActivity(), true);
+        mPlaylistAdapter = new FileAdapter(getActivity(), false);
 
         // Combine the two to a happy couple
-        mListView.setAdapter(mAdapter);
+        mListView.setAdapter(mPlaylistAdapter);
         mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
+
 
         // get swipe layout
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
@@ -103,20 +111,10 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
+
         if (null != mFABCallback) {
-            mFABCallback.setupFAB(true, new FABListener());
-            if (mPath.equals("")) {
-                mFABCallback.setupToolbar(getString(R.string.menu_files), false, true, false);
-            } else {
-                String[] pathSplit = mPath.split("/");
-                if ( pathSplit.length > 0 ) {
-                    mFABCallback.setupToolbar(pathSplit[pathSplit.length-1], false, false, false);
-                } else {
-                    mFABCallback.setupToolbar(mPath, false, false, false);
-                }
-            }
+            mFABCallback.setupFAB(false, null);
+            mFABCallback.setupToolbar(getString(R.string.menu_playlists), false, true, false);
         }
     }
 
@@ -130,7 +128,7 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (FilesCallback) context;
+            mCallback = (SavedPlaylistsCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
@@ -144,26 +142,17 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
         }
     }
 
+
     /**
      * Create the context menu.
      */
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-
         MenuInflater inflater = getActivity().getMenuInflater();
-        int position = ((AdapterView.AdapterContextMenuInfo)menuInfo).position;
-
-        MPDFileEntry file = (MPDFileEntry)mAdapter.getItem(position);
-
-        if (file instanceof MPDFile) {
-            inflater.inflate(R.menu.context_menu_track, menu);
-        } else if ( file instanceof  MPDDirectory) {
-            inflater.inflate(R.menu.context_menu_directory, menu);
-        } else if ( file instanceof MPDPlaylist) {
-            inflater.inflate(R.menu.context_menu_playlist, menu);
-        }
+        inflater.inflate(R.menu.context_menu_playlist, menu);
     }
+
 
     /**
      * Hook called when an menu item in the context menu is selected.
@@ -179,27 +168,19 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
             return super.onContextItemSelected(item);
         }
 
+        MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(info.position);
         switch (item.getItemId()) {
-            case R.id.action_song_enqueue:
-                MPDQueryHandler.addSong(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+            case R.id.action_add_playlist:
+                MPDQueryHandler.loadPlaylist(playlist.getPath());
                 return true;
-            case R.id.action_song_play:
-                MPDQueryHandler.playSong(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
-                return true;
-            case R.id.action_song_play_next:
-                MPDQueryHandler.playSongNext(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+            case R.id.action_remove_playlist:
+                MPDQueryHandler.removePlaylist(playlist.getPath());
+                mPlaylistAdapter.swapModel(null);
+                getLoaderManager().destroyLoader(0);
+                getLoaderManager().initLoader(0, getArguments(), this);
                 return true;
             case R.id.action_play_playlist:
-                MPDQueryHandler.playPlaylist(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
-                return true;
-            case R.id.action_add_playlist:
-                MPDQueryHandler.loadPlaylist(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
-                return true;
-            case R.id.action_add_directory:
-                MPDQueryHandler.addDirectory(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
-                return true;
-            case R.id.action_play_directory:
-                MPDQueryHandler.playDirectory(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.playPlaylist(playlist.getPath());
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -215,7 +196,7 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new FilesLoader(getActivity(), mPath);
+        return new PlaylistsLoader(getActivity(), false);
     }
 
     /**
@@ -226,7 +207,7 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
      */
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
-        mAdapter.swapModel(data);
+        mPlaylistAdapter.swapModel(data);
         // change refresh state
         mSwipeRefreshLayout.setRefreshing(false);
     }
@@ -239,32 +220,20 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onLoaderReset(Loader<List<MPDFileEntry>> loader) {
         // Clear the model data of the used adapter
-        mAdapter.swapModel(null);
+        mPlaylistAdapter.swapModel(null);
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(i);
-
-        if (file instanceof MPDDirectory) {
-            mCallback.openPath(file.getPath());
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if (null != mCallback) {
+            MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(position);
+            mCallback.openPlaylist(playlist.getPath());
         }
     }
 
-    public interface FilesCallback {
-        void openPath(String path);
+    public interface SavedPlaylistsCallback {
+        void openPlaylist(String name);
     }
 
-    private class FABListener implements View.OnClickListener {
 
-        @Override
-        public void onClick(View v) {
-            MPDQueryHandler.playDirectory(mPath);
-        }
-    }
-
-    private void refreshContent() {
-        getLoaderManager().destroyLoader(0);
-        getLoaderManager().restartLoader(0, getArguments(), this);
-    }
 }

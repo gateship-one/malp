@@ -15,14 +15,12 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.view.ContextMenu;
@@ -46,7 +44,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class PlaylistTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>> {
+public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> {
     public final static String TAG = PlaylistTracksFragment.class.getSimpleName();
     public final static String EXTRA_PLAYLIST_NAME = "name";
 
@@ -101,8 +99,6 @@ public class PlaylistTracksFragment extends Fragment implements LoaderManager.Lo
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
 
         if (null != mFABCallback) {
             mFABCallback.setupFAB(true, new FABOnClickListener());

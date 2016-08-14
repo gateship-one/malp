@@ -24,7 +24,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -34,18 +33,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
-import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 
-import org.w3c.dom.Text;
-
 import java.util.Timer;
 
 import andrompd.org.andrompd.R;
-import andrompd.org.andrompd.application.fragments.database.ChoosePlaylistDialog;
+import andrompd.org.andrompd.application.fragments.serverfragments.ChoosePlaylistDialog;
 import andrompd.org.andrompd.application.utils.FormatHelper;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;

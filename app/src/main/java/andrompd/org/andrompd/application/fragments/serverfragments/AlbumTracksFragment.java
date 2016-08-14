@@ -15,13 +15,11 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -46,7 +44,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class AlbumTracksFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AdapterView.OnItemClickListener {
+public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
     public final static String TAG = AlbumTracksFragment.class.getSimpleName();
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
@@ -107,8 +105,6 @@ public class AlbumTracksFragment extends Fragment implements LoaderManager.Loade
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
 
 
         if (null != mFABCallback) {

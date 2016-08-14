@@ -15,16 +15,13 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -42,11 +39,10 @@ import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.ArtistsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
-public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDArtist>>, AdapterView.OnItemClickListener {
+public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> implements AdapterView.OnItemClickListener {
     public final static String TAG = ArtistsFragment.class.getSimpleName();
     /**
      * GridView adapter object used for this GridView
@@ -71,7 +67,6 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
 
     private ArtistSelectedCallback mSelectedCallback;
 
-    private ConnectionStateListener mConnectionStateListener;
 
     private FABFragmentCallback mFABCallback = null;
 
@@ -94,7 +89,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         // register for context menu
         registerForContextMenu(mRootGrid);
 
-        mConnectionStateListener = new ConnectionStateListener(this);
+
 
         // get swipe layout
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
@@ -116,22 +111,12 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
-        MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
+
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.v(TAG,"onPause");
-        getLoaderManager().destroyLoader(0);
-        MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
     }
 
     /**
@@ -250,25 +235,7 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         void onArtistSelected(String artistname);
     }
 
-    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
-        private ArtistsFragment pFragment;
 
-        public ConnectionStateListener(ArtistsFragment fragment) {
-            pFragment = fragment;
-        }
-
-        @Override
-        public void onConnected() {
-            Log.v(TAG,"Reconnected to mpd server, refetch artist list");
-            // Prepare loader ( start new one or reuse old )
-            getLoaderManager().initLoader(0, getArguments(), pFragment);
-        }
-
-        @Override
-        public void onDisconnected() {
-            getLoaderManager().destroyLoader(0);
-        }
-    }
 
     private void enqueueArtist(int index) {
         MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
@@ -282,8 +249,5 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         MPDQueryHandler.playArtist(artist.getArtistName());
     }
 
-    private void refreshContent() {
-        getLoaderManager().destroyLoader(0);
-        getLoaderManager().restartLoader(0, getArguments(), this);
-    }
+
 }

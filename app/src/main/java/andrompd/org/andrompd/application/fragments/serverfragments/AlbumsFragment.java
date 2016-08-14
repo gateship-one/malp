@@ -15,18 +15,15 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -45,11 +42,10 @@ import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.AlbumsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
-public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>, AdapterView.OnItemClickListener {
+public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener {
     public final static String TAG = AlbumsFragment.class.getSimpleName();
 
     /**
@@ -83,8 +79,6 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
     private AlbumSelectedCallback mAlbumSelectCallback;
 
-    private ConnectionStateListener mConnectionStateListener;
-
     private FABFragmentCallback mFABCallback = null;
 
 
@@ -115,7 +109,6 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         // register for context menu
         registerForContextMenu(mRootGrid);
 
-        mConnectionStateListener = new ConnectionStateListener(this);
 
         setHasOptionsMenu(true);
 
@@ -139,9 +132,6 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
-        MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
 
         if ( null != mFABCallback  ) {
             if ( null != mArtistName && !mArtistName.equals("")) {
@@ -154,14 +144,6 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
             }
         }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.v(TAG,"onPause");
-        getLoaderManager().destroyLoader(0);
-        MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
     }
 
     /**
@@ -326,25 +308,6 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         void onAlbumSelected(String albumname, String artistname);
     }
 
-    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
-        private AlbumsFragment pFragment;
-
-        public ConnectionStateListener(AlbumsFragment fragment) {
-            pFragment = fragment;
-        }
-
-        @Override
-        public void onConnected() {
-            // Prepare loader ( start new one or reuse old )
-            getLoaderManager().initLoader(0, getArguments(), pFragment);
-        }
-
-        @Override
-        public void onDisconnected() {
-            // Prepare loader ( start new one or reuse old )
-            getLoaderManager().destroyLoader(0);
-        }
-    }
 
     private void enqueueAlbum(int index) {
         MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
@@ -370,8 +333,4 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
-    private void refreshContent() {
-        getLoaderManager().destroyLoader(0);
-        getLoaderManager().restartLoader(0, getArguments(), this);
-    }
 }

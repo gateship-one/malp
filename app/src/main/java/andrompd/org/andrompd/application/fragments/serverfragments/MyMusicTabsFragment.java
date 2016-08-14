@@ -15,28 +15,25 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.application.fragments.database;
+package andrompd.org.andrompd.application.fragments.serverfragments;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.RemoteException;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 
 public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener{
     public final static String TAG = MyMusicTabsFragment.class.getSimpleName();
