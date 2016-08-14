@@ -78,8 +78,6 @@
     <string name="context_menu_action_removetrack">Remove track</string>
     <string name="context_menu_action_playplaylist">Play playlist</string>
     <string name="context_menu_action_deleteplaylist">Delete playlist</string>
-    <string name="context_menu_action_resumebookmark">Resume Bookmark</string>
-    <string name="context_menu_action_deletebookmark">Delete Bookmark</string>
     <string name="context_menu_action_enqueue_folder">Add folder to playlist</string>
     <string name="context_menu_action_play_folder">Play folder</string>
     <string name="context_menu_action_enqueue_file">Add file to playlist</string>
@@ -123,7 +121,6 @@
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>
-    <string name="dialog_create_bookmark">Create Bookmark</string>
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_save">Save</string>
     <string name="dialog_choose_playlist">Choose playlist</string>

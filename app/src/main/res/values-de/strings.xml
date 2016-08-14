@@ -17,7 +17,6 @@
   -->
 
 <resources>
-    <string name="app_name">MALP</string>
     <string name="action_add_album">Album hinzufügen</string>
     <string name="action_add_artist">Interpret hinzufügen</string>
     <string name="action_add_directory">Ordner hinzufügen</string>
@@ -40,7 +39,6 @@
     <string name="bitcount_unit">Bits</string>
     <string name="bitrate_unit_kilo_bits">kbps</string>
     <string name="channel_count_unit">Kanäle</string>
-    <string name="context_menu_action_deletebookmark"></string>
     <string name="context_menu_action_deleteplaylist">Wiedergabeliste entfernen</string>
     <string name="context_menu_action_enqueue">Hinzufügen</string>
     <string name="context_menu_action_enqueue_file">Lied hinzufügen</string>
@@ -53,7 +51,6 @@
     <string name="context_menu_action_playplaylist">Wiedergabeliste spielen</string>
     <string name="context_menu_action_removetrack">Lied entfernen</string>
     <string name="context_menu_action_playsong">Lied abspielen</string>
-    <string name="context_menu_action_resumebookmark"></string>
     <string name="context_menu_action_showalbum">Zeige Album</string>
     <string name="context_menu_action_showartist">Zeige Interpret</string>
     <string name="create_new_playlist">Neue Wiedergabeliste erstellen</string>
