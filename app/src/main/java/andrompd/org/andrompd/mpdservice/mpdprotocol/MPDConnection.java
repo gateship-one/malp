@@ -1494,7 +1494,7 @@ public class MPDConnection {
             try {
                 return checkResponse();
             } catch (IOException e) {
-                e.printStackTrace();-
+                e.printStackTrace();
             }
             return false;
         }
