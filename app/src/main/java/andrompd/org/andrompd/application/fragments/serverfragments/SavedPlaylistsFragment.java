@@ -37,6 +37,7 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
+import andrompd.org.andrompd.application.callbacks.PlaylistCallback;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -58,7 +59,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
     /**
      * Callback for activity this fragment gets attached to
      */
-    private SavedPlaylistsCallback mCallback;
+    private PlaylistCallback mCallback;
 
     /**
      * Save the swipe layout for later usage
@@ -128,7 +129,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
         // This makes sure that the container activity has implemented
         // the callback interface. If not, it throws an exception
         try {
-            mCallback = (SavedPlaylistsCallback) context;
+            mCallback = (PlaylistCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
@@ -231,9 +232,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
         }
     }
 
-    public interface SavedPlaylistsCallback {
-        void openPlaylist(String name);
-    }
+
 
 
 }

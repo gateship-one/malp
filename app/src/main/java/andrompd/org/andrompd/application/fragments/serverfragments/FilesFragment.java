@@ -19,6 +19,7 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
+import andrompd.org.andrompd.application.callbacks.PlaylistCallback;
 import andrompd.org.andrompd.application.loaders.FilesLoader;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -39,6 +40,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     private FABFragmentCallback mFABCallback = null;
 
     private FilesCallback mCallback;
+
+    private PlaylistCallback mPlaylistCallback;
 
     private String mPath;
 
@@ -128,6 +131,14 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         // the callback interface. If not, it throws an exception
         try {
             mCallback = (FilesCallback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
+        }
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mPlaylistCallback = (PlaylistCallback) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnArtistSelectedListener");
         }
@@ -245,6 +256,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
         if (file instanceof MPDDirectory) {
             mCallback.openPath(file.getPath());
+        } else if (file instanceof MPDPlaylist) {
+            mPlaylistCallback.openPlaylist(file.getPath());
         }
     }
 

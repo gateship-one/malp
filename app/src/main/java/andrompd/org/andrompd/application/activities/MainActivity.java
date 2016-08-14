@@ -47,6 +47,7 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.ConnectionManager;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.callbacks.OnSaveDialogListener;
+import andrompd.org.andrompd.application.callbacks.PlaylistCallback;
 import andrompd.org.andrompd.application.callbacks.ProfileManageCallbacks;
 import andrompd.org.andrompd.application.fragments.EditProfileFragment;
 import andrompd.org.andrompd.application.fragments.ProfilesFragment;
@@ -71,7 +72,7 @@ import andrompd.org.andrompd.mpdservice.profilemanagement.MPDServerProfile;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
-        ProfileManageCallbacks, SavedPlaylistsFragment.SavedPlaylistsCallback,
+        ProfileManageCallbacks, PlaylistCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener, FilesFragment.FilesCallback,
         FABFragmentCallback {
 
