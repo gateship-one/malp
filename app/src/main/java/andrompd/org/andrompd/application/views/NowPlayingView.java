@@ -24,18 +24,23 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
+
+import org.w3c.dom.Text;
 
 import java.util.Timer;
 
@@ -161,6 +166,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private TextView mTrackAdditionalInfo;
     private TextView mElapsedTime;
     private TextView mDuration;
+
+    private TextView mTrackNo;
+    private TextView mPlaylistNo;
+    private TextView mBitrate;
+    private TextView mAudioProperties;
+    private TextView mTrackURI;
+
+
+
 
     private MPDCurrentStatus mLastStatus;
 
@@ -531,11 +545,16 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         LayoutParams layoutParams = (LayoutParams) mHeaderTextLayout.getLayoutParams();
         layoutParams.setMarginEnd((int) (mTopPlaylistButton.getMeasuredHeight() * (1.0 - mDragOffset)));
         mHeaderTextLayout.setLayoutParams(layoutParams);
+
+
+        ViewGroup.LayoutParams imageParams = mCoverImage.getLayoutParams();
+        imageParams.height = mViewSwitcher.getMeasuredHeight();
+        mCoverImage.setLayoutParams(imageParams);
     }
 
     /**
      * Called after the layout inflater is finished.
-     * Sets all global view variables to the ones inflatd.
+     * Sets all global view variables to the ones inflated.
      */
     @Override
     protected void onFinishInflate() {
@@ -582,6 +601,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // For marquee scrolling the TextView need selected == true
         mTrackAdditionalInfo.setSelected(true);
 
+        mTrackNo = (TextView) findViewById(R.id.now_playing_text_track_no);
+        mPlaylistNo = (TextView) findViewById(R.id.now_playing_text_playlist_no);
+        mBitrate = (TextView) findViewById(R.id.now_playing_text_bitrate);
+        mAudioProperties = (TextView) findViewById(R.id.now_playing_text_audio_properties);
+        mTrackURI = (TextView) findViewById(R.id.now_playing_text_track_uri);
+
         // Textviews directly under the seekbar
         mElapsedTime = (TextView) findViewById(R.id.now_playing_elapsedTime);
         mDuration = (TextView) findViewById(R.id.now_playing_duration);
@@ -612,7 +637,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     MPDCommandHandler.play();
                 } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
                     int lastIndex = mLastStatus.getCurrentSongIndex();
-                    if ( lastIndex >= 0 ) {
+                    if (lastIndex >= 0) {
                         MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
                     } else {
                         MPDCommandHandler.playSongIndex(0);
@@ -696,7 +721,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                         MPDCommandHandler.play();
                     } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
                         int lastIndex = mLastStatus.getCurrentSongIndex();
-                        if ( lastIndex >= 0 ) {
+                        if (lastIndex >= 0) {
                             MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
                         } else {
                             MPDCommandHandler.playSongIndex(0);
@@ -737,6 +762,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
         invalidate();
+
+
     }
 
     /**
@@ -790,6 +817,9 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 newTop + mHeaderView.getMeasuredHeight(),
                 r,
                 newTop + b);
+
+
+
     }
 
     /**
@@ -886,7 +916,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // Update volume seekbar
         mVolumeSeekbar.setProgress(status.getVolume());
 
+
+        mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex()) + getResources().getString(R.string.track_number_album_count_separator) +
+                String.valueOf(status.getPlaylistLength()));
+
         mLastStatus = status;
+
+        mBitrate.setText(status.getBitrate() + getResources().getString(R.string.bitrate_unit_kilo_bits));
+
+        // Set audio properties string
+        String properties = status.getSamplerate() + getResources().getString(R.string.samplerate_unit_hertz) + ' ';
+        properties += status.getBitDepth() + getResources().getString(R.string.bitcount_unit) + ' ';
+        properties += status.getChannelCount() + getResources().getString(R.string.channel_count_unit);
+        mAudioProperties.setText(properties);
     }
 
     private void updateMPDCurrentTrack(MPDFile track) {
@@ -897,6 +939,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mHeaderTextLayout.getLayoutParams();
         layoutParams.setMarginEnd((int) (mTopPlaylistButton.getWidth() * (1.0 - mDragOffset)));
         mHeaderTextLayout.setLayoutParams(layoutParams);
+
+        mTrackURI.setText(track.getPath());
+        if (track.getAlbumTrackCount() != 0) {
+            mTrackNo.setText(String.valueOf(track.getTrackNumber()) + getResources().getString(R.string.track_number_album_count_separator) +
+                    String.valueOf(track.getAlbumTrackCount()));
+        } else {
+            mTrackNo.setText(String.valueOf(track.getTrackNumber()));
+        }
+
     }
 
 

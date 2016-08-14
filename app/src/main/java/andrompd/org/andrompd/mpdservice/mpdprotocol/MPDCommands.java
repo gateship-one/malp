@@ -54,6 +54,7 @@ public class MPDCommands {
     public static final String MPD_COMMAND_STOP = "stop";
 
     public static final String MPD_COMMAND_GET_CURRENT_STATUS = "status";
+    public static final String MPD_COMMAND_GET_STATISTICS = "stats";
 
     public static final String MPD_COMMAND_GET_SAVED_PLAYLISTS = "listplaylists";
 
@@ -148,4 +149,6 @@ public class MPDCommands {
     public static String MPD_COMMAND_TOGGLE_OUTPUT(int id) {
         return "toggleoutput " + String.valueOf(id);
     }
+
+    public static final String MPD_COMMAND_UPDATE_DATABASE = "update";
 }

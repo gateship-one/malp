@@ -60,6 +60,7 @@ import andrompd.org.andrompd.application.fragments.database.MyMusicTabsFragment;
 import andrompd.org.andrompd.application.fragments.database.OutputsFragment;
 import andrompd.org.andrompd.application.fragments.database.PlaylistTracksFragment;
 import andrompd.org.andrompd.application.fragments.database.SavedPlaylistsFragment;
+import andrompd.org.andrompd.application.fragments.database.ServerStatisticFragment;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
 import andrompd.org.andrompd.application.views.NowPlayingView;
@@ -330,6 +331,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_outputs) {
             fragment = new OutputsFragment();
             fragmentTag = OutputsFragment.TAG;
+        } else if (id == R.id.nav_statistic) {
+            fragment = new ServerStatisticFragment();
+            fragmentTag = ServerStatisticFragment.TAG;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

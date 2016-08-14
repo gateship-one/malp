@@ -56,6 +56,7 @@
     <string name="menu_playlists">Playlists</string>
     <string name="menu_outputs">Outputs</string>
     <string name="menu_files">Files</string>
+    <string name="menu_statistic">Statistic</string>
     <string name="menu_app_settings">App settings</string>
 
     <string name="menu_albums">Albums</string>
@@ -63,7 +64,8 @@
 
     <!-- seperator -->
     <string name="track_item_separator" translatable="false">" - "</string>
-    <string name="profiles_item_port_separator" translatable="false">" : "</string>
+    <string name="profiles_item_port_separator" translatable="false">":"</string>
+    <string name="track_number_album_count_separator" translatable="false">" / "</string>
 
     <!-- context menu titles -->
     <string name="context_menu_action_enqueue">Add to playlist</string>
@@ -94,6 +96,30 @@
     <string name="fragment_profile_password">Password:</string>
     <string name="fragment_profile_port">Port:</string>
     <string name="fragment_profile_auto_connect">Connect automatically:</string>
+
+    <!-- Now playing view text view values -->
+    <string name="now_playing_track_no">Track No.:</string>
+    <string name="now_playing_playlist_no">Playlist No.:</string>
+    <string name="now_playing_bitrate">Bitrate:</string>
+    <string name="now_playing_audio_properties">Audio properties:</string>
+    <string name="now_playing_file_uri">Track URI.:</string>
+
+    <string name="bitrate_unit_kilo_bits">kbps</string>
+    <string name="samplerate_unit_hertz">Hz</string>
+    <string name="bitcount_unit">bits</string>
+    <string name="channel_count_unit">channels</string>
+
+    <!-- Server statistics text view values -->
+    <string name="server_statistic_artists_count">Number of artists:</string>
+    <string name="server_statistic_albums_count">Number of albums:</string>
+    <string name="server_statistic_songs_count">Number of songs:</string>
+
+    <string name="server_statistic_uptime">Number of songs:</string>
+    <string name="server_statistic_db_playtime">Duration of whole database:</string>
+    <string name="server_statistic_playtime">Recorded play time:</string>
+    <string name="server_statistic_db_update">Last database update:</string>
+
+    <string name="server_statistic_update_database">Update server database</string>
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>

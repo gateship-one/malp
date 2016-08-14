@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2016  Hendrik Borghorst
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/material_screen_edge_spacing">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_artists_count"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_artist_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_albums_count"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_albums_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_songs_count"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_songs_count"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_playtime"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_server_playtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_uptime"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_server_uptime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_db_playtime"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_db_playtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-regular"
+        android:paddingTop="@dimen/material_content_spacing"
+        android:text="@string/server_statistic_db_update"
+        android:textColor="?android:textColorSecondary"
+        android:textSize="@dimen/material_font_style_size_body_1" />
+
+    <TextView
+        android:id="@+id/server_statistic_db_update"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:fontFamily="sans-serif-medium"
+        android:textColor="?android:textColorPrimary"
+        android:textSize="@dimen/material_font_style_size_body_2" />
+    <Button
+        android:id="@+id/server_statistic_update_db_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/server_statistic_update_database"/>
+
+
+</LinearLayout>

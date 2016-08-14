@@ -56,6 +56,11 @@
                 android:id="@+id/nav_outputs"
                 android:icon="@drawable/ic_hearing_black_24dp"
                 android:title="@string/menu_outputs" />
+            <item
+                android:checkable="true"
+                android:id="@+id/nav_statistic"
+                android:icon="@drawable/ic_statistics_black_24dp"
+                android:title="@string/menu_statistic" />
         </menu>
     </item>
 

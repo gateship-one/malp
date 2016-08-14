@@ -40,6 +40,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 
 public class MPDConnection {
@@ -1059,6 +1060,45 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Requests the server statistics package from the mpd server.
+     *
+     * @return The CurrentStatus object with all gathered information.
+     */
+    public MPDStatistics getServerStatistics() throws IOException {
+        synchronized (this) {
+            MPDStatistics stats = new MPDStatistics();
+
+        /* Request status */
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_STATISTICS);
+
+        /* Response line from MPD */
+            String response;
+            while (readyRead()) {
+                response = pReader.readLine();
+
+                if (response.startsWith(MPDResponses.MPD_STATS_UPTIME)) {
+                    stats.setServerUptime(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_UPTIME.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_PLAYTIME)) {
+                    stats.setPlayDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_PLAYTIME.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_ARTISTS)) {
+                    stats.setArtistsCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ARTISTS.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_ALBUMS)) {
+                    stats.setAlbumCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ALBUMS.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_SONGS)) {
+                    stats.setSongCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_SONGS.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_DB_PLAYTIME)) {
+                    stats.setAllSongDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_DB_PLAYTIME.length())));
+                } else if (response.startsWith(MPDResponses.MPD_STATS_DB_LAST_UPDATE)) {
+                    stats.setLastDBUpdate(Long.valueOf(response.substring(MPDResponses.MPD_STATS_DB_LAST_UPDATE.length())));
+                }
+            }
+
+            startIdleWait();
+            return stats;
+        }
+    }
+
 
     public MPDFile getCurrentSong() throws IOException {
         synchronized (this) {
@@ -1436,18 +1476,18 @@ public class MPDConnection {
         /* Response line from MPD */
         String response = pReader.readLine();
         while (!response.startsWith("OK") && !response.startsWith("ACK")) {
-            if ( response.startsWith(MPDResponses.MPD_OUTPUT_ID) ) {
-                if ( null != outputName ) {
+            if (response.startsWith(MPDResponses.MPD_OUTPUT_ID)) {
+                if (null != outputName) {
                     MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
                     outputList.add(tempOutput);
                 }
                 outputId = Integer.valueOf(response.substring(MPDResponses.MPD_OUTPUT_ID.length()));
-            } else if ( response.startsWith(MPDResponses.MPD_OUTPUT_NAME)) {
+            } else if (response.startsWith(MPDResponses.MPD_OUTPUT_NAME)) {
                 outputName = response.substring(MPDResponses.MPD_OUTPUT_NAME.length());
-            } else if ( response.startsWith(MPDResponses.MPD_OUTPUT_ACTIVE)) {
+            } else if (response.startsWith(MPDResponses.MPD_OUTPUT_ACTIVE)) {
                 String activeRespsonse = response.substring(MPDResponses.MPD_OUTPUT_ACTIVE.length());
-                Log.v(TAG,"Active response: " + activeRespsonse);
-                if ( activeRespsonse.equals("1") ) {
+                Log.v(TAG, "Active response: " + activeRespsonse);
+                if (activeRespsonse.equals("1")) {
                     outputActive = true;
                 } else {
                     outputActive = false;
@@ -1457,7 +1497,7 @@ public class MPDConnection {
         }
 
         // Add remaining output to list
-        if ( null != outputName ) {
+        if (null != outputName) {
             MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
             outputList.add(tempOutput);
         }
@@ -1488,6 +1528,20 @@ public class MPDConnection {
                 return checkResponse();
             } catch (IOException e) {
                 handleReadError();
+            }
+            return false;
+        }
+    }
+
+    public boolean updateDatabase() {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE);
+
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             return false;
         }

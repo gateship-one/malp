@@ -33,12 +33,14 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseArti
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseOutputList;
+import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
     private static final String TAG = "MPDQueryHandler";
@@ -332,6 +334,22 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = outputList;
             responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SERVER_STATISTICS) {
+            responseHandler = mpdAction.getResponseHandler();
+
+            MPDStatistics stats = null;
+            try {
+                stats = mMPDConnection.getServerStatistics();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = stats;
+            responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE) {
+
+            mMPDConnection.updateDatabase();
         }
     }
 
@@ -751,6 +769,31 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             return;
         }
         action.setResponseHandler(responseHandler);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void getStatistics(MPDResponseServerStatistics responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SERVER_STATISTICS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void updateDatabase() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
 
         msg.obj = action;
 

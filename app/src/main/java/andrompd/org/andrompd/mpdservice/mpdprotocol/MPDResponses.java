@@ -65,4 +65,12 @@ public class MPDResponses {
     public static final String MPD_OUTPUT_ID = "outputid: ";
     public static final String MPD_OUTPUT_NAME = "outputname: ";
     public static final String MPD_OUTPUT_ACTIVE = "outputenabled: ";
+
+    public static final String MPD_STATS_UPTIME = "uptime: ";
+    public static final String MPD_STATS_PLAYTIME = "playtime: ";
+    public static final String MPD_STATS_ARTISTS = "artists: ";
+    public static final String MPD_STATS_ALBUMS = "albums: ";
+    public static final String MPD_STATS_SONGS = "songs: ";
+    public static final String MPD_STATS_DB_PLAYTIME = "db_playtime: ";
+    public static final String MPD_STATS_DB_LAST_UPDATE = "db_update: ";
 }

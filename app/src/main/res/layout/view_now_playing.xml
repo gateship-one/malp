@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2016  Hendrik Borghorst & Frederik Luetkes
   ~
   ~ This program is free software: you can redistribute it and/or modify
@@ -63,12 +62,12 @@
                     android:id="@+id/now_playing_trackName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:singleLine="true"
-                    android:focusable="true"
                     android:ellipsize="marquee"
-                    android:scrollHorizontally="true"
+                    android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
                     android:marqueeRepeatLimit="marquee_forever"
-                    android:fontFamily="sans-serif-medium" />
+                    android:scrollHorizontally="true"
+                    android:singleLine="true" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -79,12 +78,12 @@
                         android:id="@+id/now_playing_track_additional_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:singleLine="true"
-                        android:focusable="true"
                         android:ellipsize="marquee"
-                        android:scrollHorizontally="true"
-                        android:marqueeRepeatLimit="marquee_forever"
+                        android:focusable="true"
                         android:fontFamily="sans-serif-regular"
+                        android:marqueeRepeatLimit="marquee_forever"
+                        android:scrollHorizontally="true"
+                        android:singleLine="true"
                         android:textColor="?android:attr/textColorPrimary" />
 
                 </LinearLayout>
@@ -92,51 +91,51 @@
             </LinearLayout>
 
 
-                <LinearLayout
-                    android:id="@+id/now_playing_layout_dragged_up"
-                    android:layout_width="wrap_content"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_alignParentEnd="true">
+            <LinearLayout
+                android:id="@+id/now_playing_layout_dragged_up"
+                android:layout_width="wrap_content"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_alignParentEnd="true">
 
-                    <ImageButton
-                        android:id="@+id/now_playing_topPlaylistButton"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="?android:selectableItemBackground"
-                        android:baselineAlignBottom="false"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_queue_music_24dp"
-                        android:tint="@color/colorTextLight"
-                        android:layout_gravity="center"/>
-
-                    <ImageButton
-                        android:id="@+id/now_playing_topMenuButton"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="?android:selectableItemBackground"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_more_vert_24dp"
-                        android:tint="@color/colorTextLight"
-                        android:layout_gravity="center"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/now_playing_layout_dragged_down"
+                <ImageButton
+                    android:id="@+id/now_playing_topPlaylistButton"
                     android:layout_width="48dp"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_alignEnd="@+id/now_playing_layout_dragged_up">
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="?android:selectableItemBackground"
+                    android:baselineAlignBottom="false"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_queue_music_24dp"
+                    android:tint="@color/colorTextLight" />
 
-                    <ImageButton
-                        android:id="@+id/now_playing_topPlayPauseButton"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:background="?android:selectableItemBackground"
-                        android:baselineAlignBottom="false"
-                        android:scaleType="centerInside"
-                        android:src="@drawable/ic_play_arrow_48dp"
-                        android:tint="@color/colorTextLight"
-                        android:layout_gravity="center"/>
-                </LinearLayout>
+                <ImageButton
+                    android:id="@+id/now_playing_topMenuButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="?android:selectableItemBackground"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_more_vert_24dp"
+                    android:tint="@color/colorTextLight" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/now_playing_layout_dragged_down"
+                android:layout_width="48dp"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_alignEnd="@+id/now_playing_layout_dragged_up">
+
+                <ImageButton
+                    android:id="@+id/now_playing_topPlayPauseButton"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_gravity="center"
+                    android:background="?android:selectableItemBackground"
+                    android:baselineAlignBottom="false"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_play_arrow_48dp"
+                    android:tint="@color/colorTextLight" />
+            </LinearLayout>
 
         </RelativeLayout>
 
@@ -161,11 +160,120 @@
                     android:inAnimation="@anim/fade_in"
                     android:outAnimation="@anim/fade_out">
 
-                    <ImageView
-                        android:id="@+id/now_playing_cover"
+                    <ScrollView
+                        android:id="@+id/now_playing_view_cover_layout"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/cover_placeholder" />
+                        android:layout_height="match_parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+
+                            android:orientation="vertical">
+
+
+                            <ImageView
+                                android:id="@+id/now_playing_cover"
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:src="@drawable/cover_placeholder" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:orientation="vertical"
+                                android:paddingBottom="@dimen/material_content_spacing"
+                                android:paddingStart="@dimen/material_screen_edge_spacing"
+                                android:paddingEnd="@dimen/material_screen_edge_spacing"
+                                >
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-regular"
+                                    android:paddingTop="@dimen/material_content_spacing"
+                                    android:text="@string/now_playing_track_no"
+                                    android:textColor="?android:textColorSecondary"
+                                    android:textSize="@dimen/material_font_style_size_body_1" />
+
+                                <TextView
+                                    android:id="@+id/now_playing_text_track_no"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="@dimen/material_font_style_size_body_2" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-regular"
+                                    android:text="@string/now_playing_playlist_no"
+                                    android:textColor="?android:textColorSecondary"
+                                    android:textSize="@dimen/material_font_style_size_body_1"
+                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+
+                                <TextView
+                                    android:id="@+id/now_playing_text_playlist_no"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="@dimen/material_font_style_size_body_2" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-regular"
+                                    android:text="@string/now_playing_bitrate"
+                                    android:textColor="?android:textColorSecondary"
+                                    android:textSize="@dimen/material_font_style_size_body_1"
+                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+
+                                <TextView
+                                    android:id="@+id/now_playing_text_bitrate"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="@dimen/material_font_style_size_body_2" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-regular"
+                                    android:text="@string/now_playing_audio_properties"
+                                    android:textColor="?android:textColorSecondary"
+                                    android:textSize="@dimen/material_font_style_size_body_1"
+                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+
+                                <TextView
+                                    android:id="@+id/now_playing_text_audio_properties"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="@dimen/material_font_style_size_body_2" />
+
+                                <TextView
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-regular"
+                                    android:text="@string/now_playing_file_uri"
+                                    android:textColor="?android:textColorSecondary"
+                                    android:textSize="@dimen/material_font_style_size_body_1"
+                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+
+                                <TextView
+                                    android:id="@+id/now_playing_text_track_uri"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:fontFamily="sans-serif-medium"
+                                    android:textColor="?android:textColorPrimary"
+                                    android:textSize="@dimen/material_font_style_size_body_2" />
+                            </LinearLayout>
+                        </LinearLayout>
+                    </ScrollView>
+
 
                     <andrompd.org.andrompd.application.views.CurrentPlaylistView
                         android:id="@+id/now_playing_playlist"
@@ -212,21 +320,23 @@
 
                 <LinearLayout
                     android:id="@+id/volume_seekbar_layout"
-                    android:background="?attr/colorPrimary"
-                    android:paddingStart="@dimen/material_screen_edge_spacing"
-                    android:paddingEnd="@dimen/material_screen_edge_spacing"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorPrimary"
+                    android:paddingEnd="@dimen/material_screen_edge_spacing"
+                    android:paddingStart="@dimen/material_screen_edge_spacing">
+
                     <ImageView
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:tint="?android:textColor"
-                        android:src="@drawable/ic_volume_up_black_48dp"/>
+                        android:src="@drawable/ic_volume_up_black_48dp"
+                        android:tint="?android:textColor" />
+
                     <SeekBar
                         android:id="@+id/volume_seekbar"
-                        android:layout_gravity="center_vertical"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -266,6 +376,7 @@
                         android:scaleType="fitCenter"
                         android:src="@drawable/ic_play_circle_fill_48dp"
                         android:tint="@color/colorTextLight" />
+
                     <ImageButton
                         android:id="@+id/now_playing_bottomStopButton"
                         android:layout_width="0px"
