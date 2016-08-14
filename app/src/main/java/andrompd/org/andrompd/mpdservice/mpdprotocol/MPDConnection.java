@@ -35,6 +35,7 @@ import java.util.concurrent.Semaphore;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;

@@ -35,7 +35,7 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFile
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;

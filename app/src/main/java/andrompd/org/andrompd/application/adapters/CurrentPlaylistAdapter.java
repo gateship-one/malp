@@ -37,7 +37,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 

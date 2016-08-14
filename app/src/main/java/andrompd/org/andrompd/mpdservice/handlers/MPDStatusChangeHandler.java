@@ -20,7 +20,7 @@ package andrompd.org.andrompd.mpdservice.handlers;
 import android.os.Handler;
 import android.os.Message;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 /**

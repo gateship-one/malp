@@ -32,7 +32,7 @@ import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {

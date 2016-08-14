@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
 
 import android.os.Parcel;

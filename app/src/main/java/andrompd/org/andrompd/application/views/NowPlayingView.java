@@ -48,8 +48,8 @@ import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler
 import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
+import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener {
