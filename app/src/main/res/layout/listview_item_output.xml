@@ -29,6 +29,9 @@
     android:text="Bla"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:textSize="@dimen/material_font_style_size_body_2"
+    android:fontFamily="sans-serif-medium"
+    android:textColor="?android:textColorPrimary"
     android:gravity="center"
     android:checkMark="?android:attr/listChoiceIndicatorMultiple"
     />
