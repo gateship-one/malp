@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2016  Hendrik Borghorst
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+    <string name="app_name">MALP</string>
+    <string name="action_add_album">Album hinzufügen</string>
+    <string name="action_add_artist">Interpret hinzufügen</string>
+    <string name="action_add_directory">Ordner hinzufügen</string>
+    <string name="action_add_playlist">Wiedergabeliste hinzufügen</string>
+    <string name="action_add_profile">Profil hinzufügen</string>
+    <string name="action_connect_profile">Profil verbinden</string>
+    <string name="action_edit_profile">Profil bearbeiten</string>
+    <string name="action_play_album">Album abspielen</string>
+    <string name="action_play_artist">Interpret abspielen</string>
+    <string name="action_play_directory">Ordner abspielen</string>
+    <string name="action_play_everything">Alles abspielen</string>
+    <string name="action_play_playlist">Wiedergabeliste abspielen</string>
+    <string name="action_remove_playlist">Wiedergabeliste entfernen</string>
+    <string name="action_remove_profile">Profil entfernen</string>
+    <string name="action_settings">Einstellungen</string>
+    <string name="action_show_album">Album anzeigen</string>
+    <string name="action_show_all_tracks">Alle Lieder anzeigen</string>
+    <string name="action_show_artist">Interpret anzeigen</string>
+    <string name="activity_about_version">Version:</string>
+    <string name="bitcount_unit">Bits</string>
+    <string name="bitrate_unit_kilo_bits">kbps</string>
+    <string name="channel_count_unit">Kanäle</string>
+    <string name="context_menu_action_deletebookmark"></string>
+    <string name="context_menu_action_deleteplaylist">Wiedergabeliste entfernen</string>
+    <string name="context_menu_action_enqueue">Hinzufügen</string>
+    <string name="context_menu_action_enqueue_file">Lied hinzufügen</string>
+    <string name="context_menu_action_enqueue_folder">Ordner hinzufügen</string>
+    <string name="context_menu_action_play_file">Lied abspielen</string>
+    <string name="context_menu_action_enqueueasnext">Als nächstes wiedergeben</string>
+    <string name="context_menu_action_play_folder">Ordner abspielen</string>
+    <string name="context_menu_action_playalbum">Album abspielen</string>
+    <string name="context_menu_action_playalbums">Alben abspielen</string>
+    <string name="context_menu_action_playplaylist">Wiedergabeliste spielen</string>
+    <string name="context_menu_action_removetrack">Lied entfernen</string>
+    <string name="context_menu_action_playsong">Lied abspielen</string>
+    <string name="context_menu_action_resumebookmark"></string>
+    <string name="context_menu_action_showalbum">Zeige Album</string>
+    <string name="context_menu_action_showartist">Zeige Interpret</string>
+    <string name="create_new_playlist">Neue Wiedergabeliste erstellen</string>
+    <string name="default_playlist_title">Wiedergabeliste</string>
+    <string name="dialog_action_cancel">Abbrechen</string>
+    <string name="dialog_action_save">Speichern</string>
+    <string name="dialog_choose_playlist">Wiedergabeliste auswählen</string>
+    <string name="dialog_save_playlist">Wiedergabeliste abspeichern</string>
+    <string name="fragment_profile_auto_connect">Automatisch verbinden:</string>
+    <string name="fragment_profile_hostname">Hostname:</string>
+    <string name="fragment_profile_password">Passwort:</string>
+    <string name="fragment_profile_port">Port:</string>
+    <string name="fragment_profile_profilename">Profilname:</string>
+    <string name="fragment_profile_title">Profil beabeiten</string>
+    <string name="license_text">Diese Anwendung ist unter der GPLv3 Lizenz lizenziert.\n Material Icons sind unter der CC-BY Lizenz durch Google lizenziert.</string>
+    <string name="menu_albums">Alben</string>
+    <string name="menu_app_settings">Anwendungseinstellungen</string>
+    <string name="menu_artists">Interpreten</string>
+    <string name="menu_files">Dateien</string>
+    <string name="menu_library">Bibliothek</string>
+    <string name="menu_outputs">Ausgänge</string>
+    <string name="menu_playlists">Wiedergabelisten</string>
+    <string name="menu_profiles">Profile</string>
+    <string name="menu_server">Servereigenschaften</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_statistic">Statistik</string>
+    <string name="navigation_drawer_close">Navigationsleiste schließen</string>
+    <string name="navigation_drawer_open">Navigationsleiste öffnen</string>
+    <string name="now_playing_audio_properties">Audioeigenschaften:</string>
+    <string name="now_playing_bitrate">Bitrate:</string>
+    <string name="now_playing_file_uri">Lied-URL:</string>
+    <string name="now_playing_playlist_no">Playlist-Nr.:</string>
+    <string name="now_playing_track_no">Lied-Nr.:</string>
+    <string name="popup_menu_action_clearplaylist">Wiedergabeliste leeren</string>
+    <string name="popup_menu_action_saveplaylist">Wiedergabeliste speichern</string>
+    <string name="preference_default_view_message">Standardansicht wählen</string>
+    <string name="preference_default_view_my_music_albums">Alben</string>
+    <string name="preference_default_view_my_music_artists">Interpreten</string>
+    <string name="preference_default_view_my_music_files">Dateien</string>
+    <string name="preference_default_view_my_music_playlists">Wiedergabelisten</string>
+    <string name="preference_default_view_summary">Wähle die Standardansicht der Anwendung.</string>
+    <string name="preference_default_view_title">Standardansicht</string>
+    <string name="preference_launch_about">Über</string>
+    <string name="preference_theme_item_blue">Blau</string>
+    <string name="preference_theme_item_brown">Braun</string>
+    <string name="preference_theme_item_dark_grey">Dunkles Grau</string>
+    <string name="preference_theme_item_deep_orange">Dunkles Orange</string>
+    <string name="preference_theme_item_indigo">Indigo</string>
+    <string name="preference_theme_item_light_green">Helles Grün</string>
+    <string name="preference_theme_item_orange">Orange</string>
+    <string name="preference_theme_summary">Wähle ein anderes Design für die Anwendung.</string>
+    <string name="preference_theme_message">Wähle ein Design für die Anwendung.</string>
+    <string name="preference_theme_title">Design</string>
+    <string name="server_statistic_albums_count">Anzahl der Alben:</string>
+    <string name="server_statistic_artists_count">Anzahl der Interpreten:</string>
+    <string name="server_statistic_db_playtime">Laufzeit der gesamten Datenbank:</string>
+    <string name="server_statistic_db_update">Letzte Datenbankaktualisierung</string>
+    <string name="server_statistic_playtime">Gespeicherte Wiedergabedauer:</string>
+    <string name="server_statistic_songs_count">Anzahl der Lieder:</string>
+    <string name="server_statistic_update_database">Serverdatenbank aktualisieren</string>
+    <string name="server_statistic_uptime">Laufzeit des MPD-Servers:</string>
+    <string name="sources_text">Der Quellcode ist auf GitHub verfügbar:\nhttps://github.com/djselbeck/AndroMPD</string>
+    <string name="acknowledgement_text">Ein riesen Dank geht an Frederik Lütkes, der mich stets motiviert hat an Odyssey zu arbeiten, ein Musikplayer, auf dem die Benutzeroberfläche dieser Anwendung basiert.</string>
+</resources>

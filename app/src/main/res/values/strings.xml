@@ -16,8 +16,8 @@
   -->
 
 <resources>
-    <string name="app_name">MALP</string>
-    <string name="app_name_nice">M.A.L.P.</string>
+    <string name="app_name" translatable="false">MALP</string>
+    <string name="app_name_nice" translatable="false">M.A.L.P.</string>
     <string name="authors" translatable="false">Hendrik Borghorst</string>
 
 
@@ -105,7 +105,7 @@
     <string name="now_playing_file_uri">Track URI.:</string>
 
     <string name="bitrate_unit_kilo_bits">kbps</string>
-    <string name="samplerate_unit_hertz">Hz</string>
+    <string name="samplerate_unit_hertz" translatable="false">Hz</string>
     <string name="bitcount_unit">bits</string>
     <string name="channel_count_unit">channels</string>
 
