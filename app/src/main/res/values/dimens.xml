@@ -49,4 +49,8 @@
     <dimen name="material_font_style_size_body_2">14sp</dimen>
     <dimen name="material_font_style_size_body_1">14sp</dimen>
     <dimen name="material_font_style_size_caption">12sp</dimen>
+
+    <!-- dimensions for grid items -->
+    <dimen name="grid_item_height">128dp</dimen>
+    <dimen name="grid_text_height">48dp</dimen>
 </resources>

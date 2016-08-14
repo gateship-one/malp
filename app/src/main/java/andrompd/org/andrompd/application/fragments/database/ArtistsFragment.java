@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -40,6 +41,7 @@ import andrompd.org.andrompd.application.adapters.ArtistsGridAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.ArtistsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
@@ -62,6 +64,11 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
      */
     private int mLastPosition;
 
+    /**
+     * Save the swipe layout for later usage
+     */
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private ArtistSelectedCallback mSelectedCallback;
 
     private ConnectionStateListener mConnectionStateListener;
@@ -73,13 +80,10 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
 
         // get gridview
-        mRootGrid = (GridView) rootView.findViewById(R.id.artists_gridview);
-
-        // add progressbar
-        mRootGrid.setEmptyView(rootView.findViewById(R.id.artists_progressbar));
+        mRootGrid = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
 
         mArtistAdapter = new ArtistsGridAdapter(getActivity(), mRootGrid);
 
@@ -91,6 +95,20 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         registerForContextMenu(mRootGrid);
 
         mConnectionStateListener = new ConnectionStateListener(this);
+
+        // get swipe layout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        // set swipe colors
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        // set swipe refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
 
         return rootView;
     }
@@ -168,6 +186,9 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
             mRootGrid.setSelection(mLastPosition);
             mLastPosition = -1;
         }
+
+        // change refresh state
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -259,5 +280,10 @@ public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCal
         MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
 
         MPDQueryHandler.playArtist(artist.getArtistName());
+    }
+
+    private void refreshContent() {
+        getLoaderManager().destroyLoader(0);
+        getLoaderManager().restartLoader(0, getArguments(), this);
     }
 }

@@ -25,6 +25,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -72,6 +73,11 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
      */
     private int mLastPosition;
 
+    /**
+     * Save the swipe layout for later usage
+     */
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
 
     private String mArtistName;
 
@@ -87,13 +93,10 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_artists, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
 
         // get gridview
-        mRootGrid = (GridView) rootView.findViewById(R.id.artists_gridview);
-
-        // add progressbar
-        mRootGrid.setEmptyView(rootView.findViewById(R.id.artists_progressbar));
+        mRootGrid = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
 
         mAlbumsAdapter = new AlbumsGridAdapter(getActivity(), mRootGrid);
 
@@ -115,6 +118,20 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         mConnectionStateListener = new ConnectionStateListener(this);
 
         setHasOptionsMenu(true);
+
+        // get swipe layout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        // set swipe colors
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        // set swipe refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
 
         return rootView;
     }
@@ -278,6 +295,9 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
             mRootGrid.setSelection(mLastPosition);
             mLastPosition = -1;
         }
+
+        // change refresh state
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -348,5 +368,10 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
         public void onClick(View v) {
             MPDQueryHandler.playArtist(mArtistName);
         }
+    }
+
+    private void refreshContent() {
+        getLoaderManager().destroyLoader(0);
+        getLoaderManager().restartLoader(0, getArguments(), this);
     }
 }

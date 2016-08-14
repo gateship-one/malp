@@ -16,32 +16,26 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/refresh_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
 
     <GridView
-        android:id="@+id/artists_gridview"
+        android:id="@+id/grid_refresh_gridview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:columnWidth="@dimen/artists_item_height"
-        android:fastScrollAlwaysVisible="true"
+        android:columnWidth="@dimen/grid_item_height"
+        android:fastScrollAlwaysVisible="false"
         android:fastScrollEnabled="true"
-        android:horizontalSpacing="4dp"
+        android:fastScrollStyle="?attr/colorAccent"
+        android:horizontalSpacing="8dp"
+        android:nestedScrollingEnabled="true"
         android:numColumns="auto_fit"
-        android:scrollbarStyle="outsideInset"
+        android:scrollbarStyle="outsideOverlay"
         android:scrollingCache="false"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="4dp"
-        android:fastScrollStyle="?attr/colorAccent"
-        android:nestedScrollingEnabled="true">
-    </GridView>
+        android:verticalSpacing="8dp" />
 
-    <ProgressBar
-        android:id="@+id/artists_progressbar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:visibility="gone" />
-
-</LinearLayout>
+</android.support.v4.widget.SwipeRefreshLayout>

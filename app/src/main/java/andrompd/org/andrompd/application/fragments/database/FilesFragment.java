@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -21,6 +22,7 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.FilesLoader;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
@@ -47,11 +49,16 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
      */
     private FileAdapter mAdapter;
 
+    /**
+     * Save the swipe layout for later usage
+     */
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.listview_layout, container, false);
+        View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
@@ -70,6 +77,21 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
         mListView.setAdapter(mAdapter);
         mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
+
+        // get swipe layout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        // set swipe colors
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        // set swipe refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
+
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -205,6 +227,8 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mAdapter.swapModel(data);
+        // change refresh state
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -237,5 +261,10 @@ public class FilesFragment extends Fragment implements LoaderManager.LoaderCallb
         public void onClick(View v) {
             MPDQueryHandler.playDirectory(mPath);
         }
+    }
+
+    private void refreshContent() {
+        getLoaderManager().destroyLoader(0);
+        getLoaderManager().restartLoader(0, getArguments(), this);
     }
 }
