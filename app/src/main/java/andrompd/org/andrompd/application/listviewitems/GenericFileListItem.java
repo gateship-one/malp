@@ -28,9 +28,9 @@ import android.widget.TextView;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 public class GenericFileListItem extends LinearLayout {
     TextView mNameView;

@@ -15,47 +15,59 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
 
-public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
-    /* Artist properties */
-    private String pArtistName;
+public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
+    /* Album properties */
+    private String pName;
 
     /* Musicbrainz ID */
     private String pMBID;
 
-    public MPDArtist(String name, String mbid) {
-        pArtistName = name;
+    /* Artists name (if any) */
+    private String pArtistName;
+
+    public MPDAlbum(String name, String mbid, String artist ) {
+        pName = name;
         pMBID = mbid;
+        pArtistName = artist;
     }
 
-    public String getArtistName() {
-        return pArtistName;
+    /* Getters */
+
+    public String getName() {
+        return pName;
     }
 
     public String getMBID() {
         return pMBID;
     }
 
-    @Override
-    public String getSectionTitle() {
+    public String getArtistName() {
         return pArtistName;
     }
 
-    public boolean equals(MPDArtist artist) {
-        if ((pArtistName.equals(artist.pArtistName)) &&
-                (pMBID.equals(artist.pMBID))) {
+
+
+    @Override
+    public String getSectionTitle() {
+        return pName;
+    }
+
+    public boolean equals(MPDAlbum album) {
+        if ( (pName.equals(album.pName)) && (pArtistName.equals(album.pArtistName)) &&
+                (pMBID.equals(album.pMBID))) {
             return true;
         }
         return false;
     }
 
     @Override
-    public int compareTo(MPDArtist another) {
-        if (another.equals(this)) {
+    public int compareTo(MPDAlbum another) {
+        if ( another.equals(this) ) {
             return 0;
         }
-        return pArtistName.toLowerCase().compareTo(another.pArtistName.toLowerCase());
+        return pName.toLowerCase().compareTo(another.pName.toLowerCase());
     }
 }

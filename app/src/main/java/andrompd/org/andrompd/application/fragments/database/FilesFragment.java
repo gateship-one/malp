@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ListView;
 
 import java.util.List;
@@ -23,10 +22,10 @@ import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.FilesLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 public class FilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AbsListView.OnItemClickListener {
     public static final String EXTRA_FILENAME = "filename";

@@ -26,8 +26,8 @@ import java.util.List;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
 public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {

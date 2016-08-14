@@ -23,7 +23,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 
 import andrompd.org.andrompd.application.listviewitems.ArtistGridViewItem;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
 

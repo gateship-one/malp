@@ -25,8 +25,7 @@ import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 /**
  * Loader class for albumtracks and artist album tracks

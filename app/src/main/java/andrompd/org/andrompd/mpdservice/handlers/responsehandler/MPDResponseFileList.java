@@ -20,13 +20,10 @@ package andrompd.org.andrompd.mpdservice.handlers.responsehandler;
 
 import android.os.Bundle;
 import android.os.Message;
-import android.util.Log;
 
 import java.util.List;
-import java.util.Set;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public abstract class MPDResponseFileList extends MPDResponseHandler {
     public static final String EXTRA_WINDOW_START = "windowstart";

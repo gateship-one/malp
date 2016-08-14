@@ -15,59 +15,47 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
 
-public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
-    /* Album properties */
-    private String pName;
+public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
+    /* Artist properties */
+    private String pArtistName;
 
     /* Musicbrainz ID */
     private String pMBID;
 
-    /* Artists name (if any) */
-    private String pArtistName;
-
-    public MPDAlbum(String name, String mbid, String artist ) {
-        pName = name;
+    public MPDArtist(String name, String mbid) {
+        pArtistName = name;
         pMBID = mbid;
-        pArtistName = artist;
-    }
-
-    /* Getters */
-
-    public String getName() {
-        return pName;
-    }
-
-    public String getMBID() {
-        return pMBID;
     }
 
     public String getArtistName() {
         return pArtistName;
     }
 
-
+    public String getMBID() {
+        return pMBID;
+    }
 
     @Override
     public String getSectionTitle() {
-        return pName;
+        return pArtistName;
     }
 
-    public boolean equals(MPDAlbum album) {
-        if ( (pName.equals(album.pName)) && (pArtistName.equals(album.pArtistName)) &&
-                (pMBID.equals(album.pMBID))) {
+    public boolean equals(MPDArtist artist) {
+        if ((pArtistName.equals(artist.pArtistName)) &&
+                (pMBID.equals(artist.pMBID))) {
             return true;
         }
         return false;
     }
 
     @Override
-    public int compareTo(MPDAlbum another) {
-        if ( another.equals(this) ) {
+    public int compareTo(MPDArtist another) {
+        if (another.equals(this)) {
             return 0;
         }
-        return pName.toLowerCase().compareTo(another.pName.toLowerCase());
+        return pArtistName.toLowerCase().compareTo(another.pArtistName.toLowerCase());
     }
 }

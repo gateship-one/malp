@@ -45,10 +45,8 @@ import andrompd.org.andrompd.application.loaders.AlbumsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
-import andrompd.org.andrompd.mpdservice.handlers.MPDStatusChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDAlbum>>, AdapterView.OnItemClickListener {
     public final static String TAG = AlbumsFragment.class.getSimpleName();

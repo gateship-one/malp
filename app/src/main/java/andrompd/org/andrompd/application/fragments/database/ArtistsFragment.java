@@ -42,8 +42,7 @@ import andrompd.org.andrompd.application.loaders.ArtistsLoader;
 import andrompd.org.andrompd.application.utils.ScrollSpeedListener;
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 public class ArtistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDArtist>>, AdapterView.OnItemClickListener {
     public final static String TAG = ArtistsFragment.class.getSimpleName();

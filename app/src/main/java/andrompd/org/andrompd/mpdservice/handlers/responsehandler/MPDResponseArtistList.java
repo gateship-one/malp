@@ -22,7 +22,7 @@ import android.os.Message;
 
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 /**
  * Response class for album lists.

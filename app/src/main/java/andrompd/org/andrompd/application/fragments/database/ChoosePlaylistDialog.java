@@ -38,8 +38,8 @@ import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.OnSaveDialogListener;
 import andrompd.org.andrompd.application.fragments.SaveDialog;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 public class ChoosePlaylistDialog extends DialogFragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>> {
 

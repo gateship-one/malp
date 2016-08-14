@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDGenericItem;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
 public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends BaseAdapter implements SectionIndexer, ScrollSpeedAdapter {
     private static final String TAG = "GenericSectionAdapter";

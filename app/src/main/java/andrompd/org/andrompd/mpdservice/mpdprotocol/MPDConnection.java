@@ -33,12 +33,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDArtist;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
 public class MPDConnection {

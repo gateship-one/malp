@@ -25,10 +25,10 @@ import android.view.ViewGroup;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.listviewitems.GenericFileListItem;
 import andrompd.org.andrompd.application.listviewitems.TrackListViewItem;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDDirectory;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 /**
  * Adapter class that creates all the listitems for an album track view

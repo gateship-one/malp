@@ -8,7 +8,7 @@ import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public class FilesLoader extends Loader<List<MPDFileEntry>> {
     private FilesResponseHandler mFilesResponseHandler;

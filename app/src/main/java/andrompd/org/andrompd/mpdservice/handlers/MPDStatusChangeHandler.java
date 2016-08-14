@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 /**
  * Class to handle status updates handled by the MPDStateMonitoringHandler

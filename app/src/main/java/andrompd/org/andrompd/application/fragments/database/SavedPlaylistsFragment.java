@@ -33,7 +33,6 @@ import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import java.io.File;
 import java.util.List;
 
 import andrompd.org.andrompd.R;
@@ -41,8 +40,8 @@ import andrompd.org.andrompd.application.adapters.FileAdapter;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.loaders.PlaylistsLoader;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDPlaylist;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 public class SavedPlaylistsFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>>, AbsListView.OnItemClickListener {
     public final static String TAG = SavedPlaylistsFragment.class.getSimpleName();

@@ -15,16 +15,21 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
-/**
- * Generic item to create a sectionizable item
- */
-public interface MPDGenericItem {
 
-    /**
-     * Generic function to get a string used for section indexing. Like the first letter of a title.
-     * @return The section title used for sectioning in the GUI.
-     */
-    String getSectionTitle();
+public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
+
+
+
+    public MPDPlaylist(String path) {
+        super(path);
+    }
+
+
+
+    @Override
+    public String getSectionTitle() {
+        return mPath;
+    }
 }

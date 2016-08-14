@@ -25,7 +25,7 @@ import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDAlbum;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 
 public class AlbumsLoader extends Loader<List<MPDAlbum>> {

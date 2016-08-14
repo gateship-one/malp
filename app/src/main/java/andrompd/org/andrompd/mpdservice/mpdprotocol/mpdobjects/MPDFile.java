@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
 
 public class MPDFile extends MPDFileEntry implements MPDGenericItem {

@@ -21,7 +21,7 @@ package andrompd.org.andrompd.mpdservice.profilemanagement;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDGenericItem;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
 public class MPDServerProfile implements MPDGenericItem, Parcelable {
     /**

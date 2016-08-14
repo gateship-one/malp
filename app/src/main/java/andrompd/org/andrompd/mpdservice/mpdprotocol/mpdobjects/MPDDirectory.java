@@ -15,31 +15,17 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase;
+package andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects;
 
-public abstract class MPDFileEntry implements MPDGenericItem {
-    protected String mPath;
 
-    // FIXME to some date format of java
-    protected String mLastModified;
+public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
 
-    protected MPDFileEntry(String path) {
-        mPath = path;
+    public MPDDirectory(String path) {
+        super(path);
     }
 
-    public void setPath(String path) {
-        mPath = path;
-    }
-
-    public String getPath() {
-        return mPath;
-    }
-
-    public void setLastModified(String lastModified) {
-        mLastModified = lastModified;
-    }
-
-    public String getLastModified() {
-        return mLastModified;
+    @Override
+    public String getSectionTitle() {
+        return "";
     }
 }

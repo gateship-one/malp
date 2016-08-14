@@ -28,7 +28,7 @@ import android.widget.ListView;
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.adapters.CurrentPlaylistAdapter;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFileEntry;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnItemClickListener {
     /**

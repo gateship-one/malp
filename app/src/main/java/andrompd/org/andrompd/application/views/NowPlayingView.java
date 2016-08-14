@@ -18,13 +18,8 @@
 
 package andrompd.org.andrompd.application.views;
 
-import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.ColorStateList;
-import android.os.RemoteException;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AppCompatActivity;
@@ -43,7 +38,6 @@ import android.widget.ViewSwitcher;
 
 
 import java.util.Timer;
-import java.util.TimerTask;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.fragments.database.ChoosePlaylistDialog;
@@ -55,7 +49,7 @@ import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDCommandHandler
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCurrentStatus;
-import andrompd.org.andrompd.mpdservice.mpdprotocol.mpddatabase.MPDFile;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener {
 
