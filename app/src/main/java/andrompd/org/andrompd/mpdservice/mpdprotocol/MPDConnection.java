@@ -42,6 +42,24 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
+/**
+ * This is the main MPDConnection class. It will connect to an MPD server via an java TCP socket.
+ * If no action, query, or other command to the server is send, this connection will immediately
+ * start to idle. This means that the connection is waiting for a response from the mpd server.
+ * <p/>
+ * For this this class spawns a new thread which is then blocked by the waiting read operation
+ * on the reader of the socket.
+ * <p/>
+ * If a new command is requested by the handler thread the stopIdling function is called, which
+ * will send the "noidle" command to the server and requests to deidle the connection. Only then the
+ * server is ready again to receive commands. If this is not done properly the server will just
+ * terminate the connection.
+ * <p/>
+ * This mpd connection needs to be run in a different thread than the UI otherwise the UI will block
+ * (or android will just throw an exception).
+ *
+ * For more information check the protocol definition of the mpd server or contact me via mail.
+ */
 
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
@@ -70,20 +88,46 @@ public class MPDConnection {
     private boolean pMPDConnectionIdle = false;
 
     /* MPD server properties */
+    // FIXME do some capability checking in respect to the server version
     private String pVersionString;
     private int pMajorVersion;
     private int pMinorVersion;
 
+    /**
+     * One listener for the state of the connection (connected, disconnected)
+     */
     private MPDConnectionStateChangeListener pStateListener = null;
 
+    /**
+     * One listener for the idle state of the connection. Can be used to react
+     * to changes to the server from other clients. When the server is deidled (from outside)
+     * it will notify this listener.
+     */
     private MPDConnectionIdleChangeListener pIdleListener = null;
 
+    /**
+     * Thread that will spawn when the server is not requested at the moment. Will start an
+     * blocking read operation on the socket reader.
+     */
     private Thread pIdleThread = null;
 
+    /**
+     * Timeout to start the actual idling thread. It will start after IDLE_WAIT_TIME milliseconds
+     * passed. To prevent interfering with possible handler calls at the same time
+     * all the methods that could be called from outside are synchronized to this MPDConnection class.
+     * This means that you have to be careful when calling these functions to prevent deadlocks.
+     */
     private Timer mIdleWait = null;
 
+    /**
+     * Semaphore lock used by the deidling process. Necessary to guarantee the correct order of
+     * deidling write / read operations.
+     */
     Semaphore mIdleWaitLock;
 
+    /**
+     * Saves if a deidle was requested by this connection or is triggered by another client/connection.
+     */
     boolean mRequestedDeidle;
 
     /**
@@ -103,21 +147,18 @@ public class MPDConnection {
     private void handleReadError() {
         Log.e(TAG, "Read error exception. Disconnecting and cleaning up");
 
-
         try {
             /* Clear reader/writer up */
             if (null != pReader) {
-                pReader.close();
                 pReader = null;
             }
             if (null != pWriter) {
-                pWriter.close();
                 pWriter = null;
             }
 
-
             /* Clear TCP-Socket up */
-            if (null != pSocket) {
+            if (null != pSocket && pSocket.isConnected()) {
+                pSocket.setSoTimeout(1000);
                 pSocket.close();
                 pSocket = null;
             }
@@ -129,16 +170,9 @@ public class MPDConnection {
         pMPDConnectionIdle = false;
         pMPDConnectionReady = false;
 
-        notifyDisconnect();
-
-        try {
-            connectToServer();
-        } catch (IOException e) {
-            Log.w(TAG, "Reconnecting to server failed");
-        }
 
         // Notify listener
-
+        notifyDisconnect();
     }
 
     /**
@@ -211,16 +245,13 @@ public class MPDConnection {
             }
             Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
             pMPDConnectionReady = true;
-            Log.v(TAG, "MPDConnection: " + this + " ready");
 
             if (pPassword != null && !pPassword.equals("")) {
-                Log.v(TAG, "Try to authenticate with mpd server");
-                    /* Authenticate with server because password is set. */
+                /* Authenticate with server because password is set. */
                 boolean authenticated = authenticateMPDServer();
-                Log.v(TAG, "Authentication successful: " + authenticated);
             }
 
-
+            // Start the initial idling procedure.
             startIdleWait();
 
             // Set the timeout to infinite again
@@ -255,10 +286,9 @@ public class MPDConnection {
             readString = pReader.readLine();
             if (readString.startsWith("OK")) {
                 success = true;
-                Log.v(TAG, "Successfully authenticated with mpd server");
             } else if (readString.startsWith("ACK")) {
                 success = false;
-                Log.v(TAG, "Could not successfully authenticate with mpd server");
+                Log.e(TAG, "Could not successfully authenticate with mpd server");
             }
         }
 
@@ -266,19 +296,24 @@ public class MPDConnection {
         return success;
     }
 
+    /**
+     * Requests to disconnect from server. This will close the conection and cleanup the socket.
+     * After this call it should be safe to reconnect to another server. If this connection is
+     * currently in idle state, then it will be deidled before.
+     */
     public void disconnectFromServer() {
         synchronized (this) {
-            Log.v(TAG, "Disconnecting: " + this);
-
+            // Stop possible timers waiting for the timeout to go idle
             stopIdleWait();
 
+            // Check if the connection is currently idling, if then deidle.
             if (pMPDConnectionIdle) {
                 stopIdleing();
             }
 
-
+            /* Cleanup reader/writer */
             try {
-            /* Clear reader/writer up */
+                /* Clear reader/writer up */
                 if (null != pReader) {
                     pReader = null;
                 }
@@ -286,7 +321,7 @@ public class MPDConnection {
                     pWriter = null;
                 }
 
-            /* Clear TCP-Socket up */
+                /* Clear TCP-Socket up */
                 if (null != pSocket && pSocket.isConnected()) {
                     pSocket.setSoTimeout(1000);
                     pSocket.close();
@@ -296,10 +331,9 @@ public class MPDConnection {
                 Log.e(TAG, "Error during disconnecting:" + e.toString());
             }
 
-        /* Clear up connection state variables */
+            /* Clear up connection state variables */
             pMPDConnectionIdle = false;
             pMPDConnectionReady = false;
-            Log.v(TAG, "Disconnecting finished");
 
             // Notify listener
             notifyDisconnect();
@@ -313,17 +347,16 @@ public class MPDConnection {
      * @param command
      */
     private void sendMPDCommand(String command) {
+        // Stop possible idling timeout tasks.
         stopIdleWait();
-
-
-        Log.v(TAG, "Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
 
 
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
 
-            /* Check if server is in idling mode, this needs unidling first,
-            otherwise the server will disconnect the client.
+            /*
+             * Check if server is in idling mode, this needs unidling first,
+             * otherwise the server will disconnect the client.
              */
             if (pMPDConnectionIdle) {
                 stopIdleing();
@@ -333,61 +366,41 @@ public class MPDConnection {
              * Send the command to the server
              * FIXME Should be validated in the future.
              */
-            // FIXME Remove me, seriously
-            Log.v(TAG, "Connection: " + this + "Sending command: " + command);
             pWriter.println(command);
             pWriter.flush();
+
+            // This waits until the server sends a response (OK,ACK(failure) or the requested data)
             waitForResponse();
         }
     }
 
     /**
      * This functions sends the command to the MPD server.
-     * If the server is currently idling then it will deidle it first.
+     * This function is used between start command list and the end. It has no check if the
+     * connection is currently idle.
+     * Also it will not wait for a response because this would only deadlock, because the mpd server
+     * waits until the end_command is received.
      *
      * @param command
      */
-    public void sendMPDRAWCommand(String command) {
-        Log.v(TAG, "Connection: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
-        // FIXME remove me too
-        Log.v(TAG, "Prepare to send: " + command);
-        if (!pMPDConnectionReady) {
-            try {
-                connectToServer();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+    private void sendMPDRAWCommand(String command) {
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
-            /* Check if server is in idling mode, this needs unidling first,
-            otherwise the server will disconnect the client.
-             */
-            if (pMPDConnectionIdle) {
-                stopIdleing();
-            }
-
             /*
              * Send the command to the server
              * FIXME Should be validated in the future.
              */
-            // FIXME Remove me, seriously
-            Log.v(TAG, "Sending command: " + command);
             pWriter.println(command);
             pWriter.flush();
         }
     }
 
+    /**
+     * This will start a command list to the server. It can be used to speed up multiple requests
+     * like adding songs to the current playlist. Make sure that the idle timeout is stopped
+     * before starting a command list.
+     */
     private void startCommandList() {
-        if (!pMPDConnectionReady) {
-            try {
-                connectToServer();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
             /* Check if server is in idling mode, this needs unidling first,
@@ -407,22 +420,18 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * This command will end the command list. After this call it is important to call
+     * checkResponse to clear the possible response in the read buffer. There should be at
+     * least one "OK" or "ACK" from the mpd server.
+     */
     private void endCommandList() {
-        if (!pMPDConnectionReady) {
-            try {
-                connectToServer();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         /* Check if the server is connected. */
         if (pMPDConnectionReady) {
             /*
              * Send the command to the server
              * FIXME Should be validated in the future.
              */
-            Log.v(TAG, "Con: " + this + " sending: " + MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.println(MPDCommands.MPD_END_COMMAND_LIST);
             pWriter.flush();
 
@@ -512,19 +521,23 @@ public class MPDConnection {
         boolean success = false;
         waitForResponse();
         String response;
+
+        // Wait for data to be available to read. MPD communication could take some time.
         while (readyRead()) {
             response = pReader.readLine();
-            Log.v(TAG, "Con: " + this + " Response: " + response);
             if (response.startsWith("OK")) {
                 success = true;
             } else if (response.startsWith("ACK")) {
                 success = false;
+                Log.e(TAG, "Server response error: " + response);
             }
         }
-        Log.v(TAG, "Con: " + this + " check response: " + success);
 
+        // The command was handled now it is time to set the connection to idle again (after the timeout,
+        // to prevent disconnecting).
         startIdleWait();
 
+        // Return if successful or not.
         return success;
     }
 
@@ -557,7 +570,7 @@ public class MPDConnection {
 
         MPDAlbum tempAlbum;
 
-        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -590,8 +603,10 @@ public class MPDConnection {
             tempAlbum = new MPDAlbum(albumName, albumMBID, albumArtist);
             albumList.add(tempAlbum);
         }
-        Log.v(TAG, "Albums parsed");
+
+        // Start the idling timeout again.
         startIdleWait();
+        // Sort the albums for later sectioning.
         Collections.sort(albumList);
         return albumList;
     }
@@ -617,7 +632,7 @@ public class MPDConnection {
 
         MPDArtist tempArtist;
 
-        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -634,18 +649,24 @@ public class MPDConnection {
             }
             response = pReader.readLine();
         }
-        Log.v(TAG, "Artists parsed");
 
+        // Start the idling timeout again.
         startIdleWait();
+        // Sort the artists for later sectioning.
         Collections.sort(artistList);
         return artistList;
     }
 
     /**
-     * Parses the resposne of mpd on requests that return track items
+     * Parses the response of mpd on requests that return track items. This is also used
+     * for MPD file, directory and playlist responses. This allows the GUI to develop
+     * one adapter for all three types. Also MPD mixes them when requesting directory listings.
+     * <p/>
+     * It will return a list of MPDFileEntry objects which is a parent class for (MPDFile, MPDPlaylist,
+     * MPDDirectory) you can use instanceof to check which type you got.
      *
      * @param filterArtist Artist used for filtering. Non-matching tracks get discarded.
-     * @return List of MPDFile objects
+     * @return List of MPDFileEntry objects
      * @throws IOException
      */
     private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
@@ -659,8 +680,9 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
 
+            /* This if block will just check all the different response possible by MPDs file/dir/playlist response */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
@@ -750,6 +772,7 @@ public class MPDConnection {
                 tempFileEntry = new MPDDirectory(response.substring(MPDResponses.MPD_RESPONSE_DIRECTORY.length()));
             }
 
+            // Move to the next line.
             response = pReader.readLine();
 
         }
@@ -766,7 +789,6 @@ public class MPDConnection {
                 trackList.add(tempFileEntry);
             }
         }
-        Log.v(TAG, "File entries parsed: " + trackList.size());
         startIdleWait();
 
         return trackList;
@@ -991,9 +1013,9 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
         /* Response line from MPD */
-            String response;
-            while (readyRead()) {
-                response = pReader.readLine();
+            String response = pReader.readLine();
+            while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
+
 
                 if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
                     status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
@@ -1053,6 +1075,8 @@ public class MPDConnection {
                 } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
                     status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
                 }
+
+                response = pReader.readLine();
             }
 
             startIdleWait();
@@ -1099,12 +1123,21 @@ public class MPDConnection {
         }
     }
 
-
+    /**
+     * This will query the current song playing on the mpd server.
+     *
+     * @return MPDFile entry for the song playing.
+     * @throws IOException
+     */
     public MPDFile getCurrentSong() throws IOException {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
+
+            // Reuse the parsing function for tracks here.
             List<MPDFileEntry> retList = parseMPDTracks("");
             if (retList.size() == 1) {
+                // If one element is in the list it is safe to assume that this element is
+                // the current song. So casting is no problem.
                 return (MPDFile) retList.get(0);
             } else {
                 return null;
@@ -1196,6 +1229,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Sets random to true or false
+     * @param random If random should be set (true) or not (false)
+     * @return True if server responed with ok
+     */
     public boolean setRandom(boolean random) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
@@ -1210,6 +1248,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Sets repeat to true or false
+     * @param repeat If repeat should be set (true) or not (false)
+     * @return True if server responed with ok
+     */
     public boolean setRepeat(boolean repeat) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
@@ -1224,6 +1267,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Sets single playback to enable (true) or disabled (false)
+     * @param single if single playback should be enabled or not.
+     * @return True if server responed with ok
+     */
     public boolean setSingle(boolean single) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SET_SINGLE(single));
@@ -1238,6 +1286,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Sets if files should be removed after playback (consumed)
+     * @param consume True if yes and false if not.
+     * @return True if server responed with ok
+     */
     public boolean setConsume(boolean consume) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
@@ -1252,6 +1305,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Plays the song with the index in the current playlist.
+     * @param index Index of the song that should be played.
+     * @return True if server responed with ok
+     */
     public boolean playSongIndex(int index) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
@@ -1266,6 +1324,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Seeks the currently playing song to a certain position
+     * @param seconds Position in seconds to which a seek is requested to.
+     * @return True if server responed with ok
+     */
     public boolean seekSeconds(int seconds) {
         synchronized (this) {
             MPDCurrentStatus status = null;
@@ -1287,6 +1350,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Sets the volume of the mpd servers output. It is an absolute value between (0-100).
+     * @param volume Volume to set to the server.
+     * @return True if server responed with ok
+     */
     public boolean setVolume(int volume) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
@@ -1307,6 +1375,11 @@ public class MPDConnection {
      ***********************
      */
 
+    /**
+     * This method adds songs in a bulk command list. Should be reasonably in performance this way.
+     * @param tracks List of MPDFileEntry objects to add to the current playlist.
+     * @return True if server responed with ok
+     */
     private boolean addTrackList(List<MPDFileEntry> tracks) {
         synchronized (this) {
             if (null == tracks) {
@@ -1331,6 +1404,14 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Adds all tracks from a certain album from artistname to the current playlist.
+     * @param albumname Name of the album to add to the current playlist.
+     * @param artistname Name of the artist of the album to add to the list. This
+     *                   allows filtering of album tracks to a specified artist. Can also
+     *                   be left empty then all tracks from the album will be added.
+     * @return True if server responed with ok
+     */
     public boolean addAlbumTracks(String albumname, String artistname) {
         synchronized (this) {
             List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname);
@@ -1338,6 +1419,12 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Adds all albums of an artist to the current playlist. Will first get a list of albums for the
+     * artist and then call addAlbumTracks for every album on this result.
+     * @param artistname Name of the artist to enqueue the albums from.
+     * @return True if server responed with ok
+     */
     public boolean addArtist(String artistname) {
         synchronized (this) {
             List<MPDAlbum> albums = getArtistAlbums(artistname);
@@ -1355,6 +1442,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Adds a single File/Directory to the current playlist.
+     * @param url URL of the file or directory! to add to the current playlist.
+     * @return True if server responed with ok
+     */
     public boolean addSong(String url) {
         synchronized (this) {
             Log.v(TAG, "Add: " + url);
@@ -1366,11 +1458,17 @@ public class MPDConnection {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            Log.v(TAG, "Added: " + url);
             return false;
         }
     }
 
+    /**
+     * This method adds a song to a specified positiion in the current playlist.
+     * This allows GUI developers to implement a method like "add after current".
+     * @param url URL to add to the playlist.
+     * @param index Index at which the item should be added.
+     * @return True if server responed with ok
+     */
     public boolean addSongatIndex(String url, int index) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE_AT_INDEX(url, index));
@@ -1385,6 +1483,10 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Instructs the mpd server to clear its current playlist.
+     * @return True if server responed with ok
+     */
     public boolean clearPlaylist() {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
@@ -1392,12 +1494,17 @@ public class MPDConnection {
             try {
                 return checkResponse();
             } catch (IOException e) {
-                e.printStackTrace();
+                e.printStackTrace();-
             }
             return false;
         }
     }
 
+    /**
+     * Instructs the mpd server to remove one item from the current playlist at index.
+     * @param index Position of the item to remove from current playlist.
+     * @return True if server responed with ok
+     */
     public boolean removeIndex(int index) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
@@ -1411,6 +1518,13 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Moves one item from an index in the current playlist to an new index. This allows to move
+     * tracks for example after the current to priotize songs.
+     * @param from Item to move from.
+     * @param to Position to enter item
+     * @return
+     */
     public boolean moveSongFromTo(int from, int to) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
@@ -1424,6 +1538,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Saves the current playlist as a new playlist with a name.
+     * @param name Name of the playlist to save to.
+     * @return True if server responed with ok
+     */
     public boolean savePlaylist(String name) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SAVE_PLAYLIST(name));
@@ -1438,6 +1557,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Removes a saved playlist from the servers database.
+     * @param name Name of the playlist to remove.
+     * @return True if server responed with ok
+     */
     public boolean removePlaylist(String name) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_PLAYLIST(name));
@@ -1452,6 +1576,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Loads a saved playlist (added after the last song) to the current playlist.
+     * @param name Of the playlist to add to.
+     * @return True if server responed with ok
+     */
     public boolean loadPlaylist(String name) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_LOAD_PLAYLIST(name));
@@ -1466,6 +1595,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Private parsing method for MPDs output lists.
+     * @return A list of MPDOutput objects with name,active,id values if successful. Otherwise empty list.
+     * @throws IOException
+     */
     private List<MPDOutput> parseMPDOutputs() throws IOException {
         ArrayList<MPDOutput> outputList = new ArrayList<>();
         // Parse outputs
@@ -1486,7 +1620,6 @@ public class MPDConnection {
                 outputName = response.substring(MPDResponses.MPD_OUTPUT_NAME.length());
             } else if (response.startsWith(MPDResponses.MPD_OUTPUT_ACTIVE)) {
                 String activeRespsonse = response.substring(MPDResponses.MPD_OUTPUT_ACTIVE.length());
-                Log.v(TAG, "Active response: " + activeRespsonse);
                 if (activeRespsonse.equals("1")) {
                     outputActive = true;
                 } else {
@@ -1506,6 +1639,10 @@ public class MPDConnection {
 
     }
 
+    /**
+     * Returns the list of MPDOutputs to the outside callers.
+     * @return List of MPDOutput objects or null in case of error.
+     */
     public List<MPDOutput> getOutputs() {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_OUTPUTS);
@@ -1519,6 +1656,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Toggles the state of the output with the id.
+     * @param id Id of the output to toggle (active/deactive)
+     * @return True if server responed with ok
+     */
     public boolean toggleOutput(int id) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
@@ -1533,6 +1675,10 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Instructs to update the database of the mpd server (path: / )
+     * @return True if server responed with ok
+     */
     public boolean updateDatabase() {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE);
@@ -1548,37 +1694,61 @@ public class MPDConnection {
     }
 
 
+    /**
+     * Checks if the socket is ready for read operations
+      * @return True if ready
+     * @throws IOException
+     */
     private boolean readyRead() throws IOException {
         return (null != pReader) && pReader.ready();
     }
 
+    /**
+     * Will notify a connected listener that the connection is now ready to be used.
+     */
     private void notifyConnected() {
         if (null != pStateListener) {
             pStateListener.onConnected();
         }
     }
 
+    /**
+     * Will notify a connected listener that the connection is disconnect and not ready for use.
+     */
     private void notifyDisconnect() {
         if (null != pStateListener) {
             pStateListener.onDisconnected();
         }
     }
 
+    /**
+     * Registers a listener to be notified about connection state changes
+     * @param listener Listener to be connected
+     */
     public void setStateListener(MPDConnectionStateChangeListener listener) {
-        Log.v(TAG, "Set state listener:" + listener);
         pStateListener = listener;
     }
 
+    /**
+     * Registers a listener to be notified about changes in idle state of this connection.
+     * @param listener
+     */
     public void setpIdleListener(MPDConnectionIdleChangeListener listener) {
         pIdleListener = listener;
     }
 
+    /**
+     * Interface to used to be informed about connection state changes.
+     */
     public interface MPDConnectionStateChangeListener {
         void onConnected();
 
         void onDisconnected();
     }
 
+    /**
+     * Interface to be used to be informed about connection idle state changes.
+     */
     public interface MPDConnectionIdleChangeListener {
         void onIdle();
 
@@ -1626,35 +1796,41 @@ public class MPDConnection {
                else and we need to update our status.
              */
 
+            // Get the lock to prevent the handler thread from (stopIdling) to interfere with deidling sequence.
             try {
                 mIdleWaitLock.acquire();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
 
-            Log.v(TAG, "Starting blocking read operation");
 
+            // This will block this thread until the server has some data available to read again.
             String response = waitForIdleResponse();
             while (response == null) {
                 response = waitForIdleResponse();
             }
-            Log.v(TAG, "MPDConnection IdleThread: " + this + " Deidiling response:" + response);
+
+            // At this position idling is over.
             if (response.startsWith("changed")) {
                 try {
                     if (checkResponse()) {
-                        Log.v(TAG, "Deidiling from outside correct");
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            } else if (response.startsWith("OK")) {
-                Log.v(TAG, "Deidiling from outside correct");
-
             }
+            // No further handling necessary then
+            /*else if (response.startsWith("OK")) {
 
+            }*/
+
+            // Set the connection as non-idle again.
             pMPDConnectionIdle = false;
 
+            // Release the lock for possible threads waiting from outside this idling thread (handler thread).
             mIdleWaitLock.release();
+
+            // Notify a possible listener for deidling.
             if (null != pIdleListener) {
                 pIdleListener.onNonIdle();
             }
@@ -1663,30 +1839,41 @@ public class MPDConnection {
     }
 
 
+    /**
+     * This will start the timeout to set the connection to the idle state after use.
+     */
     private void startIdleWait() {
-        Log.v(TAG, "Start idle wait: " + this);
+        /**
+         * Check if a timer was running and then remove it.
+         * This will reset the timeout.
+         */
         if (null != mIdleWait) {
             mIdleWait.cancel();
             mIdleWait.purge();
         }
+        // Start the new timer with a new Idle Task.
         mIdleWait = new Timer();
         mIdleWait.schedule(new IdleWaitTask(), IDLE_WAIT_TIME);
     }
 
+    /**
+     * This will stop a potential running timeout task.
+     */
     private void stopIdleWait() {
         if (null != mIdleWait) {
-            Log.v(TAG, "Stop idle wait: " + this);
             mIdleWait.cancel();
             mIdleWait.purge();
             mIdleWait = null;
         }
     }
 
+    /**
+     * Task that will trigger the idle state of this MPDConnection.
+     */
     private class IdleWaitTask extends TimerTask {
 
         @Override
         public void run() {
-            Log.v(TAG, "Timeout over, go idleing again");
             startIdleing();
         }
     }
