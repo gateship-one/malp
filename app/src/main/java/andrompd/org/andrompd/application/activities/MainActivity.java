@@ -164,7 +164,22 @@ public class MainActivity extends AppCompatActivity
         }
 
 
-        if (findViewById(R.id.fragment_container) != null) {
+        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
+
+
+        mProfileManager = new MPDProfileManager(getApplicationContext());
+        MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
+
+
+        if (null != autoProfile) {
+            Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
+            ConnectionManager.setParameters(autoProfile, this);
+        }
+
+        registerForContextMenu(findViewById(R.id.main_listview));
+
+        if ((findViewById(R.id.fragment_container) != null) && (savedInstanceState == null)) {
+
             Fragment fragment = new MyMusicTabsFragment();
 
             Bundle args = new Bundle();
@@ -178,20 +193,6 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
 
-
-        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
-
-
-        mProfileManager = new MPDProfileManager(getApplicationContext());
-        MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
-
-
-        if (null != autoProfile) {
-            Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
-            ConnectionManager.setParameters(autoProfile,this);
-        }
-
-        registerForContextMenu(findViewById(R.id.main_listview));
 
     }
 
@@ -277,10 +278,10 @@ public class MainActivity extends AppCompatActivity
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
                     return true;
                 case R.id.action_show_artist:
-                    onArtistSelected(((MPDFile)currentPlaylistView.getItem(info.position)).getTrackArtist());
+                    onArtistSelected(((MPDFile) currentPlaylistView.getItem(info.position)).getTrackArtist());
                     return true;
                 case R.id.action_show_album:
-                    onAlbumSelected(((MPDFile)currentPlaylistView.getItem(info.position)).getTrackAlbum(),"");
+                    onAlbumSelected(((MPDFile) currentPlaylistView.getItem(info.position)).getTrackAlbum(), "");
                     return true;
             }
         }
@@ -423,8 +424,8 @@ public class MainActivity extends AppCompatActivity
     public void onAlbumSelected(String albumname, String artistname) {
         Log.v(TAG, "Album selected: " + albumname + ":" + artistname);
 
-        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP ) {
-            NowPlayingView nowPlayingView =(NowPlayingView)  findViewById(R.id.now_playing_layout);
+        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -457,8 +458,8 @@ public class MainActivity extends AppCompatActivity
     public void onArtistSelected(String artistname) {
         Log.v(TAG, "Artist selected: " + artistname);
 
-        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP ) {
-            NowPlayingView nowPlayingView =(NowPlayingView)  findViewById(R.id.now_playing_layout);
+        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -548,7 +549,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void connectProfile(MPDServerProfile profile) {
         ConnectionManager.disconnectFromServer();
-        ConnectionManager.setParameters(profile,this);
+        ConnectionManager.setParameters(profile, this);
         ConnectionManager.reconnectLastServer();
     }
 
@@ -557,7 +558,7 @@ public class MainActivity extends AppCompatActivity
         mProfileManager.addProfile(profile);
 
         // Try connecting to the new profile
-        ConnectionManager.setParameters(profile,this);
+        ConnectionManager.setParameters(profile, this);
         ConnectionManager.reconnectLastServer();
     }
 
