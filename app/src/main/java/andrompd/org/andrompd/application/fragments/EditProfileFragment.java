@@ -43,7 +43,6 @@ public class EditProfileFragment extends Fragment {
     private String mHostname;
     private String mPassword;
     private int mPort;
-    private boolean mAutoconnect;
 
 
     private TextInputEditText mProfilenameView;
@@ -51,7 +50,6 @@ public class EditProfileFragment extends Fragment {
     private TextInputEditText mPasswordView;
     private TextInputEditText mPortView;
 
-    private Switch mAutoConnectView;
 
     private MPDServerProfile mOldProfile;
 
@@ -74,13 +72,11 @@ public class EditProfileFragment extends Fragment {
                 mHostname = mOldProfile.getHostname();
                 mPassword = mOldProfile.getPassword();
                 mPort = mOldProfile.getPort();
-                mAutoconnect = mOldProfile.getAutoconnect();
             } else {
                 mHostname = "";
                 mProfilename = "";
                 mPassword = "";
                 mPort = 6600;
-                mAutoconnect = false;
             }
         }
 
@@ -88,13 +84,11 @@ public class EditProfileFragment extends Fragment {
         mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
         mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
         mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
-        mAutoConnectView = (Switch) rootView.findViewById(R.id.fragment_profile_autoconnect);
 
         mProfilenameView.setText(mProfilename);
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
         mPortView.setText(String.valueOf(mPort));
-        mAutoConnectView.setChecked(mAutoconnect);
 
 
         // Return the ready inflated and configured fragment view.
@@ -145,17 +139,12 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPort = Integer.valueOf(mPortView.getText().toString());
         }
-        if ( !mAutoConnectView.isChecked() == mAutoconnect ) {
-            profileChanged = true;
-            mAutoconnect = mAutoConnectView.isChecked();
-        }
 
         if ( profileChanged ) {
-            Log.v(TAG,"Profile changed: " + mProfilename + ':' + mHostname + ':' + String.valueOf(mPort) + ':' + String.valueOf(mAutoconnect));
             if ( null != mOldProfile ) {
                 mCallback.removeProfile(mOldProfile);
             }
-            MPDServerProfile profile = new MPDServerProfile(mProfilename,mAutoconnect);
+            MPDServerProfile profile = new MPDServerProfile(mProfilename,true);
             profile.setHostname(mHostname);
             profile.setPassword(mPassword);
             profile.setPort(mPort);

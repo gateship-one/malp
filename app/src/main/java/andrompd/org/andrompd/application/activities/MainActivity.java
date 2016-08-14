@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity
 
         if (null != autoProfile) {
             Log.v(TAG, "Auto connect profile with statemonitoring: " + autoProfile);
-            ConnectionManager.setParameters(autoProfile.getHostname(), autoProfile.getPassword(), autoProfile.getPort());
+            ConnectionManager.setParameters(autoProfile,this);
         }
 
         registerForContextMenu(findViewById(R.id.main_listview));
@@ -547,13 +547,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void connectProfile(MPDServerProfile profile) {
         ConnectionManager.disconnectFromServer();
-        ConnectionManager.setParameters(profile);
+        ConnectionManager.setParameters(profile,this);
         ConnectionManager.reconnectLastServer();
     }
 
     @Override
     public void addProfile(MPDServerProfile profile) {
         mProfileManager.addProfile(profile);
+
+        // Try connecting to the new profile
+        ConnectionManager.setParameters(profile,this);
+        ConnectionManager.reconnectLastServer();
     }
 
     @Override

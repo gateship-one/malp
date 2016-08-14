@@ -88,12 +88,6 @@
                     android:inputType="numberSigned" />
             </android.support.design.widget.TextInputLayout>
 
-            <Switch
-                android:id="@+id/fragment_profile_autoconnect"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:switchPadding="@dimen/material_standard_horizontal_spacing"
-                android:text="@string/fragment_profile_auto_connect" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -17,6 +17,7 @@
 
 package andrompd.org.andrompd.application;
 
+import android.content.Context;
 import android.util.Log;
 
 import java.util.Timer;
@@ -66,17 +67,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         return mConnectionManager;
     }
 
-    public static void setParameters(String hostname, String password, int port) {
 
-        Log.v(TAG, "Connection to: " + hostname + ':' + String.valueOf(port));
-
-
-        getInstance().mHostname = hostname;
-        getInstance().mPassword = password;
-        getInstance().mPort = port;
-    }
-
-    public static void setParameters(MPDServerProfile profile) {
+    public static void setParameters(MPDServerProfile profile, Context context) {
 
         Log.v(TAG, "Connection to: " + profile.getHostname() + ':' + String.valueOf(profile.getPort()));
 
@@ -84,6 +76,11 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         getInstance().mHostname = profile.getHostname();
         getInstance().mPassword = profile.getPassword();
         getInstance().mPort = profile.getPort();
+
+        MPDProfileManager profileManager = new MPDProfileManager(context);
+        profileManager.deleteProfile(profile);
+        profile.setAutoconnect(true);
+        profileManager.addProfile(profile);
     }
 
     public static void reconnectLastServer() {
@@ -114,6 +111,12 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         MPDStateMonitoringHandler.disconnectFromMPDServer();
         MPDQueryHandler.disconnectFromMPDServer();
         MPDCommandHandler.disconnectFromMPDServer();
+    }
+
+    public static void autoConnect(Context context) {
+        MPDProfileManager profileManager = new MPDProfileManager(context);
+
+        setParameters(profileManager.getAutoconnectProfile(),context);
     }
 
 
