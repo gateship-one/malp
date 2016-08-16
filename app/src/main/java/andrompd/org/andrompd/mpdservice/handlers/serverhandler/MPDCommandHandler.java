@@ -30,22 +30,30 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseAlbu
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 
-public class MPDCommandHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
+/**
+ * This is a subclass of the generic handler that allows to execute simple commands to the connected MPD server.
+ * Those commands are short in execution duration and should not return any query results.
+ * This ensures that basic control functionality is still available even if another Handler is busy with
+ * a long running query.
+ */
+public class MPDCommandHandler extends MPDGenericHandler {
+    private static final String TAG = "MPDCommandHandler";
 
     /**
-     * Wait 5 seconds before going to idle again
+     * Name of the thread created for the Looper.
      */
-    private static final int IDLE_WAIT_TIME = 5 * 1000;
-
-    private static final String TAG = "MPDCommandHandler";
     private static final String THREAD_NAME = "NetCommandHandler";
 
 
+    /**
+     * HandlerThread that is used by the looper. This ensures that all requests to this handler
+     * are done multi-threaded and do not block the UI.
+     */
     private static HandlerThread mHandlerThread = null;
     private static MPDCommandHandler mHandlerSingleton = null;
 
     /**
-     * Private constructor for use in singleton.
+     * Private constructor for use in singleton. Called by the static singleton retrieval method.
      *
      * @param looper Looper of a HandlerThread (that is NOT the UI thread)
      */
@@ -60,12 +68,17 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
      * @return
      */
     private synchronized static MPDCommandHandler getHandler() {
+        // Check if handler was accessed before. If not create the singleton object for the first
+        // time.
         if (null == mHandlerSingleton) {
+            // Create a new thread used as a looper for this handler.
+            // This is the thread in which all messages sent to this handler are handled.
             mHandlerThread = new HandlerThread(THREAD_NAME);
+            // It is important to start the thread before using it as a thread for the Handler.
+            // Otherwise the handler will cause a crash.
             mHandlerThread.start();
+            // Create the actual singleton instance.
             mHandlerSingleton = new MPDCommandHandler(mHandlerThread.getLooper());
-
-            mHandlerSingleton.mMPDConnection.setpIdleListener(mHandlerSingleton);
         }
         return mHandlerSingleton;
     }
@@ -74,13 +87,17 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     /**
      * This is the main entry point of messages.
      * Here all possible messages types need to be handled with the MPDConnection.
+     * Have a look into the baseclass MPDGenericHandler for more information about the handling.
      *
      * @param msg Message to process.
      */
     @Override
     public void handleMessage(Message msg) {
+        // Call the baseclass handleMessage method here to ensure that the messages handled
+        // by the baseclass are handled in subclasses as well.
         super.handleMessage(msg);
 
+        // Type checking
         if (!(msg.obj instanceof MPDHandlerAction)) {
             /* Check if the message object is of correct type. Otherwise just abort here. */
             return;
@@ -88,8 +105,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
         MPDHandlerAction mpdAction = (MPDHandlerAction) msg.obj;
         /* Catch MPD exceptions here for now. */
-        MPDResponseHandler responseHandler;
         MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
+
+        // Handle all the simple MPD actions here like play, pause, ....
+        // None of the actions should result in a returned result like a track list.
         if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_NEXT_SONG) {
             mMPDConnection.nextSong();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PREVIOUS_SONG) {
@@ -127,28 +146,14 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         }
     }
 
-    @Override
-    public void onIdle() {
-
-    }
-
-    @Override
-    public void onNonIdle() {
-
-    }
-
-    @Override
-    public void onConnected() {
-        super.onConnected();
-        Log.v(TAG,"Go idle after connection");
-    }
-
-    @Override
-    public void onDisconnected() {
-        super.onDisconnected();
-        Log.v(TAG,"Disconnected stop idling");
-    }
-
+    /**
+     * These static methods provide the only interface to outside classes.
+     * They should not be allowed to interact with the instance itself.
+     *
+     * All of these methods work with the same principle. They all create an handler message
+     * that will contain a MPDHandlerAction as a payload that contains all the information
+     * of the requested action with extras.
+     */
 
     /**
      * Set the server parameters for the connection. MUST be called before trying to
@@ -198,7 +203,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     }
 
     /**
-     * Static command methods
+     * Resume playback if in pause state.
      */
     public static void play() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PLAY);
@@ -211,7 +216,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     }
 
     /**
-     * Static command methods
+     * Pause playbakc if in playing state.
      */
     public static void pause() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PAUSE);
@@ -224,7 +229,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     }
 
     /**
-     * Static command methods
+     * Stops playback. Does not reset current playing index to 0!
      */
     public static void stop() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_STOP);
@@ -238,7 +243,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
 
 
     /**
-     * Static command methods
+     * Jumps to next song
      */
     public static void nextSong() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_NEXT_SONG);
@@ -251,7 +256,7 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
     }
 
     /**
-     * Static command methods
+     * Jumps to previous song
      */
     public static void previousSong() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PREVIOUS_SONG);
@@ -263,6 +268,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Sets the random value to random
+     * @param random Enable/disable server side random
+     */
     public static void setRandom(boolean random) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_RANDOM);
         Message msg = Message.obtain();
@@ -276,6 +285,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Sets the repeat value to repeat-
+     * @param repeat Enable/disable server side repeat
+     */
     public static void setRepeat(boolean repeat) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_REPEAT);
         Message msg = Message.obtain();
@@ -289,6 +302,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Set single song playback. (Stop after song)
+     * @param single Enable/disable single playback
+     */
     public static void setSingle(boolean single) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SINGLE);
         Message msg = Message.obtain();
@@ -302,6 +319,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Sets consume song after playback on the server.
+     * @param consume Enable/disable consume feature
+     */
     public static void setConsume(boolean consume) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_CONSUME);
         Message msg = Message.obtain();
@@ -315,6 +336,11 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Jumps to the index in the current playlist. No client side checking of boundaries (but
+     * should also not be necessary)
+     * @param index Index to play
+     */
     public static void playSongIndex(int index) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_JUMP_INDEX);
         Message msg = Message.obtain();
@@ -328,6 +354,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Seeks in the currently playing song to the position in seconds defined via the seconds parameter.
+     * @param seconds Position to seek to (in seconds)
+     */
     public static void seekSeconds(int seconds) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS);
         Message msg = Message.obtain();
@@ -341,6 +371,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Sets the server output volume to a percentage value of 0-100%.
+     * @param volume Volume in percent (0-100)
+     */
     public static void setVolume(int volume) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME);
         Message msg = Message.obtain();
@@ -354,6 +388,10 @@ public class MPDCommandHandler extends MPDGenericHandler implements MPDConnectio
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Toggles the output state of the specified output id.
+     * @param outputID ID of the output to toggle
+     */
     public static void toggleOutput(int outputID) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT);
         Message msg = Message.obtain();
