@@ -146,143 +146,136 @@
             android:layout_alignParentBottom="true"
             android:layout_below="@+id/now_playing_headerLayout">
 
-            <RelativeLayout
-                android:id="@+id/now_playing_coverLayout"
+            <ViewSwitcher
+                android:id="@+id/now_playing_view_switcher"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:inAnimation="@anim/fade_in"
+                android:outAnimation="@anim/fade_out"
                 android:layout_above="@+id/now_playing_control_layout"
                 android:background="@color/colorBackground">
 
-                <ViewSwitcher
-                    android:id="@+id/now_playing_view_switcher"
+                <ScrollView
+                    android:id="@+id/now_playing_view_cover_layout"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:inAnimation="@anim/fade_in"
-                    android:outAnimation="@anim/fade_out">
+                    android:layout_height="match_parent">
 
-                    <ScrollView
-                        android:id="@+id/now_playing_view_cover_layout"
+                    <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent">
+                        android:layout_height="wrap_content"
+
+                        android:orientation="vertical">
+
+
+                        <ImageView
+                            android:id="@+id/now_playing_cover"
+                            android:layout_width="match_parent"
+                            android:layout_height="0dp"
+                            android:src="@drawable/cover_placeholder" />
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-
-                            android:orientation="vertical">
-
-
-                            <ImageView
-                                android:id="@+id/now_playing_cover"
+                            android:orientation="vertical"
+                            android:paddingBottom="@dimen/material_content_spacing"
+                            android:paddingStart="@dimen/material_screen_edge_spacing"
+                            android:paddingEnd="@dimen/material_screen_edge_spacing"
+                            >
+                            <TextView
                                 android:layout_width="match_parent"
-                                android:layout_height="0dp"
-                                android:src="@drawable/cover_placeholder" />
-
-                            <LinearLayout
-                                android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:paddingBottom="@dimen/material_content_spacing"
-                                android:paddingStart="@dimen/material_screen_edge_spacing"
-                                android:paddingEnd="@dimen/material_screen_edge_spacing"
-                                >
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-regular"
-                                    android:paddingTop="@dimen/material_content_spacing"
-                                    android:text="@string/now_playing_track_no"
-                                    android:textColor="?android:textColorSecondary"
-                                    android:textSize="@dimen/material_font_style_size_body_1" />
+                                android:fontFamily="sans-serif-regular"
+                                android:paddingTop="@dimen/material_content_spacing"
+                                android:text="@string/now_playing_track_no"
+                                android:textColor="?android:textColorSecondary"
+                                android:textSize="@dimen/material_font_style_size_body_1" />
 
-                                <TextView
-                                    android:id="@+id/now_playing_text_track_no"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textColor="?android:textColorPrimary"
-                                    android:textSize="@dimen/material_font_style_size_body_2" />
+                            <TextView
+                                android:id="@+id/now_playing_text_track_no"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="?android:textColorPrimary"
+                                android:textSize="@dimen/material_font_style_size_body_2" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-regular"
-                                    android:text="@string/now_playing_playlist_no"
-                                    android:textColor="?android:textColorSecondary"
-                                    android:textSize="@dimen/material_font_style_size_body_1"
-                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-regular"
+                                android:text="@string/now_playing_playlist_no"
+                                android:textColor="?android:textColorSecondary"
+                                android:textSize="@dimen/material_font_style_size_body_1"
+                                android:layout_marginTop="@dimen/material_content_spacing"/>
 
-                                <TextView
-                                    android:id="@+id/now_playing_text_playlist_no"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textColor="?android:textColorPrimary"
-                                    android:textSize="@dimen/material_font_style_size_body_2" />
+                            <TextView
+                                android:id="@+id/now_playing_text_playlist_no"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="?android:textColorPrimary"
+                                android:textSize="@dimen/material_font_style_size_body_2" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-regular"
-                                    android:text="@string/now_playing_bitrate"
-                                    android:textColor="?android:textColorSecondary"
-                                    android:textSize="@dimen/material_font_style_size_body_1"
-                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-regular"
+                                android:text="@string/now_playing_bitrate"
+                                android:textColor="?android:textColorSecondary"
+                                android:textSize="@dimen/material_font_style_size_body_1"
+                                android:layout_marginTop="@dimen/material_content_spacing"/>
 
-                                <TextView
-                                    android:id="@+id/now_playing_text_bitrate"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textColor="?android:textColorPrimary"
-                                    android:textSize="@dimen/material_font_style_size_body_2" />
+                            <TextView
+                                android:id="@+id/now_playing_text_bitrate"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="?android:textColorPrimary"
+                                android:textSize="@dimen/material_font_style_size_body_2" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-regular"
-                                    android:text="@string/now_playing_audio_properties"
-                                    android:textColor="?android:textColorSecondary"
-                                    android:textSize="@dimen/material_font_style_size_body_1"
-                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-regular"
+                                android:text="@string/now_playing_audio_properties"
+                                android:textColor="?android:textColorSecondary"
+                                android:textSize="@dimen/material_font_style_size_body_1"
+                                android:layout_marginTop="@dimen/material_content_spacing"/>
 
-                                <TextView
-                                    android:id="@+id/now_playing_text_audio_properties"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textColor="?android:textColorPrimary"
-                                    android:textSize="@dimen/material_font_style_size_body_2" />
+                            <TextView
+                                android:id="@+id/now_playing_text_audio_properties"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="?android:textColorPrimary"
+                                android:textSize="@dimen/material_font_style_size_body_2" />
 
-                                <TextView
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-regular"
-                                    android:text="@string/now_playing_file_uri"
-                                    android:textColor="?android:textColorSecondary"
-                                    android:textSize="@dimen/material_font_style_size_body_1"
-                                    android:layout_marginTop="@dimen/material_content_spacing"/>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-regular"
+                                android:text="@string/now_playing_file_uri"
+                                android:textColor="?android:textColorSecondary"
+                                android:textSize="@dimen/material_font_style_size_body_1"
+                                android:layout_marginTop="@dimen/material_content_spacing"/>
 
-                                <TextView
-                                    android:id="@+id/now_playing_text_track_uri"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:fontFamily="sans-serif-medium"
-                                    android:textColor="?android:textColorPrimary"
-                                    android:textSize="@dimen/material_font_style_size_body_2" />
-                            </LinearLayout>
+                            <TextView
+                                android:id="@+id/now_playing_text_track_uri"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="sans-serif-medium"
+                                android:textColor="?android:textColorPrimary"
+                                android:textSize="@dimen/material_font_style_size_body_2" />
                         </LinearLayout>
-                    </ScrollView>
+                    </LinearLayout>
+                </ScrollView>
 
 
-                    <andrompd.org.andrompd.application.views.CurrentPlaylistView
-                        android:id="@+id/now_playing_playlist"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent" />
+                <andrompd.org.andrompd.application.views.CurrentPlaylistView
+                    android:id="@+id/now_playing_playlist"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
-                </ViewSwitcher>
-
-            </RelativeLayout>
+            </ViewSwitcher>
 
             <LinearLayout
                 android:id="@+id/now_playing_control_layout"
