@@ -18,6 +18,8 @@
 package andrompd.org.andrompd.application.adapters;
 
 
+import android.os.AsyncTask;
+import android.support.v4.util.Pair;
 import android.util.Log;
 import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
@@ -44,6 +46,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
     protected boolean mFiltered;
     protected List<T> mFilteredModelData;
+
+    private String mFilterString;
 
     /**
      * Variable to store the current scroll speed. Used for image view optimizations
@@ -225,17 +229,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     public void filterNames(String filterString) {
-        Log.v(TAG,"Filter with string: " + filterString);
-        mFiltered = true;
-
-        mFilteredModelData = new ArrayList<>();
-
-        for(T elem : mModelData) {
-            if ( elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase()) ) {
-                mFilteredModelData.add(elem);
-            }
-        }
-        createSections();
+        mFilterString = filterString;
+        new FilterTask().execute(new Pair<List<T>, String>(mModelData,filterString));
     }
 
     public void removeFilter() {
@@ -243,5 +238,34 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         mFilteredModelData = null;
 
         createSections();
+    }
+
+    private class FilterTask extends AsyncTask<Pair<List<T>,String>, Object, Pair<List<T>,String>> {
+
+        @Override
+        protected Pair<List<T>,String> doInBackground(Pair<List<T>,String>... lists) {
+            ArrayList<T> resultList = new ArrayList<>();
+
+            String filterString = lists[0].second;
+
+            Log.v(TAG,"Filter with string: " + filterString);
+            mFiltered = true;
+
+            for(T elem : lists[0].first) {
+                if ( elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase()) ) {
+                    resultList.add(elem);
+                }
+            }
+
+            return new Pair<List<T>, String>(resultList, filterString);
+        }
+
+        protected void onPostExecute(Pair<List<T>, String>  result) {
+            if ( mFilterString.equals(result.second)) {
+                mFilteredModelData = result.first;
+                createSections();
+            }
+        }
+
     }
 }
