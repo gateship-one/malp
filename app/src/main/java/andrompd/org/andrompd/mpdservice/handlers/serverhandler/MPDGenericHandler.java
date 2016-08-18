@@ -72,6 +72,8 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         mMPDConnection = new MPDConnection();
         mConnectionStateListener = new ArrayList<>();
 
+        // Register all handlers as StateObservers with the MPDConnection. This ensures that all subclasses
+        // will get a notification about connection state changes.
         mMPDConnection.setStateListener(this);
     }
 
