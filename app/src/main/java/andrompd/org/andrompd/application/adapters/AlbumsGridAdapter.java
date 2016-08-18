@@ -39,7 +39,7 @@ public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDAlbum album = mModelData.get(position);
+        MPDAlbum album = (MPDAlbum)getItem(position);
         String label = album.getName();
 
         // Check if a view can be recycled

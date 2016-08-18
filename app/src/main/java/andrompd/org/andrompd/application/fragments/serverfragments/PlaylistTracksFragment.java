@@ -23,6 +23,8 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.SearchView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,13 +66,18 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
      */
     private String mPath;
 
+    /**
+     * Save the swipe layout for later usage
+     */
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+
     private FABFragmentCallback mFABCallback = null;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.listview_layout, container, false);
+        View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
@@ -86,6 +93,20 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
         registerForContextMenu(mListView);
+
+        // get swipe layout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        // set swipe colors
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        // set swipe refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
 
         setHasOptionsMenu(true);
 
@@ -182,6 +203,15 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         DrawableCompat.setTint(drawable, tintColor);
         menu.findItem(R.id.action_add_playlist).setIcon(drawable);
 
+        drawable = menu.findItem(R.id.action_search).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_search).setIcon(drawable);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        searchView.setOnQueryTextListener(new SearchTextObserver());
+
         super.onCreateOptionsMenu(menu, menuInflater);
     }
 
@@ -223,6 +253,9 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mFileAdapter.swapModel(data);
+
+        // change refresh state
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     /**
@@ -260,6 +293,31 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         @Override
         public void onClick(View v) {
             MPDQueryHandler.playPlaylist(mPath);
+        }
+    }
+
+    private class SearchTextObserver implements SearchView.OnQueryTextListener {
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            if (!query.equals("")) {
+                mFileAdapter.filterNames(query);
+            } else {
+                mFileAdapter.removeFilter();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            if (!newText.equals("")) {
+                mFileAdapter.filterNames(newText);
+            } else {
+                mFileAdapter.removeFilter();
+            }
+
+
+            return false;
         }
     }
 }

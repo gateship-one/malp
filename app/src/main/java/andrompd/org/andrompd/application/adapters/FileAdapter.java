@@ -62,10 +62,10 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
-        MPDFileEntry file = mModelData.get(position);
+        MPDFileEntry file = (MPDFileEntry)getItem(position);
         if (file instanceof MPDFile) {
 
-            MPDFile track = (MPDFile) mModelData.get(position);
+            MPDFile track = (MPDFile) file;
 
             // Get track title
             String trackTitle = track.getTrackTitle();
@@ -88,7 +88,7 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             return convertView;
         } else if (file instanceof MPDPlaylist || file instanceof MPDDirectory) {
 
-            convertView = new GenericFileListItem(mContext, mModelData.get(position), mShowIcons);
+            convertView = new GenericFileListItem(mContext, (MPDFileEntry)file, mShowIcons);
 
 
             return convertView;

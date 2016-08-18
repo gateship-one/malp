@@ -49,6 +49,8 @@
     <string name="action_show_artist">Show artist</string>
     <string name="action_show_album">Show album</string>
 
+    <string name="action_search">Search</string>
+
     <string name="action_jump_to_current">Jump to current song</string>
 
     <string name="menu_library">Library</string>

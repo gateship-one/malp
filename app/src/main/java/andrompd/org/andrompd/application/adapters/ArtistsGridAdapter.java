@@ -39,7 +39,7 @@ public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDArtist artist = mModelData.get(position);
+        MPDArtist artist = (MPDArtist)getItem(position);
         String label = artist.getArtistName();
 
         // Check if a view can be recycled

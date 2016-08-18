@@ -42,6 +42,9 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     protected List<T> mModelData;
 
+    protected boolean mFiltered;
+    protected List<T> mFilteredModelData;
+
     /**
      * Variable to store the current scroll speed. Used for image view optimizations
      */
@@ -72,48 +75,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
             mModelData.clear();
         } else {
             mModelData = data;
-            Log.v(TAG,"Got modeldata with length: "  + data.size());
         }
         // create sectionlist for fastscrolling
 
-        mSectionList.clear();
-        mSectionPositions.clear();
-        mPositionSectionMap.clear();
-        if (mModelData.size() > 0) {
-            MPDGenericItem currentModel = mModelData.get(0);
+        createSections();
 
-            char lastSection;
-            if ( currentModel.getSectionTitle().length() > 0 ) {
-                 lastSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
-            } else {
-                lastSection = ' ';
-            }
-
-            mSectionList.add(String.valueOf(lastSection));
-            mSectionPositions.add(0);
-            mPositionSectionMap.put(lastSection, mSectionList.size() - 1);
-
-            for (int i = 1; i < getCount(); i++) {
-
-                currentModel = mModelData.get(i);
-
-                char currentSection;
-                if ( currentModel.getSectionTitle().length() > 0 ) {
-                    currentSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
-                } else {
-                    currentSection = ' ';
-                }
-
-                if (lastSection != currentSection) {
-                    mSectionList.add("" + currentSection);
-
-                    lastSection = currentSection;
-                    mSectionPositions.add(i);
-                    mPositionSectionMap.put(currentSection, mSectionList.size() - 1);
-                }
-
-            }
-        }
         notifyDataSetChanged();
     }
 
@@ -166,7 +132,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     @Override
     public int getCount() {
-        return mModelData.size();
+
+        if ( mFiltered && mFilteredModelData != null) {
+            return mFilteredModelData.size();
+        } else {
+            return mModelData.size();
+        }
     }
 
     /**
@@ -176,7 +147,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     @Override
     public Object getItem(int position) {
-        return mModelData.get(position);
+        if ( mFiltered && mFilteredModelData != null) {
+            return mFilteredModelData.get(position);
+        } else {
+            return mModelData.get(position);
+        }
     }
 
     /**
@@ -196,5 +171,77 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     public void setScrollSpeed(int speed) {
         mScrollSpeed = speed;
+    }
+
+    private void createSections() {
+        mSectionList.clear();
+        mSectionPositions.clear();
+        mPositionSectionMap.clear();
+
+        List<T> sectionList;
+
+        if ( mFiltered && mFilteredModelData != null) {
+            sectionList = mFilteredModelData;
+        } else {
+            sectionList = mModelData;
+        }
+
+        if (sectionList.size() > 0) {
+            MPDGenericItem currentModel = sectionList.get(0);
+
+            char lastSection;
+            if ( currentModel.getSectionTitle().length() > 0 ) {
+                lastSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
+            } else {
+                lastSection = ' ';
+            }
+
+            mSectionList.add(String.valueOf(lastSection));
+            mSectionPositions.add(0);
+            mPositionSectionMap.put(lastSection, mSectionList.size() - 1);
+
+            for (int i = 1; i < getCount(); i++) {
+
+                currentModel = sectionList.get(i);
+
+                char currentSection;
+                if ( currentModel.getSectionTitle().length() > 0 ) {
+                    currentSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
+                } else {
+                    currentSection = ' ';
+                }
+
+                if (lastSection != currentSection) {
+                    mSectionList.add("" + currentSection);
+
+                    lastSection = currentSection;
+                    mSectionPositions.add(i);
+                    mPositionSectionMap.put(currentSection, mSectionList.size() - 1);
+                }
+
+            }
+        }
+        notifyDataSetChanged();
+    }
+
+    public void filterNames(String filterString) {
+        Log.v(TAG,"Filter with string: " + filterString);
+        mFiltered = true;
+
+        mFilteredModelData = new ArrayList<>();
+
+        for(T elem : mModelData) {
+            if ( elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase()) ) {
+                mFilteredModelData.add(elem);
+            }
+        }
+        createSections();
+    }
+
+    public void removeFilter() {
+        mFiltered = false;
+        mFilteredModelData = null;
+
+        createSections();
     }
 }

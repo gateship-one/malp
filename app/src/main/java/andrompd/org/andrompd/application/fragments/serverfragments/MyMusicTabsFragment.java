@@ -28,12 +28,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
+import andrompd.org.andrompd.application.utils.ThemeUtils;
 
 public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener{
     public final static String TAG = MyMusicTabsFragment.class.getSimpleName();
@@ -46,6 +51,10 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
     private FABFragmentCallback mFABCallback = null;
 
+    ViewPager mViewPager;
+
+    private ArtistsFragment mArtistFragment;
+    private AlbumsFragment mAlbumsFragment;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -73,18 +82,13 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
             DrawableCompat.setTintList(icon, tabColors);
             tabLayout.addTab(tabLayout.newTab().setIcon(icon));
         }
-//        drawable = res.getDrawable(R.drawable.ic_my_library_music_24dp, null);
-//        if (drawable != null) {
-//            Drawable icon = DrawableCompat.wrap(drawable);
-//            DrawableCompat.setTintList(icon, tabColors);
-//            tabLayout.addTab(tabLayout.newTab().setIcon(icon));
-//        }
+
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        ViewPager myMusicViewPager = (ViewPager) rootView.findViewById(R.id.my_music_viewpager);
+        mViewPager = (ViewPager) rootView.findViewById(R.id.my_music_viewpager);
         MyMusicPagerAdapter adapterViewPager = new MyMusicPagerAdapter(getChildFragmentManager());
-        myMusicViewPager.setAdapter(adapterViewPager);
-        myMusicViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
+        mViewPager.setAdapter(adapterViewPager);
+        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(this);
 
         // set start page
@@ -98,10 +102,10 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
         switch (tab) {
             case ARTISTS:
-                myMusicViewPager.setCurrentItem(0);
+                mViewPager.setCurrentItem(0);
                 break;
             case ALBUMS:
-                myMusicViewPager.setCurrentItem(1);
+                mViewPager.setCurrentItem(1);
                 break;
 //            case TRACKS:
 //                myMusicViewPager.setCurrentItem(2);
@@ -112,6 +116,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 //        activity.setUpPlayButton(null);
 
 
+        setHasOptionsMenu(true);
         return rootView;
     }
 
@@ -164,17 +169,49 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         }
     }
 
+    /**
+     * Initialize the options menu.
+     * Be sure to call {@link #setHasOptionsMenu} before.
+     *
+     * @param menu         The container for the custom options menu.
+     * @param menuInflater The inflater to instantiate the layout.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.context_menu_library, menu);
+
+        // get tint color
+        int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+
+        Drawable drawable = menu.findItem(R.id.action_search).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_search).setIcon(drawable);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        searchView.setOnQueryTextListener(new SearchTextObserver());
+
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
-
+        if ( tab.getPosition() == 0) {
+            mArtistFragment.removeFilter();
+        } else if ( tab.getPosition() == 1 ) {
+            mAlbumsFragment.removeFilter();
+        }
     }
 
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
+
     }
 
-    public static class MyMusicPagerAdapter extends FragmentStatePagerAdapter {
+    private class MyMusicPagerAdapter extends FragmentStatePagerAdapter {
         static final int NUMBER_OF_PAGES = 2;
 
         public MyMusicPagerAdapter(FragmentManager fm) {
@@ -190,9 +227,11 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         public Fragment getItem(int i) {
             switch (i) {
                 case 0:
-                    return new ArtistsFragment();
+                    mArtistFragment = new ArtistsFragment();
+                    return mArtistFragment;
                 case 1:
-                    return new AlbumsFragment();
+                    mAlbumsFragment = new AlbumsFragment();
+                    return mAlbumsFragment;
 //                case 2:
 //                    return new AllTracksFragment();
                 default:
@@ -204,6 +243,46 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         public int getCount() {
             // this is done in order to reload all tabs
             return NUMBER_OF_PAGES;
+        }
+    }
+
+    private class SearchTextObserver implements SearchView.OnQueryTextListener {
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            int item = mViewPager.getCurrentItem();
+
+            if ( item == 0 ) {
+                if ( !query.equals("") ) {
+                    mArtistFragment.filterView(query);
+                } else {
+                    mArtistFragment.removeFilter();
+                }
+            }
+
+
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            int item = mViewPager.getCurrentItem();
+
+            if ( item == 0 ) {
+                if ( !newText.equals("") ) {
+                    mArtistFragment.filterView(newText);
+                } else {
+                    mArtistFragment.removeFilter();
+                }
+            } else if ( item == 1 ) {
+                if ( !newText.equals("") ) {
+                    mAlbumsFragment.filterView(newText);
+                } else {
+                    mAlbumsFragment.removeFilter();
+                }
+            }
+
+            return false;
         }
     }
 }

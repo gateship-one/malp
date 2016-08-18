@@ -333,4 +333,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
     }
 
+    public void filterView(String name) {
+        mAlbumsAdapter.filterNames(name);
+    }
+
+    public void removeFilter() {
+        mAlbumsAdapter.removeFilter();
+    }
+
+
 }
