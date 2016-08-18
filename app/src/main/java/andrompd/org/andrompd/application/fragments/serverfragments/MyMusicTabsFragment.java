@@ -29,7 +29,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +39,7 @@ import andrompd.org.andrompd.R;
 import andrompd.org.andrompd.application.callbacks.FABFragmentCallback;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 
-public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener{
+public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSelectedListener {
     public final static String TAG = MyMusicTabsFragment.class.getSimpleName();
     public final static String MY_MUSIC_REQUESTED_TAB = "ARG_REQUESTED_TAB";
 
@@ -146,8 +145,8 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     public void onResume() {
         super.onResume();
 
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(false,null);
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
     }
@@ -198,9 +197,9 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
-        if ( tab.getPosition() == 0) {
+        if (tab.getPosition() == 0 && mArtistFragment != null) {
             mArtistFragment.removeFilter();
-        } else if ( tab.getPosition() == 1 ) {
+        } else if (tab.getPosition() == 1 && mAlbumsFragment != null) {
             mAlbumsFragment.removeFilter();
         }
     }
@@ -252,8 +251,8 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         public boolean onQueryTextSubmit(String query) {
             int item = mViewPager.getCurrentItem();
 
-            if ( item == 0 ) {
-                if ( !query.equals("") ) {
+            if (item == 0) {
+                if (!query.equals("")) {
                     mArtistFragment.filterView(query);
                 } else {
                     mArtistFragment.removeFilter();
@@ -268,14 +267,14 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         public boolean onQueryTextChange(String newText) {
             int item = mViewPager.getCurrentItem();
 
-            if ( item == 0 ) {
-                if ( !newText.equals("") ) {
+            if (item == 0) {
+                if (!newText.equals("")) {
                     mArtistFragment.filterView(newText);
                 } else {
                     mArtistFragment.removeFilter();
                 }
-            } else if ( item == 1 ) {
-                if ( !newText.equals("") ) {
+            } else if (item == 1) {
+                if (!newText.equals("")) {
                     mAlbumsFragment.filterView(newText);
                 } else {
                     mAlbumsFragment.removeFilter();
