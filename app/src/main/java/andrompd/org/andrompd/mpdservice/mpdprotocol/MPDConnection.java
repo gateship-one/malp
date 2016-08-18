@@ -730,26 +730,27 @@ public class MPDConnection {
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
                 */
                 String discNumber = response.substring(MPDResponses.MPD_RESPONSE_DISC_NUMBER.length());
+                discNumber = discNumber.replaceAll(" ","");
                 String[] discNumberSep = discNumber.split("/");
                 if (discNumberSep.length > 0) {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
                     } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse disc number: ");
+                        Log.w(TAG,"Could not parse disc number: " + discNumber);
                     }
 
                     if (discNumberSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
                         } catch (NumberFormatException e ) {
-                            Log.w(TAG,"Could not parse disc number: ");
+                            Log.w(TAG,"Could not parse disc number: " + discNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
                     } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse disc number: ");
+                        Log.w(TAG,"Could not parse disc number: " + discNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER)) {
@@ -757,25 +758,26 @@ public class MPDConnection {
                  * Check if MPD returned a tracknumber like: "12" or "12/42" and set albumtrack count accordingly.
                  */
                 String trackNumber = response.substring(MPDResponses.MPD_RESPONSE_TRACK_NUMBER.length());
+                trackNumber = trackNumber.replaceAll(" ","");
                 String[] trackNumbersSep = trackNumber.split("/");
                 if (trackNumbersSep.length > 0) {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
                     } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse track number: ");
+                        Log.w(TAG,"Could not parse track number: " + trackNumber);
                     }
                     if (trackNumbersSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
                         } catch (NumberFormatException e ) {
-                            Log.w(TAG,"Could not parse track number: ");
+                            Log.w(TAG,"Could not parse track number: " + trackNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
                     } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse track number: ");
+                        Log.w(TAG,"Could not parse track number: " + trackNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
