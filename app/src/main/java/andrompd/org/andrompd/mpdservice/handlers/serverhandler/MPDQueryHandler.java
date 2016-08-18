@@ -42,27 +42,40 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
-public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
+/**
+ * This handler is used for all long running queries to the mpd server. This includes:
+ * database requests, playlists, outputs, current playlist, searches, file listings.
+ *
+ * To request certain items the caller needs to provide an instance of another Handler, called ResponseHandlers,
+ * that ensure that the return of the requested values is also done asynchronously.
+ *
+ * Requests should look like this:
+ *
+ * UI-Thread --> QueryHandler |(send message to another thread)-->    MPDConnection
+ *           <--(send message to another thread)<--ResponseHandler<-- MPDConnection
+ */
+public class MPDQueryHandler extends MPDGenericHandler {
     private static final String TAG = "MPDQueryHandler";
-    private static final String THREAD_NAME = "AndroMPD-NetHandler";
+    /**
+     * Name of the thread created for the Looper.
+     */
+    private static final String THREAD_NAME = "AndroMPD-QueryHandler";
+
 
     /**
-     * Wait 5 seconds before going to idle again
+     * HandlerThread that is used by the looper. This ensures that all requests to this handler
+     * are done multi-threaded and do not block the UI.
      */
-    private static final int IDLE_WAIT_TIME = 5 * 1000;
-
     private static HandlerThread mHandlerThread = null;
     private static MPDQueryHandler mHandlerSingleton = null;
 
     /**
-     * Private constructor for use in singleton.
+     * Private constructor for use in singleton. Called by the static singleton retrieval method.
      *
      * @param looper Looper of a HandlerThread (that is NOT the UI thread)
      */
     protected MPDQueryHandler(Looper looper) {
         super(looper);
-
-
     }
 
     /**
@@ -72,12 +85,17 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
      * @return
      */
     private synchronized static MPDQueryHandler getHandler() {
+        // Check if handler was accessed before. If not create the singleton object for the first
+        // time.
         if (null == mHandlerSingleton) {
+            // Create a new thread used as a looper for this handler.
+            // This is the thread in which all messages sent to this handler are handled.
             mHandlerThread = new HandlerThread(THREAD_NAME);
+            // It is important to start the thread before using it as a thread for the Handler.
+            // Otherwise the handler will cause a crash.
             mHandlerThread.start();
+            // Create the actual singleton instance.
             mHandlerSingleton = new MPDQueryHandler(mHandlerThread.getLooper());
-
-            mHandlerSingleton.mMPDConnection.setpIdleListener(mHandlerSingleton);
         }
         return mHandlerSingleton;
     }
@@ -86,13 +104,17 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
     /**
      * This is the main entry point of messages.
      * Here all possible messages types need to be handled with the MPDConnection.
+     * Have a look into the baseclass MPDGenericHandler for more information about the handling.
      *
      * @param msg Message to process.
      */
     @Override
     public void handleMessage(Message msg) {
+        // Call the baseclass handleMessage method here to ensure that the messages handled
+        // by the baseclass are handled in subclasses as well.
         super.handleMessage(msg);
 
+        // Type checking
         if (!(msg.obj instanceof MPDHandlerAction)) {
             /* Check if the message object is of correct type. Otherwise just abort here. */
             return;
@@ -100,9 +122,19 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
 
         MPDHandlerAction mpdAction = (MPDHandlerAction) msg.obj;
         /* Catch MPD exceptions here for now. */
-        MPDResponseHandler responseHandler;
-        MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
 
+        // ResponseHandler used to return the requested items to the caller
+        MPDResponseHandler responseHandler;
+
+        /**
+         * All messages are handled the same way:
+         *  * Check which action was requested
+         *  * Check if a ResponseHandler is necessary and also provided. (If not just abort here)
+         *  * Request the list of data objects from the MPDConnection (and therefor from the server)
+         *  * Pack the response in a Message requested from the given ResponseHandler.
+         *  * Send the message to the ResponseHandler
+         */
+        MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
         if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS) {
             responseHandler = mpdAction.getResponseHandler();
             if (!(responseHandler instanceof MPDResponseAlbumList)) {
@@ -171,7 +203,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             }
 
             List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylist();
-            Log.v(TAG, "Received current playlist with " + trackList.size() + " tracks");
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
@@ -185,7 +216,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             }
 
             List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylistWindow(start, end);
-            Log.v(TAG, "Received current playlist with " + trackList.size() + " tracks for window: " + start + ':' + end);
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
@@ -318,7 +348,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
             responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_DIRECTORY) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
-            Log.v(TAG, "Add directory: " + path);
             mMPDConnection.addSong(path);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_DIRECTORY) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
@@ -354,7 +383,15 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
     }
 
 
-    /* Convenient methods for message generation */
+    /**
+     * These static methods provide the only interface to outside classes.
+     * They should not be allowed to interact with the instance itself.
+     *
+     * All of these methods work with the same principle. They all create an handler message
+     * that will contain a MPDHandlerAction as a payload that contains all the information
+     * for the requested action with extras.
+     */
+
 
     /**
      * Set the server parameters for the connection. MUST be called before trying to
@@ -420,6 +457,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of albums of an artist.
+     * @param responseHandler The handler used to send the requested data
+     * @param artist Artist to get a list of albums from.
+     */
     public static void getArtistAlbums(MPDResponseAlbumList responseHandler, String artist) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUMS);
         Message msg = Message.obtain();
@@ -432,6 +474,10 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of all the artists available on this server
+     * @param responseHandler The handler used to send the requested data
+     */
     public static void getArtists(MPDResponseHandler responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTISTS);
         Message msg = Message.obtain();
@@ -444,6 +490,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of tracks (MPDFileEntry objects) on a album.
+     * @param responseHandler The handler used to send the requested data
+     * @param albumName Album to get tracks from
+     */
     public static void getAlbumTracks(MPDResponseFileList responseHandler, String albumName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUM_TRACKS);
         Message msg = Message.obtain();
@@ -457,6 +508,13 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of tracks (MPDFileEntry) on an album. This method will also filter the results
+     * with a given artistname
+     * @param responseHandler The handler used to send the requested data
+     * @param albumName Album go get tracks from
+     * @param artistName Artist name to filter results with
+     */
     public static void getArtistAlbumTracks(MPDResponseFileList responseHandler, String albumName, String artistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUM_TRACKS);
         Message msg = Message.obtain();
@@ -471,6 +529,10 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of all tracks enlisted in the current playlist.
+     * @param responseHandler The handler used to send the requested data
+     */
     public static void getCurrentPlaylist(MPDResponseFileList responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST);
         Message msg = Message.obtain();
@@ -483,13 +545,18 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of tracks enlisted in the current playlist.
+     * This method is able to request a partial list to speed up the query and lower the network
+     * usage.
+     * @param responseHandler The handler used to send the requested data
+     */
     public static void getCurrentPlaylist(MPDResponseFileList responseHandler, int start, int end) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST_WINDOW);
         Message msg = Message.obtain();
         if (null == msg) {
             return;
         }
-        Log.v(TAG,"Current playlist window requested: " + start + ':' + end);
         action.setResponseHandler(responseHandler);
         action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START, start);
         action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END, end);
@@ -498,6 +565,10 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of playlists saved on the server.
+     * @param responseHandler The handler used to send the requested data
+     */
     public static void getSavedPlaylists(MPDResponseFileList responseHandler) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLISTS);
         Message msg = Message.obtain();
@@ -511,6 +582,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Returns a list of tracks listed in a saved playlist.
+     * @param responseHandler The handler used to send the requested data
+     * @param playlistName Name of the playlist to get the tracks from.
+     */
     public static void getSavedPlaylist(MPDResponseFileList responseHandler, String playlistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST);
         Message msg = Message.obtain();
@@ -525,6 +601,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of files for a specified path. If no path is given the database root is used.
+     * @param responseHandler The handler used to send the requested data
+     * @param path Path to get the files/directory/playlist from
+     */
     public static void getFiles(MPDResponseFileList responseHandler, String path) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES);
         Message msg = Message.obtain();
@@ -539,6 +620,45 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Requests a list of available outputs configured on the MPD server.
+     * @param responseHandler The handler used to send the requested data.
+     */
+    public static void getOutputs(MPDResponseOutputList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_OUTPUTS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Requests a statistics object for the connected mpd server.
+     * @param responseHandler The handler used to send the requested data.
+     */
+    public static void getStatistics(MPDResponseServerStatistics responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SERVER_STATISTICS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Adds all tracks from an album (filtered with an artist name) to the current playlist.
+     * @param albumname Album name of the album to add
+     * @param artistname Artist name to filter tracks before enqueueing
+     */
     public static void addArtistAlbum(String albumname, String artistname) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST_ALBUM);
         Message msg = Message.obtain();
@@ -554,6 +674,11 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Adds an album to the current playlist and start playing it
+     * @param albumname Album name of the album to add
+     * @param artistname Artist name to filter tracks before enqueueing
+     */
     public static void playArtistAlbum(String albumname, String artistname) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM);
         Message msg = Message.obtain();
@@ -569,6 +694,10 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Adds all albums from an artist to the current playlist.
+     * @param artistname Name of the artist to add to the current playlist.
+     */
     public static void addArtist(String artistname) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST);
         Message msg = Message.obtain();
@@ -583,6 +712,10 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    /**
+     * Adds all albums from an artist to the current playlist and starts playing them.
+     * @param artistname Name of the artist to play its albums
+     */
     public static void playArtist(String artistname) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST);
         Message msg = Message.obtain();
@@ -597,6 +730,12 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    // FIXME check if song and directory actually need two different methods. It will result in the same MPD command
+
+    /**
+     * Adds a path to the current playlist. Can be a file or directory
+     * @param url URL of the path to add.
+     */
     public static void addSong(String url) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG);
         Message msg = Message.obtain();
@@ -694,7 +833,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
     }
 
     public static void playIndexAsNext(int index) {
-        Log.v(TAG, "Move index: " + index + "after current");
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -762,31 +900,6 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
-    public static void getOutputs(MPDResponseOutputList responseHandler) {
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_OUTPUTS);
-        Message msg = Message.obtain();
-        if (null == msg) {
-            return;
-        }
-        action.setResponseHandler(responseHandler);
-
-        msg.obj = action;
-
-        MPDQueryHandler.getHandler().sendMessage(msg);
-    }
-
-    public static void getStatistics(MPDResponseServerStatistics responseHandler) {
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SERVER_STATISTICS);
-        Message msg = Message.obtain();
-        if (null == msg) {
-            return;
-        }
-        action.setResponseHandler(responseHandler);
-
-        msg.obj = action;
-
-        MPDQueryHandler.getHandler().sendMessage(msg);
-    }
 
     public static void updateDatabase() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE);
@@ -807,29 +920,4 @@ public class MPDQueryHandler extends MPDGenericHandler implements MPDConnection.
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         mHandlerSingleton.internalUnregisterConnectionStateListener(stateHandler);
     }
-
-
-    @Override
-    public void onIdle() {
-
-    }
-
-    @Override
-    public void onNonIdle() {
-
-    }
-
-    @Override
-    public void onConnected() {
-        super.onConnected();
-        Log.v(TAG, "Go idle after connection");
-    }
-
-    @Override
-    public void onDisconnected() {
-        Log.v(TAG, "Disconnected stop idling");
-        super.onDisconnected();
-    }
-
-
 }
