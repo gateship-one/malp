@@ -1,11 +1,15 @@
 package andrompd.org.andrompd.application.fragments.serverfragments;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.SearchView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -99,6 +103,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             }
         });
 
+        setHasOptionsMenu(true);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -220,6 +225,56 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         }
     }
 
+
+    /**
+     * Initialize the options menu.
+     * Be sure to call {@link #setHasOptionsMenu} before.
+     *
+     * @param menu         The container for the custom options menu.
+     * @param menuInflater The inflater to instantiate the layout.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.fragment_menu_files, menu);
+
+        // get tint color
+        int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+
+        Drawable drawable = menu.findItem(R.id.action_add_playlist).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_add_playlist).setIcon(drawable);
+
+        drawable = menu.findItem(R.id.action_search).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_search).setIcon(drawable);
+
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        searchView.setOnQueryTextListener(new SearchTextObserver());
+
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
+    /**
+     * Hook called when an menu item in the options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_directory:
+                MPDQueryHandler.addDirectory(mPath);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     /**
      * Creates a new Loader that retrieves the list of playlists
      *
@@ -284,6 +339,31 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         @Override
         public void onClick(View v) {
             MPDQueryHandler.playDirectory(mPath);
+        }
+    }
+
+    private class SearchTextObserver implements SearchView.OnQueryTextListener {
+
+        @Override
+        public boolean onQueryTextSubmit(String query) {
+            if (!query.equals("")) {
+                mAdapter.filterNames(query);
+            } else {
+                mAdapter.removeFilter();
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onQueryTextChange(String newText) {
+            if (!newText.equals("")) {
+                mAdapter.filterNames(newText);
+            } else {
+                mAdapter.removeFilter();
+            }
+
+
+            return false;
         }
     }
 
