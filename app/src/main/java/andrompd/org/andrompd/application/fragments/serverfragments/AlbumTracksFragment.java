@@ -23,6 +23,7 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -74,7 +75,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.listview_layout, container, false);
+        View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
@@ -92,6 +93,21 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
         registerForContextMenu(mListView);
+
+        // get swipe layout
+        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        // set swipe colors
+        mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
+                ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
+        // set swipe refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+
+            @Override
+            public void onRefresh() {
+                refreshContent();
+            }
+        });
+
 
         setHasOptionsMenu(true);
 
@@ -152,6 +168,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         // Give the adapter the new retrieved data set
         mFileAdapter.swapModel(data);
+
+        finishedLoading();
     }
 
     /**

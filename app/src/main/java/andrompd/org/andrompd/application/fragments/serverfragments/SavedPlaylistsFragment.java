@@ -61,11 +61,6 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
      */
     private PlaylistCallback mCallback;
 
-    /**
-     * Save the swipe layout for later usage
-     */
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
     private FABFragmentCallback mFABCallback = null;
 
 
@@ -209,8 +204,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mPlaylistAdapter.swapModel(data);
-        // change refresh state
-        mSwipeRefreshLayout.setRefreshing(false);
+        finishedLoading();
     }
 
     /**
@@ -231,8 +225,4 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
             mCallback.openPlaylist(playlist.getPath());
         }
     }
-
-
-
-
 }

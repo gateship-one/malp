@@ -60,10 +60,6 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
      */
     private int mLastPosition;
 
-    /**
-     * Save the swipe layout for later usage
-     */
-    private SwipeRefreshLayout mSwipeRefreshLayout;
 
     private ArtistSelectedCallback mSelectedCallback;
 
@@ -172,8 +168,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mLastPosition = -1;
         }
 
-        // change refresh state
-        mSwipeRefreshLayout.setRefreshing(false);
+        finishedLoading();
     }
 
     /**

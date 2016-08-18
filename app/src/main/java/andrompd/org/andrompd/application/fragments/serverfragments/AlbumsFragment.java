@@ -69,12 +69,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     private int mLastPosition;
 
-    /**
-     * Save the swipe layout for later usage
-     */
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
-
     private String mArtistName;
 
     private AlbumSelectedCallback mAlbumSelectCallback;
@@ -278,8 +272,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             mLastPosition = -1;
         }
 
-        // change refresh state
-        mSwipeRefreshLayout.setRefreshing(false);
+        finishedLoading();
     }
 
     /**

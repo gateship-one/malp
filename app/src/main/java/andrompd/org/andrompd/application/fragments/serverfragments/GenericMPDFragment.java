@@ -20,14 +20,21 @@ package andrompd.org.andrompd.application.fragments.serverfragments;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
+
+import java.util.List;
 
 import andrompd.org.andrompd.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import andrompd.org.andrompd.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public abstract class GenericMPDFragment<T extends Object > extends Fragment implements LoaderManager.LoaderCallbacks<T>  {
     private static final String TAG = GenericMPDFragment.class.getSimpleName();
 
     protected ConnectionStateListener mConnectionStateListener;
+
+    protected SwipeRefreshLayout mSwipeRefreshLayout = null;
 
     protected GenericMPDFragment() {
         mConnectionStateListener = new ConnectionStateListener(this);
@@ -36,9 +43,7 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
     @Override
     public void onResume() {
         super.onResume();
-        // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
-
+        refreshContent();
         MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
 
     }
@@ -52,10 +57,17 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
 
 
     protected void refreshContent() {
+        if ( mSwipeRefreshLayout != null ) {
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(true);
+                }
+            });
+        }
         getLoaderManager().destroyLoader(0);
-        getLoaderManager().restartLoader(0, getArguments(), this);
+        getLoaderManager().initLoader(0, getArguments(), this);
     }
-
 
 
     private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
@@ -73,6 +85,12 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
         @Override
         public void onDisconnected() {
             getLoaderManager().destroyLoader(0);
+        }
+    }
+
+    protected void finishedLoading() {
+        if ( null != mSwipeRefreshLayout) {
+            mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 }

@@ -66,11 +66,6 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
      */
     private String mPath;
 
-    /**
-     * Save the swipe layout for later usage
-     */
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
     private FABFragmentCallback mFABCallback = null;
 
 
@@ -125,6 +120,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
             mFABCallback.setupFAB(true, new FABOnClickListener());
             mFABCallback.setupToolbar(mPath, false, true, false);
         }
+
     }
 
     /**
@@ -254,8 +250,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mFileAdapter.swapModel(data);
 
-        // change refresh state
-        mSwipeRefreshLayout.setRefreshing(false);
+        finishedLoading();
     }
 
     /**

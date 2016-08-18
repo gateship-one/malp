@@ -60,11 +60,6 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
      */
     private FileAdapter mAdapter;
 
-    /**
-     * Save the swipe layout for later usage
-     */
-    private SwipeRefreshLayout mSwipeRefreshLayout;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -296,8 +291,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
         mAdapter.swapModel(data);
-        // change refresh state
-        mSwipeRefreshLayout.setRefreshing(false);
+        finishedLoading();
 
         // Reset old scroll position
         if (mLastPosition >= 0) {
