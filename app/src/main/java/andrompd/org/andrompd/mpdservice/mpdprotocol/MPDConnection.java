@@ -1051,7 +1051,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
             if (!readyRead()) {
-                return null;
+                return status;
             }
         /* Response line from MPD */
             String response = pReader.readLine();
