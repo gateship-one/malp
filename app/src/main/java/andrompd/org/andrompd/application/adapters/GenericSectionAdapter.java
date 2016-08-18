@@ -229,7 +229,9 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     public void filterNames(String filterString) {
-        mFilterString = filterString;
+        if ( !filterString.equals(mFilterString)) {
+            mFilterString = filterString;
+        }
         new FilterTask().execute(new Pair<List<T>, String>(mModelData,filterString));
     }
 
