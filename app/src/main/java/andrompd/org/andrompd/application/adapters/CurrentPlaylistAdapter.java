@@ -239,7 +239,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         @Override
         public void onConnected() {
-            Log.v(TAG, "Server connected, fetch PL");
             updatePlaylist();
         }
 
@@ -307,7 +306,6 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         if (end > mLastStatus.getPlaylistLength()) {
             end = mLastStatus.getPlaylistLength();
         }
-        Log.v(TAG, "PL Window requested: " + start + ':' + end);
         MPDQueryHandler.getCurrentPlaylist(mTrackResponseHandler, start, end);
     }
 
@@ -330,6 +328,12 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             }
         }
         return null;
+    }
+
+    public void jumpToCurrent() {
+        if ( null != mLastStatus ) {
+            setCurrentIndex(mLastStatus.getCurrentSongIndex());
+        }
     }
 
     private class ListCleanUp extends TimerTask {

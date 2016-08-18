@@ -293,6 +293,9 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 break;
+            case R.id.action_jump_to_current:
+                mPlaylistView.jumpToCurrentSong();
+                break;
             default:
                 return false;
         }

@@ -93,4 +93,8 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         return null;
     }
 
+    public void jumpToCurrentSong() {
+        mPlaylistAdapter.jumpToCurrent();
+    }
+
 }
