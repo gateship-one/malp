@@ -58,7 +58,7 @@ import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
  * <p/>
  * This mpd connection needs to be run in a different thread than the UI otherwise the UI will block
  * (or android will just throw an exception).
- *
+ * <p/>
  * For more information check the protocol definition of the mpd server or contact me via mail.
  */
 
@@ -562,6 +562,9 @@ public class MPDConnection {
         if (!pMPDConnectionReady) {
             return albumList;
         }
+        if (!readyRead()) {
+            return null;
+        }
         /* Parse the MPD response and create a list of MPD albums */
         String response = pReader.readLine();
 
@@ -623,6 +626,9 @@ public class MPDConnection {
         if (!pMPDConnectionReady) {
             return artistList;
         }
+        if (!readyRead()) {
+            return null;
+        }
 
         /* Parse MPD artist return values and create a list of MPDArtist objects */
         String response = pReader.readLine();
@@ -679,6 +685,10 @@ public class MPDConnection {
         /* Temporary track item (added to list later */
         MPDFileEntry tempFileEntry = null;
 
+        if (!readyRead()) {
+            return null;
+        }
+
         /* Response line from MPD */
         String response = pReader.readLine();
         while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
@@ -722,12 +732,25 @@ public class MPDConnection {
                 String discNumber = response.substring(MPDResponses.MPD_RESPONSE_DISC_NUMBER.length());
                 String[] discNumberSep = discNumber.split("/");
                 if (discNumberSep.length > 0) {
-                    ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
+                    try {
+                        ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
+                    } catch (NumberFormatException e ) {
+                        Log.w(TAG,"Could not parse disc number: ");
+                    }
+
                     if (discNumberSep.length > 1) {
-                        ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
+                        try {
+                            ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
+                        } catch (NumberFormatException e ) {
+                            Log.w(TAG,"Could not parse disc number: ");
+                        }
                     }
                 } else {
-                    ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
+                    try {
+                        ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
+                    } catch (NumberFormatException e ) {
+                        Log.w(TAG,"Could not parse disc number: ");
+                    }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER)) {
                 /*
@@ -736,12 +759,24 @@ public class MPDConnection {
                 String trackNumber = response.substring(MPDResponses.MPD_RESPONSE_TRACK_NUMBER.length());
                 String[] trackNumbersSep = trackNumber.split("/");
                 if (trackNumbersSep.length > 0) {
-                    ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
+                    try {
+                        ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
+                    } catch (NumberFormatException e ) {
+                        Log.w(TAG,"Could not parse track number: ");
+                    }
                     if (trackNumbersSep.length > 1) {
-                        ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
+                        try {
+                            ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
+                        } catch (NumberFormatException e ) {
+                            Log.w(TAG,"Could not parse track number: ");
+                        }
                     }
                 } else {
-                    ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
+                    try {
+                        ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
+                    } catch (NumberFormatException e ) {
+                        Log.w(TAG,"Could not parse track number: ");
+                    }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
                 tempFileEntry.setLastModified(response.substring(MPDResponses.MPD_RESPONSE_LAST_MODIFIED.length()));
@@ -1013,6 +1048,9 @@ public class MPDConnection {
         /* Request status */
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
+            if (!readyRead()) {
+                return null;
+            }
         /* Response line from MPD */
             String response = pReader.readLine();
             while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
@@ -1232,6 +1270,7 @@ public class MPDConnection {
 
     /**
      * Sets random to true or false
+     *
      * @param random If random should be set (true) or not (false)
      * @return True if server responed with ok
      */
@@ -1251,6 +1290,7 @@ public class MPDConnection {
 
     /**
      * Sets repeat to true or false
+     *
      * @param repeat If repeat should be set (true) or not (false)
      * @return True if server responed with ok
      */
@@ -1270,6 +1310,7 @@ public class MPDConnection {
 
     /**
      * Sets single playback to enable (true) or disabled (false)
+     *
      * @param single if single playback should be enabled or not.
      * @return True if server responed with ok
      */
@@ -1289,6 +1330,7 @@ public class MPDConnection {
 
     /**
      * Sets if files should be removed after playback (consumed)
+     *
      * @param consume True if yes and false if not.
      * @return True if server responed with ok
      */
@@ -1308,6 +1350,7 @@ public class MPDConnection {
 
     /**
      * Plays the song with the index in the current playlist.
+     *
      * @param index Index of the song that should be played.
      * @return True if server responed with ok
      */
@@ -1327,6 +1370,7 @@ public class MPDConnection {
 
     /**
      * Seeks the currently playing song to a certain position
+     *
      * @param seconds Position in seconds to which a seek is requested to.
      * @return True if server responed with ok
      */
@@ -1353,6 +1397,7 @@ public class MPDConnection {
 
     /**
      * Sets the volume of the mpd servers output. It is an absolute value between (0-100).
+     *
      * @param volume Volume to set to the server.
      * @return True if server responed with ok
      */
@@ -1378,6 +1423,7 @@ public class MPDConnection {
 
     /**
      * This method adds songs in a bulk command list. Should be reasonably in performance this way.
+     *
      * @param tracks List of MPDFileEntry objects to add to the current playlist.
      * @return True if server responed with ok
      */
@@ -1407,7 +1453,8 @@ public class MPDConnection {
 
     /**
      * Adds all tracks from a certain album from artistname to the current playlist.
-     * @param albumname Name of the album to add to the current playlist.
+     *
+     * @param albumname  Name of the album to add to the current playlist.
      * @param artistname Name of the artist of the album to add to the list. This
      *                   allows filtering of album tracks to a specified artist. Can also
      *                   be left empty then all tracks from the album will be added.
@@ -1423,6 +1470,7 @@ public class MPDConnection {
     /**
      * Adds all albums of an artist to the current playlist. Will first get a list of albums for the
      * artist and then call addAlbumTracks for every album on this result.
+     *
      * @param artistname Name of the artist to enqueue the albums from.
      * @return True if server responed with ok
      */
@@ -1445,6 +1493,7 @@ public class MPDConnection {
 
     /**
      * Adds a single File/Directory to the current playlist.
+     *
      * @param url URL of the file or directory! to add to the current playlist.
      * @return True if server responed with ok
      */
@@ -1466,7 +1515,8 @@ public class MPDConnection {
     /**
      * This method adds a song to a specified positiion in the current playlist.
      * This allows GUI developers to implement a method like "add after current".
-     * @param url URL to add to the playlist.
+     *
+     * @param url   URL to add to the playlist.
      * @param index Index at which the item should be added.
      * @return True if server responed with ok
      */
@@ -1486,6 +1536,7 @@ public class MPDConnection {
 
     /**
      * Instructs the mpd server to clear its current playlist.
+     *
      * @return True if server responed with ok
      */
     public boolean clearPlaylist() {
@@ -1503,6 +1554,7 @@ public class MPDConnection {
 
     /**
      * Instructs the mpd server to remove one item from the current playlist at index.
+     *
      * @param index Position of the item to remove from current playlist.
      * @return True if server responed with ok
      */
@@ -1522,8 +1574,9 @@ public class MPDConnection {
     /**
      * Moves one item from an index in the current playlist to an new index. This allows to move
      * tracks for example after the current to priotize songs.
+     *
      * @param from Item to move from.
-     * @param to Position to enter item
+     * @param to   Position to enter item
      * @return
      */
     public boolean moveSongFromTo(int from, int to) {
@@ -1541,6 +1594,7 @@ public class MPDConnection {
 
     /**
      * Saves the current playlist as a new playlist with a name.
+     *
      * @param name Name of the playlist to save to.
      * @return True if server responed with ok
      */
@@ -1560,6 +1614,7 @@ public class MPDConnection {
 
     /**
      * Removes a saved playlist from the servers database.
+     *
      * @param name Name of the playlist to remove.
      * @return True if server responed with ok
      */
@@ -1579,6 +1634,7 @@ public class MPDConnection {
 
     /**
      * Loads a saved playlist (added after the last song) to the current playlist.
+     *
      * @param name Of the playlist to add to.
      * @return True if server responed with ok
      */
@@ -1598,6 +1654,7 @@ public class MPDConnection {
 
     /**
      * Private parsing method for MPDs output lists.
+     *
      * @return A list of MPDOutput objects with name,active,id values if successful. Otherwise empty list.
      * @throws IOException
      */
@@ -1607,6 +1664,10 @@ public class MPDConnection {
         String outputName = null;
         boolean outputActive = false;
         int outputId = -1;
+
+        if (!readyRead()) {
+            return null;
+        }
 
         /* Response line from MPD */
         String response = pReader.readLine();
@@ -1642,6 +1703,7 @@ public class MPDConnection {
 
     /**
      * Returns the list of MPDOutputs to the outside callers.
+     *
      * @return List of MPDOutput objects or null in case of error.
      */
     public List<MPDOutput> getOutputs() {
@@ -1659,6 +1721,7 @@ public class MPDConnection {
 
     /**
      * Toggles the state of the output with the id.
+     *
      * @param id Id of the output to toggle (active/deactive)
      * @return True if server responed with ok
      */
@@ -1678,6 +1741,7 @@ public class MPDConnection {
 
     /**
      * Instructs to update the database of the mpd server (path: / )
+     *
      * @return True if server responed with ok
      */
     public boolean updateDatabase() {
@@ -1697,7 +1761,8 @@ public class MPDConnection {
 
     /**
      * Checks if the socket is ready for read operations
-      * @return True if ready
+     *
+     * @return True if ready
      * @throws IOException
      */
     private boolean readyRead() throws IOException {
@@ -1724,6 +1789,7 @@ public class MPDConnection {
 
     /**
      * Registers a listener to be notified about connection state changes
+     *
      * @param listener Listener to be connected
      */
     public void setStateListener(MPDConnectionStateChangeListener listener) {
@@ -1732,6 +1798,7 @@ public class MPDConnection {
 
     /**
      * Registers a listener to be notified about changes in idle state of this connection.
+     *
      * @param listener
      */
     public void setpIdleListener(MPDConnectionIdleChangeListener listener) {
