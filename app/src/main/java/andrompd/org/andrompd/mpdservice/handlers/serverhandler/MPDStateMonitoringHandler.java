@@ -203,7 +203,8 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         try {
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
-            if (mLastStatus == null || status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex()) {
+
+            if ( status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex()) {
                 // New track started playing. Get it and inform the listener.
                 mLastFile = mMPDConnection.getCurrentSong();
                 distributeNewTrack(mLastFile);
