@@ -118,7 +118,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
         if (null != mFABCallback) {
             mFABCallback.setupFAB(true, new FABOnClickListener());
-            mFABCallback.setupToolbar(mPath, false, true, false);
+            mFABCallback.setupToolbar(mPath, false, false, false);
         }
 
     }
