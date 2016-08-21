@@ -120,9 +120,13 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     public void onTabSelected(TabLayout.Tab tab) {
         View view = this.getView();
 
-        if (view != null) {
-            mSearchView.setIconified(true);
-            mOptionMenu.findItem(R.id.action_search).collapseActionView();
+        if (view != null ) {
+            // dismiss searchview
+            if (!mSearchView.isIconified()) {
+                mSearchView.setIconified(true);
+                mOptionMenu.findItem(R.id.action_search).collapseActionView();
+            }
+
 
             ViewPager myMusicViewPager = (ViewPager) view.findViewById(R.id.my_music_viewpager);
             myMusicViewPager.setCurrentItem(tab.getPosition());
@@ -198,7 +202,9 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
             @Override
             public boolean onClose() {
                 GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
-                fragment.removeFilter();
+                if ( null != fragment ) {
+                    fragment.removeFilter();
+                }
 
                 return false;
             }
