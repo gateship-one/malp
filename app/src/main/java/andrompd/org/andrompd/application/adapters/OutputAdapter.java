@@ -36,7 +36,7 @@ public class OutputAdapter extends GenericSectionAdapter<MPDOutput> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDOutput output = mModelData.get(position);
+        MPDOutput output = (MPDOutput)getItem(position);
 
         // Profile name
         String outputName = output.getOutputName();
@@ -51,7 +51,7 @@ public class OutputAdapter extends GenericSectionAdapter<MPDOutput> {
     }
 
     public void setOutputActive(int index, boolean active ) {
-        MPDOutput output = (MPDOutput)mModelData.get(index);
+        MPDOutput output = (MPDOutput)getItem(index);
         output.setOutputState(active);
         notifyDataSetChanged();
     }

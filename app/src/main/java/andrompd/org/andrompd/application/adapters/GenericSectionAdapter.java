@@ -42,7 +42,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     /**
      * Abstract list with model data used for this adapter.
      */
-    protected List<T> mModelData;
+    private List<T> mModelData;
 
     protected boolean mFiltered;
     protected List<T> mFilteredModelData;
@@ -232,7 +232,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         if ( !filterString.equals(mFilterString)) {
             mFilterString = filterString;
         }
-        new FilterTask().execute(new Pair<List<T>, String>(mModelData,filterString));
+        new FilterTask().execute(filterString);
     }
 
     public void removeFilter() {
@@ -242,18 +242,16 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         createSections();
     }
 
-    private class FilterTask extends AsyncTask<Pair<List<T>,String>, Object, Pair<List<T>,String>> {
+    private class FilterTask extends AsyncTask<String, Object, Pair<List<T>,String>> {
 
         @Override
-        protected Pair<List<T>,String> doInBackground(Pair<List<T>,String>... lists) {
+        protected Pair<List<T>,String> doInBackground(String... lists) {
             ArrayList<T> resultList = new ArrayList<>();
 
-            String filterString = lists[0].second;
-
-            Log.v(TAG,"Filter with string: " + filterString);
+            String filterString = lists[0];
             mFiltered = true;
 
-            for(T elem : lists[0].first) {
+            for(T elem : mModelData) {
                 if ( elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase()) ) {
                     resultList.add(elem);
                 }

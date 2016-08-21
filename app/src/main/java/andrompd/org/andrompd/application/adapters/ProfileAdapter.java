@@ -34,7 +34,7 @@ public class ProfileAdapter extends GenericSectionAdapter<MPDServerProfile> {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDServerProfile profile = mModelData.get(position);
+        MPDServerProfile profile = (MPDServerProfile)getItem(position);
 
         // Profile name
         String profileName = profile.getProfileName();
