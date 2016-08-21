@@ -178,7 +178,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.context_menu_library, menu);
+        menuInflater.inflate(R.menu.fragment_menu_library, menu);
 
         // get tint color
         int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
