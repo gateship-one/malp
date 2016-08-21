@@ -283,6 +283,14 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         MPDQueryHandler.playSongNext(track.getPath());
     }
 
+    public void applyFilter(String name) {
+        mFileAdapter.applyFilter(name);
+    }
+
+    public void removeFilter() {
+        mFileAdapter.removeFilter();
+    }
+
     private class FABOnClickListener implements View.OnClickListener {
 
         @Override
@@ -295,24 +303,23 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            if (!query.equals("")) {
-                mFileAdapter.filterNames(query);
+            if (!query.isEmpty()) {
+                applyFilter(query);
             } else {
-                mFileAdapter.removeFilter();
+                removeFilter();
             }
             return false;
         }
 
         @Override
         public boolean onQueryTextChange(String newText) {
-            if (!newText.equals("")) {
-                mFileAdapter.filterNames(newText);
+            if (!newText.isEmpty()) {
+                applyFilter(newText);
             } else {
-                mFileAdapter.removeFilter();
+                removeFilter();
             }
 
-
-            return false;
+            return true;
         }
     }
 }

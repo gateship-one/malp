@@ -93,4 +93,22 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
+
+    /**
+     * Method to apply a filter to the view model of the fragment.
+     *
+     * This method must be overridden by the subclass.
+     */
+    public void applyFilter(String filter) {
+        throw new IllegalStateException("filterView hasn't been implemented in the subclass");
+    }
+
+    /**
+     * Method to remove a previous set filter.
+     *
+     * This method must be overridden by the subclass.
+     */
+    public void removeFilter() {
+        throw new IllegalStateException("removeFilter hasn't been implemented in the subclass");
+    }
 }

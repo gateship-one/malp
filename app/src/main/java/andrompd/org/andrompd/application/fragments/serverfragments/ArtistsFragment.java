@@ -244,8 +244,8 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         MPDQueryHandler.playArtist(artist.getArtistName());
     }
 
-    public void filterView(String name) {
-        mArtistAdapter.filterNames(name);
+    public void applyFilter(String name) {
+        mArtistAdapter.applyFilter(name);
     }
 
     public void removeFilter() {

@@ -42,7 +42,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     /**
      * Abstract list with model data used for this adapter.
      */
-    private List<T> mModelData;
+    protected List<T> mModelData;
 
     protected boolean mFiltered;
     protected List<T> mFilteredModelData;
@@ -228,7 +228,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         notifyDataSetChanged();
     }
 
-    public void filterNames(String filterString) {
+    public void applyFilter(String filterString) {
         if ( !filterString.equals(mFilterString)) {
             mFilterString = filterString;
         }

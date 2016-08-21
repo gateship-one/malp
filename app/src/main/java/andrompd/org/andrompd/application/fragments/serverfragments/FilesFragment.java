@@ -336,29 +336,37 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         }
     }
 
+    public void applyFilter(String name) {
+        mAdapter.applyFilter(name);
+    }
+
+    public void removeFilter() {
+        mAdapter.removeFilter();
+    }
+
     private class SearchTextObserver implements SearchView.OnQueryTextListener {
 
         @Override
         public boolean onQueryTextSubmit(String query) {
-            if (!query.equals("")) {
-                mAdapter.filterNames(query);
+            if (!query.isEmpty()) {
+                applyFilter(query);
             } else {
-                mAdapter.removeFilter();
+                removeFilter();
             }
             return false;
         }
 
         @Override
         public boolean onQueryTextChange(String newText) {
-            if (!newText.equals("")) {
-                mAdapter.filterNames(newText);
+            if (!newText.isEmpty()) {
+                applyFilter(newText);
             } else {
-                mAdapter.removeFilter();
+                removeFilter();
             }
 
-
-            return false;
+            return true;
         }
+
     }
 
 }
