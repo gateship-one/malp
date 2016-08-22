@@ -70,6 +70,10 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             // Get track title
             String trackTitle = track.getTrackTitle();
 
+            if ( null == trackTitle || trackTitle.isEmpty() ) {
+                trackTitle = track.getPath();
+            }
+
             // additional information (artist + album)
             String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
 
