@@ -34,6 +34,7 @@ import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseHand
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import andrompd.org.andrompd.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
+import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDCommands;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.MPDConnection;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import andrompd.org.andrompd.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -379,6 +380,33 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE) {
 
             mMPDConnection.updateDatabase();
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES) {
+            String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
+            MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
+            Log.v(TAG,"Search files: " + term + " of type: " + type + " requested");
+
+            responseHandler = mpdAction.getResponseHandler();
+            if (!(responseHandler instanceof MPDResponseFileList)) {
+                return;
+            }
+
+            List<MPDFileEntry> fileList = mMPDConnection.getSearchedFiles(term,type);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = fileList;
+            responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SEARCH_FILES) {
+            String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
+            MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
+
+            mMPDConnection.addSearchedFiles(term,type);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES) {
+            String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
+            MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
+
+            mMPDConnection.clearPlaylist();
+            mMPDConnection.addSearchedFiles(term,type);
+            mMPDConnection.playSongIndex(0);
         }
     }
 
@@ -907,6 +935,65 @@ public class MPDQueryHandler extends MPDGenericHandler {
         if (null == msg) {
             return;
         }
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Requests a list of files matching the search term and type
+     * @param term The string to search for
+     * @param type The type of items to search for
+     * @param responseHandler The handler used to send the requested data.
+     */
+    public static void searchFiles(String term, MPDCommands.MPD_SEARCH_TYPE type, MPDResponseFileList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Requests to add a search request
+     * @param term The string to search for
+     * @param type The type of items to search for
+     */
+    public static void searchAddFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SEARCH_FILES);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Requests to play a search result
+     * @param term The string to search for
+     * @param type The type of items to search for
+     */
+    public static void searchPlayFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
 
         msg.obj = action;
 

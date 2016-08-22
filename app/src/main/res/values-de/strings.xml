@@ -116,4 +116,11 @@
     <string name="acknowledgement_text">Ein riesen Dank geht an Frederik Lütkes, der mich stets motiviert hat an Odyssey zu arbeiten, ein Musikplayer, auf dem die Benutzeroberfläche dieser Anwendung basiert.</string>
     <string name="action_jump_to_current">Springe zu spielendem Lied</string>
     <string name="action_search">Suchen</string>
+    <string name="action_add_search_result">Suchergebnis hinzufügen</string>
+    <string name="menu_search">Suchen</string>
+    <string name="search_choice_album">Album</string>
+    <string name="search_choice_artist">Interpret</string>
+    <string name="search_choice_everything">Alles</string>
+    <string name="search_choice_file">Datei</string>
+    <string name="search_choice_track">Lied</string>
 </resources>

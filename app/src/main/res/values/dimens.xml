@@ -36,6 +36,8 @@
     <dimen name="material_content_spacing">8dp</dimen>
     <dimen name="material_standard_horizontal_spacing">16dp</dimen>
 
+    <dimen name="search_fragment_view_height">48dp</dimen>
+
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="fab_margin_bottom">64dp</dimen>
 

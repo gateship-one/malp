@@ -61,6 +61,7 @@ import andrompd.org.andrompd.application.fragments.serverfragments.MyMusicTabsFr
 import andrompd.org.andrompd.application.fragments.serverfragments.OutputsFragment;
 import andrompd.org.andrompd.application.fragments.serverfragments.PlaylistTracksFragment;
 import andrompd.org.andrompd.application.fragments.serverfragments.SavedPlaylistsFragment;
+import andrompd.org.andrompd.application.fragments.serverfragments.SearchFragment;
 import andrompd.org.andrompd.application.fragments.serverfragments.ServerStatisticFragment;
 import andrompd.org.andrompd.application.utils.ThemeUtils;
 import andrompd.org.andrompd.application.views.CurrentPlaylistView;
@@ -354,6 +355,9 @@ public class MainActivity extends AppCompatActivity
             Bundle args = new Bundle();
             args.putString(FilesFragment.EXTRA_FILENAME, "");
 
+        } else if (id == R.id.nav_search) {
+            fragment = new SearchFragment();
+            fragmentTag = SearchFragment.TAG;
         } else if (id == R.id.nav_profiles) {
             fragment = new ProfilesFragment();
             fragmentTag = ProfilesFragment.TAG;
@@ -512,6 +516,9 @@ public class MainActivity extends AppCompatActivity
         // back
         transaction.replace(R.id.fragment_container, newFragment, AlbumsFragment.TAG);
         transaction.addToBackStack("ArtistAlbumsFragment");
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_library);
 
         // Commit the transaction
         transaction.commit();

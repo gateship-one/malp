@@ -50,6 +50,7 @@
     <string name="action_show_album">Show album</string>
 
     <string name="action_search">Search</string>
+    <string name="action_add_search_result">Add search result</string>
 
     <string name="action_jump_to_current">Jump to current song</string>
 
@@ -62,6 +63,8 @@
     <string name="menu_files">Files</string>
     <string name="menu_statistic">Statistic</string>
     <string name="menu_app_settings">App settings</string>
+
+    <string name="menu_search">Search</string>
 
     <string name="menu_albums">Albums</string>
     <string name="menu_artists">Artists</string>
@@ -171,6 +174,20 @@
         <item>@string/preference_default_view_my_music_albums</item>
         <item>@string/preference_default_view_my_music_playlists</item>
         <item>@string/preference_default_view_my_music_files</item>
+    </string-array>
+
+    <string name="search_choice_track">Track</string>
+    <string name="search_choice_album">Album</string>
+    <string name="search_choice_artist">Artist</string>
+    <string name="search_choice_file">File</string>
+    <string name="search_choice_everything">Everything</string>
+
+    <string-array name="server_search_choices">
+        <item>@string/search_choice_track</item>
+        <item>@string/search_choice_album</item>
+        <item>@string/search_choice_artist</item>
+        <item>@string/search_choice_file</item>
+        <item>@string/search_choice_everything</item>
     </string-array>
 
     <!-- About activity -->

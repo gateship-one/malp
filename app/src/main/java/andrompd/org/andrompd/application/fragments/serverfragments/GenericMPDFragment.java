@@ -90,7 +90,14 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
 
     protected void finishedLoading() {
         if ( null != mSwipeRefreshLayout) {
-            mSwipeRefreshLayout.setRefreshing(false);
+            if ( mSwipeRefreshLayout != null ) {
+                mSwipeRefreshLayout.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mSwipeRefreshLayout.setRefreshing(false);
+                    }
+                });
+            }
         }
     }
 

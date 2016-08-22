@@ -828,7 +828,6 @@ public class MPDConnection {
             }
         }
         startIdleWait();
-
         return trackList;
     }
 
@@ -1037,6 +1036,24 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Requests the files for a specific search term and type
+     * @param term The search term to use
+     * @param type The type of items to search
+     * @return List of MPDFile items with all tracks matching the search
+     */
+    public List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term,type));
+            try {
+            /* Parse the return */
+                return parseMPDTracks("");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
 
     /**
      * Requests the currentstatus package from the mpd server.
@@ -1533,6 +1550,25 @@ public class MPDConnection {
                 e.printStackTrace();
             }
             return false;
+        }
+    }
+
+    /**
+     * Adds files to the playlist with a search term for a specific type
+     * @param term The search term to use
+     * @param type The type of items to search
+     * @return True if server responed with ok
+     */
+    public boolean addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES(term,type));
+            try {
+            /* Parse the return */
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
     }
 

@@ -151,4 +151,44 @@ public class MPDCommands {
     }
 
     public static final String MPD_COMMAND_UPDATE_DATABASE = "update";
+
+    public enum MPD_SEARCH_TYPE {
+        MPD_SEARCH_TRACK,
+        MPD_SEARCH_ALBUM,
+        MPD_SEARCH_ARTIST,
+        MPD_SEARCH_FILE,
+        MPD_SEARCH_ANY,
+    }
+
+    public static final String MPD_COMMAND_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
+        switch (type) {
+            case MPD_SEARCH_TRACK:
+                return "search title \"" + searchTerm + '\"';
+            case MPD_SEARCH_ALBUM:
+                return "search album \"" + searchTerm + '\"';
+            case MPD_SEARCH_ARTIST:
+                return "search artist \"" + searchTerm + '\"';
+            case MPD_SEARCH_FILE:
+                return "search file \"" + searchTerm + '\"';
+            case MPD_SEARCH_ANY:
+                return "search any \"" + searchTerm + '\"';
+        }
+        return "ping";
+    }
+
+    public static final String MPD_COMMAND_ADD_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
+        switch (type) {
+            case MPD_SEARCH_TRACK:
+                return "searchadd title \"" + searchTerm + '\"';
+            case MPD_SEARCH_ALBUM:
+                return "searchadd album \"" + searchTerm + '\"';
+            case MPD_SEARCH_ARTIST:
+                return "searchadd artist \"" + searchTerm + '\"';
+            case MPD_SEARCH_FILE:
+                return "searchadd file \"" + searchTerm + '\"';
+            case MPD_SEARCH_ANY:
+                return "searchadd any \"" + searchTerm + '\"';
+        }
+        return "ping";
+    }
 }

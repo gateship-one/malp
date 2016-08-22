@@ -80,6 +80,9 @@ public class MPDHandlerAction {
         ACTION_SET_VOLUME,
         ACTION_TOGGLE_OUTPUT,
         ACTION_UPDATE_DATABASE,
+        ACTION_SEARCH_FILES,
+        ACTION_ADD_SEARCH_FILES,
+        ACTION_PLAY_SEARCH_FILES
     }
 
 
@@ -95,6 +98,7 @@ public class MPDHandlerAction {
         EXTRA_PLAYLIST_NAME,
         EXTRA_SONG_URL,
         EXTRA_PATH,
+        EXTRA_SEARCH_TERM,
     }
 
     /**
@@ -114,6 +118,7 @@ public class MPDHandlerAction {
         EXTRA_WINDOW_START,
         EXTRA_WINDOW_END,
         EXTRA_OUTPUT_ID,
+        EXTRA_SEARCH_TYPE,
     }
 
     /**

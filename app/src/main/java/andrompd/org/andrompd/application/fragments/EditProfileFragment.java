@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.NumberPicker;
 import android.widget.Switch;
 
 import andrompd.org.andrompd.R;
@@ -48,7 +49,7 @@ public class EditProfileFragment extends Fragment {
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
     private TextInputEditText mPasswordView;
-    private TextInputEditText mPortView;
+    private NumberPicker mPortView;
 
 
     private MPDServerProfile mOldProfile;
@@ -83,12 +84,17 @@ public class EditProfileFragment extends Fragment {
         mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
         mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
         mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
-        mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
+        mPortView = (NumberPicker) rootView.findViewById(R.id.fragment_profile_port);
+
+        // Set to maximum tcp port
+        mPortView.setMaxValue(65535);
+        mPortView.setMinValue(1);
+
 
         mProfilenameView.setText(mProfilename);
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
-        mPortView.setText(String.valueOf(mPort));
+        mPortView.setValue(mPort);
 
 
         // Return the ready inflated and configured fragment view.
@@ -135,9 +141,9 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPassword = mPasswordView.getText().toString();
         }
-        if ( !mPortView.getText().toString().equals(String.valueOf(mPort)) ) {
+        if ( mPortView.getValue() != mPort ) {
             profileChanged = true;
-            mPort = Integer.valueOf(mPortView.getText().toString());
+            mPort = mPortView.getValue();
         }
 
         if ( profileChanged ) {
