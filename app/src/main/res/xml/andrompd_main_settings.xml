@@ -23,7 +23,7 @@
     <Preference android:title="@string/preference_launch_about">
         <intent
             android:action="android.intent.action.VIEW"
-            android:targetClass="andrompd.org.andrompd.application.activities.AboutActivity"
-            android:targetPackage="andrompd.org.andrompd" />
+            android:targetClass="org.gateshipone.malp.application.activities.AboutActivity"
+            android:targetPackage="org.gateshipone.malp" />
     </Preference>
 </PreferenceScreen>

@@ -15,26 +15,22 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package org.gateshipone.malp.application.utils;
 
-buildscript {
-    repositories {
-        jcenter()
+import android.content.Context;
+import android.util.TypedValue;
+
+public class ThemeUtils {
+
+    /**
+     * returns the color for the given theme attribute
+     * @param context the current context to resolve the attribute id
+     * @param attributeColor the requested theme attribute id
+     * @return the requested color as an integer
+     */
+    public static int getThemeColor (final Context context, final int attributeColor) {
+        final TypedValue value = new TypedValue();
+        context.getTheme().resolveAttribute(attributeColor, value, true);
+        return value.data;
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.3'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
 }

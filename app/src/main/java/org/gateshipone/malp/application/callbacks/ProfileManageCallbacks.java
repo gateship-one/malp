@@ -15,26 +15,18 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package org.gateshipone.malp.application.callbacks;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.3'
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
+import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
+public interface ProfileManageCallbacks {
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    // Should show the EditProfileFragment to the user
+    void editProfile(MPDServerProfile profile);
+
+    void connectProfile(MPDServerProfile profile);
+
+    void addProfile(MPDServerProfile profile);
+    void removeProfile(MPDServerProfile profile);
 }

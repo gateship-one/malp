@@ -22,7 +22,7 @@
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true">
 
-    <andrompd.org.andrompd.application.views.SquareImageView
+    <org.gateshipone.malp.application.views.SquareImageView
         android:id="@+id/collapsing_image"
         android:layout_width="match_parent"
         android:layout_height="300dp"

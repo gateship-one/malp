@@ -112,7 +112,7 @@
     <string name="server_statistic_songs_count">Anzahl der Lieder:</string>
     <string name="server_statistic_update_database">Serverdatenbank aktualisieren</string>
     <string name="server_statistic_uptime">Laufzeit des MPD-Servers:</string>
-    <string name="sources_text">Der Quellcode ist auf GitHub verfügbar:\nhttps://github.com/djselbeck/AndroMPD</string>
+    <string name="sources_text">Der Quellcode ist auf GitHub verfügbar:\nhttps://github.com/gateship-one/malp</string>
     <string name="acknowledgement_text">Ein riesen Dank geht an Frederik Lütkes, der mich stets motiviert hat an Odyssey zu arbeiten, ein Musikplayer, auf dem die Benutzeroberfläche dieser Anwendung basiert.</string>
     <string name="action_jump_to_current">Springe zu spielendem Lied</string>
     <string name="action_search">Suchen</string>

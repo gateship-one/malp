@@ -22,7 +22,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <andrompd.org.andrompd.application.views.NowPlayingView
+    <org.gateshipone.malp.application.views.NowPlayingView
         android:id="@+id/now_playing_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -270,7 +270,7 @@
                 </ScrollView>
 
 
-                <andrompd.org.andrompd.application.views.CurrentPlaylistView
+                <org.gateshipone.malp.application.views.CurrentPlaylistView
                     android:id="@+id/now_playing_playlist"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
@@ -423,5 +423,5 @@
 
         </RelativeLayout>
 
-    </andrompd.org.andrompd.application.views.NowPlayingView>
+    </org.gateshipone.malp.application.views.NowPlayingView>
 </FrameLayout>

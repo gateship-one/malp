@@ -15,26 +15,40 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
-buildscript {
-    repositories {
-        jcenter()
+
+public class MPDOutput implements MPDGenericItem {
+
+    private String mOutputName;
+    private boolean mActive;
+    private int mOutputId;
+
+    public MPDOutput(String name, boolean enabled, int id) {
+        mOutputName = name;
+        mActive = enabled;
+        mOutputId = id;
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:2.1.3'
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+    public String getOutputName() {
+        return mOutputName;
     }
-}
 
-allprojects {
-    repositories {
-        jcenter()
+    public boolean getOutputState() {
+        return mActive;
     }
-}
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    public int getID() {
+        return mOutputId;
+    }
+
+    public void setOutputState(boolean active ) {
+        mActive = active;
+    }
+
+
+    @Override
+    public String getSectionTitle() {
+        return mOutputName;
+    }
 }
