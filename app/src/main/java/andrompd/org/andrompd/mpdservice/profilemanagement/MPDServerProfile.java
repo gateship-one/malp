@@ -85,6 +85,14 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     }
 
     /**
+     * Sets the profile name of this profile
+     * @param profileName Profile name to set
+     */
+    public void setProfileName(String profileName) {
+        mProfileName = profileName;
+    }
+
+    /**
      *
      * @return The autoconnect flag of this profile
      */

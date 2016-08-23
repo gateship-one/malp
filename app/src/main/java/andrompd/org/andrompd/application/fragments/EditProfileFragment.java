@@ -151,6 +151,7 @@ public class EditProfileFragment extends Fragment {
             } else {
                 mOldProfile = new MPDServerProfile(mProfilename, true);
             }
+            mOldProfile.setProfileName(mProfilename);
             mOldProfile.setHostname(mHostname);
             mOldProfile.setPassword(mPassword);
             mOldProfile.setPort(mPort);

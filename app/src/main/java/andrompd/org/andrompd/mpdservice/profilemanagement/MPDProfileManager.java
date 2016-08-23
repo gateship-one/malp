@@ -164,7 +164,6 @@ public class MPDProfileManager {
             profile.setPort(serverPort);
 
             cursor.close();
-            Log.v(TAG,"Autoconnect profile: " + profile.toString());
             return profile;
         }
 
