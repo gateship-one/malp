@@ -79,6 +79,15 @@
             android:gravity="center"
             android:text="@string/authors"
             android:textSize="@dimen/material_font_style_size_body_2" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/material_content_spacing"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:text="@string/team"
+            android:textSize="@dimen/material_font_style_size_title" />
     </LinearLayout>
 
     <LinearLayout

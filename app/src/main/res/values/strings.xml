@@ -19,6 +19,8 @@
     <string name="app_name" translatable="false">MALP</string>
     <string name="app_name_nice" translatable="false">M.A.L.P.</string>
     <string name="authors" translatable="false">Hendrik Borghorst</string>
+    <string name="team" translatable="false">Team Gateship One</string>
+
 
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -193,6 +195,6 @@
     <!-- About activity -->
     <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>
     <string name="license_text">This application is licensed under the GPLv3 license.\nMaterial icons are licensed under the CC-BY license by Google.</string>
-    <string name="sources_text">The source code is available on GitHub:\nhttps://github.com/djselbeck/AndroMPD</string>
+    <string name="sources_text">The source code is available on GitHub:\nhttps://github.com/gateship-one/malp</string>
     <string name="activity_about_version">Version: </string>
 </resources>
