@@ -69,10 +69,9 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
 
     public static void setParameters(MPDServerProfile profile, Context context) {
-
-        Log.v(TAG, "Connection to: " + profile.getHostname() + ':' + String.valueOf(profile.getPort()));
-
-
+        if ( null == profile ) {
+            return;
+        }
         getInstance().mHostname = profile.getHostname();
         getInstance().mPassword = profile.getPassword();
         getInstance().mPort = profile.getPort();
@@ -104,8 +103,6 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public static void disconnectFromServer() {
-        Log.v(TAG,"Disconnecting from server");
-
         getInstance().mDisconnectRequested = true;
 
         MPDStateMonitoringHandler.disconnectFromMPDServer();

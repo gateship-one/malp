@@ -43,13 +43,28 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mPassword;
     private int mPort;
 
+    private long mCreated;
+
     public MPDServerProfile(String profileName, boolean autoConnect) {
         mProfileName = profileName;
         mAutoconnect = autoConnect;
 
+        mCreated = System.currentTimeMillis();
 
         /* Just set the default mpd port here */
         mPort = 6600;
+    }
+
+    public MPDServerProfile(String profileName, boolean autoConnect, long creationDate) {
+        mProfileName = profileName;
+        mAutoconnect = autoConnect;
+
+        mCreated = System.currentTimeMillis();
+
+        /* Just set the default mpd port here */
+        mPort = 6600;
+
+        mCreated = creationDate;
     }
 
     protected MPDServerProfile(Parcel in) {
@@ -58,6 +73,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         mPassword = in.readString();
         mPort = in.readInt();
         mAutoconnect = in.readInt() == 1;
+        mCreated = in.readLong();
     }
 
     /**
@@ -150,6 +166,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         retString += "Hostname: " + mHostname + "\n";
         retString += "Password: " + mPassword + "\n";
         retString += "Port: " + mPort + "\n";
+        retString += "Created: " + mCreated + "\n";
 
         return retString;
     }
@@ -184,5 +201,10 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         dest.writeString(mPassword);
         dest.writeInt(mPort);
         dest.writeInt(mAutoconnect ? 1 : 0);
+        dest.writeLong(mCreated);
+    }
+
+    public long getCreationDate() {
+        return mCreated;
     }
 }

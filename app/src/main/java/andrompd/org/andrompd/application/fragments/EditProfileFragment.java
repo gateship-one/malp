@@ -38,7 +38,6 @@ public class EditProfileFragment extends Fragment {
     public final static String TAG = EditProfileFragment.class.getSimpleName();
     public static final String EXTRA_PROFILE = "profile";
 
-    
 
     private String mProfilename;
     private String mHostname;
@@ -68,7 +67,7 @@ public class EditProfileFragment extends Fragment {
         Bundle args = getArguments();
         if (null != args) {
             mOldProfile = args.getParcelable(EXTRA_PROFILE);
-            if ( mOldProfile != null ) {
+            if (mOldProfile != null) {
                 mProfilename = mOldProfile.getProfileName();
                 mHostname = mOldProfile.getHostname();
                 mPassword = mOldProfile.getPassword();
@@ -129,32 +128,33 @@ public class EditProfileFragment extends Fragment {
         super.onPause();
 
         boolean profileChanged = false;
-        if ( !mProfilenameView.getText().toString().equals(mProfilenameView) ) {
+        if (!mProfilenameView.getText().toString().equals(mProfilenameView)) {
             profileChanged = true;
             mProfilename = mProfilenameView.getText().toString();
         }
-        if ( !mHostnameView.getText().toString().equals(mHostnameView) ) {
+        if (!mHostnameView.getText().toString().equals(mHostnameView)) {
             profileChanged = true;
             mHostname = mHostnameView.getText().toString();
         }
-        if ( !mPasswordView.getText().toString().equals(mPasswordView) ) {
+        if (!mPasswordView.getText().toString().equals(mPasswordView)) {
             profileChanged = true;
             mPassword = mPasswordView.getText().toString();
         }
-        if ( mPortView.getValue() != mPort ) {
+        if (mPortView.getValue() != mPort) {
             profileChanged = true;
             mPort = mPortView.getValue();
         }
 
-        if ( profileChanged ) {
-            if ( null != mOldProfile ) {
+        if (profileChanged) {
+            if (null != mOldProfile) {
                 mCallback.removeProfile(mOldProfile);
+            } else {
+                mOldProfile = new MPDServerProfile(mProfilename, true);
             }
-            MPDServerProfile profile = new MPDServerProfile(mProfilename,true);
-            profile.setHostname(mHostname);
-            profile.setPassword(mPassword);
-            profile.setPort(mPort);
-            mCallback.addProfile(profile);
+            mOldProfile.setHostname(mHostname);
+            mOldProfile.setPassword(mPassword);
+            mOldProfile.setPort(mPort);
+            mCallback.addProfile(mOldProfile);
         }
 
     }
@@ -164,9 +164,9 @@ public class EditProfileFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(false,null);
-            mFABCallback.setupToolbar(getString(R.string.fragment_profile_title),false, false, false);
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(false, null);
+            mFABCallback.setupToolbar(getString(R.string.fragment_profile_title), false, false, false);
         }
     }
 

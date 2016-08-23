@@ -70,9 +70,10 @@ public class MPDProfileManager {
                 String serverHostname = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_HOSTNAME));
                 String serverPassword = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PASSWORD));
                 int serverPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PORT));
+                long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
 
                 /* Create temporary object to append to list. */
-                MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect);
+                MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
                 profile.setHostname(serverHostname);
                 profile.setPassword(serverPassword);
                 profile.setPort(serverPort);
@@ -114,6 +115,7 @@ public class MPDProfileManager {
         values.put(MPDServerProfileTable.COLUMN_SERVER_HOSTNAME, profile.getHostname());
         values.put(MPDServerProfileTable.COLUMN_SERVER_PASSWORD, profile.getPassword());
         values.put(MPDServerProfileTable.COLUMN_SERVER_PORT, profile.getPort());
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED, profile.getCreationDate());
 
         /* Insert the table in the database */
         mDatabase.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
@@ -126,14 +128,12 @@ public class MPDProfileManager {
      */
     public void deleteProfile(MPDServerProfile profile) {
         /* Create the where clauses */
-        String whereClause = MPDServerProfileTable.COLUMN_PROFILE_NAME + "=? AND ";
-        whereClause += MPDServerProfileTable.COLUMN_SERVER_HOSTNAME + "=? AND ";
-        whereClause += MPDServerProfileTable.COLUMN_SERVER_PASSWORD + "=? AND ";
-        whereClause += MPDServerProfileTable.COLUMN_SERVER_PORT + "=? ";
+        String whereClause = MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED + "=?";
 
-        String[] whereValues = {profile.getProfileName(), profile.getHostname(), profile.getPassword(), String.valueOf(profile.getPort())};
+        String[] whereValues = {String.valueOf(profile.getCreationDate())};
         mDatabase.delete(MPDServerProfileTable.SQL_TABLE_NAME,whereClause, whereValues);
     }
+
 
     /**
      * This method is convient to call to easily get the automatic connect server profile (if any).
@@ -154,14 +154,17 @@ public class MPDProfileManager {
             String serverHostname = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_HOSTNAME));
             String serverPassword = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PASSWORD));
             int serverPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PORT));
+            long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
+
 
             /* Create temporary object to append to list. */
-            MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect);
+            MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
             profile.setHostname(serverHostname);
             profile.setPassword(serverPassword);
             profile.setPort(serverPort);
 
             cursor.close();
+            Log.v(TAG,"Autoconnect profile: " + profile.toString());
             return profile;
         }
 

@@ -34,12 +34,13 @@ public class MPDServerProfileTable {
     public static final String COLUMN_SERVER_PASSWORD = "server_password";
     public static final String COLUMN_SERVER_PORT = "server_port";
     public static final String COLUMN_PROFILE_AUTO_CONNECT = "autoconnect";
+    public static final String COLUMN_PROFILE_DATE_CREATED = "date";
 
     /**
      * Projection string array used for queries on this table
      */
     public static final String[] PROJECTION_SERVER_PROFILES = {COLUMN_PROFILE_NAME, COLUMN_PROFILE_AUTO_CONNECT,
-        COLUMN_SERVER_HOSTNAME, COLUMN_SERVER_PASSWORD, COLUMN_SERVER_PORT
+        COLUMN_SERVER_HOSTNAME, COLUMN_SERVER_PASSWORD, COLUMN_SERVER_PORT, COLUMN_PROFILE_DATE_CREATED
     };
 
 
@@ -49,7 +50,7 @@ public class MPDServerProfileTable {
     public static final String DATABASE_CREATE = "create table if not exists " +  SQL_TABLE_NAME + " (" +
             COLUMN_PROFILE_NAME + " text," + COLUMN_PROFILE_AUTO_CONNECT + " integer," +
             COLUMN_SERVER_HOSTNAME + " text," + COLUMN_SERVER_PASSWORD + " integer," +
-            COLUMN_SERVER_PORT + " integer );";
+            COLUMN_SERVER_PORT  + " integer,"  + COLUMN_PROFILE_DATE_CREATED  + " integer PRIMARY KEY);";
 
     /**
      * Creates the inital database table.

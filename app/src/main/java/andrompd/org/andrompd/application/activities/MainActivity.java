@@ -168,12 +168,8 @@ public class MainActivity extends AppCompatActivity
 
 
         mProfileManager = new MPDProfileManager(getApplicationContext());
-        MPDServerProfile autoProfile = mProfileManager.getAutoconnectProfile();
 
-
-        if (null != autoProfile) {
-            ConnectionManager.setParameters(autoProfile, this);
-        }
+        ConnectionManager.autoConnect(this);
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
