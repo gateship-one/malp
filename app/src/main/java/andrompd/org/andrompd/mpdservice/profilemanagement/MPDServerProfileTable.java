@@ -49,7 +49,7 @@ public class MPDServerProfileTable {
      */
     public static final String DATABASE_CREATE = "create table if not exists " +  SQL_TABLE_NAME + " (" +
             COLUMN_PROFILE_NAME + " text," + COLUMN_PROFILE_AUTO_CONNECT + " integer," +
-            COLUMN_SERVER_HOSTNAME + " text," + COLUMN_SERVER_PASSWORD + " integer," +
+            COLUMN_SERVER_HOSTNAME + " text," + COLUMN_SERVER_PASSWORD + " text," +
             COLUMN_SERVER_PORT  + " integer,"  + COLUMN_PROFILE_DATE_CREATED  + " integer PRIMARY KEY);";
 
     /**
