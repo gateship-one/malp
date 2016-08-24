@@ -1123,12 +1123,16 @@ public class MPDConnection {
                     String audioInfoSep[] = audioInfo.split(":");
                     if (audioInfoSep.length == 3) {
                     /* Extract the separate pieces */
+                        try {
                     /* First is sampleRate */
-                        status.setSamplerate(Integer.valueOf(audioInfoSep[0]));
+                            status.setSamplerate(Integer.valueOf(audioInfoSep[0]));
                     /* Second is bitresolution */
-                        status.setBitDepth(Integer.valueOf(audioInfoSep[1]));
+                            status.setBitDepth(Integer.valueOf(audioInfoSep[1]));
                     /* Third is channel count */
-                        status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
+                            status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
+                        } catch (NumberFormatException e) {
+                            Log.w(TAG,"Error parsing audio properties");
+                        }
                     }
                 } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
                     status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
