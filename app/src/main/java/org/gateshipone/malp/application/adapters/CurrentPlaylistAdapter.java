@@ -296,6 +296,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         }
         notifyDataSetChanged();
+        jumpToCurrent();
     }
 
     private void fetchWindow(int index) {
