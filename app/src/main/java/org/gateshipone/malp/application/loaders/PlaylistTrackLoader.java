@@ -86,13 +86,6 @@ public class PlaylistTrackLoader extends Loader<List<MPDFileEntry>> {
 
     }
 
-    /**
-     * In case of reset just start another load.
-     */
-    @Override
-    public void onReset() {
-        forceLoad();
-    }
 
     /**
      * Start the actual laoding process. Check if an playlistpath is provided.

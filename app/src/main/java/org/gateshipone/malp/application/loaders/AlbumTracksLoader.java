@@ -92,14 +92,6 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
     }
 
     /**
-     * In case of reset just start another load.
-     */
-    @Override
-    public void onReset() {
-        forceLoad();
-    }
-
-    /**
      * Start the actual laoding process. Check if an artistname was provided.
      * If fetch the artistalbumtracks otherwise fetch all tracks for a specific album.
      */

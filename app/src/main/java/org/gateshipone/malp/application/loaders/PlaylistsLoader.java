@@ -66,10 +66,6 @@ public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
 
     }
 
-    @Override
-    public void onReset() {
-        deliverResult(null);
-    }
 
     @Override
     public void onForceLoad() {

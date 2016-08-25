@@ -64,11 +64,6 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     }
 
     @Override
-    public void onReset() {
-        deliverResult(null);
-    }
-
-    @Override
     public void onForceLoad() {
         if ( (null == mArtistName) || mArtistName.equals("") ) {
             MPDQueryHandler.getAlbums(pAlbumsResponseHandler);

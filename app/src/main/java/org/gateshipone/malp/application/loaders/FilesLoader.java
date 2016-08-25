@@ -65,14 +65,6 @@ public class FilesLoader extends Loader<List<MPDFileEntry>> {
     }
 
     /**
-     * Reset the data with an empty data set
-     */
-    @Override
-    public void onReset() {
-        deliverResult(null);
-    }
-
-    /**
      * Requests the file list from the MPDQueryHandler, it will respond asynchronously
      */
     @Override

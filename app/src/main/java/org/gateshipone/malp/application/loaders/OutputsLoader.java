@@ -64,11 +64,6 @@ public class OutputsLoader extends Loader<List<MPDOutput>> {
     }
 
     @Override
-    public void onReset() {
-        deliverResult(null);
-    }
-
-    @Override
     public void onForceLoad() {
         MPDQueryHandler.getOutputs(mOutputResponseHandler);
     }
