@@ -74,7 +74,7 @@ import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
-        NowPlayingView.NowPlayingDragStatusReceiver, OnSaveDialogListener, FilesFragment.FilesCallback,
+        NowPlayingView.NowPlayingDragStatusReceiver, FilesFragment.FilesCallback,
         FABFragmentCallback {
 
 
@@ -598,17 +598,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void removeProfile(MPDServerProfile profile) {
         mProfileManager.deleteProfile(profile);
-    }
-
-    @Override
-    public void onSaveObject(String title, SaveDialog.OBJECTTYPE type) {
-        // check type to identify which object should be saved
-        switch (type) {
-            case PLAYLIST:
-                MPDQueryHandler.savePlaylist(title);
-                break;
-
-        }
     }
 
     @Override

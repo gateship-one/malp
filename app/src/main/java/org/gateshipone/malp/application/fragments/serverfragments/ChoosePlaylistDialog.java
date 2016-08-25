@@ -17,7 +17,6 @@
 
 package org.gateshipone.malp.application.fragments.serverfragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -29,6 +28,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 
 import java.util.List;
@@ -43,6 +45,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 public class ChoosePlaylistDialog extends DialogFragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>> {
 
+    public static final String EXTRA_SHOW_NEW_ENTRY = "show_newentry";
+
     /**
      * Listener to save the bookmark
      */
@@ -53,18 +57,15 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
      */
     private FileAdapter mPlaylistsListViewAdapter;
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
+    private boolean mShowNewEntry;
 
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mSaveCallback = (OnSaveDialogListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnSaveDialogListener");
-        }
+
+    public void setCallback(OnSaveDialogListener callback) {
+        mSaveCallback = callback;
     }
+
+
+
 
     /**
      * This method creates a new loader for this fragment.
@@ -75,7 +76,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new PlaylistsLoader(getActivity(),true);
+        return new PlaylistsLoader(getActivity(),mShowNewEntry);
     }
 
     /**
@@ -105,6 +106,12 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Bundle args = getArguments();
+
+        if ( null != args ) {
+            mShowNewEntry = args.getBoolean(EXTRA_SHOW_NEW_ENTRY);
+        }
+
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
@@ -113,24 +120,23 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
         builder.setTitle(getString(R.string.dialog_choose_playlist)).setAdapter(mPlaylistsListViewAdapter, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-
+                if ( null == mSaveCallback ) {
+                    return;
+                }
                 if (which == 0) {
-                    // open save dialog to create a new bookmark
-                    SaveDialog saveDialog = new SaveDialog();
-                    Bundle arguments = new Bundle();
-                    arguments.putSerializable(SaveDialog.ARG_OBJECTTYPE, SaveDialog.OBJECTTYPE.PLAYLIST);
-                    saveDialog.setArguments(arguments);
-                    saveDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SaveDialog");
+                    // open save dialog to create a new playlist
+                    mSaveCallback.onCreateNewObject();
                 } else {
-                    // override existing bookmark
+                    // override existing playlist
+                    // FIXME show confirmation dialog
                     MPDPlaylist playlist = (MPDPlaylist) mPlaylistsListViewAdapter.getItem(which);
                     String objectTitle = playlist.getPath();
-                    mSaveCallback.onSaveObject(objectTitle, SaveDialog.OBJECTTYPE.PLAYLIST);
+                    mSaveCallback.onSaveObject(objectTitle);
                 }
             }
         }).setNegativeButton(R.string.dialog_action_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog dont save object
+                // User cancelled the dialog don't save object
                 getDialog().cancel();
             }
         });

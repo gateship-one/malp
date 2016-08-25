@@ -18,8 +18,8 @@
 package org.gateshipone.malp.application.callbacks;
 
 
-import org.gateshipone.malp.application.fragments.SaveDialog;
-
 public interface OnSaveDialogListener {
-    void onSaveObject(String title, SaveDialog.OBJECTTYPE type);
+    void onSaveObject(String title);
+
+    void onCreateNewObject();
 }

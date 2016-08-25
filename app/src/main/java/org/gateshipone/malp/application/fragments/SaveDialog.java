@@ -24,6 +24,9 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 
 import org.gateshipone.malp.R;
@@ -31,63 +34,63 @@ import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 
 
 public class SaveDialog extends DialogFragment {
-
-    public final static String ARG_OBJECTTYPE = "objecttype";
-
-    public enum OBJECTTYPE {
-        PLAYLIST, BOOKMARK
-    }
+    public final static String EXTRA_DIALOG_TITLE = "dialog_title";
+    public final static String EXTRA_DIALOG_TEXT = "dialog_text";
 
     OnSaveDialogListener mSaveCallback;
 
+    private String mTitle;
+    private String mText;
+
+    private boolean mFirstClick;
+
+    public void setCallback(OnSaveDialogListener callback) {
+        mSaveCallback = callback;
+    }
+
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mSaveCallback = (OnSaveDialogListener) activity;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement OnSaveDialogListener");
-        }
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        Bundle args = getArguments();
+
+        if ( null != args ) {
+            mTitle = args.getString(EXTRA_DIALOG_TITLE);
+            mText = args.getString(EXTRA_DIALOG_TEXT);
+        }
+
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        // read arguments to identify type of the object which should be saved
-        Bundle mArgs = getArguments();
-        final OBJECTTYPE type = (OBJECTTYPE) mArgs.get(ARG_OBJECTTYPE);
-
-        String dialogTitle = "";
-        String editTextDefaultTitle = "";
-
-        if (type != null) {
-            switch (type) {
-                case PLAYLIST:
-                    dialogTitle = getString(R.string.dialog_save_playlist);
-                    editTextDefaultTitle = getString(R.string.default_playlist_title);
-                    break;
-            }
-        }
 
         // create edit text for title
         final EditText editTextTitle = new EditText(getActivity());
-        editTextTitle.setText(editTextDefaultTitle);
+        editTextTitle.setText(mText);
+
+        // Add a listener that just removes the text on first clicking
+        editTextTitle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if ( !mFirstClick ) {
+                    editTextTitle.setText("");
+                    mFirstClick = true;
+                }
+            }
+        });
         builder.setView(editTextTitle);
 
-        builder.setMessage(dialogTitle).setPositiveButton(R.string.dialog_action_save, new DialogInterface.OnClickListener() {
+        builder.setMessage(mTitle).setPositiveButton(R.string.dialog_action_save, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 // accept title and call callback method
                 String objectTitle = editTextTitle.getText().toString();
-                mSaveCallback.onSaveObject(objectTitle, type);
+                mSaveCallback.onSaveObject(objectTitle);
             }
         }).setNegativeButton(R.string.dialog_action_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog dont save object
+                // User cancelled the dialog don't save object
                 getDialog().cancel();
             }
         });
