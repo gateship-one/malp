@@ -355,19 +355,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          */
         @Override
         public boolean tryCaptureView(View child, int pointerId) {
-            if (child == mHeaderView) {
-                // report the change of the view
-                if (mDragStatusReceiver != null) {
-                    // Disable scrolling of the text views
-                    mTrackName.setSelected(false);
-                    mTrackAdditionalInfo.setSelected(false);
-
-                    mDragStatusReceiver.onStartDrag();
-                }
-                return true;
-            } else {
-                return false;
-            }
+            return child == mHeaderView;
         }
 
         /**
@@ -487,13 +475,26 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     }
 
                 }
-            } else {
+            } else if ( state == ViewDragHelper.STATE_DRAGGING) {
                 /*
                  * Show both layouts to enable a smooth transition via
                  * alpha values of the layouts.
                  */
                 mDraggedDownButtons.setVisibility(VISIBLE);
                 mDraggedUpButtons.setVisibility(VISIBLE);
+                // report the change of the view
+                if (mDragStatusReceiver != null) {
+                    // Disable scrolling of the text views
+                    mTrackName.setSelected(false);
+                    mTrackAdditionalInfo.setSelected(false);
+
+                    mDragStatusReceiver.onStartDrag();
+
+                    if (mViewSwitcher.getCurrentView() == mPlaylistView) {
+                        mPlaylistView.jumpToCurrentSong();
+                    }
+                }
+
             }
         }
     }
@@ -701,6 +702,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     } else {
                         // playlist view is shown
                         mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.PLAYLIST_VIEW);
+                        mPlaylistView.jumpToCurrentSong();
                     }
                 }
             }
