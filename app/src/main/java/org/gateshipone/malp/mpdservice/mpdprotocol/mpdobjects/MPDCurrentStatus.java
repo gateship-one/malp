@@ -83,7 +83,7 @@ public class MPDCurrentStatus implements Parcelable{
     /**
      * Sample resolution in bits. (also audio-field)
      */
-    private int pBitDepth;
+    private String pBitDepth;
 
     /**
      * Channel count of audiofile (also audio-field)
@@ -128,7 +128,7 @@ public class MPDCurrentStatus implements Parcelable{
         pCurrentSongIndex = in.readInt();
         pNextSongIndex = in.readInt();
         pSamplerate = in.readInt();
-        pBitDepth = in.readInt();
+        pBitDepth = in.readString();
         pChannelCount = in.readInt();
         pBitrate = in.readInt();
         pElapsedTime = in.readInt();
@@ -148,7 +148,7 @@ public class MPDCurrentStatus implements Parcelable{
         pCurrentSongIndex = -1;
         pNextSongIndex = 0;
         pSamplerate = 0;
-        pBitDepth = 0;
+        pBitDepth = "0";
         pChannelCount = 0;
         pBitrate = 0;
         pElapsedTime = 0;
@@ -266,11 +266,11 @@ public class MPDCurrentStatus implements Parcelable{
         this.pSamplerate = pSamplerate;
     }
 
-    public int getBitDepth() {
+    public String getBitDepth() {
         return pBitDepth;
     }
 
-    public void setBitDepth(int pBitDepth) {
+    public void setBitDepth(String pBitDepth) {
         this.pBitDepth = pBitDepth;
     }
 
@@ -336,7 +336,7 @@ public class MPDCurrentStatus implements Parcelable{
         dest.writeInt(pCurrentSongIndex);
         dest.writeInt(pNextSongIndex);
         dest.writeInt(pSamplerate);
-        dest.writeInt(pBitDepth);
+        dest.writeString(pBitDepth);
         dest.writeInt(pChannelCount);
         dest.writeInt(pBitrate);
         dest.writeInt(pElapsedTime);
@@ -379,7 +379,7 @@ public class MPDCurrentStatus implements Parcelable{
         retString += "Current song index: " + String.valueOf(pCurrentSongIndex) + "\n";
         retString += "Next song index: " + String.valueOf(pNextSongIndex) + "\n";
         retString += "Samplerate: " + String.valueOf(pSamplerate) + "\n";
-        retString += "Bitdepth: " + String.valueOf(pBitDepth) + "\n";
+        retString += "Bitdepth: " + pBitDepth + "\n";
         retString += "Channel count: " + String.valueOf(pChannelCount) + "\n";
         retString += "Bitrate: " + String.valueOf(pBitrate) + "\n";
         retString += "Elapsed time: " + String.valueOf(pElapsedTime) + "\n";

@@ -173,8 +173,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private TextView mTrackURI;
 
 
-
-
     private MPDCurrentStatus mLastStatus;
 
     /**
@@ -475,7 +473,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     }
 
                 }
-            } else if ( state == ViewDragHelper.STATE_DRAGGING) {
+            } else if (state == ViewDragHelper.STATE_DRAGGING) {
                 /*
                  * Show both layouts to enable a smooth transition via
                  * alpha values of the layouts.
@@ -848,7 +846,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 newTop + b);
 
 
-
     }
 
     /**
@@ -955,7 +952,18 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Set audio properties string
         String properties = status.getSamplerate() + getResources().getString(R.string.samplerate_unit_hertz) + ' ';
-        properties += status.getBitDepth() + getResources().getString(R.string.bitcount_unit) + ' ';
+
+        // Check for fancy new formats here (dsd, float = f)
+        String sampleFormat = status.getBitDepth();
+
+        if (sampleFormat.equals("8") || sampleFormat.equals("16") || sampleFormat.equals("24") || sampleFormat.equals("32")) {
+            properties += status.getBitDepth() + getResources().getString(R.string.bitcount_unit) + ' ';
+        } else {
+            properties += status.getBitDepth() + ' ';
+            ;
+        }
+
+
         properties += status.getChannelCount() + getResources().getString(R.string.channel_count_unit);
         mAudioProperties.setText(properties);
     }
