@@ -490,7 +490,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
                     mDragStatusReceiver.onStartDrag();
 
-                    if (mViewSwitcher.getCurrentView() == mPlaylistView) {
+                    if (mViewSwitcher.getCurrentView() == mPlaylistView && mDragOffset == 1.0f) {
                         mPlaylistView.jumpToCurrentSong();
                     }
                 }
