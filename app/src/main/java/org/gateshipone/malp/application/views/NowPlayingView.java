@@ -958,9 +958,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         if (sampleFormat.equals("8") || sampleFormat.equals("16") || sampleFormat.equals("24") || sampleFormat.equals("32")) {
             properties += status.getBitDepth() + getResources().getString(R.string.bitcount_unit) + ' ';
+        } else if (sampleFormat.equals("f")) {
+            properties += "float ";
         } else {
             properties += status.getBitDepth() + ' ';
-            ;
         }
 
 
