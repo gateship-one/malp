@@ -45,6 +45,7 @@ import android.widget.ImageView;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.ConnectionManager;
+import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
@@ -56,6 +57,7 @@ import org.gateshipone.malp.application.fragments.SettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.AlbumTracksFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.AlbumsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ArtistsFragment;
+import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.FilesFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.MyMusicTabsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.OutputsFragment;
@@ -68,6 +70,7 @@ import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -297,18 +300,31 @@ public class MainActivity extends AppCompatActivity
         CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
 
         if (currentPlaylistView != null && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+
+            MPDFile track = (MPDFile) currentPlaylistView.getItem(info.position);
+
             switch (item.getItemId()) {
+
                 case R.id.action_song_play_next:
                     MPDQueryHandler.playIndexAsNext(info.position);
+                    return true;
+                case R.id.action_add_to_saved_playlist:
+                    // open dialog in order to save the current playlist as a playlist in the mediastore
+                    ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
+                    Bundle args = new Bundle();
+                    args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
+                    choosePlaylistDialog.setCallback(new AddPathToPlaylist(track, this));
+                    choosePlaylistDialog.setArguments(args);
+                    choosePlaylistDialog.show(getSupportFragmentManager(), "ChoosePlaylistDialog");
                     return true;
                 case R.id.action_remove_song:
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
                     return true;
                 case R.id.action_show_artist:
-                    onArtistSelected(((MPDFile) currentPlaylistView.getItem(info.position)).getTrackArtist());
+                    onArtistSelected(track.getTrackArtist());
                     return true;
                 case R.id.action_show_album:
-                    onAlbumSelected(((MPDFile) currentPlaylistView.getItem(info.position)).getTrackAlbum(), "");
+                    onAlbumSelected(track.getTrackAlbum(), "");
                     return true;
             }
         }

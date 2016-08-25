@@ -1655,6 +1655,27 @@ public class MPDConnection {
     }
 
     /**
+     * Adds a song to the saved playlist
+     *
+     * @param playlistName Name of the playlist to add the url to.
+     * @param url URL to add to the saved playlist
+     * @return True if server responed with ok
+     */
+    public boolean addSongToPlaylist(String playlistName, String url) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(playlistName, url));
+
+        /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    /**
      * Removes a saved playlist from the servers database.
      *
      * @param name Name of the playlist to remove.

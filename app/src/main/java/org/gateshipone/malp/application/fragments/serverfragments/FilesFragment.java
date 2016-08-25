@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -22,8 +23,11 @@ import java.util.List;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
+import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
+import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
+import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.FilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -117,8 +121,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 mFABCallback.setupToolbar(getString(R.string.menu_files), false, true, false);
             } else {
                 String[] pathSplit = mPath.split("/");
-                if ( pathSplit.length > 0 ) {
-                    mFABCallback.setupToolbar(pathSplit[pathSplit.length-1], false, false, false);
+                if (pathSplit.length > 0) {
+                    mFABCallback.setupToolbar(pathSplit[pathSplit.length - 1], false, false, false);
                 } else {
                     mFABCallback.setupToolbar(mPath, false, false, false);
                 }
@@ -166,15 +170,15 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         super.onCreateContextMenu(menu, v, menuInfo);
 
         MenuInflater inflater = getActivity().getMenuInflater();
-        int position = ((AdapterView.AdapterContextMenuInfo)menuInfo).position;
+        int position = ((AdapterView.AdapterContextMenuInfo) menuInfo).position;
 
-        MPDFileEntry file = (MPDFileEntry)mAdapter.getItem(position);
+        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(position);
 
         if (file instanceof MPDFile) {
             inflater.inflate(R.menu.context_menu_track, menu);
-        } else if ( file instanceof  MPDDirectory) {
+        } else if (file instanceof MPDDirectory) {
             inflater.inflate(R.menu.context_menu_directory, menu);
-        } else if ( file instanceof MPDPlaylist) {
+        } else if (file instanceof MPDPlaylist) {
             inflater.inflate(R.menu.context_menu_playlist, menu);
         }
     }
@@ -195,25 +199,33 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
         switch (item.getItemId()) {
             case R.id.action_song_enqueue:
-                MPDQueryHandler.addSong(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.addSong(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_song_play:
-                MPDQueryHandler.playSong(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.playSong(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_song_play_next:
-                MPDQueryHandler.playSongNext(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.playSongNext(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
+            case R.id.action_add_to_saved_playlist:
+                // open dialog in order to save the current playlist as a playlist in the mediastore
+                ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
+                Bundle args = new Bundle();
+                args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mAdapter.getItem(info.position), getActivity()));
+                choosePlaylistDialog.setArguments(args);
+                choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
             case R.id.action_play_playlist:
-                MPDQueryHandler.playPlaylist(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.playPlaylist(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_add_playlist:
-                MPDQueryHandler.loadPlaylist(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.loadPlaylist(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_add_directory:
-                MPDQueryHandler.addDirectory(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.addDirectory(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_play_directory:
-                MPDQueryHandler.playDirectory(((MPDFileEntry)mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.playDirectory(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             default:
                 return super.onContextItemSelected(item);

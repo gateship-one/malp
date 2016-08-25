@@ -54,6 +54,8 @@
     <string name="action_search">Search</string>
     <string name="action_add_search_result">Add search result</string>
 
+    <string name="action_add_to_saved_playlist">Add to saved playlist</string>
+
     <string name="action_jump_to_current">Jump to current song</string>
 
     <string name="menu_library">Library</string>

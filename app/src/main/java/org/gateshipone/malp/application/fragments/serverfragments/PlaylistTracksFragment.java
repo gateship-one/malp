@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -39,7 +40,10 @@ import java.util.List;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
+import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
+import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
+import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -173,6 +177,15 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
                 return true;
             case R.id.action_song_play_next:
                 playNext(info.position);
+                return true;
+            case R.id.action_add_to_saved_playlist:
+                // open dialog in order to save the current playlist as a playlist in the mediastore
+                ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
+                Bundle args = new Bundle();
+                args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry)mFileAdapter.getItem(info.position),getActivity()));
+                choosePlaylistDialog.setArguments(args);
+                choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
             default:
                 return super.onContextItemSelected(item);

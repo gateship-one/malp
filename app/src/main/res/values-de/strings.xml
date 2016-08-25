@@ -123,4 +123,5 @@
     <string name="search_choice_everything">Alles</string>
     <string name="search_choice_file">Datei</string>
     <string name="search_choice_track">Lied</string>
+    <string name="action_add_to_saved_playlist">An gespeicherte Liste anfügen</string>
 </resources>

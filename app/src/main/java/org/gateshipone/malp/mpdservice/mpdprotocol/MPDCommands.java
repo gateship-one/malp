@@ -84,6 +84,10 @@ public class MPDCommands {
         return "load \"" + playlistName + "\"";
     }
 
+    public static String MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(String playlistName, String url) {
+        return "playlistadd \"" + playlistName + "\" \"" + url + '\"';
+    }
+
     public static final String MPD_COMMAND_GET_CURRENT_SONG = "currentsong";
 
     public static final String MPD_COMMAND_START_IDLE = "idle";

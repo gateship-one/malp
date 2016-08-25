@@ -36,4 +36,9 @@
         app:showAsAction="never"
         android:title="@string/context_menu_action_enqueueasnext"/>
 
+    <item
+        android:id="@+id/action_add_to_saved_playlist"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_add_to_saved_playlist"/>
 </menu>

@@ -46,14 +46,14 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 /**
  * This handler is used for all long running queries to the mpd server. This includes:
  * database requests, playlists, outputs, current playlist, searches, file listings.
- *
+ * <p/>
  * To request certain items the caller needs to provide an instance of another Handler, called ResponseHandlers,
  * that ensure that the return of the requested values is also done asynchronously.
- *
+ * <p/>
  * Requests should look like this:
- *
+ * <p/>
  * UI-Thread --> QueryHandler |(send message to another thread)-->    MPDConnection
- *           <--(send message to another thread)<--ResponseHandler<-- MPDConnection
+ * <--(send message to another thread)<--ResponseHandler<-- MPDConnection
  */
 public class MPDQueryHandler extends MPDGenericHandler {
     private static final String TAG = "MPDQueryHandler";
@@ -253,6 +253,12 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
             mMPDConnection.savePlaylist(playlistName);
 
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG_TO_PLAYLIST) {
+            String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
+            String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+
+            mMPDConnection.addSongToPlaylist(playlistName, path);
+
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_PLAYLIST) {
             String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
 
@@ -383,14 +389,14 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES) {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
-            Log.v(TAG,"Search files: " + term + " of type: " + type + " requested");
+            Log.v(TAG, "Search files: " + term + " of type: " + type + " requested");
 
             responseHandler = mpdAction.getResponseHandler();
             if (!(responseHandler instanceof MPDResponseFileList)) {
                 return;
             }
 
-            List<MPDFileEntry> fileList = mMPDConnection.getSearchedFiles(term,type);
+            List<MPDFileEntry> fileList = mMPDConnection.getSearchedFiles(term, type);
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = fileList;
@@ -399,13 +405,13 @@ public class MPDQueryHandler extends MPDGenericHandler {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
-            mMPDConnection.addSearchedFiles(term,type);
+            mMPDConnection.addSearchedFiles(term, type);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES) {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
             mMPDConnection.clearPlaylist();
-            mMPDConnection.addSearchedFiles(term,type);
+            mMPDConnection.addSearchedFiles(term, type);
             mMPDConnection.playSongIndex(0);
         }
     }
@@ -487,8 +493,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of albums of an artist.
+     *
      * @param responseHandler The handler used to send the requested data
-     * @param artist Artist to get a list of albums from.
+     * @param artist          Artist to get a list of albums from.
      */
     public static void getArtistAlbums(MPDResponseAlbumList responseHandler, String artist) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUMS);
@@ -504,6 +511,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of all the artists available on this server
+     *
      * @param responseHandler The handler used to send the requested data
      */
     public static void getArtists(MPDResponseHandler responseHandler) {
@@ -520,8 +528,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of tracks (MPDFileEntry objects) on a album.
+     *
      * @param responseHandler The handler used to send the requested data
-     * @param albumName Album to get tracks from
+     * @param albumName       Album to get tracks from
      */
     public static void getAlbumTracks(MPDResponseFileList responseHandler, String albumName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUM_TRACKS);
@@ -539,9 +548,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
     /**
      * Requests a list of tracks (MPDFileEntry) on an album. This method will also filter the results
      * with a given artistname
+     *
      * @param responseHandler The handler used to send the requested data
-     * @param albumName Album go get tracks from
-     * @param artistName Artist name to filter results with
+     * @param albumName       Album go get tracks from
+     * @param artistName      Artist name to filter results with
      */
     public static void getArtistAlbumTracks(MPDResponseFileList responseHandler, String albumName, String artistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUM_TRACKS);
@@ -559,6 +569,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of all tracks enlisted in the current playlist.
+     *
      * @param responseHandler The handler used to send the requested data
      */
     public static void getCurrentPlaylist(MPDResponseFileList responseHandler) {
@@ -577,6 +588,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      * Requests a list of tracks enlisted in the current playlist.
      * This method is able to request a partial list to speed up the query and lower the network
      * usage.
+     *
      * @param responseHandler The handler used to send the requested data
      */
     public static void getCurrentPlaylist(MPDResponseFileList responseHandler, int start, int end) {
@@ -595,6 +607,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of playlists saved on the server.
+     *
      * @param responseHandler The handler used to send the requested data
      */
     public static void getSavedPlaylists(MPDResponseFileList responseHandler) {
@@ -612,8 +625,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Returns a list of tracks listed in a saved playlist.
+     *
      * @param responseHandler The handler used to send the requested data
-     * @param playlistName Name of the playlist to get the tracks from.
+     * @param playlistName    Name of the playlist to get the tracks from.
      */
     public static void getSavedPlaylist(MPDResponseFileList responseHandler, String playlistName) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_SAVED_PLAYLIST);
@@ -631,8 +645,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of files for a specified path. If no path is given the database root is used.
+     *
      * @param responseHandler The handler used to send the requested data
-     * @param path Path to get the files/directory/playlist from
+     * @param path            Path to get the files/directory/playlist from
      */
     public static void getFiles(MPDResponseFileList responseHandler, String path) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES);
@@ -650,6 +665,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of available outputs configured on the MPD server.
+     *
      * @param responseHandler The handler used to send the requested data.
      */
     public static void getOutputs(MPDResponseOutputList responseHandler) {
@@ -667,6 +683,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a statistics object for the connected mpd server.
+     *
      * @param responseHandler The handler used to send the requested data.
      */
     public static void getStatistics(MPDResponseServerStatistics responseHandler) {
@@ -684,7 +701,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Adds all tracks from an album (filtered with an artist name) to the current playlist.
-     * @param albumname Album name of the album to add
+     *
+     * @param albumname  Album name of the album to add
      * @param artistname Artist name to filter tracks before enqueueing
      */
     public static void addArtistAlbum(String albumname, String artistname) {
@@ -704,7 +722,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Adds an album to the current playlist and start playing it
-     * @param albumname Album name of the album to add
+     *
+     * @param albumname  Album name of the album to add
      * @param artistname Artist name to filter tracks before enqueueing
      */
     public static void playArtistAlbum(String albumname, String artistname) {
@@ -724,6 +743,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Adds all albums from an artist to the current playlist.
+     *
      * @param artistname Name of the artist to add to the current playlist.
      */
     public static void addArtist(String artistname) {
@@ -742,6 +762,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Adds all albums from an artist to the current playlist and starts playing them.
+     *
      * @param artistname Name of the artist to play its albums
      */
     public static void playArtist(String artistname) {
@@ -762,6 +783,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Adds a path to the current playlist. Can be a file or directory
+     *
      * @param url URL of the path to add.
      */
     public static void addSong(String url) {
@@ -886,6 +908,21 @@ public class MPDQueryHandler extends MPDGenericHandler {
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    public static void addURLToSavedPlaylist(String playlistName, String url) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG_TO_PLAYLIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME, playlistName);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, url);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
     public static void removePlaylist(String name) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_PLAYLIST);
         Message msg = Message.obtain();
@@ -943,8 +980,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests a list of files matching the search term and type
-     * @param term The string to search for
-     * @param type The type of items to search for
+     *
+     * @param term            The string to search for
+     * @param type            The type of items to search for
      * @param responseHandler The handler used to send the requested data.
      */
     public static void searchFiles(String term, MPDCommands.MPD_SEARCH_TYPE type, MPDResponseFileList responseHandler) {
@@ -955,7 +993,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         }
         action.setResponseHandler(responseHandler);
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE, type.ordinal());
 
         msg.obj = action;
 
@@ -964,6 +1002,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests to add a search request
+     *
      * @param term The string to search for
      * @param type The type of items to search for
      */
@@ -974,7 +1013,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             return;
         }
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE, type.ordinal());
 
         msg.obj = action;
 
@@ -983,6 +1022,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     /**
      * Requests to play a search result
+     *
      * @param term The string to search for
      * @param type The type of items to search for
      */
@@ -993,7 +1033,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             return;
         }
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM, term);
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE,type.ordinal());
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE, type.ordinal());
 
         msg.obj = action;
 
