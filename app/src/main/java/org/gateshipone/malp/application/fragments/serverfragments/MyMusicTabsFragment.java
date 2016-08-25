@@ -29,6 +29,7 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -123,6 +124,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         if (view != null ) {
             // dismiss searchview
             if (mSearchView != null && mOptionMenu != null && !mSearchView.isIconified()) {
+                Log.v(TAG,"Deiconfy");
                 mSearchView.setIconified(true);
                 mOptionMenu.findItem(R.id.action_search).collapseActionView();
             }
@@ -198,24 +200,15 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
         mSearchView.setOnQueryTextListener(new SearchTextObserver());
 
-        mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
-                if ( null != fragment ) {
-                    fragment.removeFilter();
-                }
-
-                return false;
-            }
-        });
-
         super.onCreateOptionsMenu(menu, menuInflater);
     }
 
     @Override
     public void onTabUnselected(TabLayout.Tab tab) {
-
+        GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
+        if ( null != fragment ) {
+            fragment.removeFilter();
+        }
     }
 
     @Override
@@ -287,13 +280,11 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         @Override
         public boolean onQueryTextChange(String newText) {
             applyFilter(newText);
-
             return true;
         }
 
         private void applyFilter(String filter) {
             GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
-
             if (filter.isEmpty()) {
                 fragment.removeFilter();
             } else {

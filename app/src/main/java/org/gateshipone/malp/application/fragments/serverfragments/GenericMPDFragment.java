@@ -29,7 +29,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public abstract class GenericMPDFragment<T extends Object > extends Fragment implements LoaderManager.LoaderCallbacks<T>  {
+public abstract class GenericMPDFragment<T extends Object> extends Fragment implements LoaderManager.LoaderCallbacks<T> {
     private static final String TAG = GenericMPDFragment.class.getSimpleName();
 
     protected ConnectionStateListener mConnectionStateListener;
@@ -57,7 +57,7 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
 
 
     protected void refreshContent() {
-        if ( mSwipeRefreshLayout != null ) {
+        if (mSwipeRefreshLayout != null) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
                 public void run() {
@@ -65,8 +65,7 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
                 }
             });
         }
-        getLoaderManager().destroyLoader(0);
-        getLoaderManager().initLoader(0, getArguments(), this);
+        getLoaderManager().restartLoader(0, getArguments(), this);
     }
 
 
@@ -89,21 +88,19 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
     }
 
     protected void finishedLoading() {
-        if ( null != mSwipeRefreshLayout) {
-            if ( mSwipeRefreshLayout != null ) {
-                mSwipeRefreshLayout.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mSwipeRefreshLayout.setRefreshing(false);
-                    }
-                });
-            }
+        if (null != mSwipeRefreshLayout) {
+            mSwipeRefreshLayout.post(new Runnable() {
+                @Override
+                public void run() {
+                    mSwipeRefreshLayout.setRefreshing(false);
+                }
+            });
         }
     }
 
     /**
      * Method to apply a filter to the view model of the fragment.
-     *
+     * <p/>
      * This method must be overridden by the subclass.
      */
     public void applyFilter(String filter) {
@@ -112,7 +109,7 @@ public abstract class GenericMPDFragment<T extends Object > extends Fragment imp
 
     /**
      * Method to remove a previous set filter.
-     *
+     * <p/>
      * This method must be overridden by the subclass.
      */
     public void removeFilter() {

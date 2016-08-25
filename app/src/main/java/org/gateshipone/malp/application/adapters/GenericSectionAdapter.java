@@ -44,7 +44,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     protected List<T> mModelData;
 
-    protected boolean mFiltered;
     protected List<T> mFilteredModelData;
 
     private String mFilterString;
@@ -71,8 +70,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      * Clears old section data and model data and recreates sectionScrolling
      * data.
      *
-     * @param data
-     *            Actual model data
+     * @param data Actual model data
      */
     public void swapModel(List<T> data) {
         if (data == null) {
@@ -89,6 +87,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
     /**
      * Looks up the position(index) of a given section(index)
+     *
      * @param sectionIndex Section to get the ListView/GridView position for
      * @return The item position of this section start.
      */
@@ -99,6 +98,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
     /**
      * Reverse lookup of a section for a given position
+     *
      * @param pos Position to get the section for
      * @return Section (index) for the items position
      */
@@ -122,7 +122,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     /**
-     *
      * @return A list of all available sections
      */
     @Override
@@ -131,13 +130,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     /**
-     *
      * @return The length of the modeldata of this adapter.
      */
     @Override
     public int getCount() {
 
-        if ( mFiltered && mFilteredModelData != null) {
+        if (mFilteredModelData != null) {
             return mFilteredModelData.size();
         } else {
             return mModelData.size();
@@ -146,12 +144,13 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
     /**
      * Simple getter for the model data.
+     *
      * @param position Index of the item to get. No check for boundaries here.
      * @return The item at index position.
      */
     @Override
     public Object getItem(int position) {
-        if ( mFiltered && mFilteredModelData != null) {
+        if (mFilteredModelData != null) {
             return mFilteredModelData.get(position);
         } else {
             return mModelData.get(position);
@@ -160,6 +159,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
     /**
      * Simple position->id mapping here.
+     *
      * @param position Position to get the id from
      * @return The id (position)
      */
@@ -184,7 +184,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
         List<T> sectionList;
 
-        if ( mFiltered && mFilteredModelData != null) {
+        if (mFilteredModelData != null) {
             sectionList = mFilteredModelData;
         } else {
             sectionList = mModelData;
@@ -194,7 +194,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
             MPDGenericItem currentModel = sectionList.get(0);
 
             char lastSection;
-            if ( currentModel.getSectionTitle().length() > 0 ) {
+            if (currentModel.getSectionTitle().length() > 0) {
                 lastSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
             } else {
                 lastSection = ' ';
@@ -209,7 +209,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
                 currentModel = sectionList.get(i);
 
                 char currentSection;
-                if ( currentModel.getSectionTitle().length() > 0 ) {
+                if (currentModel.getSectionTitle().length() > 0) {
                     currentSection = currentModel.getSectionTitle().toUpperCase().charAt(0);
                 } else {
                     currentSection = ' ';
@@ -229,30 +229,30 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     public void applyFilter(String filterString) {
-        if ( !filterString.equals(mFilterString)) {
+        if (!filterString.equals(mFilterString)) {
             mFilterString = filterString;
         }
         new FilterTask().execute(filterString);
     }
 
     public void removeFilter() {
-        mFiltered = false;
-        mFilteredModelData = null;
+        if (mFilterString != null && !mFilterString.isEmpty()) {
+            mFilteredModelData = null;
 
-        createSections();
+            createSections();
+        }
     }
 
-    private class FilterTask extends AsyncTask<String, Object, Pair<List<T>,String>> {
+    private class FilterTask extends AsyncTask<String, Object, Pair<List<T>, String>> {
 
         @Override
-        protected Pair<List<T>,String> doInBackground(String... lists) {
+        protected Pair<List<T>, String> doInBackground(String... lists) {
             ArrayList<T> resultList = new ArrayList<>();
 
             String filterString = lists[0];
-            mFiltered = true;
 
-            for(T elem : mModelData) {
-                if ( elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase()) ) {
+            for (T elem : mModelData) {
+                if (elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase())) {
                     resultList.add(elem);
                 }
             }
@@ -260,8 +260,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
             return new Pair<List<T>, String>(resultList, filterString);
         }
 
-        protected void onPostExecute(Pair<List<T>, String>  result) {
-            if ( mFilterString.equals(result.second)) {
+        protected void onPostExecute(Pair<List<T>, String> result) {
+            if (mFilterString.equals(result.second)) {
                 mFilteredModelData = result.first;
                 createSections();
             }
