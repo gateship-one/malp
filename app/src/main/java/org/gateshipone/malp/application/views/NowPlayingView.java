@@ -43,7 +43,8 @@ import java.util.Timer;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.fragments.SaveDialog;
+import org.gateshipone.malp.application.callbacks.TextDialogCallback;
+import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -299,12 +300,17 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     @Override
                     public void onCreateNewObject() {
                         // open dialog in order to save the current playlist as a playlist in the mediastore
-                        SaveDialog textDialog = new SaveDialog();
+                        TextDialog textDialog = new TextDialog();
                         Bundle args = new Bundle();
-                        args.putString(SaveDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.dialog_save_playlist));
-                        args.putString(SaveDialog.EXTRA_DIALOG_TEXT, getResources().getString(R.string.default_playlist_title));
+                        args.putString(TextDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.dialog_save_playlist));
+                        args.putString(TextDialog.EXTRA_DIALOG_TEXT, getResources().getString(R.string.default_playlist_title));
 
-                        textDialog.setCallback(this);
+                        textDialog.setCallback(new TextDialogCallback() {
+                            @Override
+                            public void onFinished(String text) {
+                                MPDQueryHandler.savePlaylist(text);
+                            }
+                        });
                         textDialog.setArguments(args);
                         textDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SavePLTextDialog");
                     }
