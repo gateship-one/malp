@@ -217,7 +217,6 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
 
         MPDFile track = (MPDFile)mFileAdapter.getItem(info.position);
 
-        mListView.setActivated(true);
         mListView.requestFocus();
 
 
