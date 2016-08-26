@@ -128,6 +128,11 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             // Get track title
             String trackTitle = track.getTrackTitle();
 
+            // If no trackname is available (e.g. streaming URLs) show path
+            if ( null == trackTitle || trackTitle.isEmpty() ) {
+                trackTitle = track.getPath();
+            }
+
             // additional information (artist + album)
             String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
 
