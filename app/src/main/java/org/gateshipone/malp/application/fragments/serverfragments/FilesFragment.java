@@ -204,6 +204,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 return true;
             case R.id.action_song_play_next:
                 MPDQueryHandler.playSongNext(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
+                return true;
             case R.id.action_add_to_saved_playlist:
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
