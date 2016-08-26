@@ -52,7 +52,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
+public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
     public static final String TAG = SearchFragment.class.getSimpleName();
 
     /**
@@ -94,6 +94,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
+        mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
 
         mSelectSpinner = (Spinner) rootView.findViewById(R.id.search_criteria);
@@ -294,6 +295,16 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // Open song details dialog
+        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        songDetailsDialog.setArguments(args);
+        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }
 
     private void showFAB(boolean active) {
