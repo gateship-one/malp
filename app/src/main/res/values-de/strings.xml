@@ -27,7 +27,7 @@
     <string name="action_save_playlist">Liste speichern</string>
     <string name="action_search">Suchen</string>
     <string name="action_settings">Einstellungen</string>
-    <string name="action_show_album">Alben anzeigen</string>
+    <string name="action_show_album">Album anzeigen</string>
     <string name="action_show_all_tracks">Alle Lieder anzeigen</string>
     <string name="action_show_artist">Interpreten anzeigen</string>
     <string name="activity_about_version">Version:</string>
@@ -100,4 +100,15 @@
     <string name="action_add_url">URL hinzufügen</string>
     <string name="action_add">Hinzufügen</string>
     <string name="action_show_details">Details anzeigen</string>
+    <string name="song_album">Album:</string>
+    <string name="song_album_artist">Albuminterpret:</string>
+    <string name="song_album_artist_mbid">MusicBrainz Albuminterpreten-ID:</string>
+    <string name="song_album_mbid">MusicBrainz Album-ID:</string>
+    <string name="song_artist">Interpret:</string>
+    <string name="song_artist_mbid">MusicBrainz Interpreten-ID:</string>
+    <string name="song_date">Datum:</string>
+    <string name="song_disc">Medium-Nr.:</string>
+    <string name="song_duration">Länge:</string>
+    <string name="song_title">Titel:</string>
+    <string name="song_title_mbid">MusicBrainz Lied-ID:</string>
 </resources>
