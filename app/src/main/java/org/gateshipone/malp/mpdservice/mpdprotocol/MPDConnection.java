@@ -721,6 +721,8 @@ public class MPDConnection {
                 ((MPDFile) tempFileEntry).setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID)) {
                 ((MPDFile) tempFileEntry).setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_MBID)) {
+                ((MPDFile) tempFileEntry).setTrackAlbumArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_MBID)) {
                 ((MPDFile) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME)) {
