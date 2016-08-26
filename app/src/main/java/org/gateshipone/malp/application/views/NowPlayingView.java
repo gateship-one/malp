@@ -287,10 +287,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.view_nowplaying_action_clearplaylist:
+            case R.id.action_clear_playlist:
                 MPDQueryHandler.clearPlaylist();
                 break;
-            case R.id.view_nowplaying_action_saveplaylist:
+            case R.id.action_save_playlist:
                 OnSaveDialogListener plDialogCallback = new OnSaveDialogListener() {
                     @Override
                     public void onSaveObject(String title) {
@@ -324,6 +324,20 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 choosePlaylistDialog.setCallback(plDialogCallback);
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
+                break;
+            case R.id.action_add_url:
+                TextDialog addURLDialog = new TextDialog();
+                addURLDialog.setCallback(new TextDialogCallback() {
+                    @Override
+                    public void onFinished(String text) {
+                        MPDQueryHandler.addSong(text);
+                    }
+                });
+                Bundle textDialogArgs = new Bundle();
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TEXT,"http://...");
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TITLE,getResources().getString(R.string.action_add_url));
+                addURLDialog.setArguments(textDialogArgs);
+                addURLDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "AddURLDialog");
                 break;
             case R.id.action_jump_to_current:
                 mPlaylistView.jumpToCurrentSong();
