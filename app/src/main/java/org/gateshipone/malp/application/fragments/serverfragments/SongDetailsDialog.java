@@ -39,6 +39,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.loaders.PlaylistsLoader;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -62,6 +63,7 @@ public class SongDetailsDialog extends DialogFragment {
     private TextView mTrackNo;
     private TextView mTrackDisc;
     private TextView mTrackDate;
+    private TextView mTrackDuration;
 
     private TextView mTrackTitleMBID;
     private TextView mTrackAlbumMBID;
@@ -89,6 +91,7 @@ public class SongDetailsDialog extends DialogFragment {
         mTrackNo = (TextView) rootView.findViewById(R.id.now_playing_text_track_no);
         mTrackDisc = (TextView) rootView.findViewById(R.id.now_playing_text_disc_no);
         mTrackDate = (TextView) rootView.findViewById(R.id.now_playing_text_date);
+        mTrackDuration = (TextView) rootView.findViewById(R.id.now_playing_text_song_duration);
 
         mTrackTitleMBID = (TextView) rootView.findViewById(R.id.now_playing_text_track_mbid);
         mTrackAlbumMBID = (TextView) rootView.findViewById(R.id.now_playing_text_album_mbid);
@@ -108,6 +111,7 @@ public class SongDetailsDialog extends DialogFragment {
             // FIXME total disc count
             mTrackDisc.setText(String.valueOf(mFile.getDiscNumber()));
             mTrackDate.setText(mFile.getDate());
+            mTrackDuration.setText(FormatHelper.formatTracktimeFromS(mFile.getLength()));
 
             mTrackTitleMBID.setText(mFile.getTrackMBID());
             mTrackAlbumMBID.setText(mFile.getTrackAlbumMBID());
