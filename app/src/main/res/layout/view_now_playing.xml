@@ -186,7 +186,7 @@
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-regular"
                                 android:paddingTop="@dimen/material_content_spacing"
-                                android:text="@string/now_playing_track_no"
+                                android:text="@string/song_track_no"
                                 android:textColor="?android:textColorSecondary"
                                 android:textSize="@dimen/material_font_style_size_body_1" />
 
@@ -202,7 +202,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-regular"
-                                android:text="@string/now_playing_playlist_no"
+                                android:text="@string/song_playlist_no"
                                 android:textColor="?android:textColorSecondary"
                                 android:textSize="@dimen/material_font_style_size_body_1"
                                 android:layout_marginTop="@dimen/material_content_spacing"/>
@@ -219,7 +219,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-regular"
-                                android:text="@string/now_playing_bitrate"
+                                android:text="@string/song_bitrate"
                                 android:textColor="?android:textColorSecondary"
                                 android:textSize="@dimen/material_font_style_size_body_1"
                                 android:layout_marginTop="@dimen/material_content_spacing"/>
@@ -236,7 +236,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-regular"
-                                android:text="@string/now_playing_audio_properties"
+                                android:text="@string/song_audio_properties"
                                 android:textColor="?android:textColorSecondary"
                                 android:textSize="@dimen/material_font_style_size_body_1"
                                 android:layout_marginTop="@dimen/material_content_spacing"/>
@@ -253,7 +253,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:fontFamily="sans-serif-regular"
-                                android:text="@string/now_playing_file_uri"
+                                android:text="@string/song_uri"
                                 android:textColor="?android:textColorSecondary"
                                 android:textSize="@dimen/material_font_style_size_body_1"
                                 android:layout_marginTop="@dimen/material_content_spacing"/>

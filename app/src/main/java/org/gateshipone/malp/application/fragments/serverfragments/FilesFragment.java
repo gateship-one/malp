@@ -331,6 +331,13 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             mCallback.openPath(file.getPath());
         } else if (file instanceof MPDPlaylist) {
             mPlaylistCallback.openPlaylist(file.getPath());
+        } else if (file instanceof MPDFile) {
+            // Open song details dialog
+            SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+            Bundle args = new Bundle();
+            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile)file);
+            songDetailsDialog.setArguments(args);
+            songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
         }
     }
 

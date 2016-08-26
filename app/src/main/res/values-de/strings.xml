@@ -60,11 +60,11 @@
     <string name="menu_statistic">Statistik</string>
     <string name="navigation_drawer_close">Navigationsleiste schließen</string>
     <string name="navigation_drawer_open">Navigationsleiste öffnen</string>
-    <string name="now_playing_audio_properties">Audioeigenschaften:</string>
-    <string name="now_playing_bitrate">Bitrate:</string>
-    <string name="now_playing_file_uri">Lied-URL:</string>
-    <string name="now_playing_playlist_no">Playlist-Nr.:</string>
-    <string name="now_playing_track_no">Lied-Nr.:</string>
+    <string name="song_audio_properties">Audioeigenschaften:</string>
+    <string name="song_bitrate">Bitrate:</string>
+    <string name="song_uri">Lied-URL:</string>
+    <string name="song_playlist_no">Playlist-Nr.:</string>
+    <string name="song_track_no">Lied-Nr.:</string>
     <string name="preference_default_view_message">Standardanzeige wählen</string>
     <string name="preference_default_view_my_music_albums">Alben</string>
     <string name="preference_default_view_my_music_artists">Interpreten</string>
@@ -98,4 +98,6 @@
     <string name="server_statistic_uptime">Laufzeit des MPD-Servers</string>
     <string name="sources_text">Der Quellcode ist auf GitHub verfügbar:\nhttps://github.com/gateship-one/malp</string>
     <string name="action_add_url">URL hinzufügen</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_show_details">Details anzeigen</string>
 </resources>

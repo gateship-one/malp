@@ -33,6 +33,7 @@
     <string name="action_remove_profile">Remove profile</string>
     <string name="action_add_profile">Add profile</string>
 
+    <string name="action_add">Add</string>
     <string name="action_add_album">Add album</string>
     <string name="action_play_album">Play album</string>
     <string name="action_show_all_tracks">Show all tracks</string>
@@ -51,6 +52,7 @@
 
     <string name="action_show_artist">Show artist</string>
     <string name="action_show_album">Show album</string>
+    <string name="action_show_details">Show details</string>
 
     <string name="action_search">Search</string>
     <string name="action_add_search_result">Add search result</string>
@@ -102,11 +104,24 @@
     <string name="fragment_profile_port">Port:</string>
 
     <!-- Now playing view text view values -->
-    <string name="now_playing_track_no">Track No.:</string>
-    <string name="now_playing_playlist_no">Playlist No.:</string>
-    <string name="now_playing_bitrate">Bitrate:</string>
-    <string name="now_playing_audio_properties">Audio properties:</string>
-    <string name="now_playing_file_uri">Track URI.:</string>
+    <string name="song_track_no">Track No.:</string>
+    <string name="song_playlist_no">Playlist No.:</string>
+    <string name="song_bitrate">Bitrate:</string>
+    <string name="song_audio_properties">Audio properties:</string>
+    <string name="song_uri">Track URI:</string>
+    <string name="song_title">Title:</string>
+    <string name="song_album">Album:</string>
+    <string name="song_artist">Artist:</string>
+    <string name="song_album_artist">Album artist:</string>
+
+    <string name="song_date">Date:</string>
+    <string name="song_disc">Disc:</string>
+    <string name="song_duration">Duration:</string>
+
+    <string name="song_title_mbid">MusicBrainz Track ID:</string>
+    <string name="song_album_mbid">MusicBrainz Album ID:</string>
+    <string name="song_artist_mbid">MusicBrainz Artist ID:</string>
+    <string name="song_album_artist_mbid">MusicBrainz AlbumArtist ID:</string>
 
     <string name="bitrate_unit_kilo_bits">kbps</string>
     <string name="samplerate_unit_hertz" translatable="false">Hz</string>
