@@ -79,24 +79,15 @@
     <string name="track_number_album_count_separator" translatable="false">" / "</string>
 
     <!-- context menu titles -->
-    <string name="context_menu_action_enqueue">Add to playlist</string>
-    <string name="context_menu_action_enqueueasnext">Play after current song</string>
-    <string name="context_menu_action_playsong">Play song</string>
-    <string name="context_menu_action_playalbum">Play album</string>
-    <string name="context_menu_action_playalbums">Play albums</string>
-    <string name="context_menu_action_showartist">Show artist</string>
-    <string name="context_menu_action_showalbum">Show album</string>
-    <string name="context_menu_action_removetrack">Remove track</string>
-    <string name="context_menu_action_playplaylist">Play playlist</string>
-    <string name="context_menu_action_deleteplaylist">Delete playlist</string>
-    <string name="context_menu_action_enqueue_folder">Add folder to playlist</string>
-    <string name="context_menu_action_play_folder">Play folder</string>
-    <string name="context_menu_action_enqueue_file">Add file to playlist</string>
-    <string name="context_menu_action_play_file">Play file</string>
+    <string name="action_enqueue">Add to playlist</string>
+    <string name="action_enqueue_as_next">Play after current song</string>
+    <string name="action_play_song">Play song</string>
+    <string name="action_play_albums">Play albums</string>
+    <string name="action_remove_track">Remove track</string>
 
     <!-- popup menu titles -->
-    <string name="popup_menu_action_clearplaylist">clear playlist</string>
-    <string name="popup_menu_action_saveplaylist">save playlist</string>
+    <string name="action_clear_playlist">Clear playlist</string>
+    <string name="action_save_playlist">Save playlist</string>
 
     <!-- edit profile fragment strings -->
     <string name="fragment_profile_title">Edit profile</string>
@@ -104,7 +95,6 @@
     <string name="fragment_profile_hostname">Hostname:</string>
     <string name="fragment_profile_password">Password:</string>
     <string name="fragment_profile_port">Port:</string>
-    <string name="fragment_profile_auto_connect">Connect automatically:</string>
 
     <!-- Now playing view text view values -->
     <string name="now_playing_track_no">Track No.:</string>

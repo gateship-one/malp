@@ -23,18 +23,18 @@
         android:id="@+id/action_song_play"
         android:orderInCategory="100"
         app:showAsAction="never"
-        android:title="@string/context_menu_action_playsong"/>
+        android:title="@string/action_play_song"/>
     <item
         android:id="@+id/action_song_enqueue"
         android:orderInCategory="100"
         app:showAsAction="never"
-        android:title="@string/context_menu_action_enqueue"/>
+        android:title="@string/action_enqueue"/>
 
     <item
         android:id="@+id/action_song_play_next"
         android:orderInCategory="100"
         app:showAsAction="never"
-        android:title="@string/context_menu_action_enqueueasnext"/>
+        android:title="@string/action_enqueue_as_next"/>
 
     <item
         android:id="@+id/action_add_to_saved_playlist"
