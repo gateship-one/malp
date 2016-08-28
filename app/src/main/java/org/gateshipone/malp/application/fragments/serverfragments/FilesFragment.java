@@ -247,10 +247,10 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         // get tint color
         int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
 
-        Drawable drawable = menu.findItem(R.id.action_add_playlist).getIcon();
+        Drawable drawable = menu.findItem(R.id.action_add_directory).getIcon();
         drawable = DrawableCompat.wrap(drawable);
         DrawableCompat.setTint(drawable, tintColor);
-        menu.findItem(R.id.action_add_playlist).setIcon(drawable);
+        menu.findItem(R.id.action_add_directory).setIcon(drawable);
 
         drawable = menu.findItem(R.id.action_search).getIcon();
         drawable = DrawableCompat.wrap(drawable);
