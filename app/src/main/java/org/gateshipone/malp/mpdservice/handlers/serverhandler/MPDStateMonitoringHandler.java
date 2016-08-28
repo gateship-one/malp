@@ -182,7 +182,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     private void resyncState() {
         synchronized (this) {
-            Log.v(TAG, "Resyncing MPD state");
 
             // Stop the interpolation
             if (null != mInterpolateTimer) {
@@ -255,7 +254,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
             mResyncTimer = new Timer();
             mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
-            Log.v(TAG, "Resyncing state in: " + IDLE_TIME + " ms");
         }
     }
 
@@ -305,14 +303,12 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         mLastFile = new MPDFile("");
         distributeNewStatus(mLastStatus);
         distributeNewTrack(mLastFile);
-        Log.v(TAG, "Connected to a MPD host");
         resyncState();
     }
 
     @Override
     public void onDisconnected() {
         super.onDisconnected();
-        Log.v(TAG,"Disconnected");
         synchronized (this) {
             // Stop the interpolation
             if (null != mInterpolateTimer) {
@@ -335,7 +331,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     @Override
     public void onNonIdle() {
-        Log.v(TAG, "Server idle over");
         // Server idle is over (reason unclear), resync the state
         resyncState();
     }
