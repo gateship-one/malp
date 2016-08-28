@@ -235,26 +235,28 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     }
 
     private synchronized void startInterpolation() {
-        if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-            if (null != mInterpolateTimer) {
-                mInterpolateTimer.cancel();
-                mInterpolateTimer.purge();
-                mInterpolateTimer = null;
+        if ( mMPDConnection.isConnected() ) {
+            if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                if (null != mInterpolateTimer) {
+                    mInterpolateTimer.cancel();
+                    mInterpolateTimer.purge();
+                    mInterpolateTimer = null;
+                }
+                mInterpolateTimer = new Timer();
+
+                mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
             }
-            mInterpolateTimer = new Timer();
 
-            mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
+            if (null != mResyncTimer) {
+                mResyncTimer.cancel();
+                mResyncTimer.purge();
+                mResyncTimer = null;
+            }
+
+            mResyncTimer = new Timer();
+            mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
+            Log.v(TAG, "Resyncing state in: " + IDLE_TIME + " ms");
         }
-
-        if (null != mResyncTimer) {
-            mResyncTimer.cancel();
-            mResyncTimer.purge();
-            mResyncTimer = null;
-        }
-        mResyncTimer = new Timer();
-        mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
-        Log.v(TAG, "Resyncing state in: " + IDLE_TIME + " ms");
-
     }
 
     public static MPDCurrentStatus getLastStatus() {
@@ -306,6 +308,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     @Override
     public void onDisconnected() {
         super.onDisconnected();
+        Log.v(TAG,"Disconnected");
         synchronized (this) {
             // Stop the interpolation
             if (null != mInterpolateTimer) {

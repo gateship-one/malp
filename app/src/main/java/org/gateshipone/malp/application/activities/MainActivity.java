@@ -44,15 +44,13 @@ import android.widget.ImageView;
 
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.ConnectionManager;
+import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
 import org.gateshipone.malp.application.callbacks.ProfileManageCallbacks;
 import org.gateshipone.malp.application.fragments.EditProfileFragment;
 import org.gateshipone.malp.application.fragments.ProfilesFragment;
-import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.fragments.SettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.AlbumTracksFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.AlbumsFragment;
@@ -70,7 +68,6 @@ import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 

@@ -542,7 +542,13 @@ public class MPDConnection {
         return success;
     }
 
-
+    public boolean isConnected() {
+        if ( null != pSocket && pSocket.isConnected()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /*
      * *******************************

@@ -15,10 +15,9 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application;
+package org.gateshipone.malp.mpdservice;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.Timer;
 
