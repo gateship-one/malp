@@ -301,6 +301,10 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     @Override
     public void onConnected() {
         super.onConnected();
+        mLastStatus = new MPDCurrentStatus();
+        mLastFile = new MPDFile("");
+        distributeNewStatus(mLastStatus);
+        distributeNewTrack(mLastFile);
         Log.v(TAG, "Connected to a MPD host");
         resyncState();
     }

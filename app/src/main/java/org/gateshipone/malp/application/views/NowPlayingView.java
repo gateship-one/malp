@@ -909,7 +909,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
     private void updateMPDStatus(MPDCurrentStatus status) {
-
         MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
 
         // update play buttons
@@ -991,7 +990,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     private void updateMPDCurrentTrack(MPDFile track) {
         mTrackName.setText(track.getTrackTitle());
-        mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());
+        if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+            mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());
+        } else if (track.getTrackArtist().isEmpty() ) {
+            mTrackAdditionalInfo.setText(track.getTrackAlbum());
+        } else if (track.getTrackAlbum().isEmpty()) {
+            mTrackAdditionalInfo.setText(track.getTrackArtist());
+        } else {
+            mTrackAdditionalInfo.setText("");
+        }
 
         // Calculate the margin to avoid cut off textviews
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mHeaderTextLayout.getLayoutParams();
