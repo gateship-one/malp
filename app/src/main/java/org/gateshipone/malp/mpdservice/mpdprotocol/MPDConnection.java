@@ -705,7 +705,6 @@ public class MPDConnection {
      * @throws IOException
      */
     private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
-        Log.v(TAG,"Parse tracks");
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!isConnected()) {
             return trackList;
@@ -1549,7 +1548,6 @@ public class MPDConnection {
      */
     public boolean addSong(String url) {
         synchronized (this) {
-            Log.v(TAG, "Add: " + url);
             sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
 
         /* Return the response value of MPD */
