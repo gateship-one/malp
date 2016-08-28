@@ -50,7 +50,8 @@ public class MPDProfileManager {
         ArrayList<MPDServerProfile> profileList = new ArrayList<>();
 
         /* Query the database table for profiles */
-        Cursor cursor = mDBHelper.getReadableDatabase().query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES, null, null, null, null, MPDServerProfileTable.COLUMN_PROFILE_NAME);
+        SQLiteDatabase db = mDBHelper.getReadableDatabase();
+        Cursor cursor = db.query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES, null, null, null, null, MPDServerProfileTable.COLUMN_PROFILE_NAME);
 
 
         /* Iterate over the cursor and create MPDServerProfile objects */
@@ -78,7 +79,7 @@ public class MPDProfileManager {
         }
 
         cursor.close();
-
+        db.close();
         return profileList;
     }
 
