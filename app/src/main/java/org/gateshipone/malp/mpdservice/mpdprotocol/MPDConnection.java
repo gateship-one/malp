@@ -17,6 +17,7 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -66,7 +67,22 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
 
+    /**
+     * Timeout to wait for socket operations
+     */
     private static final int SOCKET_TIMEOUT = 5 * 1000;
+
+    /**
+     * Time to wait for response from server. If server is not answering this prevents a livelock
+     * after 5 seconds.
+     */
+    private static final long RESPONSE_TIMEOUT = 5L * 1000L * 1000L * 1000L;
+
+    /**
+     * Time to sleep the process waiting for a server response. This reduces the busy-waiting to
+     * a bit more efficent sleep/check pattern.
+     */
+    private static int RESPONSE_WAIT_SLEEP_TIME = 250;
 
     private static final int IDLE_WAIT_TIME = 500;
 
@@ -136,6 +152,7 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
+        mServerCapabilities = new MPDCapabilities("", null);
 
     }
 
@@ -254,7 +271,6 @@ public class MPDConnection {
             mServerCapabilities = new MPDCapabilities(versionString, commands);
 
 
-
             // Start the initial idling procedure.
             startIdleWait();
 
@@ -349,10 +365,11 @@ public class MPDConnection {
 
     /**
      * Access to the currently server capabilities
+     *
      * @return
      */
     public MPDCapabilities getServerCapabilities() {
-        if ( isConnected() ) {
+        if (isConnected()) {
             return mServerCapabilities;
         }
         return null;
@@ -388,7 +405,11 @@ public class MPDConnection {
             pWriter.flush();
 
             // This waits until the server sends a response (OK,ACK(failure) or the requested data)
-            waitForResponse();
+            try {
+                waitForResponse();
+            } catch (IOException e) {
+                handleReadError();
+            }
         }
     }
 
@@ -530,14 +551,20 @@ public class MPDConnection {
      * Function only actively waits for reader to get ready for
      * the response.
      */
-    private void waitForResponse() {
+    private void waitForResponse() throws IOException {
         if (null != pReader) {
-            try {
-                while (!readyRead()) {
+            long currentTime = System.nanoTime();
+
+            while (!readyRead()) {
+                // Go to sleep if no response is ready yet
+                SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
+                // Terminate waiting after waiting to long. This indicates that the server is not responding
+                if ((System.nanoTime() - currentTime) > RESPONSE_TIMEOUT) {
+                    Log.e(TAG, "Stuck waiting for server response");
+                    throw new IOException();
                 }
-            } catch (IOException e) {
-                handleReadError();
             }
+
         }
     }
 
@@ -571,7 +598,7 @@ public class MPDConnection {
     }
 
     public boolean isConnected() {
-        if ( null != pSocket && pSocket.isConnected() && pMPDConnectionReady) {
+        if (null != pSocket && pSocket.isConnected() && pMPDConnectionReady) {
             return true;
         } else {
             return false;
@@ -756,27 +783,27 @@ public class MPDConnection {
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
                 */
                 String discNumber = response.substring(MPDResponses.MPD_RESPONSE_DISC_NUMBER.length());
-                discNumber = discNumber.replaceAll(" ","");
+                discNumber = discNumber.replaceAll(" ", "");
                 String[] discNumberSep = discNumber.split("/");
                 if (discNumberSep.length > 0) {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
-                    } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse disc number: " + discNumber);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Could not parse disc number: " + discNumber);
                     }
 
                     if (discNumberSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
-                        } catch (NumberFormatException e ) {
-                            Log.w(TAG,"Could not parse disc number: " + discNumber);
+                        } catch (NumberFormatException e) {
+                            Log.w(TAG, "Could not parse disc number: " + discNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
-                    } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse disc number: " + discNumber);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Could not parse disc number: " + discNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER)) {
@@ -784,26 +811,26 @@ public class MPDConnection {
                  * Check if MPD returned a tracknumber like: "12" or "12/42" and set albumtrack count accordingly.
                  */
                 String trackNumber = response.substring(MPDResponses.MPD_RESPONSE_TRACK_NUMBER.length());
-                trackNumber = trackNumber.replaceAll(" ","");
+                trackNumber = trackNumber.replaceAll(" ", "");
                 String[] trackNumbersSep = trackNumber.split("/");
                 if (trackNumbersSep.length > 0) {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
-                    } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse track number: " + trackNumber);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Could not parse track number: " + trackNumber);
                     }
                     if (trackNumbersSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
-                        } catch (NumberFormatException e ) {
-                            Log.w(TAG,"Could not parse track number: " + trackNumber);
+                        } catch (NumberFormatException e) {
+                            Log.w(TAG, "Could not parse track number: " + trackNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
-                    } catch (NumberFormatException e ) {
-                        Log.w(TAG,"Could not parse track number: " + trackNumber);
+                    } catch (NumberFormatException e) {
+                        Log.w(TAG, "Could not parse track number: " + trackNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
@@ -1064,13 +1091,14 @@ public class MPDConnection {
 
     /**
      * Requests the files for a specific search term and type
+     *
      * @param term The search term to use
      * @param type The type of items to search
      * @return List of MPDFile items with all tracks matching the search
      */
     public List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term,type));
+            sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
             try {
             /* Parse the return */
                 return parseMPDTracks("");
@@ -1157,7 +1185,7 @@ public class MPDConnection {
                     /* Third is channel count */
                             status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
                         } catch (NumberFormatException e) {
-                            Log.w(TAG,"Error parsing audio properties");
+                            Log.w(TAG, "Error parsing audio properties");
                         }
                     }
                 } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
@@ -1584,13 +1612,14 @@ public class MPDConnection {
 
     /**
      * Adds files to the playlist with a search term for a specific type
+     *
      * @param term The search term to use
      * @param type The type of items to search
      * @return True if server responed with ok
      */
     public boolean addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES(term,type));
+            sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES(term, type));
             try {
             /* Parse the return */
                 return checkResponse();
@@ -1683,7 +1712,7 @@ public class MPDConnection {
      * Adds a song to the saved playlist
      *
      * @param playlistName Name of the playlist to add the url to.
-     * @param url URL to add to the saved playlist
+     * @param url          URL to add to the saved playlist
      * @return True if server responed with ok
      */
     public boolean addSongToPlaylist(String playlistName, String url) {
@@ -1882,7 +1911,7 @@ public class MPDConnection {
      * @throws IOException
      */
     private boolean readyRead() throws IOException {
-        return (null != pSocket ) && (null != pReader) && pSocket.isConnected() && pReader.ready();
+        return (null != pSocket) && (null != pReader) && pSocket.isConnected() && pReader.ready();
     }
 
     /**
@@ -1957,7 +1986,7 @@ public class MPDConnection {
 
                 return response;
             } catch (IOException e) {
-                e.printStackTrace();
+                return "";
             }
         }
         return "";
@@ -1992,8 +2021,8 @@ public class MPDConnection {
             String response = waitForIdleResponse();
 
             // This happens when disconnected
-            if ( null == response ) {
-                Log.w(TAG,"Probably disconnected during idling");
+            if (null == response) {
+                Log.w(TAG, "Probably disconnected during idling");
                 mIdleWaitLock.release();
                 handleReadError();
                 return;
