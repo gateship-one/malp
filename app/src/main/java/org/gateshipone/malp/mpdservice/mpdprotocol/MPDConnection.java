@@ -26,6 +26,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +66,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
 
-    private static final int SOCKET_TIMEOUT = 30 * 1000;
+    private static final int SOCKET_TIMEOUT = 5 * 1000;
 
     private static final int IDLE_WAIT_TIME = 500;
 
@@ -156,7 +157,7 @@ public class MPDConnection {
 
             /* Clear TCP-Socket up */
             if (null != pSocket && pSocket.isConnected()) {
-                pSocket.setSoTimeout(1000);
+                pSocket.setSoTimeout(500);
                 pSocket.close();
                 pSocket = null;
             }
@@ -258,7 +259,7 @@ public class MPDConnection {
             startIdleWait();
 
             // Set the timeout to infinite again
-            pSocket.setSoTimeout(0);
+            pSocket.setSoTimeout(SOCKET_TIMEOUT);
 
             // Notify listener
             notifyConnected();
@@ -314,6 +315,9 @@ public class MPDConnection {
                 stopIdleing();
             }
 
+            // Close connection gracefully
+            sendMPDRAWCommand(MPDCommands.MPD_COMMAND_CLOSE);
+
             /* Cleanup reader/writer */
             try {
                 /* Clear reader/writer up */
@@ -326,7 +330,7 @@ public class MPDConnection {
 
                 /* Clear TCP-Socket up */
                 if (null != pSocket && pSocket.isConnected()) {
-                    pSocket.setSoTimeout(1000);
+                    pSocket.setSoTimeout(500);
                     pSocket.close();
                     pSocket = null;
                 }
@@ -493,7 +497,13 @@ public class MPDConnection {
             if (!pMPDConnectionReady || pMPDConnectionIdle) {
                 return;
             }
-            Log.v(TAG, "MPDConnection: " + this + "Sending idle command");
+
+            // Set the timeout to zero to block when no data is available
+            try {
+                pSocket.setSoTimeout(0);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
 
             mRequestedDeidle = false;
 
@@ -502,7 +512,7 @@ public class MPDConnection {
             pIdleThread = new IdleThread();
             pIdleThread.start();
 
-            Log.v(TAG, "Runnable is waiting for idle finish");
+
             pMPDConnectionIdle = true;
 
             if (null != pIdleListener) {
@@ -556,7 +566,7 @@ public class MPDConnection {
     }
 
     public boolean isConnected() {
-        if ( null != pSocket && pSocket.isConnected()) {
+        if ( null != pSocket && pSocket.isConnected() && pMPDConnectionReady) {
             return true;
         } else {
             return false;
@@ -578,11 +588,8 @@ public class MPDConnection {
      */
     private ArrayList<MPDAlbum> parseMPDAlbums(String albumArtist) throws IOException {
         ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
-        if (!pMPDConnectionReady) {
+        if (!isConnected()) {
             return albumList;
-        }
-        if (!readyRead()) {
-            return null;
         }
         /* Parse the MPD response and create a list of MPD albums */
         String response = pReader.readLine();
@@ -593,7 +600,7 @@ public class MPDConnection {
 
         MPDAlbum tempAlbum;
 
-        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -642,11 +649,8 @@ public class MPDConnection {
      */
     private ArrayList<MPDArtist> parseMPDArtists() throws IOException {
         ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
-        if (!pMPDConnectionReady) {
+        if (!isConnected()) {
             return artistList;
-        }
-        if (!readyRead()) {
-            return null;
         }
 
         /* Parse MPD artist return values and create a list of MPDArtist objects */
@@ -658,7 +662,7 @@ public class MPDConnection {
 
         MPDArtist tempArtist;
 
-        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -697,20 +701,17 @@ public class MPDConnection {
      */
     private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
-        if (!pMPDConnectionReady) {
+        if (!isConnected()) {
             return trackList;
         }
 
         /* Temporary track item (added to list later */
         MPDFileEntry tempFileEntry = null;
 
-        if (!readyRead()) {
-            return null;
-        }
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             /* This if block will just check all the different response possible by MPDs file/dir/playlist response */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
@@ -1749,13 +1750,13 @@ public class MPDConnection {
         boolean outputActive = false;
         int outputId = -1;
 
-        if (!readyRead()) {
+        if (!isConnected()) {
             return null;
         }
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_OUTPUT_ID)) {
                 if (null != outputName) {
                     MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
@@ -1795,13 +1796,13 @@ public class MPDConnection {
         ArrayList<String> commandList = new ArrayList<>();
         // Parse outputs
         String commandName = null;
-        if (!readyRead()) {
+        if (!isConnected()) {
             return null;
         }
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_COMMAND)) {
                 commandName = response.substring(MPDResponses.MPD_COMMAND.length());
                 commandList.add(commandName);
@@ -2006,6 +2007,13 @@ public class MPDConnection {
 
             // Set the connection as non-idle again.
             pMPDConnectionIdle = false;
+
+            // Reset the timeout again
+            try {
+                pSocket.setSoTimeout(SOCKET_TIMEOUT);
+            } catch (SocketException e) {
+                e.printStackTrace();
+            }
 
             // Release the lock for possible threads waiting from outside this idling thread (handler thread).
             mIdleWaitLock.release();
