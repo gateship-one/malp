@@ -111,4 +111,6 @@
     <string name="song_duration">Länge:</string>
     <string name="song_title">Titel:</string>
     <string name="song_title_mbid">MusicBrainz Lied-ID:</string>
+    <string name="main_activity_connected">Mit MPD-Server verbunden</string>
+    <string name="main_activity_disconnected">Von MPD-Server getrennt</string>
 </resources>

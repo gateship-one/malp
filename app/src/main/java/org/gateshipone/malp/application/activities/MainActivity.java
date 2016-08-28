@@ -25,6 +25,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -40,7 +41,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 
 import org.gateshipone.malp.R;
@@ -67,7 +70,9 @@ import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDia
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
@@ -100,6 +105,7 @@ public class MainActivity extends AppCompatActivity
 
     private FloatingActionButton mFAB;
 
+    private ConnectionStateListener mConnectionStateListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -220,7 +226,7 @@ public class MainActivity extends AppCompatActivity
             transaction.replace(R.id.fragment_container, fragment);
             transaction.commit();
         }
-
+        mConnectionStateListener = new ConnectionStateListener();
 
     }
 
@@ -441,7 +447,7 @@ public class MainActivity extends AppCompatActivity
         }
         ConnectionManager.reconnectLastServer();
 
-
+        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
     }
 
     @Override
@@ -460,6 +466,7 @@ public class MainActivity extends AppCompatActivity
             // Disconnect from MPD server
             ConnectionManager.disconnectFromServer();
         }
+        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -765,4 +772,20 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
 
     }
+
+    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
+        @Override
+        public void onConnected() {
+            Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_connected), Snackbar.LENGTH_SHORT);
+            sb.show();
+        }
+
+        @Override
+        public void onDisconnected() {
+            Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_disconnected), Snackbar.LENGTH_SHORT);
+            sb.show();
+        }
+    }
+
+
 }
