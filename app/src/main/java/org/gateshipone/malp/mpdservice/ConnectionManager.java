@@ -18,8 +18,10 @@
 package org.gateshipone.malp.mpdservice;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.Timer;
+import java.util.TimerTask;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -32,7 +34,7 @@ import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
  * Simple class that manages the three MPD Connections (Queries, State monitoring, Commands)
  */
 public class ConnectionManager extends MPDConnectionStateChangeHandler {
-    private static final String TAG = "ConnectionManager";
+    private static final String TAG = ConnectionManager.class.getSimpleName();
 
     /**
      * Short time to wait for reconnect
@@ -43,6 +45,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
      * Long time to wait for reconnect
      */
     private static final int LONG_RECONNECT_TIME = 5 * 60 * 1000;
+
+    private static final int SHORT_RECONNECT_TRIES = 5;
 
     private String mHostname;
     private String mPassword;
@@ -57,6 +61,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private static ConnectionManager mConnectionManager = null;
 
     private ConnectionManager() {
+        MPDStateMonitoringHandler.registerConnectionStateListener(this);
     }
 
     private static ConnectionManager getInstance() {
@@ -79,6 +84,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         profileManager.deleteProfile(profile);
         profile.setAutoconnect(true);
         profileManager.addProfile(profile);
+
+
     }
 
     public static void reconnectLastServer() {
@@ -121,18 +128,41 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         mConnected = true;
 
         mReconnectCounter = 0;
+        mDisconnectRequested = false;
+
+        if (null != mReconnectTimer) {
+            mReconnectTimer.cancel();
+            mReconnectTimer.purge();
+            mReconnectTimer = null;
+        }
     }
 
     @Override
     public void onDisconnected() {
         if ( !mDisconnectRequested ) {
-            if ( mReconnectCounter <= 3 ) {
-                // FIXME, start timer short
+            if (null != mReconnectTimer) {
+                mReconnectTimer.cancel();
+                mReconnectTimer.purge();
+                mReconnectTimer = null;
+            }
+            mReconnectTimer = new Timer();
+            if ( mReconnectCounter <= SHORT_RECONNECT_TRIES ) {
+                mReconnectTimer.schedule(new ReconnectTask(), SHORT_RECONNECT_TIME);
             } else {
-                // FIXME start timer long
+                mReconnectTimer.schedule(new ReconnectTask(), LONG_RECONNECT_TIME);
             }
         }
     }
 
     // FIXME create timertask
+
+    private class ReconnectTask extends TimerTask {
+
+        @Override
+        public void run() {
+            // Increase connection try counter
+            mReconnectCounter++;
+            reconnectLastServer();
+        }
+    }
 }

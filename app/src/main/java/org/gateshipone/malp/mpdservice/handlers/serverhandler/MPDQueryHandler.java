@@ -1062,10 +1062,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
     }
 
     public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        mHandlerSingleton.internalRegisterConnectionStateListener(stateHandler);
+        getHandler().internalRegisterConnectionStateListener(stateHandler);
     }
 
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        mHandlerSingleton.internalUnregisterConnectionStateListener(stateHandler);
+        getHandler().internalUnregisterConnectionStateListener(stateHandler);
     }
 }

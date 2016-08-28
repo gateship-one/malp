@@ -264,11 +264,11 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     }
 
     public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        mHandlerSingleton.internalRegisterConnectionStateListener(stateHandler);
+        getHandler().internalRegisterConnectionStateListener(stateHandler);
     }
 
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        mHandlerSingleton.internalUnregisterConnectionStateListener(stateHandler);
+        getHandler().internalUnregisterConnectionStateListener(stateHandler);
     }
 
 
