@@ -180,19 +180,23 @@ public class MPDCommands {
         return "ping";
     }
 
+    public static final String MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME = "searchadd";
+
     public static final String MPD_COMMAND_ADD_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
         switch (type) {
             case MPD_SEARCH_TRACK:
-                return "searchadd title \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " title \"" + searchTerm + '\"';
             case MPD_SEARCH_ALBUM:
-                return "searchadd album \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " album \"" + searchTerm + '\"';
             case MPD_SEARCH_ARTIST:
-                return "searchadd artist \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " artist \"" + searchTerm + '\"';
             case MPD_SEARCH_FILE:
-                return "searchadd file \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " file \"" + searchTerm + '\"';
             case MPD_SEARCH_ANY:
-                return "searchadd any \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " any \"" + searchTerm + '\"';
         }
         return "ping";
     }
+
+    public static final String MPD_COMMAND_GET_COMMANDS = "commands";
 }

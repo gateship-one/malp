@@ -244,6 +244,12 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         @Override
         public void onConnected() {
+            // Check if connected server version is recent enough
+            if ( MPDQueryHandler.getServerCapabilities().hasRangedCurrentPlaylist()) {
+                mWindowEnabled = true;
+            } else {
+                mWindowEnabled = false;
+            }
             updatePlaylist();
         }
 
@@ -317,17 +323,25 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
     private MPDFile getTrack(int position) {
         if (!mWindowEnabled) {
-            return (MPDFile) mPlaylist.get(position);
+            // Check if list is long enough, can be that the new list is not ready yet.
+            if ( mPlaylist.size() > position) {
+                return (MPDFile) mPlaylist.get(position);
+            } else {
+                return null;
+            }
         } else {
             int listIndex = position / WINDOW_SIZE;
-            if (mWindowedListStates[position / WINDOW_SIZE] == LIST_STATE.LIST_READY) {
+            if (mWindowedListStates[listIndex] == LIST_STATE.LIST_READY ) {
                 mLastAccessedList = listIndex;
                 if (null != mClearTimer) {
                     mClearTimer.cancel();
                 }
                 mClearTimer = new Timer();
                 mClearTimer.schedule(new ListCleanUp(), CLEANUP_TIMEOUT);
-                return (MPDFile) mWindowedPlaylists[listIndex].get(position % WINDOW_SIZE);
+                int listPosition = position % WINDOW_SIZE;
+                if ( listPosition < mWindowedPlaylists[listIndex].size()) {
+                    return (MPDFile) mWindowedPlaylists[listIndex].get(position % WINDOW_SIZE);
+                }
             } else if (mWindowedListStates[position / WINDOW_SIZE] == LIST_STATE.LIST_EMPTY) {
                 mWindowedListStates[position / WINDOW_SIZE] = LIST_STATE.LIST_LOADING;
                 fetchWindow(position);

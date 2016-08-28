@@ -74,4 +74,6 @@ public class MPDResponses {
     public static final String MPD_STATS_SONGS = "songs: ";
     public static final String MPD_STATS_DB_PLAYTIME = "db_playtime: ";
     public static final String MPD_STATS_DB_LAST_UPDATE = "db_update: ";
+
+    public static final String MPD_COMMAND = "command: ";
 }

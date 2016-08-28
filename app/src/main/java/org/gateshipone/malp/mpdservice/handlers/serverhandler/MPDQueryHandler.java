@@ -34,11 +34,13 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandl
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
@@ -389,7 +391,6 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES) {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
-            Log.v(TAG, "Search files: " + term + " of type: " + type + " requested");
 
             responseHandler = mpdAction.getResponseHandler();
             if (!(responseHandler instanceof MPDResponseFileList)) {
@@ -405,13 +406,29 @@ public class MPDQueryHandler extends MPDGenericHandler {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
-            mMPDConnection.addSearchedFiles(term, type);
+            // Check if server has the add search result capability
+            if ( mMPDConnection.getServerCapabilities().hasSearchAdd()) {
+                mMPDConnection.addSearchedFiles(term, type);
+            } else {
+                // Fetch search results and add them
+                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term,type);
+                mMPDConnection.addTrackList(searchResults);
+            }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES) {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
             mMPDConnection.clearPlaylist();
-            mMPDConnection.addSearchedFiles(term, type);
+
+            // Check if server has the add search result capability
+            if ( mMPDConnection.getServerCapabilities().hasSearchAdd()) {
+                mMPDConnection.addSearchedFiles(term, type);
+            } else {
+                // Fetch search results and add them
+                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term,type);
+                mMPDConnection.addTrackList(searchResults);
+            }
+
             mMPDConnection.playSongIndex(0);
         }
     }
@@ -1038,6 +1055,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
         msg.obj = action;
 
         MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static MPDCapabilities getServerCapabilities() {
+        return MPDQueryHandler.getHandler().mMPDConnection.getServerCapabilities();
     }
 
     public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {

@@ -89,10 +89,7 @@ public class MPDConnection {
     private boolean pMPDConnectionIdle = false;
 
     /* MPD server properties */
-    // FIXME do some capability checking in respect to the server version
-    private String pVersionString;
-    private int pMajorVersion;
-    private int pMinorVersion;
+    private MPDCapabilities mServerCapabilities;
 
     /**
      * One listener for the state of the connection (connected, disconnected)
@@ -230,27 +227,32 @@ public class MPDConnection {
 
             /* If connected try to get MPDs version */
             String readString = null;
+
+            String versionString = "";
             while (readyRead()) {
                 readString = pReader.readLine();
                 Log.v(TAG, "Read string: " + readString);
                 /* Look out for the greeting message */
                 if (readString.startsWith("OK MPD ")) {
-                    pVersionString = readString.substring(7);
-                    String[] versions = pVersionString.split("\\.");
-                    if (versions.length == 3) {
-                        pMajorVersion = Integer.valueOf(versions[0]);
-                        pMinorVersion = Integer.valueOf(versions[1]);
-                    }
+                    versionString = readString.substring(7);
 
                 }
             }
-            Log.v(TAG, "MPD Version: " + pMajorVersion + ":" + pMinorVersion);
             pMPDConnectionReady = true;
 
             if (pPassword != null && !pPassword.equals("")) {
                 /* Authenticate with server because password is set. */
                 boolean authenticated = authenticateMPDServer();
             }
+
+            // Get available commands
+            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
+
+            List<String> commands = parseMPDCommands();
+
+            mServerCapabilities = new MPDCapabilities(versionString, commands);
+
+
 
             // Start the initial idling procedure.
             startIdleWait();
@@ -339,6 +341,17 @@ public class MPDConnection {
             // Notify listener
             notifyDisconnect();
         }
+    }
+
+    /**
+     * Access to the currently server capabilities
+     * @return
+     */
+    public MPDCapabilities getServerCapabilities() {
+        if ( isConnected() ) {
+            return mServerCapabilities;
+        }
+        return null;
     }
 
     /**
@@ -580,7 +593,7 @@ public class MPDConnection {
 
         MPDAlbum tempAlbum;
 
-        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
+        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -645,7 +658,7 @@ public class MPDConnection {
 
         MPDArtist tempArtist;
 
-        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
+        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -697,7 +710,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
+        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             /* This if block will just check all the different response possible by MPDs file/dir/playlist response */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
@@ -1458,7 +1471,7 @@ public class MPDConnection {
      * @param tracks List of MPDFileEntry objects to add to the current playlist.
      * @return True if server responed with ok
      */
-    private boolean addTrackList(List<MPDFileEntry> tracks) {
+    public boolean addTrackList(List<MPDFileEntry> tracks) {
         synchronized (this) {
             if (null == tracks) {
                 return false;
@@ -1742,7 +1755,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = pReader.readLine();
-        while (!response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_OUTPUT_ID)) {
                 if (null != outputName) {
                     MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
@@ -1769,6 +1782,34 @@ public class MPDConnection {
         }
 
         return outputList;
+
+    }
+
+    /**
+     * Private parsing method for MPDs command list
+     *
+     * @return A list of Strings of commands that are allowed on the server
+     * @throws IOException
+     */
+    private List<String> parseMPDCommands() throws IOException {
+        ArrayList<String> commandList = new ArrayList<>();
+        // Parse outputs
+        String commandName = null;
+        if (!readyRead()) {
+            return null;
+        }
+
+        /* Response line from MPD */
+        String response = pReader.readLine();
+        while (readyRead() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+            if (response.startsWith(MPDResponses.MPD_COMMAND)) {
+                commandName = response.substring(MPDResponses.MPD_COMMAND.length());
+                commandList.add(commandName);
+            }
+            response = pReader.readLine();
+        }
+
+        return commandList;
 
     }
 
@@ -1837,7 +1878,7 @@ public class MPDConnection {
      * @throws IOException
      */
     private boolean readyRead() throws IOException {
-        return (null != pReader) && pReader.ready();
+        return (null != pSocket ) && (null != pReader) && pSocket.isConnected() && pReader.ready();
     }
 
     /**
