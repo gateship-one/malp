@@ -159,8 +159,8 @@ public class MPDConnection {
             if (null != pSocket && pSocket.isConnected()) {
                 pSocket.setSoTimeout(500);
                 pSocket.close();
-                pSocket = null;
             }
+            pSocket = null;
         } catch (IOException e) {
             Log.e(TAG, "Error during read error handling");
         }
@@ -467,7 +467,12 @@ public class MPDConnection {
         if (!pMPDConnectionIdle || !pMPDConnectionReady) {
             return;
         }
-        Log.v(TAG, "Deidling MPD before request");
+
+        try {
+            pSocket.setSoTimeout(SOCKET_TIMEOUT);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
 
 
         /* Send the "noidle" command to the server to initiate noidle */
@@ -700,6 +705,7 @@ public class MPDConnection {
      * @throws IOException
      */
     private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
+        Log.v(TAG,"Parse tracks");
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!isConnected()) {
             return trackList;
@@ -712,7 +718,6 @@ public class MPDConnection {
         /* Response line from MPD */
         String response = pReader.readLine();
         while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
-
             /* This if block will just check all the different response possible by MPDs file/dir/playlist response */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (null != tempFileEntry) {
@@ -1987,10 +1992,14 @@ public class MPDConnection {
 
             // This will block this thread until the server has some data available to read again.
             String response = waitForIdleResponse();
-            while (response == null) {
-                response = waitForIdleResponse();
-            }
 
+            // This happens when disconnected
+            if ( null == response ) {
+                Log.w(TAG,"Probably disconnected during idling");
+                mIdleWaitLock.release();
+                handleReadError();
+                return;
+            }
             // At this position idling is over.
             if (response.startsWith("changed")) {
                 try {
