@@ -46,19 +46,20 @@ public class MPDCapabilities {
         } else {
             mHasRangedCurrentPlaylist = false;
         }
+        if ( null != commands ) {
+            if (commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
+                mHasIdle = true;
+            } else {
+                mHasIdle = false;
+            }
 
-        if ( commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
-            mHasIdle = true;
-        } else {
-            mHasIdle = false;
-        }
-
-        if ( commands.contains(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME)) {
-            Log.v(TAG,"Searchadd available");
-            mHasSearchAdd = true;
-        } else {
-            Log.v(TAG,"Searchadd not available");
-            mHasSearchAdd = false;
+            if (commands.contains(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME)) {
+                Log.v(TAG, "Searchadd available");
+                mHasSearchAdd = true;
+            } else {
+                Log.v(TAG, "Searchadd not available");
+                mHasSearchAdd = false;
+            }
         }
     }
 
