@@ -43,7 +43,8 @@ import java.util.Timer;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.fragments.SaveDialog;
+import org.gateshipone.malp.application.callbacks.TextDialogCallback;
+import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -286,10 +287,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.view_nowplaying_action_clearplaylist:
+            case R.id.action_clear_playlist:
                 MPDQueryHandler.clearPlaylist();
                 break;
-            case R.id.view_nowplaying_action_saveplaylist:
+            case R.id.action_save_playlist:
                 OnSaveDialogListener plDialogCallback = new OnSaveDialogListener() {
                     @Override
                     public void onSaveObject(String title) {
@@ -299,12 +300,17 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     @Override
                     public void onCreateNewObject() {
                         // open dialog in order to save the current playlist as a playlist in the mediastore
-                        SaveDialog textDialog = new SaveDialog();
+                        TextDialog textDialog = new TextDialog();
                         Bundle args = new Bundle();
-                        args.putString(SaveDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.dialog_save_playlist));
-                        args.putString(SaveDialog.EXTRA_DIALOG_TEXT, getResources().getString(R.string.default_playlist_title));
+                        args.putString(TextDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.dialog_save_playlist));
+                        args.putString(TextDialog.EXTRA_DIALOG_TEXT, getResources().getString(R.string.default_playlist_title));
 
-                        textDialog.setCallback(this);
+                        textDialog.setCallback(new TextDialogCallback() {
+                            @Override
+                            public void onFinished(String text) {
+                                MPDQueryHandler.savePlaylist(text);
+                            }
+                        });
                         textDialog.setArguments(args);
                         textDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SavePLTextDialog");
                     }
@@ -318,6 +324,20 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 choosePlaylistDialog.setCallback(plDialogCallback);
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
+                break;
+            case R.id.action_add_url:
+                TextDialog addURLDialog = new TextDialog();
+                addURLDialog.setCallback(new TextDialogCallback() {
+                    @Override
+                    public void onFinished(String text) {
+                        MPDQueryHandler.addSong(text);
+                    }
+                });
+                Bundle textDialogArgs = new Bundle();
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TEXT,"http://...");
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TITLE,getResources().getString(R.string.action_add_url));
+                addURLDialog.setArguments(textDialogArgs);
+                addURLDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "AddURLDialog");
                 break;
             case R.id.action_jump_to_current:
                 mPlaylistView.jumpToCurrentSong();

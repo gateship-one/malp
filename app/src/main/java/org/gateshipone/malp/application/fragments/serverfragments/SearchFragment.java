@@ -25,7 +25,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -46,8 +45,6 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.SearchResultLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -55,7 +52,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
+public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
     public static final String TAG = SearchFragment.class.getSimpleName();
 
     /**
@@ -97,6 +94,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
+        mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
 
         mSelectSpinner = (Spinner) rootView.findViewById(R.id.search_criteria);
@@ -220,7 +218,6 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
 
         MPDFile track = (MPDFile)mFileAdapter.getItem(info.position);
 
-        mListView.setActivated(true);
         mListView.requestFocus();
 
 
@@ -298,6 +295,16 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // Open song details dialog
+        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        songDetailsDialog.setArguments(args);
+        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }
 
     private void showFAB(boolean active) {

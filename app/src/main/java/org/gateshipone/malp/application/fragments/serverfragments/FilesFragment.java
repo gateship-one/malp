@@ -25,9 +25,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
-import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.FilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -206,6 +204,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 return true;
             case R.id.action_song_play_next:
                 MPDQueryHandler.playSongNext(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
+                return true;
             case R.id.action_add_to_saved_playlist:
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
@@ -333,6 +332,13 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             mCallback.openPath(file.getPath());
         } else if (file instanceof MPDPlaylist) {
             mPlaylistCallback.openPlaylist(file.getPath());
+        } else if (file instanceof MPDFile) {
+            // Open song details dialog
+            SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+            Bundle args = new Bundle();
+            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile)file);
+            songDetailsDialog.setArguments(args);
+            songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
         }
     }
 

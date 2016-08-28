@@ -18,7 +18,10 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
-public class MPDFile extends MPDFileEntry implements MPDGenericItem {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable {
     private String pTrackTitle;
 
 
@@ -31,6 +34,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     private String pTrackArtistMBID;
     private String pTrackMBID;
     private String pTrackAlbumMBID;
+    private String pTrackAlbumArtistMBID;
 
     private int pLength;
     private int pTrackNumber;
@@ -38,7 +42,6 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
     private int pDiscNumber;
     private int pAlbumDiscCount;
 
-    private boolean mPlaying;
 
     /**
      * Create empty MPDFile (track). Fill it with setter methods during
@@ -57,8 +60,30 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
         pTrackArtistMBID = "";
         pTrackMBID = "";
         pTrackAlbumMBID = "";
+        pTrackAlbumArtistMBID = "";
 
         pLength = 0;
+    }
+
+    protected MPDFile(Parcel in) {
+        super(in.readString());
+        pTrackTitle = in.readString();
+        pTrackAlbum = in.readString();
+        pTrackArtist = in.readString();
+        pTrackAlbumArtist = in.readString();
+
+        pDate = in.readString();
+
+        pTrackMBID = in.readString();
+        pTrackAlbumMBID = in.readString();
+        pTrackArtistMBID = in.readString();
+        pTrackAlbumArtistMBID = in.readString();
+
+        pLength = in.readInt();
+        pTrackNumber = in.readInt();
+        pAlbumTrackCount = in.readInt();
+        pDiscNumber = in.readInt();
+        pAlbumDiscCount = in.readInt();
     }
 
     public String getTrackTitle() {
@@ -108,6 +133,14 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
 
     public void setTrackArtistMBID(String pTrackArtistMBID) {
         this.pTrackArtistMBID = pTrackArtistMBID;
+    }
+
+    public String getTrackAlbumArtistMBID() {
+        return pTrackAlbumArtistMBID;
+    }
+
+    public void setTrackAlbumArtistMBID(String pTrackArtistMBID) {
+        this.pTrackAlbumArtistMBID = pTrackArtistMBID;
     }
 
     public String getTrackMBID() {
@@ -191,11 +224,45 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem {
         return pTrackTitle.equals("") ? mPath : pTrackTitle;
     }
 
-    public void setPlaying(boolean playing) {
-        mPlaying = playing;
+
+
+    @Override
+    public int describeContents() {
+        return 0;
     }
 
-    public boolean getPlaying() {
-        return mPlaying;
+    public static final Creator<MPDFile> CREATOR = new Creator<MPDFile>() {
+        @Override
+        public MPDFile createFromParcel(Parcel in) {
+            return new MPDFile(in);
+        }
+
+        @Override
+        public MPDFile[] newArray(int size) {
+            return new MPDFile[size];
+        }
+    };
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        // Serialize MPDFile
+        dest.writeString(mPath);
+        dest.writeString(pTrackTitle);
+        dest.writeString(pTrackAlbum);
+        dest.writeString(pTrackArtist);
+        dest.writeString(pTrackAlbumArtist);
+
+        dest.writeString(pDate);
+
+        dest.writeString(pTrackMBID);
+        dest.writeString(pTrackAlbumMBID);
+        dest.writeString(pTrackArtistMBID);
+        dest.writeString(pTrackAlbumArtistMBID);
+
+        dest.writeInt(pLength);
+        dest.writeInt(pTrackNumber);
+        dest.writeInt(pAlbumTrackCount);
+        dest.writeInt(pDiscNumber);
+        dest.writeInt(pAlbumDiscCount);
     }
 }

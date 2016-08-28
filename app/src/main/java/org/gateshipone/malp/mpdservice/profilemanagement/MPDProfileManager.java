@@ -30,10 +30,6 @@ import java.util.List;
 public class MPDProfileManager {
     private static final String TAG = "ProfileManager";
 
-    /**
-     * Database to use for all operations
-     */
-    private SQLiteDatabase mDatabase;
 
     /**
      * Instance of the helper class to initialize the database.
@@ -44,8 +40,6 @@ public class MPDProfileManager {
         /* Create instance of the helper class to get the writable DB later. */
         mDBHelper = new MPDProfileDBHelper(context);
 
-        /* Get a writable database here. */
-        mDatabase = mDBHelper.getWritableDatabase();
     }
 
     /**
@@ -56,7 +50,7 @@ public class MPDProfileManager {
         ArrayList<MPDServerProfile> profileList = new ArrayList<>();
 
         /* Query the database table for profiles */
-        Cursor cursor  = mDatabase.query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES, null, null, null, null, MPDServerProfileTable.COLUMN_PROFILE_NAME);
+        Cursor cursor = mDBHelper.getReadableDatabase().query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES, null, null, null, null, MPDServerProfileTable.COLUMN_PROFILE_NAME);
 
 
         /* Iterate over the cursor and create MPDServerProfile objects */
@@ -94,13 +88,14 @@ public class MPDProfileManager {
      * @param profile Profile to add to the database.
      */
     public void addProfile(MPDServerProfile profile) {
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
         /* Check if autoconnect is set, if it is, all other autoconnects need to be set to 0 */
         if ( profile.getAutoconnect() ) {
             ContentValues autoConValues = new ContentValues();
             autoConValues.put(MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT, 0);
 
             /* Update the table columns to 0. */
-            mDatabase.update(MPDServerProfileTable.SQL_TABLE_NAME, autoConValues, MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT + "=?", new String[]{"1"});
+            db.update(MPDServerProfileTable.SQL_TABLE_NAME, autoConValues, MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT + "=?", new String[]{"1"});
         }
 
 
@@ -118,7 +113,9 @@ public class MPDProfileManager {
         values.put(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED, profile.getCreationDate());
 
         /* Insert the table in the database */
-        mDatabase.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
+        db.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
+
+        db.close();
     }
 
 
@@ -127,11 +124,14 @@ public class MPDProfileManager {
      * @param profile Profile to remove.
      */
     public void deleteProfile(MPDServerProfile profile) {
+        SQLiteDatabase db = mDBHelper.getWritableDatabase();
         /* Create the where clauses */
         String whereClause = MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED + "=?";
 
         String[] whereValues = {String.valueOf(profile.getCreationDate())};
-        mDatabase.delete(MPDServerProfileTable.SQL_TABLE_NAME,whereClause, whereValues);
+        db.delete(MPDServerProfileTable.SQL_TABLE_NAME,whereClause, whereValues);
+
+        db.close();
     }
 
 
@@ -140,8 +140,9 @@ public class MPDProfileManager {
      * @return Profile to connect to otherwise null.
      */
     public MPDServerProfile getAutoconnectProfile() {
+        SQLiteDatabase db = mDBHelper.getReadableDatabase();
         /* Query the database table for profiles */
-        Cursor cursor  = mDatabase.query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES,MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT + "=?", new String[]{"1"}, null, null, null);
+        Cursor cursor  = db.query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES,MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT + "=?", new String[]{"1"}, null, null, null);
 
 
         /* Iterate over the cursor and create MPDServerProfile objects */
@@ -168,6 +169,7 @@ public class MPDProfileManager {
         }
 
         cursor.close();
+        db.close();
         return null;
     }
 

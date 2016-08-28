@@ -42,15 +42,13 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> {
+public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
     public final static String TAG = PlaylistTracksFragment.class.getSimpleName();
     public final static String EXTRA_PLAYLIST_NAME = "name";
 
@@ -91,6 +89,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
+        mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
 
         // get swipe layout
@@ -302,6 +301,16 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
     public void removeFilter() {
         mFileAdapter.removeFilter();
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+        // Open song details dialog
+        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        songDetailsDialog.setArguments(args);
+        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }
 
     private class FABOnClickListener implements View.OnClickListener {

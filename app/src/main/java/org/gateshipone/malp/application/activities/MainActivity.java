@@ -63,6 +63,7 @@ import org.gateshipone.malp.application.fragments.serverfragments.PlaylistTracks
 import org.gateshipone.malp.application.fragments.serverfragments.SavedPlaylistsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.SearchFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerStatisticFragment;
+import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDialog;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
@@ -322,6 +323,14 @@ public class MainActivity extends AppCompatActivity
                     return true;
                 case R.id.action_show_album:
                     onAlbumSelected(track.getTrackAlbum(), "");
+                    return true;
+                case R.id.action_show_details:
+                    // Open song details dialog
+                    SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                    Bundle songArgs = new Bundle();
+                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile)track);
+                    songDetailsDialog.setArguments(songArgs);
+                    songDetailsDialog.show(getSupportFragmentManager(), "SongDetails");
                     return true;
             }
         }

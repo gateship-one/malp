@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
-
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -35,19 +34,17 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import java.util.List;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.fragments.SaveDialog;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+
+import java.util.List;
 
 public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
     public final static String TAG = AlbumTracksFragment.class.getSimpleName();
@@ -97,6 +94,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
         registerForContextMenu(mListView);
+        mListView.setOnItemClickListener(this);
 
         // get swipe layout
         mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
@@ -189,7 +187,12 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
+        // Open song details dialog
+        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+        Bundle args = new Bundle();
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        songDetailsDialog.setArguments(args);
+        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }
 
     /**
@@ -231,7 +234,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
                 args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
-                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry)mFileAdapter.getItem(info.position),getActivity()));
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(info.position), getActivity()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;

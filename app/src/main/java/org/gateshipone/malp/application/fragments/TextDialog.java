@@ -31,20 +31,21 @@ import android.widget.EditText;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
+import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 
 
-public class SaveDialog extends DialogFragment {
+public class TextDialog extends DialogFragment {
     public final static String EXTRA_DIALOG_TITLE = "dialog_title";
     public final static String EXTRA_DIALOG_TEXT = "dialog_text";
 
-    OnSaveDialogListener mSaveCallback;
+    TextDialogCallback mSaveCallback;
 
     private String mTitle;
     private String mText;
 
     private boolean mFirstClick;
 
-    public void setCallback(OnSaveDialogListener callback) {
+    public void setCallback(TextDialogCallback callback) {
         mSaveCallback = callback;
     }
 
@@ -86,7 +87,7 @@ public class SaveDialog extends DialogFragment {
             public void onClick(DialogInterface dialog, int id) {
                 // accept title and call callback method
                 String objectTitle = editTextTitle.getText().toString();
-                mSaveCallback.onSaveObject(objectTitle);
+                mSaveCallback.onFinished(objectTitle);
             }
         }).setNegativeButton(R.string.dialog_action_cancel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {

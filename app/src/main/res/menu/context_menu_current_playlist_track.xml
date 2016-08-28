@@ -23,13 +23,13 @@
         android:id="@+id/action_song_play_next"
         android:orderInCategory="100"
         app:showAsAction="never"
-        android:title="@string/context_menu_action_enqueueasnext"/>
+        android:title="@string/action_enqueue_as_next"/>
 
     <item
         android:id="@+id/action_remove_song"
         android:orderInCategory="100"
         app:showAsAction="never"
-        android:title="@string/context_menu_action_removetrack"/>
+        android:title="@string/action_remove_track"/>
     <item
         android:id="@+id/action_show_artist"
         android:orderInCategory="100"
@@ -45,4 +45,9 @@
         android:orderInCategory="100"
         app:showAsAction="never"
         android:title="@string/action_add_to_saved_playlist"/>
+    <item
+        android:id="@+id/action_show_details"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_show_details"/>
 </menu>
