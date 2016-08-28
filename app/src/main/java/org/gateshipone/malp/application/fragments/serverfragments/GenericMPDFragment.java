@@ -84,6 +84,7 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
         @Override
         public void onDisconnected() {
             getLoaderManager().destroyLoader(0);
+            finishedLoading();
         }
     }
 
