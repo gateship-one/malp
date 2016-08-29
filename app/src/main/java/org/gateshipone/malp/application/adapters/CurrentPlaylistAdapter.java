@@ -245,7 +245,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         @Override
         public void onConnected() {
             // Check if connected server version is recent enough
-            if ( MPDQueryHandler.getServerCapabilities().hasRangedCurrentPlaylist()) {
+            if (  MPDQueryHandler.getServerCapabilities() != null && MPDQueryHandler.getServerCapabilities().hasRangedCurrentPlaylist()) {
                 mWindowEnabled = true;
             } else {
                 mWindowEnabled = false;
