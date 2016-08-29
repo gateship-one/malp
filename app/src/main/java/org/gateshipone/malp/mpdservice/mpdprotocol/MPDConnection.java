@@ -562,9 +562,9 @@ public class MPDConnection {
                     Log.e(TAG, "Stuck waiting for server response");
                     throw new IOException();
                 }
-                if ( compareTime > 500L * 1000L * 1000L ) {
-                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
-                }
+//                if ( compareTime > 500L * 1000L * 1000L ) {
+//                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
+//                }
             }
 
         }
