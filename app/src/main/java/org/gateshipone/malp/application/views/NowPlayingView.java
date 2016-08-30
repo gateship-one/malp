@@ -975,7 +975,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
 
-        mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex()) + getResources().getString(R.string.track_number_album_count_separator) +
+        mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex() + 1) + getResources().getString(R.string.track_number_album_count_separator) +
                 String.valueOf(status.getPlaylistLength()));
 
         mLastStatus = status;
