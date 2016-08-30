@@ -48,12 +48,12 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 /**
  * This handler is used for all long running queries to the mpd server. This includes:
  * database requests, playlists, outputs, current playlist, searches, file listings.
- * <p/>
+ * <p>
  * To request certain items the caller needs to provide an instance of another Handler, called ResponseHandlers,
  * that ensure that the return of the requested values is also done asynchronously.
- * <p/>
+ * <p>
  * Requests should look like this:
- * <p/>
+ * <p>
  * UI-Thread --> QueryHandler |(send message to another thread)-->    MPDConnection
  * <--(send message to another thread)<--ResponseHandler<-- MPDConnection
  */
@@ -333,7 +333,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                 int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
                 if (index < status.getCurrentSongIndex()) {
                     mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex());
-                } else {
+                } else if (index > status.getCurrentSongIndex()) {
                     mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
                 }
             } catch (IOException e) {
@@ -407,11 +407,11 @@ public class MPDQueryHandler extends MPDGenericHandler {
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
             // Check if server has the add search result capability
-            if ( mMPDConnection.getServerCapabilities().hasSearchAdd()) {
+            if (mMPDConnection.getServerCapabilities().hasSearchAdd()) {
                 mMPDConnection.addSearchedFiles(term, type);
             } else {
                 // Fetch search results and add them
-                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term,type);
+                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term, type);
                 mMPDConnection.addTrackList(searchResults);
             }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES) {
@@ -421,11 +421,11 @@ public class MPDQueryHandler extends MPDGenericHandler {
             mMPDConnection.clearPlaylist();
 
             // Check if server has the add search result capability
-            if ( mMPDConnection.getServerCapabilities().hasSearchAdd()) {
+            if (mMPDConnection.getServerCapabilities().hasSearchAdd()) {
                 mMPDConnection.addSearchedFiles(term, type);
             } else {
                 // Fetch search results and add them
-                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term,type);
+                List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term, type);
                 mMPDConnection.addTrackList(searchResults);
             }
 
