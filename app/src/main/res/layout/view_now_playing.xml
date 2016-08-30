@@ -320,9 +320,10 @@
                     android:paddingStart="@dimen/material_screen_edge_spacing">
 
                     <ImageView
+                        android:id="@+id/volume_icon"
                         android:layout_width="48dp"
                         android:layout_height="48dp"
-                        android:src="@drawable/ic_volume_up_black_48dp"
+                        android:src="@drawable/ic_volume_high_black_48dp"
                         android:tint="?android:textColor" />
 
                     <SeekBar

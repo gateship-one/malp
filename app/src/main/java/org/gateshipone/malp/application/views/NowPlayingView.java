@@ -154,6 +154,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      * Seekbar used for volume control of host
      */
     private SeekBar mVolumeSeekbar;
+    private ImageView mVolumeIcon;
 
     private LinearLayout mHeaderTextLayout;
     private LayoutParams mHeaderTextLayoutParams;
@@ -664,6 +665,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
+        mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
@@ -959,7 +961,18 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
 
         // Update volume seekbar
-        mVolumeSeekbar.setProgress(status.getVolume());
+        int volume = status.getVolume();
+        mVolumeSeekbar.setProgress(volume);
+
+        if ( volume >= 70 ) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
+        } else if ( volume >= 30 && volume < 70) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+        } else if ( volume > 0 && volume < 30 ) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+        } else {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+        }
 
 
         mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex()) + getResources().getString(R.string.track_number_album_count_separator) +
@@ -1181,9 +1194,17 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (fromUser) {
-                // FIXME Check if it is better to just update if user releases the seekbar
-                // (network stress)
                 MPDCommandHandler.setVolume(progress);
+
+                if ( progress >= 70 ) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
+                } else if ( progress >= 30 && progress < 70) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+                } else if ( progress > 0 && progress < 30 ) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+                } else {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+                }
             }
         }
 
