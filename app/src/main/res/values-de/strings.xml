@@ -115,4 +115,8 @@
     <string name="main_activity_disconnected">Von MPD-Server getrennt</string>
     <string name="track_item_loading">Lied lädt</string>
     <string name="action_remove_from_list">Lied von Liste entfernen</string>
+    <string name="preference_library_view_grid">Gitter</string>
+    <string name="preference_library_view_list">Liste</string>
+    <string name="preference_library_view_message">Bibliotheksanzeige wählen</string>
+    <string name="preference_library_view_summary">Wählen Sie den Typ der Anzeige für die Interpreten- und Albenanzeige</string>
 </resources>

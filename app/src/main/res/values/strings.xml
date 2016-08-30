@@ -195,6 +195,18 @@
         <item>@string/preference_default_view_my_music_files</item>
     </string-array>
 
+    <string name="preference_library_view_title">Select library view</string>
+    <string name="preference_library_view_message">Select library view</string>
+    <string name="preference_library_view_summary">Select the type of view that is used for albums and artists</string>
+
+    <string name="preference_library_view_list">List</string>
+    <string name="preference_library_view_grid">Grid</string>
+
+    <string-array name="preference_library_view">
+        <item>@string/preference_library_view_list</item>
+        <item>@string/preference_library_view_grid</item>
+    </string-array>
+
     <string name="search_choice_track">Track</string>
     <string name="search_choice_album">Album</string>
     <string name="search_choice_artist">Artist</string>

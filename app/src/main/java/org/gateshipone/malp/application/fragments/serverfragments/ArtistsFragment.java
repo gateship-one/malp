@@ -19,7 +19,9 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
@@ -28,8 +30,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.ListView;
 
 import java.util.List;
 
@@ -52,7 +56,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
     /**
      * Save the root GridView for later usage.
      */
-    private GridView mRootGrid;
+    private AbsListView mAdapterView;
 
     /**
      * Save the last position here. Gets reused when the user returns to this view after selecting sme
@@ -66,24 +70,43 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
     private FABFragmentCallback mFABCallback = null;
 
+    private boolean mUseList = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String libraryView = sharedPref.getString("pref_library_view", "library_view_grid");
 
+        if ( libraryView.equals("library_view_list")) {
+            mUseList = true;
+        } else {
+            mUseList = false;
+        }
+
+
+        View rootView;
         // get gridview
-        mRootGrid = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
+        if (mUseList) {
+            rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
+            mAdapterView = (ListView) rootView.findViewById(R.id.main_listview);
+        } else {
+            // Inflate the layout for this fragment
+            rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
+            mAdapterView = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
+        }
 
-        mArtistAdapter = new ArtistsGridAdapter(getActivity(), mRootGrid);
+        mArtistAdapter = new ArtistsGridAdapter(getActivity(), mAdapterView, mUseList);
 
-        mRootGrid.setAdapter(mArtistAdapter);
-        mRootGrid.setOnScrollListener(new ScrollSpeedListener(mArtistAdapter, mRootGrid));
-        mRootGrid.setOnItemClickListener(this);
+        mAdapterView.setAdapter(mArtistAdapter);
+        mAdapterView.setOnItemClickListener(this);
+
+        if ( !mUseList) {
+            mAdapterView.setOnScrollListener(new ScrollSpeedListener(mArtistAdapter, mAdapterView));
+        }
 
         // register for context menu
-        registerForContextMenu(mRootGrid);
+        registerForContextMenu(mAdapterView);
 
 
 
@@ -164,7 +187,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
         // Reset old scroll position
         if (mLastPosition >= 0) {
-            mRootGrid.setSelection(mLastPosition);
+            mAdapterView.setSelection(mLastPosition);
             mLastPosition = -1;
         }
 

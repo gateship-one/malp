@@ -20,21 +20,27 @@ package org.gateshipone.malp.application.adapters;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.GridView;
 
 import org.gateshipone.malp.application.listviewitems.ArtistGridViewItem;
+import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
 
-    private final GridView mRootGrid;
+    private final AbsListView mListView;
     private final Context mContext;
 
-    public ArtistsGridAdapter(Context context, GridView rootGrid) {
+    private boolean mUseList;
+
+    public ArtistsGridAdapter(Context context, AbsListView rootGrid, boolean useList) {
         super();
 
         mContext = context;
-        mRootGrid = rootGrid;
+        mListView = rootGrid;
+
+        mUseList = useList;
     }
 
     @Override
@@ -42,24 +48,38 @@ public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
         MPDArtist artist = (MPDArtist)getItem(position);
         String label = artist.getArtistName();
 
-        // Check if a view can be recycled
-        if (convertView != null) {
-            ArtistGridViewItem gridItem = (ArtistGridViewItem) convertView;
+        if ( mUseList ) {
+            // Check if a view can be recycled
+            if (convertView != null) {
+                SimpleListItem listItem = (SimpleListItem) convertView;
 
-            // Make sure to reset the layoutParams in case of change (rotation for example)
-            ViewGroup.LayoutParams layoutParams = gridItem.getLayoutParams();
-            layoutParams.height = mRootGrid.getColumnWidth();
-            layoutParams.width = mRootGrid.getColumnWidth();
-            gridItem.setLayoutParams(layoutParams);
-            gridItem.setTitle(label);
+                // Make sure to reset the layoutParams in case of change (rotation for example)
+                listItem.setText(label);
+            } else {
+                // Create new view if no reusable is available
+                convertView = new SimpleListItem(mContext, label);
+            }
         } else {
-            // Create new view if no reusable is available
-            convertView = new ArtistGridViewItem(mContext, label, null, new android.widget.AbsListView.LayoutParams(mRootGrid.getColumnWidth(), mRootGrid.getColumnWidth()));
-        }
 
-        // Check if the scroll speed currently is already 0, then start the image task right away.
-        if (mScrollSpeed == 0) {
-            ((ArtistGridViewItem) convertView).startCoverImageTask();
+            // Check if a view can be recycled
+            if (convertView != null) {
+                ArtistGridViewItem gridItem = (ArtistGridViewItem) convertView;
+
+                // Make sure to reset the layoutParams in case of change (rotation for example)
+                ViewGroup.LayoutParams layoutParams = gridItem.getLayoutParams();
+                layoutParams.height = ((GridView)mListView).getColumnWidth();
+                layoutParams.width = ((GridView)mListView).getColumnWidth();
+                gridItem.setLayoutParams(layoutParams);
+                gridItem.setTitle(label);
+            } else {
+                // Create new view if no reusable is available
+                convertView = new ArtistGridViewItem(mContext, label, null, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
+            }
+
+            // Check if the scroll speed currently is already 0, then start the image task right away.
+            if (mScrollSpeed == 0) {
+                ((ArtistGridViewItem) convertView).startCoverImageTask();
+            }
         }
         return convertView;
     }

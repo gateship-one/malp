@@ -19,8 +19,10 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -31,10 +33,10 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
-
-import java.util.List;
+import android.widget.ListView;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.AlbumsGridAdapter;
@@ -44,6 +46,8 @@ import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+
+import java.util.List;
 
 public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener {
     public final static String TAG = AlbumsFragment.class.getSimpleName();
@@ -61,7 +65,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     /**
      * Save the root GridView for later usage.
      */
-    private GridView mRootGrid;
+    private AbsListView mAdapterView;
 
     /**
      * Save the last position here. Gets reused when the user returns to this view after selecting sme
@@ -75,18 +79,35 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
     private FABFragmentCallback mFABCallback = null;
 
+    private boolean mUseList = false;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String libraryView = sharedPref.getString("pref_library_view", "library_view_grid");
 
+        if ( libraryView.equals("library_view_list")) {
+            mUseList = true;
+        } else {
+            mUseList = false;
+        }
+
+        View rootView;
         // get gridview
-        mRootGrid = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
+        if (mUseList) {
+            rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
+            mAdapterView = (ListView) rootView.findViewById(R.id.main_listview);
+        } else {
+            // Inflate the layout for this fragment
+            rootView = inflater.inflate(R.layout.fragment_gridview, container, false);
+            mAdapterView = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
+        }
 
-        mAlbumsAdapter = new AlbumsGridAdapter(getActivity(), mRootGrid);
+
+        mAlbumsAdapter = new AlbumsGridAdapter(getActivity(), mAdapterView, mUseList);
+
 
         /* Check if an artistname was given in the extras */
         Bundle args = getArguments();
@@ -96,12 +117,15 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             mArtistName = "";
         }
 
-        mRootGrid.setAdapter(mAlbumsAdapter);
-        mRootGrid.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mRootGrid));
-        mRootGrid.setOnItemClickListener(this);
+        mAdapterView.setAdapter(mAlbumsAdapter);
+        mAdapterView.setOnItemClickListener(this);
 
+
+        if ( !mUseList) {
+            mAdapterView.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mAdapterView));
+        }
         // register for context menu
-        registerForContextMenu(mRootGrid);
+        registerForContextMenu(mAdapterView);
 
 
         setHasOptionsMenu(true);
@@ -127,8 +151,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public void onResume() {
         super.onResume();
 
-        if ( null != mFABCallback  ) {
-            if ( null != mArtistName && !mArtistName.equals("")) {
+        if (null != mFABCallback) {
+            if (null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 mFABCallback.setupToolbar(mArtistName, true, false, false);
 
@@ -178,6 +202,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
     /**
      * Hook called when an menu item in the context menu is selected.
+     *
      * @param item The menu item that was selected.
      * @return True if the hook was consumed here.
      */
@@ -211,7 +236,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        if ( null != mArtistName && !mArtistName.equals("")) {
+        if (null != mArtistName && !mArtistName.equals("")) {
             menuInflater.inflate(R.menu.fragment_menu_albums, menu);
 
             // get tint color
@@ -268,7 +293,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         // Reset old scroll position
         if (mLastPosition >= 0) {
-            mRootGrid.setSelection(mLastPosition);
+            mAdapterView.setSelection(mLastPosition);
             mLastPosition = -1;
         }
 
@@ -296,20 +321,19 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     }
 
 
-
     public interface AlbumSelectedCallback {
         void onAlbumSelected(String albumname, String artistname);
     }
 
 
     private void enqueueAlbum(int index) {
-        MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
+        MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
         MPDQueryHandler.addArtistAlbum(album.getName(), mArtistName);
     }
 
     private void playAlbum(int index) {
-        MPDAlbum album = (MPDAlbum)mAlbumsAdapter.getItem(index);
+        MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
         MPDQueryHandler.playArtistAlbum(album.getName(), mArtistName);
     }

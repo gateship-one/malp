@@ -16,4 +16,9 @@
         <item>playlists</item>
         <item>files</item>
     </string-array>
+
+    <string-array name="preference_library_view_values" translatable="false">
+        <item>library_view_list</item>
+        <item>library_view_grid</item>
+    </string-array>
 </resources>
