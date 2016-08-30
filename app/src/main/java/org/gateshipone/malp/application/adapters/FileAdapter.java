@@ -80,7 +80,16 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             }
 
             // additional information (artist + album)
-            String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
+            String trackInformation;
+            if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + track.getTrackAlbum();
+            } else if (track.getTrackArtist().isEmpty() ) {
+                trackInformation = track.getTrackAlbum();
+            } else if (track.getTrackAlbum().isEmpty()) {
+                trackInformation = track.getTrackArtist();
+            } else {
+                trackInformation = "";
+            }
 
             String trackNumber;
             if (mShowTrackNumbers) {
