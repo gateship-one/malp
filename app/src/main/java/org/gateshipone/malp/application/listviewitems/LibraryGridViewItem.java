@@ -26,8 +26,8 @@ import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.R;
 
-public class ArtistGridViewItem extends GenericGridItem {
-    public ArtistGridViewItem(Context context, String title, String imageURL, ViewGroup.LayoutParams layoutParams) {
+public class LibraryGridViewItem extends GenericGridItem {
+    public LibraryGridViewItem(Context context, String title, String imageURL, ViewGroup.LayoutParams layoutParams) {
         super(context, imageURL, layoutParams);
 
         mTitleView.setText(title);

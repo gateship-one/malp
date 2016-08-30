@@ -23,7 +23,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.GridView;
 
-import org.gateshipone.malp.application.listviewitems.ArtistGridViewItem;
+import org.gateshipone.malp.application.listviewitems.LibraryGridViewItem;
 import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
@@ -63,7 +63,7 @@ public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
 
             // Check if a view can be recycled
             if (convertView != null) {
-                ArtistGridViewItem gridItem = (ArtistGridViewItem) convertView;
+                LibraryGridViewItem gridItem = (LibraryGridViewItem) convertView;
 
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 ViewGroup.LayoutParams layoutParams = gridItem.getLayoutParams();
@@ -73,12 +73,12 @@ public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
                 gridItem.setTitle(label);
             } else {
                 // Create new view if no reusable is available
-                convertView = new ArtistGridViewItem(mContext, label, null, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
+                convertView = new LibraryGridViewItem(mContext, label, null, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
             }
 
             // Check if the scroll speed currently is already 0, then start the image task right away.
             if (mScrollSpeed == 0) {
-                ((ArtistGridViewItem) convertView).startCoverImageTask();
+                ((LibraryGridViewItem) convertView).startCoverImageTask();
             }
         }
         return convertView;
