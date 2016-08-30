@@ -62,6 +62,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     private ConnectionManager() {
         MPDStateMonitoringHandler.registerConnectionStateListener(this);
+        mHostname = null;
+        mPassword = null;
     }
 
     private static ConnectionManager getInstance() {
@@ -85,26 +87,29 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         profile.setAutoconnect(true);
         profileManager.addProfile(profile);
 
+        String hostname = getInstance().mHostname;
+        String password = getInstance().mPassword;
+        int port = getInstance().mPort;
 
+        MPDStateMonitoringHandler.setServerParameters(hostname, password, port);
+        MPDQueryHandler.setServerParameters(hostname, password, port);
+        MPDCommandHandler.setServerParameters(hostname, password, port);
     }
 
-    public static void reconnectLastServer() {
+    public static void reconnectLastServer(Context context) {
         ConnectionManager instance = getInstance();
+
+        if (instance.mHostname == null  && null != context) {
+            // Not connected so far
+            autoConnect(context);
+        }
 
         instance.mDisconnectRequested = false;
 
-        String hostname = instance.mHostname;
-        String password = instance.mPassword;
-        int port = instance.mPort;
-
-
-        MPDStateMonitoringHandler.setServerParameters(hostname, password, port);
         MPDStateMonitoringHandler.connectToMPDServer();
 
-        MPDQueryHandler.setServerParameters(hostname, password, port);
         MPDQueryHandler.connectToMPDServer();
 
-        MPDCommandHandler.setServerParameters(hostname, password, port);
         MPDCommandHandler.connectToMPDServer();
     }
 
@@ -162,7 +167,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         public void run() {
             // Increase connection try counter
             mReconnectCounter++;
-            reconnectLastServer();
+            reconnectLastServer(null);
         }
     }
 }

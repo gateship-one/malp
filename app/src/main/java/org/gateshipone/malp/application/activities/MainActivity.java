@@ -179,8 +179,6 @@ public class MainActivity extends AppCompatActivity
 
         mProfileManager = new MPDProfileManager(getApplicationContext());
 
-        ConnectionManager.autoConnect(this);
-
         registerForContextMenu(findViewById(R.id.main_listview));
 
         // Read default view preference
@@ -454,7 +452,7 @@ public class MainActivity extends AppCompatActivity
             }
             nowPlayingView.onResume();
         }
-        ConnectionManager.reconnectLastServer();
+        ConnectionManager.reconnectLastServer(getApplicationContext());
 
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
     }
@@ -622,7 +620,7 @@ public class MainActivity extends AppCompatActivity
     public void connectProfile(MPDServerProfile profile) {
         ConnectionManager.disconnectFromServer();
         ConnectionManager.setParameters(profile, this);
-        ConnectionManager.reconnectLastServer();
+        ConnectionManager.reconnectLastServer(getApplicationContext());
     }
 
     @Override
@@ -631,7 +629,7 @@ public class MainActivity extends AppCompatActivity
 
         // Try connecting to the new profile
         ConnectionManager.setParameters(profile, this);
-        ConnectionManager.reconnectLastServer();
+        ConnectionManager.reconnectLastServer(getApplicationContext());
     }
 
     @Override

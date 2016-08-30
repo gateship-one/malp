@@ -108,6 +108,11 @@ public class MPDConnection {
     private MPDCapabilities mServerCapabilities;
 
     /**
+     * Only get the server capabilities if server parameters changed
+     */
+    boolean mCapabilitiesChanged;
+
+    /**
      * One listener for the state of the connection (connected, disconnected)
      */
     private MPDConnectionStateChangeListener pStateListener = null;
@@ -143,6 +148,8 @@ public class MPDConnection {
      * Saves if a deidle was requested by this connection or is triggered by another client/connection.
      */
     boolean mRequestedDeidle;
+
+
 
     /**
      * Creates disconnected MPDConnection with following parameters
@@ -204,6 +211,7 @@ public class MPDConnection {
             pPassword = password;
         }
         pPort = port;
+        mCapabilitiesChanged = true;
     }
 
     /**
@@ -267,7 +275,10 @@ public class MPDConnection {
 
             List<String> commands = parseMPDCommands();
 
-            mServerCapabilities = new MPDCapabilities(versionString, commands);
+            if ( mCapabilitiesChanged  ) {
+                mServerCapabilities = new MPDCapabilities(versionString, commands);
+                mCapabilitiesChanged = false;
+            }
 
 
             // Start the initial idling procedure.
