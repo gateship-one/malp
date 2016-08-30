@@ -70,7 +70,7 @@
     <string name="preference_default_view_my_music_artists">Interpreten</string>
     <string name="preference_default_view_my_music_files">Dateien</string>
     <string name="preference_default_view_my_music_playlists">Wiedergabelisten</string>
-    <string name="preference_default_view_summary">Wählen Sie eine Standardanzeige für diese Anwendnug.</string>
+    <string name="preference_default_view_summary">Wählen Sie eine Standardanzeige für diese Anwendung.</string>
     <string name="preference_default_view_title">Standardanzeige</string>
     <string name="preference_launch_about">Über</string>
     <string name="preference_theme_item_blue">Blue</string>
@@ -81,7 +81,7 @@
     <string name="preference_theme_item_light_green">Helles Grün</string>
     <string name="preference_theme_item_orange">Orange</string>
     <string name="preference_theme_message">Design auswählen</string>
-    <string name="preference_theme_summary">Wählen Sie ein Design für diese Anwendnug.</string>
+    <string name="preference_theme_summary">Wählen Sie ein Design für diese Anwendung.</string>
     <string name="preference_theme_title">Design</string>
     <string name="search_choice_album">Album</string>
     <string name="search_choice_artist">Interpret</string>
