@@ -16,7 +16,7 @@
   -->
 
 <resources>
-    <string name="app_name" translatable="false">MALP</string>
+    <string name="app_name" translatable="false">@string/app_name_nice</string>
     <string name="app_name_nice" translatable="false">M.A.L.P.</string>
     <string name="authors" translatable="false">Hendrik Borghorst</string>
     <string name="team" translatable="false">Team Gateship One</string>
