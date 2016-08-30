@@ -154,7 +154,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         if (null != mFABCallback) {
             if (null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
-                mFABCallback.setupToolbar(mArtistName, true, false, false);
+                mFABCallback.setupToolbar(mArtistName, false, false, false);
 
             } else {
                 mFABCallback.setupFAB(false, null);
