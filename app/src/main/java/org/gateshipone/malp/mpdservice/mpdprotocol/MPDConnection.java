@@ -577,6 +577,7 @@ public class MPDConnection {
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
                 if (compareTime > RESPONSE_TIMEOUT) {
                     Log.e(TAG, "Stuck waiting for server response");
+                    new Exception().printStackTrace();
                     throw new IOException();
                 }
 //                if ( compareTime > 500L * 1000L * 1000L ) {
