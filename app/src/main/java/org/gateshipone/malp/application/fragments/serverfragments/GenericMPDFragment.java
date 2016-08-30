@@ -88,7 +88,7 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
         }
     }
 
-    protected void finishedLoading() {
+    private void finishedLoading() {
         if (null != mSwipeRefreshLayout) {
             mSwipeRefreshLayout.post(new Runnable() {
                 @Override
@@ -97,6 +97,24 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
                 }
             });
         }
+    }
+
+    /**
+     * Called when the loader finished loading its data.
+     * <p/>
+     * The refresh indicator will be stopped if a refreshlayout exists.
+     *
+     * @param loader The used loader itself
+     * @param model  Data of the loader
+     */
+    @Override
+    public void onLoadFinished(Loader<T> loader, T model) {
+        finishedLoading();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<T> loader) {
+        finishedLoading();
     }
 
     /**

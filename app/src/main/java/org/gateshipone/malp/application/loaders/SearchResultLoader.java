@@ -95,6 +95,8 @@ public class SearchResultLoader extends Loader<List<MPDFileEntry>> {
     public void onForceLoad() {
         if (null != mSearchString && !mSearchString.isEmpty()) {
             MPDQueryHandler.searchFiles(mSearchString, mSearchType, pTrackResponseHandler);
+        } else {
+            deliverResult(null);
         }
     }
 }

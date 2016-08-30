@@ -78,7 +78,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String libraryView = sharedPref.getString("pref_library_view", "library_view_grid");
 
-        if ( libraryView.equals("library_view_list")) {
+        if (libraryView.equals("library_view_list")) {
             mUseList = true;
         } else {
             mUseList = false;
@@ -101,13 +101,12 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         mAdapterView.setAdapter(mArtistAdapter);
         mAdapterView.setOnItemClickListener(this);
 
-        if ( !mUseList) {
+        if (!mUseList) {
             mAdapterView.setOnScrollListener(new ScrollSpeedListener(mArtistAdapter, mAdapterView));
         }
 
         // register for context menu
         registerForContextMenu(mAdapterView);
-
 
 
         // get swipe layout
@@ -132,8 +131,8 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         super.onResume();
 
 
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(false,null);
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
     }
@@ -182,6 +181,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
      */
     @Override
     public void onLoadFinished(Loader<List<MPDArtist>> loader, List<MPDArtist> data) {
+        super.onLoadFinished(loader, data);
         // Set the actual data to the adapter.
         mArtistAdapter.swapModel(data);
 
@@ -190,8 +190,6 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mAdapterView.setSelection(mLastPosition);
             mLastPosition = -1;
         }
-
-        finishedLoading();
     }
 
     /**
@@ -217,6 +215,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
     /**
      * Hook called when an menu item in the context menu is selected.
+     *
      * @param item The menu item that was selected.
      * @return True if the hook was consumed here.
      */
@@ -254,15 +253,14 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
     }
 
 
-
     private void enqueueArtist(int index) {
-        MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
+        MPDArtist artist = (MPDArtist) mArtistAdapter.getItem(index);
 
         MPDQueryHandler.addArtist(artist.getArtistName());
     }
 
     private void playArtist(int index) {
-        MPDArtist artist = (MPDArtist)mArtistAdapter.getItem(index);
+        MPDArtist artist = (MPDArtist) mArtistAdapter.getItem(index);
 
         MPDQueryHandler.playArtist(artist.getArtistName());
     }

@@ -302,8 +302,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
      */
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
+        super.onLoadFinished(loader, data);
         mAdapter.swapModel(data);
-        finishedLoading();
 
         // Reset old scroll position
         if (mLastPosition >= 0) {

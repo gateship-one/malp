@@ -162,10 +162,6 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
             mFABCallback.setupFAB(true, new FABOnClickListener());
             mFABCallback.setupToolbar(getResources().getString(R.string.action_search), false, true, false);
         }
-        finishedLoading();
-
-
-
     }
 
     @Override
@@ -175,9 +171,9 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
-        finishedLoading();
+        super.onLoadFinished(loader, data);
         mFileAdapter.swapModel(data);
-        if ( null != data && !data.isEmpty()) {
+        if (null != data && !data.isEmpty()) {
             showFAB(true);
         } else {
             showFAB(false);
@@ -186,7 +182,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     @Override
     public void onLoaderReset(Loader<List<MPDFileEntry>> loader) {
-        finishedLoading();
+        super.onLoaderReset(loader);
         mFileAdapter.swapModel(null);
     }
 
@@ -216,7 +212,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         }
 
 
-        MPDFile track = (MPDFile)mFileAdapter.getItem(info.position);
+        MPDFile track = (MPDFile) mFileAdapter.getItem(info.position);
 
         mListView.requestFocus();
 
@@ -236,15 +232,15 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
                 args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
-                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry)mFileAdapter.getItem(info.position), getContext()));
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(info.position), getContext()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
             case R.id.action_add_album:
-                MPDQueryHandler.addArtistAlbum(track.getTrackAlbum(),"");
+                MPDQueryHandler.addArtistAlbum(track.getTrackAlbum(), "");
                 return true;
             case R.id.action_play_album:
-                MPDQueryHandler.playArtistAlbum(track.getTrackAlbum(),"");
+                MPDQueryHandler.playArtistAlbum(track.getTrackAlbum(), "");
                 return true;
             case R.id.action_add_artist:
                 MPDQueryHandler.addArtist(track.getTrackArtist());
@@ -290,7 +286,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_search_result:
-                MPDQueryHandler.searchAddFiles(mSearchText,mSearchType);
+                MPDQueryHandler.searchAddFiles(mSearchText, mSearchType);
                 return true;
         }
 
@@ -309,7 +305,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     private void showFAB(boolean active) {
         if (null != mFABCallback) {
-            mFABCallback.setupFAB(active, active ?  new FABOnClickListener() : null);
+            mFABCallback.setupFAB(active, active ? new FABOnClickListener() : null);
         }
     }
 

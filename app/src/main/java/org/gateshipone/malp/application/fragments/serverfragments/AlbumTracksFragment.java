@@ -169,10 +169,9 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
+        super.onLoadFinished(loader, data);
         // Give the adapter the new retrieved data set
         mFileAdapter.swapModel(data);
-
-        finishedLoading();
     }
 
     /**

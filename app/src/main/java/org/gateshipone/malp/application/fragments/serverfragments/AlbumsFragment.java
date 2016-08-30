@@ -88,7 +88,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String libraryView = sharedPref.getString("pref_library_view", "library_view_grid");
 
-        if ( libraryView.equals("library_view_list")) {
+        if (libraryView.equals("library_view_list")) {
             mUseList = true;
         } else {
             mUseList = false;
@@ -121,7 +121,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         mAdapterView.setOnItemClickListener(this);
 
 
-        if ( !mUseList) {
+        if (!mUseList) {
             mAdapterView.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mAdapterView));
         }
         // register for context menu
@@ -288,6 +288,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     @Override
     public void onLoadFinished(Loader<List<MPDAlbum>> loader, List<MPDAlbum> data) {
+        super.onLoadFinished(loader, data);
         // Set the actual data to the adapter.
         mAlbumsAdapter.swapModel(data);
 
@@ -296,8 +297,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             mAdapterView.setSelection(mLastPosition);
             mLastPosition = -1;
         }
-
-        finishedLoading();
     }
 
     /**

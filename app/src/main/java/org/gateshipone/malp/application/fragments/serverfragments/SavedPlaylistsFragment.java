@@ -203,8 +203,8 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
      */
     @Override
     public void onLoadFinished(Loader<List<MPDFileEntry>> loader, List<MPDFileEntry> data) {
+        super.onLoadFinished(loader, data);
         mPlaylistAdapter.swapModel(data);
-        finishedLoading();
     }
 
     /**
