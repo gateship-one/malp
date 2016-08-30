@@ -29,8 +29,10 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -508,11 +510,12 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
         // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
@@ -541,8 +544,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -602,8 +605,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -647,7 +650,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));
         // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
@@ -771,8 +775,10 @@ public class MainActivity extends AppCompatActivity
 
         android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        transaction.setCustomAnimations(android.R.anim.slide_in_left, android.R.anim.slide_out_right, android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-        transaction.addToBackStack("FilesFragment");
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));
+
+        transaction.addToBackStack("FilesFragment" + path);
         transaction.replace(R.id.fragment_container, newFragment);
 
         // Commit the transaction

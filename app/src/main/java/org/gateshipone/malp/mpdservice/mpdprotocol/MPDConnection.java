@@ -556,13 +556,15 @@ public class MPDConnection {
             long currentTime = System.nanoTime();
 
             while (!readyRead()) {
-                // Go to sleep if no response is ready yet
-                SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
+                long compareTime = System.nanoTime() - currentTime;
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
-                if ((System.nanoTime() - currentTime) > RESPONSE_TIMEOUT) {
+                if (compareTime > RESPONSE_TIMEOUT) {
                     Log.e(TAG, "Stuck waiting for server response");
                     throw new IOException();
                 }
+//                if ( compareTime > 500L * 1000L * 1000L ) {
+//                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
+//                }
             }
 
         }
