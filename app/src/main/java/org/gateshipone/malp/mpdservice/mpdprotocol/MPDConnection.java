@@ -577,6 +577,7 @@ public class MPDConnection {
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
                 if (compareTime > RESPONSE_TIMEOUT) {
                     Log.e(TAG, "Stuck waiting for server response");
+                    new Exception().printStackTrace();
                     throw new IOException();
                 }
 //                if ( compareTime > 500L * 1000L * 1000L ) {
@@ -742,23 +743,32 @@ public class MPDConnection {
 
         // Start the idling timeout again.
         startIdleWait();
+        Log.v(TAG,"Parsed: " + artistList.size() +  " artists");
+
         // Sort the artists for later sectioning.
         Collections.sort(artistList);
 
-        ArrayList<MPDArtist> clearedList = new ArrayList<>();
+        if ( mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup() ) {
 
-        // Remove multiple entries when one artist is in list with and without MBID
-        for ( int i = 0; i < artistList.size(); i++ ) {
-            MPDArtist artist = artistList.get(i);
-            if (i + 1 != artistList.size()) {
-                MPDArtist nextArtist = artistList.get(i+1);
-                if ( !artist.getArtistName().equals(nextArtist.getArtistName()) || artist.getMBIDCount() != 0) {
-                    clearedList.add(artist);
+
+            ArrayList<MPDArtist> clearedList = new ArrayList<>();
+
+            // Remove multiple entries when one artist is in list with and without MBID
+            for (int i = 0; i < artistList.size(); i++) {
+                MPDArtist artist = artistList.get(i);
+                if (i + 1 != artistList.size()) {
+                    MPDArtist nextArtist = artistList.get(i + 1);
+                    if (!artist.getArtistName().equals(nextArtist.getArtistName()) || artist.getMBIDCount() != 0) {
+                        clearedList.add(artist);
+                    }
                 }
             }
-        }
 
-        return clearedList;
+            Log.v(TAG,"Return: " + clearedList.size() +  " cleared artists");
+            return clearedList;
+        } else {
+            return artistList;
+        }
     }
 
     /**
