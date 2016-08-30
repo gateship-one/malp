@@ -73,6 +73,7 @@ import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
@@ -289,6 +290,12 @@ public class MainActivity extends AppCompatActivity
         if (v.getId() == R.id.main_listview && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_menu_current_playlist_track, menu);
+
+            // Check if the menu is created for the currently playing song. If this is the case, do not show play as next item.
+            MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
+            if (status != null &&  ((AdapterView.AdapterContextMenuInfo)menuInfo).position == status.getCurrentSongIndex()) {
+                menu.findItem(R.id.action_song_play_next).setVisible(false);
+            }
         }
     }
 
