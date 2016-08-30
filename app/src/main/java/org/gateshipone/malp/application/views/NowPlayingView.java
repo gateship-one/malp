@@ -666,6 +666,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
         mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
+        mVolumeIcon.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.setVolume(0);
+            }
+        });
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
