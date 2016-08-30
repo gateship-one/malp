@@ -116,6 +116,7 @@ public class TrackListViewItem extends LinearLayout {
      * @param information Information string (use R.string.track_item_separator) to separate information
      */
     public void setAdditionalInformation(String information) {
+        mSeparator.setVisibility(VISIBLE);
         mAdditionalInfoView.setText(information);
     }
 }

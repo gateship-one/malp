@@ -90,6 +90,8 @@
     <string name="profiles_item_port_separator" translatable="false">":"</string>
     <string name="track_number_album_count_separator" translatable="false">" / "</string>
 
+    <string name="track_item_loading">Track loading</string>
+
     <string name="main_activity_connected">Connected with MPD server</string>
     <string name="main_activity_disconnected">Disconnected from MPD server</string>
 

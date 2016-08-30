@@ -26,6 +26,14 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 
 public class CurrentPlaylistTrackItem extends TrackListViewItem {
 
+    public CurrentPlaylistTrackItem(Context context) {
+        super(context,"","","","",false);
+
+        mTitleView.setText(getResources().getText(R.string.track_item_loading));
+
+        // Hide separator
+        mSeparator.setVisibility(GONE);
+    }
 
 
     /**

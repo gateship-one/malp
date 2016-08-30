@@ -160,7 +160,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                 ((CurrentPlaylistTrackItem) convertView).setPlaying(false);
             }
         } else {
-            convertView = new CurrentPlaylistTrackItem(mContext, "", "", "", "");
+            convertView = new CurrentPlaylistTrackItem(mContext);
         }
         return convertView;
     }
