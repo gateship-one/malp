@@ -66,6 +66,16 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
         if (another.equals(this)) {
             return 0;
         }
+
+        if ( another.pArtistName.equals(pArtistName ) ) {
+            // Use MBID as sort criteria, without MBID before the ones with
+            if ( another.pMBIDs.size() > pMBIDs.size() ) {
+                return -1;
+            } else {
+                return 1;
+            }
+        }
+
         return pArtistName.toLowerCase().compareTo(another.pArtistName.toLowerCase());
     }
 }
