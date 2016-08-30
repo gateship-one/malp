@@ -18,24 +18,34 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
+import java.util.ArrayList;
+
 public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
     /* Artist properties */
     private String pArtistName;
 
     /* Musicbrainz ID */
-    private String pMBID;
+    private ArrayList<String> pMBIDs;
 
-    public MPDArtist(String name, String mbid) {
+    public MPDArtist(String name) {
         pArtistName = name;
-        pMBID = mbid;
+        pMBIDs = new ArrayList<>();
     }
 
     public String getArtistName() {
         return pArtistName;
     }
 
-    public String getMBID() {
-        return pMBID;
+    public int getMBIDCount() {
+        return pMBIDs.size();
+    }
+
+    public String getMBID(int position) {
+        return pMBIDs.get(position);
+    }
+
+    public void addMBID(String mbid) {
+        pMBIDs.add(mbid);
     }
 
     @Override
@@ -45,7 +55,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
 
     public boolean equals(MPDArtist artist) {
         if ((pArtistName.equals(artist.pArtistName)) &&
-                (pMBID.equals(artist.pMBID))) {
+                (pMBIDs.equals(artist.pMBIDs))) {
             return true;
         }
         return false;

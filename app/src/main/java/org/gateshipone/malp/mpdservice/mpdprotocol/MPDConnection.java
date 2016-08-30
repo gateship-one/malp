@@ -158,7 +158,7 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
-        mServerCapabilities = new MPDCapabilities("", null);
+        mServerCapabilities = new MPDCapabilities("", null,null);
 
     }
 
@@ -270,15 +270,22 @@ public class MPDConnection {
                 boolean authenticated = authenticateMPDServer();
             }
 
-            // Get available commands
-            sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
 
-            List<String> commands = parseMPDCommands();
 
             if ( mCapabilitiesChanged  ) {
-                mServerCapabilities = new MPDCapabilities(versionString, commands);
+                // Get available commands
+                sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
+
+                List<String> commands = parseMPDCommands();
+
+                // Get list of supported tags
+                sendMPDCommand(MPDCommands.MPD_COMMAND_GET_TAGS);
+                List<String> tags = parseMPDTagTypes();
+
+                mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
                 mCapabilitiesChanged = false;
             }
+
 
 
             // Start the initial idling procedure.
@@ -701,10 +708,10 @@ public class MPDConnection {
         String response = pReader.readLine();
 
         /* Artist properties */
-        String artistName;
+        String artistName = null;
         String artistMBID = "";
 
-        MPDArtist tempArtist;
+        MPDArtist tempArtist = null;
 
         while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
@@ -714,14 +721,23 @@ public class MPDConnection {
             }
 
             if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME)) {
+                if ( null != tempArtist ) {
+                    artistList.add(tempArtist);
+                }
                 artistName = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length());
-                tempArtist = new MPDArtist(artistName, artistMBID);
-                artistList.add(tempArtist);
-                //Log.v(TAG,"Added artist: " + artistName + ":" + artistMBID);
+                tempArtist = new MPDArtist(artistName);
+            } else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID) ) {
+                artistMBID = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length());
+                tempArtist.addMBID(artistMBID);
             } else if (response.startsWith("OK")) {
                 break;
             }
             response = pReader.readLine();
+        }
+
+        // Add last artist
+        if ( null != tempArtist ) {
+            artistList.add(tempArtist);
         }
 
         // Start the idling timeout again.
@@ -945,7 +961,7 @@ public class MPDConnection {
      */
     public List<MPDArtist> getArtists() {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS);
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
             try {
                 return parseMPDArtists();
             } catch (IOException e) {
@@ -1861,7 +1877,7 @@ public class MPDConnection {
         // Parse outputs
         String commandName = null;
         if (!isConnected()) {
-            return null;
+            return commandList;
         }
 
         /* Response line from MPD */
@@ -1875,6 +1891,33 @@ public class MPDConnection {
         }
 
         return commandList;
+
+    }
+
+    /**
+     * Parses the response of MPDs supported tag types
+     * @return List of tags supported by the connected MPD host
+     * @throws IOException
+     */
+    private List<String> parseMPDTagTypes() throws IOException {
+        ArrayList<String> tagList = new ArrayList<>();
+        // Parse outputs
+        String tagName = null;
+        if (!isConnected()) {
+            return tagList;
+        }
+
+        /* Response line from MPD */
+        String response = pReader.readLine();
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+            if (response.startsWith(MPDResponses.MPD_TAGTYPE)) {
+                tagName = response.substring(MPDResponses.MPD_TAGTYPE.length());
+                tagList.add(tagName);
+            }
+            response = pReader.readLine();
+        }
+
+        return tagList;
 
     }
 

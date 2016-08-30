@@ -76,4 +76,5 @@ public class MPDResponses {
     public static final String MPD_STATS_DB_LAST_UPDATE = "db_update: ";
 
     public static final String MPD_COMMAND = "command: ";
+    public static final String MPD_TAGTYPE = "tagtype: ";
 }

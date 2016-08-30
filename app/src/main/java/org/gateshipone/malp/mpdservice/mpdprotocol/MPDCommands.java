@@ -40,7 +40,13 @@ public class MPDCommands {
         return "find album \"" + albumName.replaceAll("\"","\\\\\"") + "\"";
     }
 
-    public static final String MPD_COMMAND_REQUEST_ARTISTS = "list artist";
+    public static String MPD_COMMAND_REQUEST_ARTISTS(boolean groupMBID) {
+        if ( !groupMBID ) {
+            return "list artist";
+        } else {
+            return "list artist group MUSICBRAINZ_ARTISTID";
+        }
+    }
 
     public static final String MPD_COMMAND_REQUEST_ALL_FILES = "listallinfo";
 
@@ -203,4 +209,6 @@ public class MPDCommands {
     }
 
     public static final String MPD_COMMAND_GET_COMMANDS = "commands";
+
+    public static final String MPD_COMMAND_GET_TAGS = "tagtypes";
 }

@@ -33,7 +33,10 @@ public class MPDCapabilities {
     private boolean mHasRangedCurrentPlaylist;
     private boolean mHasSearchAdd;
 
-    public MPDCapabilities(String version, List<String> commands) {
+    private boolean mHasMusicBrainzTags;
+    private boolean mHasListGroup;
+
+    public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
             pMajorVersion = Integer.valueOf(versions[0]);
@@ -46,6 +49,11 @@ public class MPDCapabilities {
         } else {
             mHasRangedCurrentPlaylist = false;
         }
+
+        if ( pMinorVersion >= 19 ) {
+            mHasListGroup = true;
+        }
+
         if ( null != commands ) {
             if (commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
                 mHasIdle = true;
@@ -61,6 +69,18 @@ public class MPDCapabilities {
                 mHasSearchAdd = false;
             }
         }
+
+
+
+        if ( null != tags ) {
+            for (String tag : tags ) {
+                if ( tag.contains("MUSICBRAINZ")) {
+                    mHasMusicBrainzTags = true;
+                    Log.v(TAG,"Sever has MusicBrainz support");
+                    break;
+                }
+            }
+        }
     }
 
     public boolean hasIdling() {
@@ -73,5 +93,11 @@ public class MPDCapabilities {
 
     public boolean hasSearchAdd() {
         return mHasSearchAdd;
+    }
+
+    public boolean hasListGroup() { return mHasListGroup;}
+
+    public boolean hasMusicBrainzTags() {
+        return mHasMusicBrainzTags;
     }
 }
