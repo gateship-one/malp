@@ -80,7 +80,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         }
 
         // Create the needed adapter for the ListView
-        mAdapter = new FileAdapter(getActivity(), true);
+        mAdapter = new FileAdapter(getActivity(), true, true);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mAdapter);

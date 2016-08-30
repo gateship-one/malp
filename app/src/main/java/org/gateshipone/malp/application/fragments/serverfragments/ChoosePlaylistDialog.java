@@ -110,7 +110,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
 
-        mPlaylistsListViewAdapter = new FileAdapter(getActivity(), false);
+        mPlaylistsListViewAdapter = new FileAdapter(getActivity(), false, false);
 
         builder.setTitle(getString(R.string.dialog_choose_playlist)).setAdapter(mPlaylistsListViewAdapter, new DialogInterface.OnClickListener() {
             @Override

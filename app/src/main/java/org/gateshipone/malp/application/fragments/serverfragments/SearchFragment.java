@@ -90,7 +90,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
 
         // Create the needed adapter for the ListView
-        mFileAdapter = new FileAdapter(getActivity(), false);
+        mFileAdapter = new FileAdapter(getActivity(), false, true);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);

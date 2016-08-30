@@ -39,16 +39,21 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
     boolean mShowIcons;
 
+    boolean mShowTrackNumbers;
+
     /**
-     * Standard construtor
+     * Standard constructor
      *
      * @param context Context used for creating listview items
+     * @param showIcons If icons should be shown in view (e.g. for FileExplorer)
+     * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
      */
-    public FileAdapter(Context context, boolean showIcons) {
+    public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers) {
         super();
 
         mShowIcons = showIcons;
         mContext = context;
+        mShowTrackNumbers = showTrackNumbers;
     }
 
     /**
@@ -77,8 +82,14 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             // additional information (artist + album)
             String trackInformation = track.getTrackArtist() + mContext.getString(R.string.track_item_separator) + track.getTrackAlbum();
 
-            // Get the number of the track
-            String trackNumber = String.valueOf(track.getTrackNumber());
+            String trackNumber;
+            if (mShowTrackNumbers) {
+                // Get the number of the track
+                trackNumber = String.valueOf(track.getTrackNumber());
+            } else {
+                trackNumber = String.valueOf(position + 1);
+            }
+
 
             // Get the preformatted duration of the track.
             String trackDuration = track.getLengthString();

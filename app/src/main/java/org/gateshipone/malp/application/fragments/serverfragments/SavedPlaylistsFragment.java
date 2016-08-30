@@ -74,7 +74,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
 
 
         // Create the needed adapter for the ListView
-        mPlaylistAdapter = new FileAdapter(getActivity(), false);
+        mPlaylistAdapter = new FileAdapter(getActivity(), false, false);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mPlaylistAdapter);
