@@ -114,4 +114,5 @@
     <string name="main_activity_connected">Mit MPD-Server verbunden</string>
     <string name="main_activity_disconnected">Von MPD-Server getrennt</string>
     <string name="track_item_loading">Lied lädt</string>
+    <string name="action_remove_from_list">Lied von Liste entfernen</string>
 </resources>

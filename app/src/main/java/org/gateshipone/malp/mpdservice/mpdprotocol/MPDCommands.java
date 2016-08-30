@@ -88,6 +88,10 @@ public class MPDCommands {
         return "playlistadd \"" + playlistName + "\" \"" + url + '\"';
     }
 
+    public static String MPD_COMMAND_REMOVE_TRACK_FROM_PLAYLIST(String playlistName, int position) {
+        return "playlistdelete \"" + playlistName + "\" " + String.valueOf(position);
+    }
+
     public static final String MPD_COMMAND_GET_CURRENT_SONG = "currentsong";
 
     public static final String MPD_COMMAND_START_IDLE = "idle";

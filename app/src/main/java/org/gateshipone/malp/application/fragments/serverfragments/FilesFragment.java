@@ -28,6 +28,7 @@ import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
 import org.gateshipone.malp.application.loaders.FilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
@@ -350,6 +351,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
         @Override
         public void onClick(View v) {
+            MPDCommandHandler.setRandom(false);
+            MPDCommandHandler.setRepeat(false);
             MPDQueryHandler.playDirectory(mPath);
         }
     }

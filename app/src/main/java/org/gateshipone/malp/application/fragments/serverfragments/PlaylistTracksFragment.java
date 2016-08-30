@@ -44,6 +44,7 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -150,6 +151,9 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         super.onCreateContextMenu(menu, v, menuInfo);
         MenuInflater inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.context_menu_track, menu);
+
+        // Enable the remove from list action
+        menu.findItem(R.id.action_remove_from_list).setVisible(true);
     }
 
 
@@ -185,6 +189,10 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
                 choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry)mFileAdapter.getItem(info.position),getActivity()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
+                return true;
+            case R.id.action_remove_from_list:
+                MPDQueryHandler.removeSongFromSavedPlaylist(mPath,info.position);
+                refreshContent();
                 return true;
             default:
                 return super.onContextItemSelected(item);
@@ -317,6 +325,9 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
         @Override
         public void onClick(View v) {
+            MPDCommandHandler.setRandom(false);
+            MPDCommandHandler.setRepeat(false);
+
             MPDQueryHandler.playPlaylist(mPath);
         }
     }

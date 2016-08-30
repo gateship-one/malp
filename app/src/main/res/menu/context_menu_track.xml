@@ -41,4 +41,11 @@
         android:orderInCategory="100"
         app:showAsAction="never"
         android:title="@string/action_add_to_saved_playlist"/>
+
+    <item
+        android:id="@+id/action_remove_from_list"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:visible="false"
+        android:title="@string/action_remove_from_list"/>
 </menu>

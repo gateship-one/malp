@@ -40,6 +40,7 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -316,6 +317,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
         @Override
         public void onClick(View v) {
+            MPDCommandHandler.setRandom(false);
+            MPDCommandHandler.setRepeat(false);
             MPDQueryHandler.playArtistAlbum(mAlbumName, mArtistName);
         }
     }

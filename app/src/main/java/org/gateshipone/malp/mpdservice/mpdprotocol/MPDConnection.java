@@ -17,8 +17,17 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
-import android.os.SystemClock;
 import android.util.Log;
+
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -34,16 +43,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
-
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 /**
  * This is the main MPDConnection class. It will connect to an MPD server via an java TCP socket.
@@ -1722,6 +1721,26 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(playlistName, url));
 
         /* Return the response value of MPD */
+            try {
+                return checkResponse();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return false;
+        }
+    }
+
+    /**
+     * Removes a song from a saved playlist
+     * @param playlistName Name of the playlist of which the song should be removed from
+     * @param position Index of the song to remove from the lits
+     * @return
+     */
+    public boolean removeSongFromPlaylist(String playlistName, int position) {
+        synchronized (this) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_TRACK_FROM_PLAYLIST(playlistName, position));
+
+            /* Return the response value of MPD */
             try {
                 return checkResponse();
             } catch (IOException e) {
