@@ -61,6 +61,9 @@ public class SimpleListItem extends LinearLayout {
         if (null != mDetailsView && !text.isEmpty()) {
             mDetailsView.setText(text);
             mDetailsView.setVisibility(VISIBLE);
+        } else if ( null != mDetailsView ) {
+            mDetailsView.setText("");
+            mDetailsView.setVisibility(GONE);
         }
     }
 
