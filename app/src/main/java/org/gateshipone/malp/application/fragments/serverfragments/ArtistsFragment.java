@@ -38,7 +38,7 @@ import android.widget.ListView;
 import java.util.List;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.adapters.ArtistsGridAdapter;
+import org.gateshipone.malp.application.adapters.ArtistsAdapter;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
@@ -51,7 +51,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
     /**
      * GridView adapter object used for this GridView
      */
-    private ArtistsGridAdapter mArtistAdapter;
+    private ArtistsAdapter mArtistAdapter;
 
     /**
      * Save the root GridView for later usage.
@@ -96,7 +96,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mAdapterView = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
         }
 
-        mArtistAdapter = new ArtistsGridAdapter(getActivity(), mAdapterView, mUseList);
+        mArtistAdapter = new ArtistsAdapter(getActivity(), mAdapterView, mUseList);
 
         mAdapterView.setAdapter(mArtistAdapter);
         mAdapterView.setOnItemClickListener(this);

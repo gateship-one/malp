@@ -39,7 +39,7 @@ import android.widget.GridView;
 import android.widget.ListView;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.adapters.AlbumsGridAdapter;
+import org.gateshipone.malp.application.adapters.AlbumsAdapter;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumsLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
@@ -60,7 +60,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     /**
      * GridView adapter object used for this GridView
      */
-    private AlbumsGridAdapter mAlbumsAdapter;
+    private AlbumsAdapter mAlbumsAdapter;
 
     /**
      * Save the root GridView for later usage.
@@ -106,7 +106,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
 
 
-        mAlbumsAdapter = new AlbumsGridAdapter(getActivity(), mAdapterView, mUseList);
+        mAlbumsAdapter = new AlbumsAdapter(getActivity(), mAdapterView, mUseList);
 
 
         /* Check if an artistname was given in the extras */

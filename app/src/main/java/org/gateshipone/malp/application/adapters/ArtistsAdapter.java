@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016  Hendrik Borghorst
+ * Copyright (C) 2016  Hendrik Borghorst & Frederik Luetkes
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 package org.gateshipone.malp.application.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -26,29 +25,28 @@ import android.widget.GridView;
 
 import org.gateshipone.malp.application.listviewitems.LibraryGridViewItem;
 import org.gateshipone.malp.application.listviewitems.SimpleListItem;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
-public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
-    private static final String TAG = AlbumsGridAdapter.class.getSimpleName();
+public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> {
+
     private final AbsListView mListView;
     private final Context mContext;
 
     private boolean mUseList;
 
-    public AlbumsGridAdapter(Context context, AbsListView listView, boolean useList) {
+    public ArtistsAdapter(Context context, AbsListView rootGrid, boolean useList) {
         super();
 
         mContext = context;
-        mListView = listView;
+        mListView = rootGrid;
 
         mUseList = useList;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        MPDAlbum album = (MPDAlbum)getItem(position);
-        String label = album.getName();
-        String albumArtist = album.getArtistName();
+        MPDArtist artist = (MPDArtist)getItem(position);
+        String label = artist.getArtistName();
 
         if ( mUseList ) {
             // Check if a view can be recycled
@@ -57,12 +55,12 @@ public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
 
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
-                listItem.setDetails(albumArtist);
             } else {
                 // Create new view if no reusable is available
-                convertView = new SimpleListItem(mContext,label, albumArtist);
+                convertView = new SimpleListItem(mContext, label,null);
             }
         } else {
+
             // Check if a view can be recycled
             if (convertView != null) {
                 LibraryGridViewItem gridItem = (LibraryGridViewItem) convertView;
@@ -83,7 +81,6 @@ public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
                 ((LibraryGridViewItem) convertView).startCoverImageTask();
             }
         }
-
         return convertView;
     }
 }
