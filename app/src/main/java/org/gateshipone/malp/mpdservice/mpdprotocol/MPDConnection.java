@@ -150,7 +150,6 @@ public class MPDConnection {
     boolean mRequestedDeidle;
 
 
-
     /**
      * Creates disconnected MPDConnection with following parameters
      */
@@ -158,7 +157,7 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
-        mServerCapabilities = new MPDCapabilities("", null,null);
+        mServerCapabilities = new MPDCapabilities("", null, null);
 
     }
 
@@ -271,8 +270,7 @@ public class MPDConnection {
             }
 
 
-
-            if ( mCapabilitiesChanged  ) {
+            if (mCapabilitiesChanged) {
                 // Get available commands
                 sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
 
@@ -285,7 +283,6 @@ public class MPDConnection {
                 mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
                 mCapabilitiesChanged = false;
             }
-
 
 
             // Start the initial idling procedure.
@@ -634,11 +631,10 @@ public class MPDConnection {
     /**
      * Parses the return of MPD when a list of albums was requested.
      *
-     * @param albumArtist Artist to be added to all MPDAlbum objects. (Useful for later GUI)
      * @return List of MPDAlbum objects
      * @throws IOException
      */
-    private ArrayList<MPDAlbum> parseMPDAlbums(String albumArtist) throws IOException {
+    private ArrayList<MPDAlbum> parseMPDAlbums() throws IOException {
         ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
         if (!isConnected()) {
             return albumList;
@@ -648,32 +644,23 @@ public class MPDConnection {
 
         boolean emptyAlbum = false;
         String albumName = "";
-        String albumMBID = "";
 
-        MPDAlbum tempAlbum;
+        MPDAlbum tempAlbum = null;
 
         while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
-
-            if (response == null) {
-                /* skip this invalid (empty) response */
-                continue;
-            }
-
             /* Check if the response is an album */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME)) {
                 /* We found an album, add it to the list. */
-                if (!albumName.equals("") || emptyAlbum) {
-                    tempAlbum = new MPDAlbum(albumName, albumMBID, albumArtist);
-                    //Log.v(TAG,"Add album to list: " + albumName + ":" + albumMBID + ":"  + albumArtist);
+                if (null != tempAlbum) {
                     albumList.add(tempAlbum);
                 }
                 albumName = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length());
-                if (albumName.equals("")) {
-                    emptyAlbum = true;
-                }
+                tempAlbum = new MPDAlbum(albumName);
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID)) {
-                /* Check if the response is a musicbrainz_albumid. */
-                albumMBID = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length());
+                tempAlbum.setMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME)) {
+                /* Check if the response is a albumartist. */
+                tempAlbum.setArtistName(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
             }
             response = pReader.readLine();
         }
@@ -681,8 +668,7 @@ public class MPDConnection {
         /* Because of the loop structure the last album has to be added because no
         "ALBUM:" is sent anymore.
          */
-        if (!albumName.equals("") || emptyAlbum) {
-            tempAlbum = new MPDAlbum(albumName, albumMBID, albumArtist);
+        if (null != tempAlbum) {
             albumList.add(tempAlbum);
         }
 
@@ -722,12 +708,12 @@ public class MPDConnection {
             }
 
             if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME)) {
-                if ( null != tempArtist ) {
+                if (null != tempArtist) {
                     artistList.add(tempArtist);
                 }
                 artistName = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length());
                 tempArtist = new MPDArtist(artistName);
-            } else if ( response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID) ) {
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID)) {
                 artistMBID = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length());
                 tempArtist.addMBID(artistMBID);
             } else if (response.startsWith("OK")) {
@@ -737,18 +723,18 @@ public class MPDConnection {
         }
 
         // Add last artist
-        if ( null != tempArtist ) {
+        if (null != tempArtist) {
             artistList.add(tempArtist);
         }
 
         // Start the idling timeout again.
         startIdleWait();
-        Log.v(TAG,"Parsed: " + artistList.size() +  " artists");
+        Log.v(TAG, "Parsed: " + artistList.size() + " artists");
 
         // Sort the artists for later sectioning.
         Collections.sort(artistList);
 
-        if ( mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup() ) {
+        if (mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()) {
 
 
             ArrayList<MPDArtist> clearedList = new ArrayList<>();
@@ -764,7 +750,7 @@ public class MPDConnection {
                 }
             }
 
-            Log.v(TAG,"Return: " + clearedList.size() +  " cleared artists");
+            Log.v(TAG, "Return: " + clearedList.size() + " cleared artists");
             return clearedList;
         } else {
             return artistList;
@@ -802,7 +788,7 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -892,7 +878,7 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -905,7 +891,7 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) ||filterArtist.equals("")) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -925,7 +911,7 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
             if (tempFileEntry instanceof MPDFile) {
                 MPDFile file = (MPDFile) tempFileEntry;
-                if (filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
                     trackList.add(tempFileEntry);
                 }
             } else {
@@ -949,10 +935,10 @@ public class MPDConnection {
      */
     public List<MPDAlbum> getAlbums() {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS);
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
             try {
         /* No artistName here because it is a full list */
-                return parseMPDAlbums("");
+                return parseMPDAlbums();
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -968,9 +954,9 @@ public class MPDConnection {
      */
     public List<MPDAlbum> getArtistAlbums(String artistName) {
         synchronized (this) {
-            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName));
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()));
             try {
-                return parseMPDAlbums(artistName);
+                return parseMPDAlbums();
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1783,8 +1769,9 @@ public class MPDConnection {
 
     /**
      * Removes a song from a saved playlist
+     *
      * @param playlistName Name of the playlist of which the song should be removed from
-     * @param position Index of the song to remove from the lits
+     * @param position     Index of the song to remove from the lits
      * @return
      */
     public boolean removeSongFromPlaylist(String playlistName, int position) {
@@ -1920,6 +1907,7 @@ public class MPDConnection {
 
     /**
      * Parses the response of MPDs supported tag types
+     *
      * @return List of tags supported by the connected MPD host
      * @throws IOException
      */

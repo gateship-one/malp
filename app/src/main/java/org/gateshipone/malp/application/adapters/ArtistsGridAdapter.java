@@ -57,7 +57,7 @@ public class ArtistsGridAdapter extends GenericSectionAdapter<MPDArtist> {
                 listItem.setText(label);
             } else {
                 // Create new view if no reusable is available
-                convertView = new SimpleListItem(mContext, label);
+                convertView = new SimpleListItem(mContext, label,null);
             }
         } else {
 

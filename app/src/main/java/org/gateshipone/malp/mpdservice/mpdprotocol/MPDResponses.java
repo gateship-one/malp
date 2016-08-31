@@ -29,6 +29,7 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_ALBUM_ARTIST_NAME = "AlbumArtist: ";
     public static final String MPD_RESPONSE_TRACK_TIME = "Time: ";
     public static final String MPD_RESPONSE_DATE = "Date: ";
+
     public static final String MPD_RESPONSE_TRACK_MBID = "MUSICBRAINZ_TRACKID: ";
     public static final String MPD_RESPONSE_ALBUM_ARTIST_MBID = "MUSICBRAINZ_ALBUMARTISTID: ";
     public static final String MPD_RESPONSE_ARTIST_MBID = "MUSICBRAINZ_ARTISTID: ";

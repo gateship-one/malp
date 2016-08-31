@@ -18,6 +18,7 @@
 package org.gateshipone.malp.application.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -28,7 +29,7 @@ import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
-
+    private static final String TAG = AlbumsGridAdapter.class.getSimpleName();
     private final AbsListView mListView;
     private final Context mContext;
 
@@ -47,6 +48,7 @@ public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
     public View getView(int position, View convertView, ViewGroup parent) {
         MPDAlbum album = (MPDAlbum)getItem(position);
         String label = album.getName();
+        String albumArtist = album.getArtistName();
 
         if ( mUseList ) {
             // Check if a view can be recycled
@@ -55,9 +57,10 @@ public class AlbumsGridAdapter extends GenericSectionAdapter<MPDAlbum> {
 
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
+                listItem.setDetails(albumArtist);
             } else {
                 // Create new view if no reusable is available
-                convertView = new SimpleListItem(mContext,label);
+                convertView = new SimpleListItem(mContext,label, albumArtist);
             }
         } else {
             // Check if a view can be recycled

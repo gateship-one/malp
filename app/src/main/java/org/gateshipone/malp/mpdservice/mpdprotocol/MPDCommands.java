@@ -24,16 +24,22 @@ public class MPDCommands {
     public static final String MPD_COMMAND_PASSWORD = "password ";
 
     /* Database request commands */
-    public static final String MPD_COMMAND_REQUEST_ALBUMS = "list album";
-    public static final String MPD_COMMAND_REQUEST_ALBUMS_WITH_MBID = "list album group MUSICBRAINZ_ALBUMID";
-
-
-    public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName) {
-        return "list album \"" + artistName.replaceAll("\"","\\\\\"") + "\"";
+    public static final String MPD_COMMAND_REQUEST_ALBUMS(boolean groupFeatures) {
+        if ( groupFeatures) {
+            return "list album group albumartist group musicbrainz_albumid";
+        } else {
+            return "list album";
+        }
     }
 
-    public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS_WITH_MBID(String artistName) {
-        return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group MUSICBRAINZ_ALBUMID";
+
+
+    public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName, boolean groupFeatures) {
+        if ( groupFeatures ) {
+            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group musicbrainz_albumid";
+        } else {
+            return "list album \"" + artistName.replaceAll("\"", "\\\\\"") + "\"";
+        }
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {

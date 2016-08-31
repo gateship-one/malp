@@ -29,12 +29,24 @@ import org.gateshipone.malp.R;
 public class SimpleListItem extends LinearLayout {
 
     TextView mMainView;
+    TextView mDetailsView;
 
-    public SimpleListItem(Context context, String text) {
+    public SimpleListItem(Context context, String text, String details) {
         super(context);
+        if (null == details) {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(R.layout.listview_item_simple, this, true);
+        } else {
+            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            inflater.inflate(R.layout.listview_item_details, this, true);
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.listview_item_simple, this, true);
+            mDetailsView = (TextView) findViewById(R.id.item_details);
+            if ( !details.isEmpty()) {
+                mDetailsView.setText(details);
+            } else {
+                mDetailsView.setVisibility(GONE);
+            }
+        }
 
         mMainView = (TextView) findViewById(R.id.item_text);
         mMainView.setText(text);
@@ -43,6 +55,13 @@ public class SimpleListItem extends LinearLayout {
 
     public void setText(String text) {
         mMainView.setText(text);
+    }
+
+    public void setDetails(String text) {
+        if (null != mDetailsView && !text.isEmpty()) {
+            mDetailsView.setText(text);
+            mDetailsView.setVisibility(VISIBLE);
+        }
     }
 
 }

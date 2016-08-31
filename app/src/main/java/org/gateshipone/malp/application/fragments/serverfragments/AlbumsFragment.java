@@ -316,7 +316,11 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
 
-        mAlbumSelectCallback.onAlbumSelected(album.getName(), mArtistName);
+        if ( null != mArtistName && !mArtistName.isEmpty()) {
+            mAlbumSelectCallback.onAlbumSelected(album.getName(),mArtistName);
+        } else {
+            mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName());
+        }
     }
 
 
