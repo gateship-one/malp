@@ -52,8 +52,12 @@ public class GenericFileListItem extends LinearLayout {
         mNameView.setText(path);
 
         mLastModifiedView = (TextView) findViewById(R.id.item_last_modified);
-        mLastModifiedView.setText(file.getLastModified());
-
+        if ( null != file.getLastModified() && !file.getLastModified().isEmpty()) {
+            mLastModifiedView.setVisibility(VISIBLE);
+            mLastModifiedView.setText(file.getLastModified());
+        } else {
+            mLastModifiedView.setVisibility(GONE);
+        }
 
         LinearLayout textLayout = (LinearLayout)findViewById(R.id.item_text_layout);
 
