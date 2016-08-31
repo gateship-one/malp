@@ -92,10 +92,13 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
                 trackInformation = "";
             }
 
-            String trackNumber;
+            String trackNumber = "";
             if (mShowTrackNumbers) {
+                if ( 0 != track.getDiscNumber() ) {
+                    trackNumber = String.valueOf(track.getDiscNumber()) + mContext.getResources().getString(R.string.track_item_separator);
+                }
                 // Get the number of the track
-                trackNumber = String.valueOf(track.getTrackNumber());
+                trackNumber += String.valueOf(track.getTrackNumber());
             } else {
                 trackNumber = String.valueOf(position + 1);
             }
