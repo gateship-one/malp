@@ -916,7 +916,8 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
             if (tempFileEntry instanceof MPDFile) {
                 MPDFile file = (MPDFile) tempFileEntry;
-                if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                if ( (filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
+                        && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID())) {
                     trackList.add(tempFileEntry);
                 }
             } else {
