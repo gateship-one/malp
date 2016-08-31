@@ -65,7 +65,13 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
         return mName;
     }
 
-    public boolean equals(MPDAlbum album) {
+    @Override
+    public boolean equals(Object object) {
+        if ( !(object instanceof MPDAlbum)) {
+            return false;
+        }
+
+        MPDAlbum album = (MPDAlbum)object;
         if ( (mName.equals(album.mName)) && (mArtistName.equals(album.mArtistName)) &&
                 (mMBID.equals(album.mMBID))) {
             return true;
@@ -79,5 +85,10 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
             return 0;
         }
         return mName.toLowerCase().compareTo(another.mName.toLowerCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return (mName + mArtistName + mMBID).hashCode();
     }
 }

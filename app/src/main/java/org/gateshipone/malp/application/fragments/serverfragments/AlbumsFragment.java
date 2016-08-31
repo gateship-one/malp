@@ -316,9 +316,11 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
 
-        if ( null != mArtistName && !mArtistName.isEmpty()) {
+        // Check if the album already has an artist set. If not use the artist of the fragment
+        if ( album.getArtistName().isEmpty() && (null != mArtistName && !mArtistName.isEmpty()) ) {
             mAlbumSelectCallback.onAlbumSelected(album.getName(),mArtistName);
         } else {
+            // If the album has an artist, use it as the filtering criteria
             mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName());
         }
     }

@@ -39,7 +39,9 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
@@ -955,8 +957,23 @@ public class MPDConnection {
     public List<MPDAlbum> getArtistAlbums(String artistName) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()));
+
             try {
-                return parseMPDAlbums();
+                if ( mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags() ) {
+                    Set<MPDAlbum> result = new HashSet<>(parseMPDAlbums());
+
+                    sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName));
+
+                    result.addAll(parseMPDAlbums());
+
+                    List<MPDAlbum> resultList = new ArrayList<MPDAlbum>(result);
+                    Collections.sort(resultList);
+                    return resultList;
+                } else {
+                    List<MPDAlbum> result = parseMPDAlbums();
+                    return result;
+                }
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;

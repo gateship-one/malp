@@ -36,10 +36,14 @@ public class MPDCommands {
 
     public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName, boolean groupFeatures) {
         if ( groupFeatures ) {
-            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group musicbrainz_albumid";
+            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group AlbumArtist group musicbrainz_albumid";
         } else {
             return "list album \"" + artistName.replaceAll("\"", "\\\\\"") + "\"";
         }
+    }
+
+    public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName) {
+        return "list album AlbumArtist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group AlbumArtist group musicbrainz_albumid";
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {
