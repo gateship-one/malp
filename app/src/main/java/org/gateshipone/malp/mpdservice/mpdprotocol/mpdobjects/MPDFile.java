@@ -337,4 +337,33 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         dest.writeInt(pDiscNumber);
         dest.writeInt(pAlbumDiscCount);
     }
+
+    public int indexCompare(MPDFile compFile) {
+        if ( pDiscNumber != 0 && compFile.pDiscNumber != 0 ) {
+            // Compare disc numbers first
+            if ( pDiscNumber > compFile.pDiscNumber ) {
+                return 1;
+            } else if (pDiscNumber == compFile.pDiscNumber ) {
+                // Compare track number field
+                if ( pTrackNumber > compFile.pTrackNumber ) {
+                    return 1;
+                } else if ( pTrackNumber == compFile.pTrackNumber ) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
+
+        } else {
+            if ( pTrackNumber > compFile.pTrackNumber ) {
+                return 1;
+            } else if ( pTrackNumber == compFile.pTrackNumber ) {
+                return 0;
+            } else {
+                return -1;
+            }
+        }
+    }
 }
