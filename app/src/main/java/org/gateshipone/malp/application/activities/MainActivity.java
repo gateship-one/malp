@@ -122,7 +122,7 @@ public class MainActivity extends AppCompatActivity
 
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString("pref_theme", "indigo");
+        String themePref = sharedPref.getString("pref_theme", "orange");
 
         switch (themePref) {
             case "indigo":

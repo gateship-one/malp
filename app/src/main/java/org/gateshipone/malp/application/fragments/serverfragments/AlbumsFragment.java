@@ -86,7 +86,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String libraryView = sharedPref.getString("pref_library_view", "library_view_grid");
+        String libraryView = sharedPref.getString("pref_library_view", "library_view_list");
 
         if (libraryView.equals("library_view_list")) {
             mUseList = true;
