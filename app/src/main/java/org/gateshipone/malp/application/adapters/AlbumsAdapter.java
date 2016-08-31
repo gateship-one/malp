@@ -53,7 +53,7 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
             label = mContext.getResources().getString(R.string.no_album_tag);
         }
 
-        String albumArtist = album.getArtistName() + ":" + album.getMBID();
+        String albumArtist = album.getArtistName();
 
         if ( mUseList ) {
             // Check if a view can be recycled
