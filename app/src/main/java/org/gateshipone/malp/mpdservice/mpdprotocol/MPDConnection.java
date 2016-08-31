@@ -731,14 +731,14 @@ public class MPDConnection {
 
         // Start the idling timeout again.
         startIdleWait();
-        Log.v(TAG, "Parsed: " + artistList.size() + " artists");
 
         // Sort the artists for later sectioning.
         Collections.sort(artistList);
 
+        // If we used MBID filtering, it could happen that a user as an artist in the list multiple times,
+        // once with and once without MBID. Try to filter this by sorting the list first by name and mbid count
+        // and then remove duplicates.
         if (mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()) {
-
-
             ArrayList<MPDArtist> clearedList = new ArrayList<>();
 
             // Remove multiple entries when one artist is in list with and without MBID
@@ -751,8 +751,6 @@ public class MPDConnection {
                     }
                 }
             }
-
-            Log.v(TAG, "Return: " + clearedList.size() + " cleared artists");
             return clearedList;
         } else {
             return artistList;
@@ -767,7 +765,11 @@ public class MPDConnection {
      * It will return a list of MPDFileEntry objects which is a parent class for (MPDFile, MPDPlaylist,
      * MPDDirectory) you can use instanceof to check which type you got.
      *
-     * @param filterArtist Artist used for filtering. Non-matching tracks get discarded.
+     * @param filterArtist Artist used for filtering against the Artist AND AlbumArtist tag. Non matching tracks
+     *                     will be discarded.
+     * @param filterAlbumMBID MusicBrainzID of the album that is also used as a filter criteria.
+     *                        This can be used to differentiate albums with same name, same artist but different MBID.
+     *                        This is often the case for soundtrack releases. (E.g. LOTR DVD-Audio vs. CD release)
      * @return List of MPDFileEntry objects
      * @throws IOException
      */
@@ -941,9 +943,9 @@ public class MPDConnection {
      */
     public List<MPDAlbum> getAlbums() {
         synchronized (this) {
+            // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
             try {
-        /* No artistName here because it is a full list */
                 return parseMPDAlbums();
             } catch (IOException e) {
                 e.printStackTrace();
@@ -953,24 +955,29 @@ public class MPDConnection {
     }
 
     /**
-     * Get a list of all albums by an artist.
+     * Get a list of all albums by an artist where artist is part of or artist is the AlbumArtist (tag)
      *
-     * @param artistName Artist to filter album lsit with.
+     * @param artistName Artist to filter album list with.
      * @return List of MPDAlbum objects
      */
     public List<MPDAlbum> getArtistAlbums(String artistName) {
         synchronized (this) {
+            // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()));
 
             try {
                 if ( mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags() ) {
+                    // Use a hashset for the results, to filter duplicates that will exist.
                     Set<MPDAlbum> result = new HashSet<>(parseMPDAlbums());
 
+                    // Also get the list where artistName matches on AlbumArtist
                     sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName));
 
                     result.addAll(parseMPDAlbums());
 
                     List<MPDAlbum> resultList = new ArrayList<MPDAlbum>(result);
+
+                    // Sort the created list
                     Collections.sort(resultList);
                     return resultList;
                 } else {
@@ -992,6 +999,7 @@ public class MPDConnection {
      */
     public List<MPDArtist> getArtists() {
         synchronized (this) {
+            // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
             try {
                 return parseMPDArtists();
@@ -1061,8 +1069,10 @@ public class MPDConnection {
     /**
      * Returns the list of tracks that are part of albumName and from artistName
      *
-     * @param albumName  Album to get tracks from
-     * @param artistName Artist to filter with
+     * @param albumName  Album name used as primary filter.
+     * @param artistName Artist to filter with. This is checked with Artist AND AlbumArtist tag.
+     * @param mbid MusicBrainzID of the album to get tracks from. Necessary if one item with the
+     *             same name exists multiple times.
      * @return List of MPDFile track objects
      */
     public List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) {
@@ -1071,6 +1081,7 @@ public class MPDConnection {
             try {
             /* Filter tracks with artistName */
                 List<MPDFileEntry> result = parseMPDTracks(artistName,mbid);
+                // Sort with disc & track number
                 MPDSortHelper.sortFileListNumeric(result);
                 return result;
             } catch (IOException e) {
@@ -1623,6 +1634,8 @@ public class MPDConnection {
 
             boolean success = true;
             for (MPDAlbum album : albums) {
+                // This will add all tracks from album where artistname is either the artist or
+                // the album artist.
                 if (!(addAlbumTracks(album.getName(), artistname, ""))) {
                     success = false;
                 }
