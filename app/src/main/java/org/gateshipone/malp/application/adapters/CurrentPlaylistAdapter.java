@@ -540,7 +540,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
     private MPDFile getTrack(int position) {
         if (!mWindowEnabled) {
             // Check if list is long enough, can be that the new list is not ready yet.
-            if (mPlaylist.size() > position) {
+            if (null != mPlaylist && mPlaylist.size() > position) {
                 return (MPDFile) mPlaylist.get(position);
             } else {
                 return null;
