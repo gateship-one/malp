@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.GridView;
 
+import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.listviewitems.LibraryGridViewItem;
 import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
@@ -47,6 +48,10 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> {
     public View getView(int position, View convertView, ViewGroup parent) {
         MPDArtist artist = (MPDArtist)getItem(position);
         String label = artist.getArtistName();
+
+        if ( label.isEmpty() ) {
+            label = mContext.getResources().getString(R.string.no_artist_tag);
+        }
 
         if ( mUseList ) {
             // Check if a view can be recycled

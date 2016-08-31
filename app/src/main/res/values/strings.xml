@@ -96,6 +96,9 @@
     <string name="main_activity_connected">Connected with MPD server</string>
     <string name="main_activity_disconnected">Disconnected from MPD server</string>
 
+    <!-- No Tag texts -->
+    <string name="no_album_tag">No album tag</string>
+    <string name="no_artist_tag">No artist tag</string>
 
     <!-- popup menu titles -->
     <string name="action_clear_playlist">Clear playlist</string>

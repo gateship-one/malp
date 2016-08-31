@@ -23,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.GridView;
 
+import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.listviewitems.LibraryGridViewItem;
 import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -47,6 +48,11 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
     public View getView(int position, View convertView, ViewGroup parent) {
         MPDAlbum album = (MPDAlbum)getItem(position);
         String label = album.getName();
+
+        if ( label.isEmpty() ) {
+            label = mContext.getResources().getString(R.string.no_album_tag);
+        }
+
         String albumArtist = album.getArtistName();
 
         if ( mUseList ) {
