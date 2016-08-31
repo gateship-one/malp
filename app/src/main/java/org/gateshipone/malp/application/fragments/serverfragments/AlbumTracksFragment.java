@@ -283,6 +283,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 return true;
             case R.id.action_show_all_tracks:
                 mArtistName = "";
+                mAlbumMBID = "";
                 getLoaderManager().destroyLoader(0);
 
                 getLoaderManager().initLoader(0, getArguments(), this);
