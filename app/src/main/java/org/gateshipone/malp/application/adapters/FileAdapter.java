@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.listviewitems.GenericFileListItem;
 import org.gateshipone.malp.application.listviewitems.TrackListViewItem;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -101,7 +102,7 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
 
             // Get the preformatted duration of the track.
-            String trackDuration = track.getLengthString();
+            String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
 
             // Check if reusable object is available
 
