@@ -103,6 +103,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     /**
      * Create empty MPDFile (track). Fill it with setter methods during
      * parsing of mpds output.
+     *
      * @param path The path of the file. This should never change.
      */
     public MPDFile(String path) {
@@ -125,6 +126,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
 
     /**
      * Create a MPDFile from a parcel
+     *
      * @param in Parcel to deserialize
      */
     protected MPDFile(Parcel in) {
@@ -266,7 +268,6 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     }
 
     /**
-     *
      * @return String that is used for section based scrolling
      */
     @Override
@@ -277,6 +278,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
 
     /**
      * Describes if it is a special parcel type (no)
+     *
      * @return 0
      */
     @Override
@@ -312,7 +314,8 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     /**
      * Serialized the MPDFile object to a parcel. Check that this method is equivalent with the
      * deserializing creator above.
-     * @param dest Parcel to write the properties to
+     *
+     * @param dest  Parcel to write the properties to
      * @param flags Special flags
      */
     @Override
@@ -339,31 +342,20 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     }
 
     public int indexCompare(MPDFile compFile) {
-        if ( pDiscNumber != 0 && compFile.pDiscNumber != 0 ) {
-            // Compare disc numbers first
-            if ( pDiscNumber > compFile.pDiscNumber ) {
+        // Compare disc numbers first
+        if (pDiscNumber > compFile.pDiscNumber) {
+            return 1;
+        } else if (pDiscNumber == compFile.pDiscNumber) {
+            // Compare track number field
+            if (pTrackNumber > compFile.pTrackNumber) {
                 return 1;
-            } else if (pDiscNumber == compFile.pDiscNumber ) {
-                // Compare track number field
-                if ( pTrackNumber > compFile.pTrackNumber ) {
-                    return 1;
-                } else if ( pTrackNumber == compFile.pTrackNumber ) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            } else {
-                return -1;
-            }
-
-        } else {
-            if ( pTrackNumber > compFile.pTrackNumber ) {
-                return 1;
-            } else if ( pTrackNumber == compFile.pTrackNumber ) {
+            } else if (pTrackNumber == compFile.pTrackNumber) {
                 return 0;
             } else {
                 return -1;
             }
+        } else {
+            return -1;
         }
     }
 }
