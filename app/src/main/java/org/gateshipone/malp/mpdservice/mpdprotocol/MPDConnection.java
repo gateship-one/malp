@@ -1044,7 +1044,9 @@ public class MPDConnection {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
-                return parseMPDTracks("");
+                List<MPDFileEntry> result = parseMPDTracks("");
+                MPDSortHelper.sortFileListNumeric(result);
+                return result;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1064,7 +1066,9 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
             /* Filter tracks with artistName */
-                return parseMPDTracks(artistName);
+                List<MPDFileEntry> result = parseMPDTracks(artistName);
+                MPDSortHelper.sortFileListNumeric(result);
+                return result;
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
