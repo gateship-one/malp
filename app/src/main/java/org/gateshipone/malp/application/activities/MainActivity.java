@@ -335,7 +335,7 @@ public class MainActivity extends AppCompatActivity
                     onArtistSelected(track.getTrackArtist());
                     return true;
                 case R.id.action_show_album:
-                    onAlbumSelected(track.getTrackAlbum(), "");
+                    onAlbumSelected(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
                     return true;
                 case R.id.action_show_details:
                     // Open song details dialog
@@ -487,7 +487,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAlbumSelected(String albumname, String artistname) {
+    public void onAlbumSelected(String albumname, String artistname, String mbid) {
         Log.v(TAG, "Album selected: " + albumname + ":" + artistname);
 
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
@@ -504,6 +504,7 @@ public class MainActivity extends AppCompatActivity
         Bundle args = new Bundle();
         args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME, albumname);
         args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artistname);
+        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMMBID, mbid);
 
         newFragment.setArguments(args);
 

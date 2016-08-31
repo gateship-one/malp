@@ -237,10 +237,10 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
             case R.id.action_add_album:
-                MPDQueryHandler.addArtistAlbum(track.getTrackAlbum(), "");
+                MPDQueryHandler.addArtistAlbum(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
                 return true;
             case R.id.action_play_album:
-                MPDQueryHandler.playArtistAlbum(track.getTrackAlbum(), "");
+                MPDQueryHandler.playArtistAlbum(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
                 return true;
             case R.id.action_add_artist:
                 MPDQueryHandler.addArtist(track.getTrackArtist());

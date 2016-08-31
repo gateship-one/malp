@@ -101,6 +101,7 @@ public class MPDHandlerAction {
         EXTRA_SONG_URL,
         EXTRA_PATH,
         EXTRA_SEARCH_TERM,
+        EXTRA_ALBUM_MBID,
     }
 
     /**

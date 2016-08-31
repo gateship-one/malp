@@ -46,13 +46,15 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
      */
     private String mAlbumName;
 
+    private String mAlbumMBID;
+
     /**
      * Creates the loader that retrieves the information from the MPD server
      * @param context Context used
      * @param albumName Name of the album to retrieve
      * @param artistName Name of the artist of the album to retrieve (can be left empty)
      */
-    public AlbumTracksLoader(Context context, String albumName, String artistName) {
+    public AlbumTracksLoader(Context context, String albumName, String artistName, String albumMBID) {
         super(context);
 
         // Create a new Handler for asynchronous callback
@@ -61,6 +63,7 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
         // Set the album properties
         mArtistName = artistName;
         mAlbumName = albumName;
+        mAlbumMBID = albumMBID;
     }
 
 
@@ -98,9 +101,9 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
     @Override
     public void onForceLoad() {
         if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName);
+            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName,mAlbumMBID);
         } else {
-            MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName);
+            MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName,mAlbumMBID);
         }
     }
 }

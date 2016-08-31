@@ -318,29 +318,29 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         // Check if the album already has an artist set. If not use the artist of the fragment
         if ( album.getArtistName().isEmpty() && (null != mArtistName && !mArtistName.isEmpty()) ) {
-            mAlbumSelectCallback.onAlbumSelected(album.getName(),mArtistName);
+            mAlbumSelectCallback.onAlbumSelected(album.getName(),mArtistName,"");
         } else {
             // If the album has an artist, use it as the filtering criteria
-            mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName());
+            mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName(), album.getMBID());
         }
     }
 
 
     public interface AlbumSelectedCallback {
-        void onAlbumSelected(String albumname, String artistname);
+        void onAlbumSelected(String albumname, String artistname, String mbid);
     }
 
 
     private void enqueueAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
-        MPDQueryHandler.addArtistAlbum(album.getName(), mArtistName);
+        MPDQueryHandler.addArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }
 
     private void playAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
-        MPDQueryHandler.playArtistAlbum(album.getName(), mArtistName);
+        MPDQueryHandler.playArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }
 
     private void enqueueArtist() {

@@ -53,7 +53,7 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
             label = mContext.getResources().getString(R.string.no_album_tag);
         }
 
-        String albumArtist = album.getArtistName();
+        String albumArtist = album.getArtistName() + ":" + album.getMBID();
 
         if ( mUseList ) {
             // Check if a view can be recycled
@@ -62,7 +62,7 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
 
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
-                listItem.setDetails(albumArtist);
+                listItem.setDetails(albumArtist );
             } else {
                 // Create new view if no reusable is available
                 convertView = new SimpleListItem(mContext,label, albumArtist);

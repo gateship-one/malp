@@ -771,7 +771,7 @@ public class MPDConnection {
      * @return List of MPDFileEntry objects
      * @throws IOException
      */
-    private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist) throws IOException {
+    private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist, String filterAlbumMBID) throws IOException {
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!isConnected()) {
             return trackList;
@@ -790,7 +790,8 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                        if ( (filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
+                                && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))  ) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -880,7 +881,8 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) || filterArtist.equals("")) {
+                        if ( (filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
+                                && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))  ) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -893,7 +895,8 @@ public class MPDConnection {
                     /* Check the artist filter criteria here */
                     if (tempFileEntry instanceof MPDFile) {
                         MPDFile file = (MPDFile) tempFileEntry;
-                        if (filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()) ||filterArtist.equals("")) {
+                        if ( (filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
+                                && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))  ) {
                             trackList.add(tempFileEntry);
                         }
                     } else {
@@ -1007,7 +1010,7 @@ public class MPDConnection {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
             try {
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1025,7 +1028,7 @@ public class MPDConnection {
             Log.w(TAG, "This command should not be used");
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
             try {
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1040,11 +1043,11 @@ public class MPDConnection {
      * @param albumName Album to get tracks from
      * @return List of MPDFile track objects
      */
-    public List<MPDFileEntry> getAlbumTracks(String albumName) {
+    public List<MPDFileEntry> getAlbumTracks(String albumName, String mbid) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
-                List<MPDFileEntry> result = parseMPDTracks("");
+                List<MPDFileEntry> result = parseMPDTracks("", mbid);
                 MPDSortHelper.sortFileListNumeric(result);
                 return result;
             } catch (IOException e) {
@@ -1061,12 +1064,12 @@ public class MPDConnection {
      * @param artistName Artist to filter with
      * @return List of MPDFile track objects
      */
-    public List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName) {
+    public List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
             try {
             /* Filter tracks with artistName */
-                List<MPDFileEntry> result = parseMPDTracks(artistName);
+                List<MPDFileEntry> result = parseMPDTracks(artistName,mbid);
                 MPDSortHelper.sortFileListNumeric(result);
                 return result;
             } catch (IOException e) {
@@ -1086,7 +1089,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
             try {
             /* Parse the return */
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1104,7 +1107,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
             try {
             /* Parse the return */
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1122,7 +1125,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
             try {
             /* Parse the return */
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1140,7 +1143,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
             try {
             /* Parse the return */
-                return parseMPDTracks("");
+                return parseMPDTracks("", "");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1160,7 +1163,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
             try {
             /* Parse the return */
-                return parseMPDTracks("");
+                return parseMPDTracks("","");
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -1309,7 +1312,7 @@ public class MPDConnection {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
 
             // Reuse the parsing function for tracks here.
-            List<MPDFileEntry> retList = parseMPDTracks("");
+            List<MPDFileEntry> retList = parseMPDTracks("", "");
             if (retList.size() == 1) {
                 // If one element is in the list it is safe to assume that this element is
                 // the current song. So casting is no problem.
@@ -1596,9 +1599,9 @@ public class MPDConnection {
      *                   be left empty then all tracks from the album will be added.
      * @return True if server responed with ok
      */
-    public boolean addAlbumTracks(String albumname, String artistname) {
+    public boolean addAlbumTracks(String albumname, String artistname, String mbid) {
         synchronized (this) {
-            List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname);
+            List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname, mbid);
             return addTrackList(tracks);
         }
     }
@@ -1619,7 +1622,7 @@ public class MPDConnection {
 
             boolean success = true;
             for (MPDAlbum album : albums) {
-                if (!(addAlbumTracks(album.getName(), artistname))) {
+                if (!(addAlbumTracks(album.getName(), artistname, ""))) {
                     success = false;
                 }
             }

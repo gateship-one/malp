@@ -55,12 +55,14 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
     public static final String BUNDLE_STRING_EXTRA_ALBUMNAME = "albumname";
+    public static final String BUNDLE_STRING_EXTRA_ALBUMMBID = "albumMBID";
 
     /**
      * Album definition variables
      */
     private String mAlbumName;
     private String mArtistName;
+    private String mAlbumMBID;
 
     /**
      * Main ListView of this fragment
@@ -87,6 +89,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         if (null != args) {
             mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
             mAlbumName = args.getString(BUNDLE_STRING_EXTRA_ALBUMNAME);
+            mAlbumMBID = args.getString(BUNDLE_STRING_EXTRA_ALBUMMBID);
         }
 
         // Create the needed adapter for the ListView
@@ -158,7 +161,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(), mAlbumName, mArtistName);
+        return new AlbumTracksLoader(getActivity(), mAlbumName, mArtistName, mAlbumMBID);
     }
 
     /**
@@ -309,7 +312,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     }
 
     private void enqueueAlbum() {
-        MPDQueryHandler.addArtistAlbum(mAlbumName, mArtistName);
+        MPDQueryHandler.addArtistAlbum(mAlbumName, mArtistName, mAlbumMBID);
     }
 
     private class FABOnClickListener implements View.OnClickListener {
@@ -318,7 +321,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         public void onClick(View v) {
             MPDCommandHandler.setRandom(false);
             MPDCommandHandler.setRepeat(false);
-            MPDQueryHandler.playArtistAlbum(mAlbumName, mArtistName);
+            MPDQueryHandler.playArtistAlbum(mAlbumName, mArtistName, mAlbumMBID);
         }
     }
 
