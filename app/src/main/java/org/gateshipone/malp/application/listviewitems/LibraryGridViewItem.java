@@ -50,6 +50,6 @@ public class LibraryGridViewItem extends GenericGridItem {
 
     @Override
     int provideLayout() {
-        return R.layout.gridview_item_artist;
+        return R.layout.gridview_item;
     }
 }
