@@ -122,4 +122,7 @@
     <string name="preference_library_view_summary">Wählen Sie den Typ der Anzeige für die Interpreten- und Albenanzeige</string>
     <string name="no_album_tag">Kein Album-Tag</string>
     <string name="no_artist_tag">Kein Interpreten-Tag</string>
+    <string name="dialog_action_ok">OK</string>
+    <string name="welcome_dialog_title">Keine Profile gefunden</string>
+    <string name="welcome_dialog_text">Diese Anwendung ist eine Fernsteuerung für MPD. Falls Sie MPD nicht kennen ist diese Anwendung höchstwahrscheinlich für Sie nutzlos, entschuldigung :).\n\nUm diese Anwendung zu nutzen, erstellen Sie ein neues Profil mit dem Hinzufügen-Knopf in der rechten oberen Ecke.\n\nFalls Sie einen Musikspieler mit der gleichen Oberfläche nutzen möchten, versuchen Sie doch mal Odyssey (https://github.com/gateship-one/odyssey).</string>
 </resources>

@@ -152,6 +152,7 @@
     <string name="dialog_save_playlist">Save Playlist</string>
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_save">Save</string>
+    <string name="dialog_action_ok">OK</string>
     <string name="dialog_choose_playlist">Choose playlist</string>
 
     <!-- dialog default names  -->
@@ -223,6 +224,9 @@
         <item>@string/search_choice_file</item>
         <item>@string/search_choice_everything</item>
     </string-array>
+
+    <string name="welcome_dialog_title">No profiles found</string>
+    <string name="welcome_dialog_text">This application is a remote control for MPD. If you don\'t know MPD this application is probably useless for you, sorry :).\n\nTo use this application add a new profile with a add button in the upper right corner.\n\nIf you would like an music player based on the same interface, try Odyssey (https://github.com/gateship-one/odyssey).</string>
 
     <!-- About activity -->
     <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>

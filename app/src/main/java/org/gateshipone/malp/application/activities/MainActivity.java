@@ -17,6 +17,7 @@
 
 package org.gateshipone.malp.application.activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -29,6 +30,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -204,6 +206,22 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
+        if ( mProfileManager.getProfiles().size() == 0 ) {
+            navId = R.id.nav_profiles;
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(getResources().getString(R.string.welcome_dialog_title));
+            builder.setMessage(getResources().getString(R.string.welcome_dialog_text));
+
+
+            builder.setPositiveButton(R.string.dialog_action_ok, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                }
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
         navigationView.setCheckedItem(navId);
 
         if ((findViewById(R.id.fragment_container) != null) && (savedInstanceState == null)) {
@@ -221,6 +239,8 @@ public class MainActivity extends AppCompatActivity
                 fragment = new SavedPlaylistsFragment();
             } else if (navId == R.id.nav_files) {
                 fragment = new FilesFragment();
+            } else if ( navId == R.id.nav_profiles) {
+                fragment = new ProfilesFragment();
             }
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -228,6 +248,8 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
         mConnectionStateListener = new ConnectionStateListener();
+
+
 
     }
 
