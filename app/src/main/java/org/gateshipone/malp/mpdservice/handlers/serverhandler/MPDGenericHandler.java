@@ -32,19 +32,18 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 /**
  * This class is a base class for all derived handlers that talk to the MPD server.
  * There are three handlers for different tasks.
- *
- *  - MPDCommandHandler - Issues all playback commands to the mpd server which are handled instantly.
- *                      - For example: play,pause,stop ...
- *
- *  - MPDQueryHandler   - Handles all requests to the database and other state objects of the MPD server.
- *                      - For example: Album, artist, playlists, output list ...
- *  - MPDStateMonitoringHandler - Monitors the state and notifies connected callback listeners in a certain
- *                                interval about changes in state. It uses the idle state of the MPDConnection
- *                                as a notification about changes at the server side.
- *
+ * <p/>
+ * - MPDCommandHandler - Issues all playback commands to the mpd server which are handled instantly.
+ * - For example: play,pause,stop ...
+ * <p/>
+ * - MPDQueryHandler   - Handles all requests to the database and other state objects of the MPD server.
+ * - For example: Album, artist, playlists, output list ...
+ * - MPDStateMonitoringHandler - Monitors the state and notifies connected callback listeners in a certain
+ * interval about changes in state. It uses the idle state of the MPDConnection
+ * as a notification about changes at the server side.
+ * <p/>
  * All handlers are static singletons and run in a new spawned thread. You can get the singleton via
  * an static method. Each handler has one MPDConnection object, that is used for talking to the mpd server.
- *
  */
 public abstract class MPDGenericHandler extends Handler implements MPDConnection.MPDConnectionStateChangeListener {
 
@@ -64,6 +63,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     /**
      * Protected constructor that has to be called from subclasses. If it is not called
      * the MPDConnection objcet is not ready for use and the class will cause a crash.
+     *
      * @param looper Looper that is used by this handler. Needs to be created by the
      *               subclass otherwise the network communication is not handled in a separate thread.
      */
@@ -137,7 +137,9 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         if (null == stateHandler) {
             return;
         }
-        mConnectionStateListener.add(stateHandler);
+        synchronized (mConnectionStateListener) {
+            mConnectionStateListener.add(stateHandler);
+        }
     }
 
     // Internal class that unregisters observers to the state changes. This is only used by the subclasses.
@@ -145,7 +147,9 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         if (null == stateHandler) {
             return;
         }
-        mConnectionStateListener.remove(stateHandler);
+        synchronized (mConnectionStateListener) {
+            mConnectionStateListener.remove(stateHandler);
+        }
     }
 
     /**
@@ -153,11 +157,13 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
      */
     @Override
     public void onConnected() {
-        // Send a message to all registered listen handlers.
-        for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
-            Message msg = handler.obtainMessage();
-            msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.CONNECTED;
-            handler.sendMessage(msg);
+        synchronized (mConnectionStateListener) {
+            // Send a message to all registered listen handlers.
+            for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
+                Message msg = handler.obtainMessage();
+                msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.CONNECTED;
+                handler.sendMessage(msg);
+            }
         }
     }
 
@@ -167,10 +173,12 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     @Override
     public void onDisconnected() {
         // Send a message to all registered listen handlers.
-        for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
-            Message msg = handler.obtainMessage();
-            msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
-            handler.sendMessage(msg);
+        synchronized (mConnectionStateListener) {
+            for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
+                Message msg = handler.obtainMessage();
+                msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
+                handler.sendMessage(msg);
+            }
         }
     }
 }
