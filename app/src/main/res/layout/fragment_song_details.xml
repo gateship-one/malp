@@ -249,7 +249,9 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/action_add"
-            android:textAlignment="center"/>
+            android:textAlignment="center"
+            android:textColor="?attr/colorAccent"
+            style="?attr/borderlessButtonStyle"/>
         <Button
             android:id="@+id/button_cancel"
             android:layout_width="match_parent"
@@ -257,7 +259,9 @@
             android:layout_weight="1"
             android:gravity="center_vertical"
             android:text="@string/dialog_action_cancel"
-            android:textAlignment="center"/>
+            android:textAlignment="center"
+            android:textColor="?attr/colorAccent"
+            style="?attr/borderlessButtonStyle"/>
 
     </LinearLayout>
 
