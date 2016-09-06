@@ -217,9 +217,9 @@
     <string name="preference_artwork_album_provider_summary">Select an provider for album cover images.</string>
     <string name="preference_artwork_album_provider_message">Select an provider for album cover images.</string>
 
-    <string name="musicbrainz">MusicBrainz</string>
-    <string name="last_fm">Last.fm</string>
-    <string name="fanart_tv">Fanart.tv</string>
+    <string name="musicbrainz" translatable="false">MusicBrainz</string>
+    <string name="last_fm" translatable="false">Last.fm</string>
+    <string name="fanart_tv" translatable="false">Fanart.tv</string>
 
     <string-array name="preference_artwork_album_provider_entries">
         <item>@string/musicbrainz</item>

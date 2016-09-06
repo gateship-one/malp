@@ -125,4 +125,15 @@
     <string name="dialog_action_ok">OK</string>
     <string name="welcome_dialog_title">Keine Profile gefunden</string>
     <string name="welcome_dialog_text">Diese Anwendung ist eine Fernsteuerung für MPD. Falls Sie MPD nicht kennen ist diese Anwendung höchstwahrscheinlich für Sie nutzlos, entschuldigung :).\n\nUm diese Anwendung zu nutzen, erstellen Sie ein neues Profil mit dem Hinzufügen-Knopf in der rechten oberen Ecke.\n\nFalls Sie einen Musikspieler mit der gleichen Oberfläche nutzen möchten, versuchen Sie doch mal Odyssey (https://github.com/gateship-one/odyssey).</string>
+    <string name="preference_artwork_album_provider_message">Wählen Sie einen Anbieter für die Albenbilder</string>
+    <string name="preference_artwork_album_provider_summary">Wählen Sie einen Anbieter für die Albenbilder</string>
+    <string name="preference_artwork_artist_provider_message">Wählen Sie einen Anbieter für die Interpretenbilder</string>
+    <string name="preference_artwork_album_provider_title">Albenbilderanbieter</string>
+    <string name="preference_artwork_artist_provider_summary">Wählen Sie einen Anbieter für die Interpretenbilder</string>
+    <string name="preference_artwork_artist_provider_title">Interpretenbilderanbieter</string>
+    <string name="preference_artwork_clear_album">Lösche Albenbilder</string>
+    <string name="preference_artwork_clear_artist">Lösche Interpretenbilder</string>
+    <string name="preference_artwork_wifi_only_text">Bilder werden nur bei aktiver WIFI-Verbindung heruntergeladen</string>
+    <string name="preference_artwork_wifi_only_title">Nur WIFI fürs Bilderrunterladen nutzen</string>
+    <string name="artwork_settings">Bildereinstellungen</string>
 </resources>
