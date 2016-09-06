@@ -16,31 +16,30 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
     android:background="@drawable/side_nav_bar"
     android:gravity="bottom"
     android:orientation="vertical"
     android:theme="@style/AppTheme.NavDrawerHeader">
- <!--   <ImageView
+    <ImageView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:scaleType="fitCenter"
         android:tint="@android:color/black"
         android:alpha="0.1"
-        android:src="@drawable/odyssey_256dp"/>-->
+        android:src="@drawable/icon_outline_256dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:padding="@dimen/material_screen_edge_spacing"
-        android:text="@string/app_name_nice"
+        android:text="@string/app_name"
         android:fontFamily="sans-serif-thin"
         android:textSize="@dimen/material_font_style_size_body_1"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-
-</LinearLayout>
+</RelativeLayout>
