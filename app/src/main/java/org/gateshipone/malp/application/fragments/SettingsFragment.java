@@ -36,11 +36,22 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public static final String TAG = SettingsFragment.class.getSimpleName();
 
     private FABFragmentCallback mFABCallback = null;
+    private OnArtworkSettingsRequestedCallback mArtworkCallback;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+        // add listener to open artwork settings
+        Preference openArtwork = findPreference("pref_key_artwork_settings");
+        openArtwork.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+                mArtworkCallback.openArtworkSettings();
+                return true;
+            }
+        });
     }
 
     /**
@@ -56,6 +67,14 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             mFABCallback = (FABFragmentCallback) context;
         } catch (ClassCastException e) {
             mFABCallback = null;
+        }
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mArtworkCallback = (OnArtworkSettingsRequestedCallback) context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() + " must implement OnArtworkSettingsRequestedCallback");
         }
     }
 
@@ -92,5 +111,9 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             getActivity().finish();
             startActivity(intent);
         }
+    }
+
+    public interface OnArtworkSettingsRequestedCallback {
+        void openArtworkSettings();
     }
 }

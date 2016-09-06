@@ -18,8 +18,11 @@
 
 package org.gateshipone.malp.application.views;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -42,10 +45,12 @@ import android.widget.ViewSwitcher;
 import java.util.Timer;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
+import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -53,10 +58,11 @@ import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
-public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener {
+public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener {
 
     private final ViewDragHelper mDragHelper;
 
@@ -113,11 +119,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     private ViewSwitcher mViewSwitcher;
 
-
     /**
-     * Timer that periodically updates the state of the view (seekbar)
+     * Asynchronous loader for coverimages for TrackItems.
      */
-    private Timer mRefreshTimer = null;
+    private CoverBitmapLoader mCoverLoader = null;
 
     /**
      * Observer for information about the state of the draggable part of this view.
@@ -132,8 +137,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private ImageButton mTopPlayPauseButton;
     private ImageButton mTopPlaylistButton;
     private ImageButton mTopMenuButton;
-
-    private int mTopPlaylistButtonHeight;
 
     /**
      * Buttons in the bottom part of the view
@@ -157,8 +160,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private ImageView mVolumeIcon;
 
     private LinearLayout mHeaderTextLayout;
-    private LayoutParams mHeaderTextLayoutParams;
-
 
     /**
      * Various textviews for track information
@@ -176,12 +177,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
     private MPDCurrentStatus mLastStatus;
-
-    /**
-     * Name of the last played album. This is used for a optimization of cover fetching. If album
-     * did not change with a track, there is no need to refetch the cover.
-     */
-    private String mLastAlbumKey;
+    private MPDFile mLastTrack;
 
     public NowPlayingView(Context context) {
         this(context, null, 0);
@@ -349,13 +345,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         return false;
     }
 
-    /**
-     * Saves the current playlist. This just calls the PBS and asks him to save the playlist.
-     *
-     * @param playlistName Name of the playlist to save.
-     */
-    public void savePlaylist(String playlistName) {
-        // FIXME savePlaylist with name
+
+    @Override
+    public void newAlbumImage(MPDAlbum album) {
+        if ( mLastTrack.getTrackAlbum().equals(album.getName())) {
+            mCoverLoader.getImage(mLastTrack);
+        }
     }
 
 
@@ -815,6 +810,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
         });
 
+        mCoverLoader = new CoverBitmapLoader(getContext(), new CoverReceiverClass());
 
         invalidate();
 
@@ -885,6 +881,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
         mPlaylistView.onPause();
+
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener(this);
     }
 
     /**
@@ -913,6 +911,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
 
         mPlaylistView.onResume();
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(this);
     }
 
 
@@ -1019,6 +1018,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mTrackAdditionalInfo.setText("");
         }
 
+        if ( null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
+            // Show the placeholder image until the cover fetch process finishes
+            mCoverImage.setImageResource(R.drawable.cover_placeholder);
+            // The same for the small header image
+            mTopCoverImage.setImageResource(R.drawable.cover_placeholder_128dp);
+            // Start the cover loader
+            mCoverLoader.getImage(track);
+        }
+
         // Calculate the margin to avoid cut off textviews
         RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mHeaderTextLayout.getLayoutParams();
         layoutParams.setMarginEnd((int) (mTopPlaylistButton.getWidth() * (1.0 - mDragOffset)));
@@ -1031,6 +1039,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         } else {
             mTrackNo.setText(String.valueOf(track.getTrackNumber()));
         }
+
+        mLastTrack = track;
 
     }
 
@@ -1232,6 +1242,37 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             // TODO Auto-generated method stub
+        }
+    }
+
+    /**
+     * Private class that handles when the CoverGenerator finishes its fetching of cover images.
+     */
+    private class CoverReceiverClass implements CoverBitmapLoader.CoverBitmapListener {
+
+        /**
+         * Called when a bitmap is created
+         *
+         * @param bm Bitmap ready for use in the UI
+         */
+        @Override
+        public void receiveBitmap(final Bitmap bm) {
+            if (bm != null) {
+                Activity activity = (Activity) getContext();
+                if (activity != null) {
+                    // Run on the UI thread of the activity because we are modifying gui elements.
+                    activity.runOnUiThread(new Runnable() {
+
+                        @Override
+                        public void run() {
+                            // Set the main cover image
+                            mCoverImage.setImageBitmap(bm);
+                            // Set the small header image
+                            mTopCoverImage.setImageBitmap(bm);
+                        }
+                    });
+                }
+            }
         }
     }
 

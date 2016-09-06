@@ -39,6 +39,7 @@ import java.util.List;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.ArtistsAdapter;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
@@ -135,6 +136,14 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
+        ArtworkManager.getInstance(getContext()).registerOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        ArtworkManager.getInstance(getContext()).unregisterOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
     }
 
     /**

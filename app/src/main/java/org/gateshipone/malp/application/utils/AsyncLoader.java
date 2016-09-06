@@ -21,8 +21,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.util.Pair;
-import android.widget.ImageView;
-import android.widget.ViewSwitcher;
+
+
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
+import org.gateshipone.malp.application.listviewitems.GenericGridItem;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
 import java.lang.ref.WeakReference;
 
@@ -30,48 +36,73 @@ import java.lang.ref.WeakReference;
  * Loaderclass for covers
  */
 public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bitmap> {
-
+    private static final String TAG = AsyncLoader.class.getSimpleName();
     private CoverViewHolder mCover;
-    private static boolean mIsScaled;
 
-    /*
-     * Wrapperclass for covers
+    /**
+     * Wrapper class for covers
      */
     public static class CoverViewHolder {
-        public String imagePath;
-        // public String labelText;
-        public WeakReference<ImageView> coverViewReference;
-        public WeakReference<ViewSwitcher> coverViewSwitcher;
-        public AsyncLoader task;
-        //public WeakReference<LruCache<String, Bitmap>> cache;
-        public Pair<Integer,Integer> imageDimension;
+        public Pair<Integer, Integer> imageDimension;
+        public GenericGridItem gridItem;
+        public ArtworkManager artworkManager;
+        public MPDGenericItem modelItem;
     }
 
     @Override
     protected Bitmap doInBackground(CoverViewHolder... params) {
         mCover = params[0];
-        if (mCover.imagePath != null) {
-            return decodeSampledBitmapFromResource(mCover.imagePath, mCover.imageDimension.first, mCover.imageDimension.second);
-        }
+        Bitmap image = null;
+        // Check if model item is artist or album
+        if (mCover.modelItem instanceof MPDArtist) {
+            MPDArtist artist = (MPDArtist)mCover.modelItem;
+            try {
+                // Check if image is available. If it is not yet fetched it will throw an exception
+                // If it was already searched for and not found, this will be null.
+                image = mCover.artworkManager.getArtistImage(artist);
+            } catch (ImageNotFoundException e) {
+                // Check if fetching for this item is already ongoing
+                if (!artist.getFetching()) {
+                    // If not set it as ongoing and request the image fetch.
+                    mCover.artworkManager.fetchArtistImage(artist);
+                    artist.setFetching(true);
+                }
+            }
+        } else if (mCover.modelItem instanceof MPDAlbum) {
+            MPDAlbum album = (MPDAlbum)mCover.modelItem;
 
-        return null;
+            try {
+                // Check if image is available. If it is not yet fetched it will throw an exception.
+                // If it was already searched for and not found, this will be null.
+                image = mCover.artworkManager.getAlbumImage(album);
+            } catch (ImageNotFoundException e) {
+                // Check if fetching for this item is already ongoing
+                if (!album.getFetching()) {
+                    // If not set it as ongoing and request the image fetch.
+                    mCover.artworkManager.fetchAlbumImage(album);
+                    album.setFetching(true);
+                }
+            }
+        }
+        return image;
+
     }
 
-    public static Bitmap decodeSampledBitmapFromResource(String pathName, int reqWidth, int reqHeight) {
+    /**
+     * Resize retrieved bitmap if necessary
+     */
+    private Bitmap decodeSampledBitmapFromResource(String pathName, int reqWidth, int reqHeight) {
 
         // First decode with inJustDecodeBounds=true to check dimensions
         final BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(pathName, options);
 
         // Calculate inSampleSize
         if (reqWidth == 0 && reqHeight == 0) {
             // check if the layout of the view already set
             options.inSampleSize = 1;
-            mIsScaled = false;
         } else {
             options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-            mIsScaled = true;
         }
 
         // Decode bitmap with inSampleSize set
@@ -79,7 +110,10 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
         return BitmapFactory.decodeFile(pathName, options);
     }
 
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+    /**
+     * Calculate sample size to resize the bitmap
+     */
+    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
         final int height = options.outHeight;
         final int width = options.outWidth;
@@ -91,8 +125,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             final int halfWidth = width / 2;
 
             // Calculate the largest inSampleSize value that is a power of 2 and
-            // keeps both
-            // height and width larger than the requested height and width.
+            // keeps both height and width larger than the requested height and width.
             while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
                 inSampleSize *= 2;
             }
@@ -107,9 +140,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
         super.onPostExecute(result);
 
         // set mCover if exists
-        if (mCover.coverViewReference.get() != null && result != null) {
-            mCover.coverViewReference.get().setImageBitmap(result);
-            mCover.coverViewSwitcher.get().setDisplayedChild(1);
+        if ( null != result ) {
+            mCover.gridItem.setImage(result);
         }
     }
 }

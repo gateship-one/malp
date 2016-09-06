@@ -28,6 +28,8 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
     /* Artists name (if any) */
     private String mArtistName;
 
+    private boolean mImageFetching;
+
     public MPDAlbum(String name ) {
         mName = name;
         mMBID = "";
@@ -90,5 +92,13 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
     @Override
     public int hashCode() {
         return (mName + mArtistName + mMBID).hashCode();
+    }
+
+    public synchronized void setFetching(boolean fetching) {
+        mImageFetching = fetching;
+    }
+
+    public synchronized boolean getFetching() {
+        return mImageFetching;
     }
 }

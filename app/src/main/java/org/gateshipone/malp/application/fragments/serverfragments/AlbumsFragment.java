@@ -40,6 +40,7 @@ import android.widget.ListView;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.AlbumsAdapter;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumsLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
@@ -162,6 +163,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
             }
         }
+
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter)mAlbumsAdapter);
     }
 
     /**
@@ -187,6 +190,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         } catch (ClassCastException e) {
             mFABCallback = null;
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter)mAlbumsAdapter);
     }
 
 

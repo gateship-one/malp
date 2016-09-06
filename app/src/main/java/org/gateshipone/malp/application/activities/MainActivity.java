@@ -51,6 +51,7 @@ import android.widget.LinearLayout;
 
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, FilesFragment.FilesCallback,
-        FABFragmentCallback {
+        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback {
 
 
     private static final String TAG = "MainActivity";
@@ -803,6 +804,26 @@ public class MainActivity extends AppCompatActivity
         // Commit the transaction
         transaction.commit();
 
+    }
+
+    @Override
+    public void openArtworkSettings() {
+        // Create fragment and give it an argument for the selected directory
+        ArtworkSettingsFragment newFragment = new ArtworkSettingsFragment();
+
+
+        FragmentManager fragmentManager = getSupportFragmentManager();
+
+        android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
+
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));
+
+        transaction.addToBackStack("ArtworkSettingsFragment");
+        transaction.replace(R.id.fragment_container, newFragment);
+
+        // Commit the transaction
+        transaction.commit();
     }
 
     private class ConnectionStateListener extends MPDConnectionStateChangeHandler {

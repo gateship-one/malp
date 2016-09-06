@@ -24,16 +24,19 @@ import android.widget.AbsListView;
 import android.widget.GridView;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.listviewitems.LibraryGridViewItem;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.listviewitems.GenericGridItem;
 import org.gateshipone.malp.application.listviewitems.SimpleListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
-public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
+public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = AlbumsAdapter.class.getSimpleName();
     private final AbsListView mListView;
     private final Context mContext;
 
     private boolean mUseList;
+
+    private ArtworkManager mArtworkManager;
 
     public AlbumsAdapter(Context context, AbsListView listView, boolean useList) {
         super();
@@ -42,6 +45,8 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
         mListView = listView;
 
         mUseList = useList;
+
+        mArtworkManager = ArtworkManager.getInstance(context);
     }
 
     @Override
@@ -70,7 +75,7 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
         } else {
             // Check if a view can be recycled
             if (convertView != null) {
-                LibraryGridViewItem gridItem = (LibraryGridViewItem) convertView;
+                GenericGridItem gridItem = (GenericGridItem) convertView;
 
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 ViewGroup.LayoutParams layoutParams = gridItem.getLayoutParams();
@@ -80,15 +85,23 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> {
                 gridItem.setTitle(label);
             } else {
                 // Create new view if no reusable is available
-                convertView = new LibraryGridViewItem(mContext, label, null, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
+                convertView = new GenericGridItem(mContext, label,  new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
             }
+
+            // This will prepare the view for fetching the image from the internet if not already saved in local database.
+            ((GenericGridItem)convertView).prepareArtworkFetching(mArtworkManager, album);
 
             // Check if the scroll speed currently is already 0, then start the image task right away.
             if (mScrollSpeed == 0) {
-                ((LibraryGridViewItem) convertView).startCoverImageTask();
+                ((GenericGridItem) convertView).startCoverImageTask();
             }
         }
 
         return convertView;
+    }
+
+    @Override
+    public void newAlbumImage(MPDAlbum album) {
+        notifyDataSetChanged();
     }
 }

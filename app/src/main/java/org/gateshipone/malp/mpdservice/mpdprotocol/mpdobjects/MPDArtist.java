@@ -27,6 +27,8 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
     /* Musicbrainz ID */
     private ArrayList<String> pMBIDs;
 
+    private boolean mImageFetching;
+
     public MPDArtist(String name) {
         pArtistName = name;
         pMBIDs = new ArrayList<>();
@@ -47,6 +49,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
     public void addMBID(String mbid) {
         pMBIDs.add(mbid);
     }
+
 
     @Override
     public String getSectionTitle() {
@@ -77,5 +80,13 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
         }
 
         return pArtistName.toLowerCase().compareTo(another.pArtistName.toLowerCase());
+    }
+
+    public synchronized void setFetching(boolean fetching) {
+        mImageFetching = fetching;
+    }
+
+    public synchronized boolean getFetching() {
+        return mImageFetching;
     }
 }

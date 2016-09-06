@@ -57,7 +57,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
      * List of handlers that get notified when there is a change of state for the network connection
      * (connected, disconnected)
      */
-    protected ArrayList<MPDConnectionStateChangeHandler> mConnectionStateListener;
+    protected final ArrayList<MPDConnectionStateChangeHandler> mConnectionStateListener;
 
 
     /**
