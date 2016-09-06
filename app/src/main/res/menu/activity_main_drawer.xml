@@ -36,21 +36,11 @@
             android:icon="@drawable/ic_search_black_24dp"
             android:title="@string/menu_search"/>
     </group>
-    <item android:title="@string/menu_server"
-        android:checkable="true">
-        <menu>
-            <item
-                android:checkable="true"
-                android:id="@+id/nav_outputs"
-                android:icon="@drawable/ic_hearing_black_24dp"
-                android:title="@string/menu_outputs" />
-            <item
-                android:checkable="true"
-                android:id="@+id/nav_statistic"
-                android:icon="@drawable/ic_statistics_black_24dp"
-                android:title="@string/menu_statistic" />
-        </menu>
-    </item>
+    <item
+        android:id="@+id/nav_server_properties"
+        android:icon="@drawable/ic_server_properties_24dp"
+        android:title="@string/menu_server"
+        android:checkable="true"/>
     <item android:title="@string/menu_settings"
         android:checkable="true">
         <menu>

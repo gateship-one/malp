@@ -47,8 +47,6 @@ public class OutputsFragment extends GenericMPDFragment<List<MPDOutput>> impleme
     private OutputAdapter mAdapter;
 
 
-    private FABFragmentCallback mFABCallback = null;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -72,36 +70,6 @@ public class OutputsFragment extends GenericMPDFragment<List<MPDOutput>> impleme
         return rootView;
     }
 
-    /**
-     * Called when the fragment is first attached to its context.
-     */
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mFABCallback = (FABFragmentCallback) context;
-        } catch (ClassCastException e) {
-            mFABCallback = null;
-        }
-    }
-
-    /**
-     * Called when the fragment resumes.
-     * Reload the data, setup the toolbar and create the PBS connection.
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-
-
-        if ( null != mFABCallback ) {
-            mFABCallback.setupFAB(false,null);
-            mFABCallback.setupToolbar(getString(R.string.menu_outputs), false, true, false);
-        }
-    }
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

@@ -64,7 +64,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_mymusic_tabs, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_tab_pager, container, false);
 
 
         // create tabs
@@ -132,18 +132,6 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
             ViewPager myMusicViewPager = (ViewPager) view.findViewById(R.id.my_music_viewpager);
             myMusicViewPager.setCurrentItem(tab.getPosition());
-
-            View.OnClickListener listener = null;
-
-            switch (tab.getPosition()) {
-                case 0:
-                    break;
-                case 1:
-                    break;
-                default:
-                    break;
-            }
-
         }
     }
 

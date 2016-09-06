@@ -36,7 +36,6 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 public class ServerStatisticFragment extends Fragment {
     public final static String TAG = ServerStatisticFragment.class.getSimpleName();
-    private FABFragmentCallback mFABCallback = null;
 
     private TextView mArtistCount;
     private TextView mAlbumsCount;
@@ -74,28 +73,9 @@ public class ServerStatisticFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        if (null != mFABCallback) {
-            mFABCallback.setupFAB(false, null);
-            mFABCallback.setupToolbar(getString(R.string.menu_statistic), false, true, false);
-        }
         MPDQueryHandler.getStatistics(new StatisticResponseHandler());
     }
 
-    /**
-     * Called when the fragment is first attached to its context.
-     */
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        // This makes sure that the container activity has implemented
-        // the callback interface. If not, it throws an exception
-        try {
-            mFABCallback = (FABFragmentCallback) context;
-        } catch (ClassCastException e) {
-            mFABCallback = null;
-        }
-    }
 
     private class StatisticResponseHandler extends MPDResponseServerStatistics {
 

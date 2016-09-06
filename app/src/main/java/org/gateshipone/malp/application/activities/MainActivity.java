@@ -51,6 +51,7 @@ import android.widget.LinearLayout;
 
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
@@ -417,12 +418,9 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_app_settings) {
             fragment = new SettingsFragment();
             fragmentTag = SettingsFragment.TAG;
-        } else if (id == R.id.nav_outputs) {
-            fragment = new OutputsFragment();
-            fragmentTag = OutputsFragment.TAG;
-        } else if (id == R.id.nav_statistic) {
-            fragment = new ServerStatisticFragment();
-            fragmentTag = ServerStatisticFragment.TAG;
+        } else if (id == R.id.nav_server_properties) {
+            fragment = new ServerPropertiesFragment();
+            fragmentTag = ServerPropertiesFragment.TAG;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
