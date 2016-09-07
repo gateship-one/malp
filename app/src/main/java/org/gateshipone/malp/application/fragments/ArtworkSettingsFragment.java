@@ -59,6 +59,33 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
                 return true;
             }
         });
+
+        Preference clearBlockedAlbums = findPreference("pref_clear_blocked_album");
+        clearBlockedAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+                ArtworkDatabaseManager.getInstance(getContext()).clearBlockedAlbumImages();
+                return true;
+            }
+        });
+
+        Preference clearBlockedArtists = findPreference("pref_clear_blocked_artist");
+        clearBlockedArtists.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+                ArtworkDatabaseManager.getInstance(getContext()).clearBlockedArtistImages();
+                return true;
+            }
+        });
+
+        Preference buldLoad = findPreference("pref_bulk_load");
+        buldLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+
+            public boolean onPreferenceClick(Preference preference) {
+                ArtworkManager.getInstance(getContext()).bulkLoadImages();
+                return true;
+            }
+        });
     }
 
     /**
