@@ -27,7 +27,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -35,12 +34,16 @@ import android.util.Pair;
 
 import com.android.volley.Response;
 
-
+import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
+import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtistList;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     private static final String TAG = ArtworkManager.class.getSimpleName();
@@ -441,8 +444,25 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDArtist doInBackground(Pair<byte[], MPDArtist>... params) {
             Pair<byte[], MPDArtist> response = params[0];
+            if ( response.first == null ){
+                mDBManager.insertArtistImage(response.second, response.first);
+                return response.second;
+            }
 
-            mDBManager.insertArtistImage(response.second, response.first);
+            // Rescale them if to big
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+            if ((options.outHeight > 500 || options.outWidth > 500)) {
+                Log.v(TAG, "Image to big, rescaling");
+                options.inJustDecodeBounds = false;
+                Bitmap bm = BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
+                mDBManager.insertArtistImage(response.second, byteStream.toByteArray());
+            } else {
+                mDBManager.insertArtistImage(response.second, response.first);
+            }
 
 
             return response.second;
@@ -478,9 +498,25 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDAlbum doInBackground(Pair<byte[], MPDAlbum>... params) {
             Pair<byte[], MPDAlbum> response = params[0];
+            if ( response.first == null ){
+                mDBManager.insertAlbumImage(response.second, response.first);
+                return response.second;
+            }
 
-            mDBManager.insertAlbumImage(response.second, response.first);
-
+            // Rescale them if to big
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+            if ((options.outHeight > 500 || options.outWidth > 500)) {
+                Log.v(TAG, "Image to big, rescaling");
+                options.inJustDecodeBounds = false;
+                Bitmap bm = BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+                ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+                bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
+                mDBManager.insertAlbumImage(response.second, byteStream.toByteArray());
+            } else {
+                mDBManager.insertAlbumImage(response.second, response.first);
+            }
 
             return response.second;
         }
