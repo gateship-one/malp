@@ -18,12 +18,14 @@
 
 package org.gateshipone.malp.application.artworkdatabase;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -54,29 +56,21 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
     private static final int MUSICBRAINZ_LIMIT_RESULT_COUNT = 10;
     private static final String MUSICBRAINZ_LIMIT_RESULT = "&limit=" + String.valueOf(MUSICBRAINZ_LIMIT_RESULT_COUNT);
 
-    private MusicBrainzManager() {
-        mRequestQueue = getRequestQueue();
+    private MusicBrainzManager(Context context) {
+        mRequestQueue = MALPRequestQueue.getInstance(context);
     }
 
-    public static synchronized MusicBrainzManager getInstance() {
+    public static synchronized MusicBrainzManager getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new MusicBrainzManager();
+            mInstance = new MusicBrainzManager(context);
         }
         return mInstance;
     }
 
-    public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null) {
-            Cache cache = new NoCache();
-            Network nw = new BasicNetwork(new HurlStack());
-            mRequestQueue = new RequestQueue(cache, nw, 1);
-            mRequestQueue.start();
-        }
-        return mRequestQueue;
-    }
+
 
     public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        mRequestQueue.add(req);
     }
 
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
@@ -196,7 +190,19 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                errorListener.fetchError(album);
+                NetworkResponse networkResponse = error.networkResponse;
+                if (networkResponse != null && networkResponse.statusCode == 503) {
+                    // If MusicBrainz returns 503 this is probably because of rate limiting
+                    Log.e(TAG, "Rate limit reached");
+                    mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
+                        @Override
+                        public boolean apply(Request<?> request) {
+                            return true;
+                        }
+                    });
+                } else {
+                    errorListener.fetchError(album);
+                }
             }
         });
     }

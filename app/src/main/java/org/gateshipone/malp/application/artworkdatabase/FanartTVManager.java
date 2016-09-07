@@ -17,6 +17,7 @@
  */
 package org.gateshipone.malp.application.artworkdatabase;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
@@ -54,31 +55,22 @@ public class FanartTVManager implements ArtistImageProvider {
     private static final String MUSICBRAINZ_LIMIT_RESULT = "&limit=" + String.valueOf(MUSICBRAINZ_LIMIT_RESULT_COUNT);
 
 
-    private static final String API_KEY = "API_KEY_MISSING";
+    private static final String API_KEY = "c0cc5d1b6e807ce93e49d75e0e5d371b";
 
-    private FanartTVManager() {
-        mRequestQueue = getRequestQueue();
+    private FanartTVManager(Context context) {
+        mRequestQueue = MALPRequestQueue.getInstance(context);
     }
 
-    public static synchronized FanartTVManager getInstance() {
+    public static synchronized FanartTVManager getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new FanartTVManager();
+            mInstance = new FanartTVManager(context);
         }
         return mInstance;
     }
 
-    public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null) {
-            Cache cache = new NoCache();
-            Network nw = new BasicNetwork(new HurlStack());
-            mRequestQueue = new RequestQueue(cache, nw, 1);
-            mRequestQueue.start();
-        }
-        return mRequestQueue;
-    }
 
     public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        mRequestQueue.add(req);
     }
 
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
@@ -137,7 +129,12 @@ public class FanartTVManager implements ArtistImageProvider {
                     if (networkResponse != null && networkResponse.statusCode == 503) {
                         // If MusicBrainz returns 503 this is probably because of rate limiting
                         Log.e(TAG, "Rate limit reached");
-                        mRequestQueue.stop();
+                        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
+                            @Override
+                            public boolean apply(Request<?> request) {
+                                return true;
+                            }
+                        });
                     } else {
                         errorListener.fetchError(artist);
                     }

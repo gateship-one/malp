@@ -17,6 +17,7 @@
  */
 package org.gateshipone.malp.application.artworkdatabase;
 
+import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
@@ -52,29 +53,21 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
 
     private static LastFMManager mInstance;
 
-    private LastFMManager() {
-        mRequestQueue = getRequestQueue();
+    private LastFMManager(Context context) {
+        mRequestQueue = MALPRequestQueue.getInstance(context);
     }
 
-    public static synchronized LastFMManager getInstance() {
+    public static synchronized LastFMManager getInstance(Context context) {
         if (mInstance == null) {
-            mInstance = new LastFMManager();
+            mInstance = new LastFMManager(context);
         }
         return mInstance;
     }
 
-    public RequestQueue getRequestQueue() {
-        if (mRequestQueue == null) {
-            Cache cache = new NoCache();
-            Network nw = new BasicNetwork(new HurlStack());
-            mRequestQueue = new RequestQueue(cache, nw, 2);
-            mRequestQueue.start();
-        }
-        return mRequestQueue;
-    }
+
 
     public <T> void addToRequestQueue(Request<T> req) {
-        getRequestQueue().add(req);
+        mRequestQueue.add(req);
     }
 
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {

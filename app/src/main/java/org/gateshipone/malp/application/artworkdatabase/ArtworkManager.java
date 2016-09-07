@@ -259,14 +259,14 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (artistProvider.equals("last_fm")) {
-            LastFMManager.getInstance().fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
+            LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDArtist> response) {
                     new InsertArtistImageTask().execute(response);
                 }
             }, this);
         } else if (artistProvider.equals("fanart_tv")) {
-            FanartTVManager.getInstance().fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
+            FanartTVManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDArtist> response) {
                     new InsertArtistImageTask().execute(response);
@@ -296,14 +296,14 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance().fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDAlbum> response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
         } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance().fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDAlbum> response) {
                     new InsertAlbumImageTask().execute(response);
@@ -338,14 +338,14 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance().fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDAlbum> response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
         } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance().fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
                 @Override
                 public void onResponse(Pair<byte[], MPDAlbum> response) {
                     new InsertAlbumImageTask().execute(response);
@@ -633,15 +633,15 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
 
         if (artistProvider.equals("last_fm")) {
-            LastFMManager.getInstance().cancelAll();
+            LastFMManager.getInstance(mContext).cancelAll();
         } else if (artistProvider.equals("fanart_tv")) {
-            FanartTVManager.getInstance().cancelAll();
+            FanartTVManager.getInstance(mContext).cancelAll();
         }
 
         if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance().cancelAll();
+            MusicBrainzManager.getInstance(mContext).cancelAll();
         } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance().cancelAll();
+            LastFMManager.getInstance(mContext).cancelAll();
         }
 
     }
