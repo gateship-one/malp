@@ -58,6 +58,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
 
+    public static final String BUNDLE_STRING_EXTRA_PATH = "album_path";
+
     /**
      * GridView adapter object used for this GridView
      */
@@ -75,6 +77,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private int mLastPosition;
 
     private String mArtistName;
+    private String mAlbumsPath;
 
     private AlbumSelectedCallback mAlbumSelectCallback;
 
@@ -114,8 +117,10 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         Bundle args = getArguments();
         if (null != args) {
             mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
+            mAlbumsPath = args.getString(BUNDLE_STRING_EXTRA_PATH);
         } else {
             mArtistName = "";
+            mAlbumsPath = "";
         }
 
         mAdapterView.setAdapter(mAlbumsAdapter);
@@ -156,7 +161,14 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             if (null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 mFABCallback.setupToolbar(mArtistName, false, false, false);
-
+            } else if (null != mAlbumsPath && !mAlbumsPath.equals(""))  {
+                String lastPath = mAlbumsPath;
+                String pathSplit[] = mAlbumsPath.split("/");
+                if (pathSplit.length > 0 ) {
+                    lastPath = pathSplit[pathSplit.length - 1];
+                }
+                mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupToolbar(lastPath, false, false, false);
             } else {
                 mFABCallback.setupFAB(false, null);
                 mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
@@ -287,7 +299,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     @Override
     public Loader<List<MPDAlbum>> onCreateLoader(int id, Bundle args) {
-        return new AlbumsLoader(getActivity(), mArtistName);
+        return new AlbumsLoader(getActivity(), mArtistName, mAlbumsPath);
     }
 
     /**

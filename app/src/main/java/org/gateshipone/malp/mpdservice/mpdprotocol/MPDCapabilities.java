@@ -36,6 +36,8 @@ public class MPDCapabilities {
     private boolean mHasMusicBrainzTags;
     private boolean mHasListGroup;
 
+    private boolean mHasListFiltering;
+
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
@@ -52,6 +54,7 @@ public class MPDCapabilities {
 
         if ( pMinorVersion >= 19 ) {
             mHasListGroup = true;
+            mHasListFiltering = true;
         }
 
         if ( null != commands ) {
@@ -96,6 +99,8 @@ public class MPDCapabilities {
     }
 
     public boolean hasListGroup() { return mHasListGroup;}
+
+    public boolean hasListFiltering() { return mHasListFiltering;}
 
     public boolean hasMusicBrainzTags() {
         return mHasMusicBrainzTags;

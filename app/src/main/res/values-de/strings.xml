@@ -136,4 +136,5 @@
     <string name="preference_artwork_wifi_only_text">Bilder werden nur bei aktiver WIFI-Verbindung heruntergeladen</string>
     <string name="preference_artwork_wifi_only_title">Nur WIFI fürs Bilderrunterladen nutzen</string>
     <string name="artwork_settings">Bildereinstellungen</string>
+    <string name="action_show_albums_from_here">Zeige Alben in diesem Ordner</string>
 </resources>

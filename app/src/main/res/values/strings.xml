@@ -69,6 +69,7 @@
     <string name="action_remove_track">Remove track</string>
 
     <string name="action_add_url">Add URL</string>
+    <string name="action_show_albums_from_here">Show albums in this directory</string>
 
     <!-- Menu entries -->
     <string name="menu_library">Library</string>

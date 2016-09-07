@@ -30,6 +30,7 @@ import org.gateshipone.malp.application.loaders.FilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -258,6 +259,13 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         DrawableCompat.setTint(drawable, tintColor);
         menu.findItem(R.id.action_search).setIcon(drawable);
 
+        MPDCapabilities serverCaps = MPDQueryHandler.getServerCapabilities();
+        if ( null != serverCaps ) {
+            if ( serverCaps.hasListFiltering()) {
+                menu.findItem(R.id.action_show_albums_from_here).setVisible(true);
+            }
+        }
+
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
 
         searchView.setOnQueryTextListener(new SearchTextObserver());
@@ -276,6 +284,9 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         switch (item.getItemId()) {
             case R.id.action_add_directory:
                 MPDQueryHandler.addDirectory(mPath);
+                return true;
+            case R.id.action_show_albums_from_here:
+                mCallback.showAlbumsForPath(mPath);
                 return true;
         }
 
@@ -345,6 +356,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
     public interface FilesCallback {
         void openPath(String path);
+        void showAlbumsForPath(String path);
     }
 
     private class FABListener implements View.OnClickListener {

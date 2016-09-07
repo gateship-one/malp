@@ -147,6 +147,17 @@ public class MPDQueryHandler extends MPDGenericHandler {
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = albumList;
             responseHandler.sendMessage(responseMessage);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS_IN_PATH) {
+            responseHandler = mpdAction.getResponseHandler();
+            if (!(responseHandler instanceof MPDResponseAlbumList)) {
+                return;
+            }
+            String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+            List<MPDAlbum> albumList = mMPDConnection.getAlbumsInPath(path);
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = albumList;
+            responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUMS) {
             String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
             responseHandler = mpdAction.getResponseHandler();
@@ -511,6 +522,27 @@ public class MPDQueryHandler extends MPDGenericHandler {
         if (msg == null) {
             return;
         }
+        action.setResponseHandler(responseHandler);
+        msg.obj = action;
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Method to retrieve a list of all albums available on the currently connected MPD server.
+     * This only shows album that lay in the given path. This feature is only available for servers
+     * >= 0.19.
+     *
+     * @param path Path to list albums for
+     * @param responseHandler The Handler that is used for asynchronous callback calls when the result
+     *                        of the MPD server is ready and parsed.
+     */
+    public static void getAlbumsInPath(String path, MPDResponseAlbumList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ALBUMS_IN_PATH);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, path);
         action.setResponseHandler(responseHandler);
         msg.obj = action;
         MPDQueryHandler.getHandler().sendMessage(msg);

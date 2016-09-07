@@ -34,12 +34,15 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
     private String mArtistName;
 
-    public AlbumsLoader(Context context, String artistName) {
+    private String mAlbumsPath;
+
+    public AlbumsLoader(Context context, String artistName, String albumsPath) {
         super(context);
 
         pAlbumsResponseHandler = new AlbumResponseHandler();
 
         mArtistName = artistName;
+        mAlbumsPath = albumsPath;
     }
 
 
@@ -65,8 +68,12 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
     @Override
     public void onForceLoad() {
-        if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDQueryHandler.getAlbums(pAlbumsResponseHandler);
+        if ( (null == mArtistName) || mArtistName.isEmpty() ) {
+            if ( null == mAlbumsPath || mAlbumsPath.isEmpty()) {
+                MPDQueryHandler.getAlbums(pAlbumsResponseHandler);
+            } else {
+                MPDQueryHandler.getAlbumsInPath(mAlbumsPath, pAlbumsResponseHandler);
+            }
         } else {
             MPDQueryHandler.getArtistAlbums(pAlbumsResponseHandler,mArtistName);
         }

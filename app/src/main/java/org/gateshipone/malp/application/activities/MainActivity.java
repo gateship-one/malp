@@ -807,6 +807,40 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void showAlbumsForPath(String path) {
+        if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            if (nowPlayingView != null) {
+                View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
+                coordinatorLayout.setVisibility(View.VISIBLE);
+                nowPlayingView.minimize();
+            }
+        }
+        // Create fragment and give it an argument for the selected article
+        AlbumsFragment newFragment = new AlbumsFragment();
+        Bundle args = new Bundle();
+        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_PATH, path);
+
+
+        newFragment.setArguments(args);
+
+        android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        newFragment.setEnterTransition(new Slide(Gravity.START));
+        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
+        // fragment,
+        // and add the transaction to the back stack so the user can navigate
+        // back
+        transaction.replace(R.id.fragment_container, newFragment, AlbumsFragment.TAG);
+        transaction.addToBackStack("DirectoryAlbumsFragment");
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_library);
+
+        // Commit the transaction
+        transaction.commit();
+    }
+
+    @Override
     public void openArtworkSettings() {
         // Create fragment and give it an argument for the selected directory
         ArtworkSettingsFragment newFragment = new ArtworkSettingsFragment();

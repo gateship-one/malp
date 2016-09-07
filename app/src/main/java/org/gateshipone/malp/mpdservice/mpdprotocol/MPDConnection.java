@@ -415,7 +415,7 @@ public class MPDConnection {
 
             /*
              * Send the command to the server
-             * FIXME Should be validated in the future.
+             *
              */
             pWriter.println(command);
             pWriter.flush();
@@ -945,6 +945,24 @@ public class MPDConnection {
         synchronized (this) {
             // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
             sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
+            try {
+                return parseMPDAlbums();
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Get a list of all albums available in the database.
+     *
+     * @return List of MPDAlbum
+     */
+    public List<MPDAlbum> getAlbumsInPath(String path) {
+        synchronized (this) {
+            // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path,mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
             try {
                 return parseMPDAlbums();
             } catch (IOException e) {

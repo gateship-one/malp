@@ -42,6 +42,14 @@ public class MPDCommands {
         }
     }
 
+    public static final String MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(String path, boolean groupFeatures) {
+        if ( groupFeatures) {
+            return "list album base \"" + path + "\" group albumartist group musicbrainz_albumid";
+        } else {
+            return "list album";
+        }
+    }
+
     public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName) {
         return "list album AlbumArtist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group AlbumArtist group musicbrainz_albumid";
     }
