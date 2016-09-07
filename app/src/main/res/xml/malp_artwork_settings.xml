@@ -45,8 +45,25 @@
         />
     <Preference
         android:key="pref_clear_artist"
-        android:title="@string/preference_artwork_clear_artist" />
+        android:title="@string/preference_artwork_clear_artist"
+        android:summary="@string/preference_artwork_clear_artist_summary"/>
     <Preference
         android:key="pref_clear_album"
-        android:title="@string/preference_artwork_clear_album" />
+        android:title="@string/preference_artwork_clear_album"
+        android:summary="@string/preference_artwork_clear_album_summary"/>
+    <Preference
+        android:key="pref_clear_blocked_artist"
+        android:title="@string/preference_artwork_clear_blocked_artist"
+        android:summary="@string/preference_artwork_clear_blocked_artist_summary"/>
+    <Preference
+        android:key="pref_clear_blocked_album"
+        android:title="@string/preference_artwork_clear_blocked_album"
+        android:summary="@string/preference_artwork_clear_blocked_album_summary"/>
+
+    <Preference
+        android:key="pref_bulk_load"
+        android:title="@string/preference_artwork_bulk_load"
+        android:summary="@string/preference_artwork_bulk_load_summary"/>
+
+
 </PreferenceScreen>
