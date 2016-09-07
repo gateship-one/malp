@@ -536,6 +536,53 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     }
 
+    private class ParseMPDAlbumListTask extends AsyncTask<List<MPDAlbum>, Object, Object> {
+
+        @Override
+        protected Object doInBackground(List<MPDAlbum>... lists) {
+            List<MPDAlbum> albums = lists[0];
+
+            for (MPDAlbum album : albums) {
+                fetchAlbumImage(album);
+            }
+
+            return null;
+        }
+    }
+
+    private class ParseMPDArtistListTask extends AsyncTask<List<MPDArtist>, Object, Object> {
+
+        @Override
+        protected Object doInBackground(List<MPDArtist>... lists) {
+            List<MPDArtist> artists = lists[0];
+
+            for (MPDArtist artist : artists) {
+                fetchArtistImage(artist);
+            }
+
+            return null;
+        }
+    }
+
+    public void bulkLoadImages() {
+        Log.v(TAG, "Start bulk loading");
+        MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
+            @Override
+            public void handleAlbums(List<MPDAlbum> albumList) {
+                Log.v(TAG, "Received " + albumList.size() + " albums for bulk loading");
+                new ParseMPDAlbumListTask().execute(albumList);
+            }
+        });
+
+        MPDQueryHandler.getArtists(new MPDResponseArtistList() {
+            @Override
+            public void handleArtists(List<MPDArtist> artistList) {
+                Log.v(TAG, "Received " + artistList.size() + " artists for bulk loading");
+                new ParseMPDArtistListTask().execute(artistList);
+            }
+        });
+    }
+
     /**
      * Interface used for adapters to be notified about data set changes
      */
