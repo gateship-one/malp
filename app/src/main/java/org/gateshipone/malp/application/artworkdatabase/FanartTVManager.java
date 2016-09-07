@@ -71,7 +71,7 @@ public class FanartTVManager implements ArtistImageProvider {
         if (mRequestQueue == null) {
             Cache cache = new NoCache();
             Network nw = new BasicNetwork(new HurlStack());
-            mRequestQueue = new RequestQueue(cache, nw,1);
+            mRequestQueue = new RequestQueue(cache, nw, 1);
             mRequestQueue.start();
         }
         return mRequestQueue;
@@ -82,64 +82,110 @@ public class FanartTVManager implements ArtistImageProvider {
     }
 
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+        if (artist.getMBIDCount() > 0) {
+            Log.v(TAG,"Directly trying MPD MBID");
+            tryArtistMBID(0, artist, listener, errorListener);
+        } else {
+            Log.v(TAG,"Manually resolving MBID");
+            String artistURLName = Uri.encode(artist.getArtistName().replaceAll("/", " "));
 
+            getArtists(artistURLName, new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    JSONArray artists = null;
+                    try {
+                        artists = response.getJSONArray("artists");
 
-        String artistURLName = Uri.encode(artist.getArtistName().replaceAll("/"," "));
+                        if (!artists.isNull(0)) {
+                            JSONObject artistObj = artists.getJSONObject(0);
+                            final String artistMBID = artistObj.getString("id");
 
-        getArtists(artistURLName, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                JSONArray artists = null;
-                try {
-                    artists = response.getJSONArray("artists");
+                            getArtistImageURL(artistMBID, new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject response) {
+                                    JSONArray thumbImages = null;
+                                    try {
+                                        thumbImages = response.getJSONArray("artistthumb");
 
-                    if (!artists.isNull(0)) {
-                        JSONObject artistObj = artists.getJSONObject(0);
-                        final String artistMBID = artistObj.getString("id");
+                                        JSONObject firstThumbImage = thumbImages.getJSONObject(0);
+                                        getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
+                                            @Override
+                                            public void onErrorResponse(VolleyError error) {
+                                                errorListener.fetchError(artist);
+                                            }
+                                        });
 
-                        getArtistImageURL(artistMBID, new Response.Listener<JSONObject>() {
+                                    } catch (JSONException e) {
+                                        errorListener.fetchError(artist);
+                                    }
+                                }
+                            }, new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError error) {
+                                    errorListener.fetchError(artist);
+                                }
+                            });
+                        }
+                    } catch (JSONException e) {
+                        errorListener.fetchError(artist);
+                    }
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    NetworkResponse networkResponse = error.networkResponse;
+                    if (networkResponse != null && networkResponse.statusCode == 503) {
+                        // If MusicBrainz returns 503 this is probably because of rate limiting
+                        Log.e(TAG, "Rate limit reached");
+                        mRequestQueue.stop();
+                    } else {
+                        errorListener.fetchError(artist);
+                    }
+                }
+            });
+        }
+    }
+
+    private void tryArtistMBID(final int mbidIndex, final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+        if (mbidIndex < artist.getMBIDCount() ) {
+            getArtistImageURL(artist.getMBID(0), new Response.Listener<JSONObject>() {
+                @Override
+                public void onResponse(JSONObject response) {
+                    JSONArray thumbImages = null;
+                    try {
+                        thumbImages = response.getJSONArray("artistthumb");
+
+                        JSONObject firstThumbImage = thumbImages.getJSONObject(0);
+                        getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
                             @Override
-                            public void onResponse(JSONObject response) {
-                                JSONArray thumbImages = null;
-                                try {
-                                    thumbImages = response.getJSONArray("artistthumb");
-
-                                    JSONObject firstThumbImage = thumbImages.getJSONObject(0);
-                                    getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
-                                        @Override
-                                        public void onErrorResponse(VolleyError error) {
-                                            errorListener.fetchError(artist);
-                                        }
-                                    });
-
-                                } catch (JSONException e) {
+                            public void onErrorResponse(VolleyError error) {
+                                // If we have multiple artist mbids try the next one
+                                if ( mbidIndex + 1 < artist.getMBIDCount() ) {
+                                    tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
+                                } else {
+                                    // All tried
                                     errorListener.fetchError(artist);
                                 }
                             }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                errorListener.fetchError(artist);
-                            }
                         });
+
+                    } catch (JSONException e) {
+                        // If we have multiple artist mbids try the next one
+                        if ( mbidIndex + 1 < artist.getMBIDCount() ) {
+                            tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
+                        } else {
+                            // All tried
+                            errorListener.fetchError(artist);
+                        }
                     }
-                } catch (JSONException e) {
+                }
+            }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
                     errorListener.fetchError(artist);
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                NetworkResponse networkResponse = error.networkResponse;
-                if (networkResponse != null && networkResponse.statusCode == 503) {
-                    // If MusicBrainz returns 503 this is probably because of rate limiting
-                    Log.e(TAG,"Rate limit reached");
-                    mRequestQueue.stop();
-                } else {
-                    errorListener.fetchError(artist);
-                }
-            }
-        });
+            });
+        }
     }
 
     private void getArtists(String artistName, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
@@ -164,7 +210,7 @@ public class FanartTVManager implements ArtistImageProvider {
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getArtistImage(String url, MPDArtist artist, Response.Listener<Pair<byte[],MPDArtist>> listener, Response.ErrorListener errorListener) {
+    private void getArtistImage(String url, MPDArtist artist, Response.Listener<Pair<byte[], MPDArtist>> listener, Response.ErrorListener errorListener) {
         Log.v(FanartTVManager.class.getSimpleName(), url);
 
         Request<Pair<byte[], MPDArtist>> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
