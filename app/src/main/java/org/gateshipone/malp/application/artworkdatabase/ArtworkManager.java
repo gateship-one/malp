@@ -32,6 +32,8 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Pair;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
@@ -55,6 +57,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     private static ArtworkManager mInstance;
     private Context mContext;
+
+    private List<MPDAlbum> mAlbumList = null;
+    private List<MPDArtist> mArtistList = null;
+
+    private MPDAlbum mCurrentBulkAlbum = null;
+    private MPDArtist mCurrentBulkArtist = null;
 
     private ArtworkManager(Context context) {
 
@@ -413,7 +421,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      */
     @Override
     public void fetchError(MPDArtist artist) {
-        Log.e(TAG, "Error fetching: " + artist.getArtistName());
+        Log.e(TAG, "Error fetching artist: " + artist.getArtistName());
         // FIXME check if retrying again and again is a problem
         new InsertArtistImageTask().execute(new Pair<byte[], MPDArtist>(null, artist));
     }
@@ -425,7 +433,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      */
     @Override
     public void fetchError(MPDAlbum album) {
-        Log.e(TAG, "Fetch error for album: " + album.getName() + "-" + album.getArtistName());
+        Log.e(TAG, "Error fetching album: " + album.getName() + "-" + album.getArtistName());
         new InsertAlbumImageTask().execute(new Pair<byte[], MPDAlbum>(null, album));
     }
 
@@ -444,6 +452,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDArtist doInBackground(Pair<byte[], MPDArtist>... params) {
             Pair<byte[], MPDArtist> response = params[0];
+            if ( mCurrentBulkArtist == response.second ) {
+                fetchNextBulkArtist();
+            }
+
+
             if ( response.first == null ){
                 mDBManager.insertArtistImage(response.second, response.first);
                 return response.second;
@@ -463,7 +476,6 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             } else {
                 mDBManager.insertArtistImage(response.second, response.first);
             }
-
 
             return response.second;
         }
@@ -498,6 +510,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDAlbum doInBackground(Pair<byte[], MPDAlbum>... params) {
             Pair<byte[], MPDAlbum> response = params[0];
+            if ( mCurrentBulkAlbum == response.second ) {
+                fetchNextBulkAlbum();
+            }
+
             if ( response.first == null ){
                 mDBManager.insertAlbumImage(response.second, response.first);
                 return response.second;
@@ -540,12 +556,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         @Override
         protected Object doInBackground(List<MPDAlbum>... lists) {
-            List<MPDAlbum> albums = lists[0];
+            List<MPDAlbum> albumList = lists[0];
 
-            for (MPDAlbum album : albums) {
-                fetchAlbumImage(album);
-            }
-
+            Log.v(TAG, "Received " + albumList.size() + " albums for bulk loading");
+            mAlbumList = albumList;
+            fetchNextBulkAlbum();
             return null;
         }
     }
@@ -554,33 +569,80 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         @Override
         protected Object doInBackground(List<MPDArtist>... lists) {
-            List<MPDArtist> artists = lists[0];
+            List<MPDArtist> artistList = lists[0];
 
-            for (MPDArtist artist : artists) {
-                fetchArtistImage(artist);
-            }
-
+            Log.v(TAG, "Received " + artistList.size() + " artists for bulk loading");
+            mArtistList = artistList;
+            fetchNextBulkArtist();
             return null;
         }
     }
 
     public void bulkLoadImages() {
         Log.v(TAG, "Start bulk loading");
-        MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
-            @Override
-            public void handleAlbums(List<MPDAlbum> albumList) {
-                Log.v(TAG, "Received " + albumList.size() + " albums for bulk loading");
-                new ParseMPDAlbumListTask().execute(albumList);
-            }
-        });
+        if ( null == mAlbumList ) {
+            MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
+                @Override
+                public void handleAlbums(List<MPDAlbum> albumList) {
+                    new ParseMPDAlbumListTask().execute(albumList);
+                }
+            });
+        }
 
-        MPDQueryHandler.getArtists(new MPDResponseArtistList() {
-            @Override
-            public void handleArtists(List<MPDArtist> artistList) {
-                Log.v(TAG, "Received " + artistList.size() + " artists for bulk loading");
-                new ParseMPDArtistListTask().execute(artistList);
+        if ( null == mArtistList ) {
+            MPDQueryHandler.getArtists(new MPDResponseArtistList() {
+                @Override
+                public void handleArtists(List<MPDArtist> artistList) {
+                    new ParseMPDArtistListTask().execute(artistList);
+                }
+            });
+        }
+    }
+
+    private void fetchNextBulkAlbum() {
+        if ( null == mAlbumList ) {
+            return;
+        }
+        while (!mAlbumList.isEmpty() ) {
+            MPDAlbum album = mAlbumList.remove(0);
+            Log.v(TAG, "Bulk load next album: " + album.getName() + ":" + album.getArtistName() + " remaining: " + mAlbumList.size());
+            mCurrentBulkAlbum = album;
+
+            // Check if image already there
+            try {
+                mDBManager.getAlbumImage(album);
+                // If this does not throw the exception it already has an image.
+            } catch (ImageNotFoundException e) {
+                fetchAlbumImage(album);
+                return;
             }
-        });
+        }
+
+        mAlbumList = null;
+
+    }
+
+    private void fetchNextBulkArtist() {
+        if ( null == mArtistList ) {
+            return;
+        }
+        while (!mArtistList.isEmpty() ) {
+            MPDArtist artist = mArtistList.remove(0);
+            Log.v(TAG, "Bulk load next artist: " + artist.getArtistName()  + " remaining: " + mArtistList.size());
+            mCurrentBulkArtist = artist;
+
+            // Check if image already there
+            try {
+                mDBManager.getArtistImage(artist);
+                // If this does not throw the exception it already has an image.
+            } catch (ImageNotFoundException e) {
+                fetchArtistImage(artist);
+                return;
+            }
+        }
+
+        mArtistList = null;
+
     }
 
     /**
@@ -627,22 +689,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * it is important to cancel all requests when changing the provider in settings.
      */
     public void cancelAllRequests() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String artistProvider = sharedPref.getString("pref_artist_provider", "last_fm");
-        String albumProvider = sharedPref.getString("pref_album_provider", "musicbrainz");
-
-
-        if (artistProvider.equals("last_fm")) {
-            LastFMManager.getInstance(mContext).cancelAll();
-        } else if (artistProvider.equals("fanart_tv")) {
-            FanartTVManager.getInstance(mContext).cancelAll();
-        }
-
-        if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance(mContext).cancelAll();
-        } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance(mContext).cancelAll();
-        }
+        MALPRequestQueue.getInstance(mContext).cancelAll(new RequestQueue.RequestFilter() {
+            @Override
+            public boolean apply(Request<?> request) {
+                return true;
+            }
+        });
 
     }
 }

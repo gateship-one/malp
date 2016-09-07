@@ -227,6 +227,8 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
                         parseMusicBrainzReleaseJSON(album, releaseIndex+1, response, listener, errorListener);
                     }
                 });
+            } else {
+                errorListener.fetchError(album);
             }
         } catch (JSONException e) {
             e.printStackTrace();
