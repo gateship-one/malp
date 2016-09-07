@@ -67,7 +67,7 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
         if (mRequestQueue == null) {
             Cache cache = new NoCache();
             Network nw = new BasicNetwork(new HurlStack());
-            mRequestQueue = new RequestQueue(cache, nw, 1);
+            mRequestQueue = new RequestQueue(cache, nw, 2);
             mRequestQueue.start();
         }
         return mRequestQueue;
@@ -89,7 +89,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                     JSONObject artistObj = response.getJSONObject("artist");
                     // FIXME optionally get mbid here without aborting the image fetch
                     JSONArray images = artistObj.getJSONArray("image");
-                    Log.v(TAG, "Found: " + images.length() + "images");
                     for (int i = 0; i < images.length(); i++) {
                         JSONObject image = images.getJSONObject(i);
                         if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
@@ -98,7 +97,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                                 getArtistImage(image.getString("#text"), artist, listener, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        error.printStackTrace();
                                         errorListener.fetchError(artist);
                                     }
                                 });
@@ -108,14 +106,12 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                         }
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
                     errorListener.fetchError(artist);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
                 errorListener.fetchError(artist);
             }
         });
@@ -162,7 +158,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                     JSONObject albumObj = response.getJSONObject("album");
                     JSONArray images = albumObj.getJSONArray("image");
                     // FIXME optionally get mbid here without aborting the image fetch
-                    Log.v(TAG, "Found: " + images.length() + "images");
                     for (int i = 0; i < images.length(); i++) {
                         JSONObject image = images.getJSONObject(i);
                         if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
@@ -171,7 +166,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                                 getAlbumImage(image.getString("#text"), album, listener, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        error.printStackTrace();
                                         errorListener.fetchError(album);
                                     }
                                 });
@@ -182,7 +176,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                         }
                     }
                 } catch (JSONException e) {
-                    e.printStackTrace();
                 }
             }
         }, new Response.ErrorListener() {
