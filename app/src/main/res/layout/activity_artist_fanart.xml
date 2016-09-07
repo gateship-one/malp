@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2016  Hendrik Borghorst
+  ~
+  ~     This program is free software: you can redistribute it and/or modify
+  ~     it under the terms of the GNU General Public License as published by
+  ~     the Free Software Foundation, either version 3 of the License, or
+  ~     (at your option) any later version.
+  ~
+  ~     This program is distributed in the hope that it will be useful,
+  ~     but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~     GNU General Public License for more details.
+  ~
+  ~     You should have received a copy of the GNU General Public License
+  ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <ViewSwitcher
+        android:id="@+id/fanart_switcher"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:inAnimation="@anim/fade_in"
+        android:outAnimation="@anim/fade_out"
+        android:translationZ="-1dp">
+
+        <ImageView
+            android:id="@+id/fanart_view_0"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+        <ImageView
+            android:id="@+id/fanart_view_1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+    </ViewSwitcher>
+
+
+    <LinearLayout
+        android:id="@+id/information_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:translationZ="2dp"
+        android:orientation="horizontal">
+        <ImageButton
+            android:id="@+id/button_previous_track"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_previous_48dp"
+            android:tint="@color/colorTextLight" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:paddingBottom="@dimen/material_screen_edge_spacing"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textview_track_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TRACKTITLE"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/textview_track_album"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TRACKTITLE"
+                android:layout_gravity="center_horizontal" />
+
+            <TextView
+                android:id="@+id/textview_track_artist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TRACKTITLE"
+                android:layout_gravity="center_horizontal" />
+        </LinearLayout>
+        <ImageButton
+            android:id="@+id/button_next_track"
+            android:layout_width="0px"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="?android:selectableItemBackground"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_skip_next_48dp"
+            android:tint="@color/colorTextLight" />
+    </LinearLayout>
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@id/information_layout"
+        android:layout_alignParentBottom="true"
+        android:translationZ="1dp"
+        android:src="@drawable/gradient_gridview_item"/>
+
+
+</RelativeLayout>

@@ -102,4 +102,22 @@ public class MALPRequestQueue extends RequestQueue implements RequestQueue.Reque
 
         }
     }
+
+    /**
+     * Cancels all requests in this queue for which the given filter applies.
+     * @param filter The filtering function to use
+     */
+    public void cancelAll(RequestFilter filter) {
+        super.cancelAll(filter);
+        synchronized (mLimitingRequestQueue) {
+            for (Request<?> request : mLimitingRequestQueue) {
+                if (filter.apply(request)) {
+                    Log.v(TAG,"Canceling request: " + request);
+                    request.cancel();
+                    mLimitingRequestQueue.remove(request);
+                }
+            }
+        }
+    }
+
 }

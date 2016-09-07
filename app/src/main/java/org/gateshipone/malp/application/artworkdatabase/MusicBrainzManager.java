@@ -53,7 +53,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
 
     private static final String MUSICBRAINZ_FORMAT_JSON = "&fmt=json";
 
-    private static final int MUSICBRAINZ_LIMIT_RESULT_COUNT = 10;
+    private static final int MUSICBRAINZ_LIMIT_RESULT_COUNT = 3;
     private static final String MUSICBRAINZ_LIMIT_RESULT = "&limit=" + String.valueOf(MUSICBRAINZ_LIMIT_RESULT_COUNT);
 
     private MusicBrainzManager(Context context) {
@@ -208,30 +208,38 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
     }
 
     private void parseMusicBrainzReleaseJSON(final MPDAlbum album, final int releaseIndex, final JSONObject response, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener) {
-        if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT) {
+        Log.v(TAG,"Try release index:" + releaseIndex + " for album: " + album.getName());
+        if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT ) {
+            Log.e(TAG,"No more releases found for album: " + album.getName());
+            errorListener.fetchError(album);
             return;
         }
-
         try {
-            JSONArray releases = response.getJSONArray("releases");
+            final JSONArray releases = response.getJSONArray("releases");
+
+
             if ( releases.length() > releaseIndex) {
                 String mbid = releases.getJSONObject(releaseIndex).getString("id");
-                album.setMBID(mbid);
-
                 String url = COVERART_ARCHIVE_API_URL + "/" + "release/" + mbid + "/front-500";
 
                 getAlbumImage(url, album, listener, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.v(TAG,"No image found for: " + album.getName() + " with release index: " + releaseIndex);
-                        parseMusicBrainzReleaseJSON(album, releaseIndex+1, response, listener, errorListener);
+                        if ( releaseIndex + 1 < releases.length()) {
+                            Log.v(TAG,"Try next release for album: " + album.getName());
+                            parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
+                        } else {
+                            Log.v(TAG,"All releases exhausted for album: " + album.getName());
+                            errorListener.fetchError(album);
+                        }
                     }
                 });
             } else {
                 errorListener.fetchError(album);
             }
         } catch (JSONException e) {
-            e.printStackTrace();
+            errorListener.fetchError(album);
         }
 
     }
@@ -254,19 +262,9 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getAlbumImageURL(String releaseMBID, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        String url = COVERART_ARCHIVE_API_URL + "/" + "release/" + releaseMBID;
-
-        Log.v(TAG, "Requesting release image urls for: " + url);
-
-        MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
-
-        addToRequestQueue(jsonObjectRequest);
-    }
-
     private void getAlbumImage(String url, MPDAlbum album, Response.Listener<Pair<byte[], MPDAlbum>> listener, Response.ErrorListener errorListener) {
         Request<Pair<byte[], MPDAlbum>> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
-        Log.v(TAG,"Get image: " + url);
+        Log.v(TAG,"Get image: " + url + " for album: " + album.getName());
         addToRequestQueue(byteResponse);
     }
 

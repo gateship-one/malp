@@ -49,7 +49,14 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
-
+        <activity
+            android:name="org.gateshipone.malp.application.activities.FanartActivity"
+            android:label="FanartActivity"
+            android:parentActivityName=".application.activities.MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

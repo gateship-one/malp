@@ -41,4 +41,11 @@
         android:orderInCategory="100"
         android:title="@string/action_jump_to_current"
         app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_open_fanart"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_fullscreen_24dp"
+        android:title="@string/action_open_fanart"
+        app:showAsAction="never" />
 </menu>

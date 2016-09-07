@@ -513,12 +513,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             if ( mCurrentBulkAlbum == response.second ) {
                 fetchNextBulkAlbum();
             }
-
             if ( response.first == null ){
                 mDBManager.insertAlbumImage(response.second, response.first);
                 return response.second;
             }
 
+            Log.v(TAG,"Inserting image for album: " + response.second.getName());
             // Rescale them if to big
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;

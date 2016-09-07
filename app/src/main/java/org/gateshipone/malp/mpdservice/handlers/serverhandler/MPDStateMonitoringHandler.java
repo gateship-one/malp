@@ -273,6 +273,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     public static void registerStatusListener(MPDStatusChangeHandler handler) {
         if (null != handler) {
             getHandler().mStatusListeners.add(handler);
+            handler.newMPDTrackReady(getHandler().mLastFile);
         }
     }
 

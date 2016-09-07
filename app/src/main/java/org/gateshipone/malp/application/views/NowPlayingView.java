@@ -20,6 +20,7 @@ package org.gateshipone.malp.application.views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -45,6 +46,7 @@ import android.widget.ViewSwitcher;
 import java.util.Timer;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.activities.FanartActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
@@ -339,6 +341,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             case R.id.action_jump_to_current:
                 mPlaylistView.jumpToCurrentSong();
                 break;
+            case R.id.action_open_fanart:
+                Intent intent = new Intent(getContext(), FanartActivity.class);
+                getContext().startActivity(intent);
+                return true;
             default:
                 return false;
         }
@@ -807,6 +813,14 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                         MPDCommandHandler.setRandom(false);
                     }
                 }
+            }
+        });
+
+        mCoverImage.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(getContext(), FanartActivity.class);
+                getContext().startActivity(intent);
             }
         });
 
