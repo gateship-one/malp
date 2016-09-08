@@ -84,6 +84,11 @@ public class FanartActivity extends Activity {
     private ImageButton mStopButton;
 
     /**
+     * Seekbar used for seeking and informing the user of the current playback position.
+     */
+    private SeekBar mPositionSeekbar;
+
+    /**
      * Seekbar used for volume control of host
      */
     private SeekBar mVolumeSeekbar;
@@ -207,7 +212,9 @@ public class FanartActivity extends Activity {
             }
         });
 
-
+        // seekbar (position)
+        mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
+        mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
         mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
@@ -271,6 +278,11 @@ public class FanartActivity extends Activity {
         } else {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
         }
+
+        // Update position seekbar & textviews
+        mPositionSeekbar.setMax(status.getTrackLength());
+        mPositionSeekbar.setProgress(status.getElapsedTime());
+
         mLastStatus = status;
     }
 
@@ -531,6 +543,45 @@ public class FanartActivity extends Activity {
                 } else {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
                 }
+            }
+        }
+
+        /**
+         * Called if the user starts moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        /**
+         * Called if the user ends moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+    }
+
+    private class PositionSeekbarListener implements SeekBar.OnSeekBarChangeListener {
+        /**
+         * Called if the user drags the seekbar to a new position or the seekbar is altered from
+         * outside. Just do some seeking, if the action is done by the user.
+         *
+         * @param seekBar  Seekbar of which the progress was changed.
+         * @param progress The new position of the seekbar.
+         * @param fromUser If the action was initiated by the user.
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                // FIXME Check if it is better to just update if user releases the seekbar
+                // (network stress)
+                MPDCommandHandler.seekSeconds(progress);
             }
         }
 

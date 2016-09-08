@@ -973,8 +973,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         // Update position seekbar & textviews
-        mPositionSeekbar.setProgress(status.getElapsedTime());
         mPositionSeekbar.setMax(status.getTrackLength());
+        mPositionSeekbar.setProgress(status.getElapsedTime());
 
         mElapsedTime.setText(FormatHelper.formatTracktimeFromS(status.getElapsedTime()));
         mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
