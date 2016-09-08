@@ -28,6 +28,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
@@ -60,6 +62,8 @@ public class FanartActivity extends Activity {
     private TextView mTrackArtist;
 
     private MPDFile mLastTrack;
+    private MPDCurrentStatus mLastStatus;
+
 
     private ServerStatusListener mStateListener = null;
 
@@ -69,11 +73,22 @@ public class FanartActivity extends Activity {
     private int mNextFanart;
     private int mCurrentFanart;
 
+    private LinearLayout mInfoLayout;
+
     private ImageView mFanartView0;
     private ImageView mFanartView1;
 
     private ImageButton mNextButton;
     private ImageButton mPreviousButton;
+    private ImageButton mPlayPauseButton;
+    private ImageButton mStopButton;
+
+    /**
+     * Seekbar used for volume control of host
+     */
+    private SeekBar mVolumeSeekbar;
+    private ImageView mVolumeIcon;
+
 
     private FanartCacheManager mFanartCache;
 
@@ -114,6 +129,8 @@ public class FanartActivity extends Activity {
 
         setContentView(R.layout.activity_artist_fanart);
 
+        mInfoLayout = (LinearLayout)findViewById(R.id.information_layout);
+
         mTrackTitle = (TextView) findViewById(R.id.textview_track_title);
         mTrackAlbum = (TextView) findViewById(R.id.textview_track_album);
         mTrackArtist = (TextView) findViewById(R.id.textview_track_artist);
@@ -126,6 +143,9 @@ public class FanartActivity extends Activity {
 
         mPreviousButton = (ImageButton) findViewById(R.id.button_previous_track);
         mNextButton = (ImageButton) findViewById(R.id.button_next_track);
+        mStopButton = (ImageButton) findViewById(R.id.button_stop);
+        mPlayPauseButton = (ImageButton) findViewById(R.id.button_playpause);
+
 
         mPreviousButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -141,22 +161,64 @@ public class FanartActivity extends Activity {
             }
         });
 
+        mStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.stop();
+            }
+        });
+
+        mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (null != mLastStatus) {
+                    if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                        MPDCommandHandler.pause();
+                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                        MPDCommandHandler.play();
+                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+                        int lastIndex = mLastStatus.getCurrentSongIndex();
+                        if (lastIndex >= 0) {
+                            MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
+                        } else {
+                            MPDCommandHandler.playSongIndex(0);
+                        }
+                    }
+                }
+            }
+        });
+
 
         if (null == mStateListener) {
             mStateListener = new ServerStatusListener();
         }
 
-        mSwitcher.setOnClickListener(new View.OnClickListener() {
+        mInfoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (MPDStateMonitoringHandler.getLastStatus().getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                    MPDCommandHandler.pause();
-                } else {
-                    MPDCommandHandler.play();
-                }
+            public void onClick(View view) {
 
             }
         });
+
+        mSwitcher.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                updateFanartViews();
+            }
+        });
+
+
+
+        mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
+        mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
+        mVolumeIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.setVolume(0);
+            }
+        });
+        mVolumeSeekbar.setMax(100);
+        mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
         mFanartCache = new FanartCacheManager(getApplicationContext());
     }
@@ -180,6 +242,36 @@ public class FanartActivity extends Activity {
 
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
         cancelSwitching();
+    }
+
+    private void updateMPDStatus(MPDCurrentStatus status) {
+        MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+
+        // update play buttons
+        switch (state) {
+            case MPD_PLAYING:
+                mPlayPauseButton.setImageResource(R.drawable.ic_pause_circle_fill_48dp);
+                break;
+            case MPD_PAUSING:
+            case MPD_STOPPED:
+                mPlayPauseButton.setImageResource(R.drawable.ic_play_circle_fill_48dp);
+                break;
+        }
+
+        // Update volume seekbar
+        int volume = status.getVolume();
+        mVolumeSeekbar.setProgress(volume);
+
+        if ( volume >= 70 ) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
+        } else if ( volume >= 30 && volume < 70) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+        } else if ( volume > 0 && volume < 30 ) {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+        } else {
+            mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+        }
+        mLastStatus = status;
     }
 
     private void updateMPDCurrentTrack(final MPDFile track) {
@@ -317,7 +409,7 @@ public class FanartActivity extends Activity {
 
         @Override
         protected void onNewStatusReady(MPDCurrentStatus status) {
-
+            updateMPDStatus(status);
         }
 
         @Override
@@ -413,6 +505,53 @@ public class FanartActivity extends Activity {
             mSwitchTimer.cancel();
             mSwitchTimer.purge();
             mSwitchTimer = null;
+        }
+    }
+
+    private class VolumeSeekBarListener implements SeekBar.OnSeekBarChangeListener {
+        /**
+         * Called if the user drags the seekbar to a new position or the seekbar is altered from
+         * outside. Just do some seeking, if the action is done by the user.
+         *
+         * @param seekBar  Seekbar of which the progress was changed.
+         * @param progress The new position of the seekbar.
+         * @param fromUser If the action was initiated by the user.
+         */
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            if (fromUser) {
+                MPDCommandHandler.setVolume(progress);
+
+                if ( progress >= 70 ) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
+                } else if ( progress >= 30 && progress < 70) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+                } else if ( progress > 0 && progress < 30 ) {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+                } else {
+                    mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+                }
+            }
+        }
+
+        /**
+         * Called if the user starts moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
+        }
+
+        /**
+         * Called if the user ends moving the seekbar. We do not handle this for now.
+         *
+         * @param seekBar SeekBar that is used for dragging.
+         */
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            // TODO Auto-generated method stub
         }
     }
 }

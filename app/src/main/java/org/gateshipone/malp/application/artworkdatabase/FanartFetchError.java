@@ -21,5 +21,6 @@ package org.gateshipone.malp.application.artworkdatabase;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public interface FanartFetchError {
+    void imageListFetchError();
     void fanartFetchError(MPDFile track);
 }
