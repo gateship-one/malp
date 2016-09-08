@@ -271,8 +271,14 @@
     <string name="welcome_dialog_text">This application is a remote control for MPD. If you don\'t know MPD this application is probably useless for you, sorry :).\n\nTo use this application add a new profile with a add button in the upper right corner.\n\nIf you would like an music player based on the same interface, try Odyssey (https://github.com/gateship-one/odyssey).</string>
 
     <!-- About activity -->
+    <string name="artwork_provided_by">Artwork provided by:</string>
     <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>
     <string name="license_text">This application is licensed under the GPLv3 license.\nMaterial icons are licensed under the CC-BY license by Google.</string>
     <string name="sources_text">The source code is available on GitHub:\nhttps://github.com/gateship-one/malp</string>
     <string name="activity_about_version">Version: </string>
+
+    <string name="url_musicbrainz" translatable="false">https://www.musicbrainz.org</string>
+    <string name="url_lastfm" translatable="false">http://www.last.fm</string>
+    <string name="url_fanarttv" translatable="false">https://fanart.tv</string>
+
 </resources>
