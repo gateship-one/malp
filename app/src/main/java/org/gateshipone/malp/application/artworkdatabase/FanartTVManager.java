@@ -22,22 +22,20 @@ import android.net.Uri;
 import android.util.Log;
 import android.util.Pair;
 
-import com.android.volley.Cache;
-import com.android.volley.Network;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.BasicNetwork;
-import com.android.volley.toolbox.HurlStack;
-import com.android.volley.toolbox.NoCache;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     private static final String TAG = FanartTVManager.class.getSimpleName();
@@ -55,7 +53,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     private static final int MUSICBRAINZ_LIMIT_RESULT_COUNT = 1;
     private static final String MUSICBRAINZ_LIMIT_RESULT = "&limit=" + String.valueOf(MUSICBRAINZ_LIMIT_RESULT_COUNT);
 
-    private static final int FANART_COUNT_LIMIT = 10;
+    private static final int FANART_COUNT_LIMIT = 50;
 
 
     private static final String API_KEY = "c0cc5d1b6e807ce93e49d75e0e5d371b";
@@ -95,7 +93,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
                             JSONObject artistObj = artists.getJSONObject(0);
                             final String artistMBID = artistObj.getString("id");
 
-                            getArtistImageURL(artistMBID, new Response.Listener<JSONObject>() {
+                            queryArtistMBIDonFanartTV(artistMBID, new Response.Listener<JSONObject>() {
                                 @Override
                                 public void onResponse(JSONObject response) {
                                     JSONArray thumbImages = null;
@@ -148,7 +146,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
 
     private void tryArtistMBID(final int mbidIndex, final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
         if (mbidIndex < artist.getMBIDCount()) {
-            getArtistImageURL(artist.getMBID(0), new Response.Listener<JSONObject>() {
+            queryArtistMBIDonFanartTV(artist.getMBID(0), new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject response) {
                     JSONArray thumbImages = null;
@@ -199,7 +197,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getArtistImageURL(String artistMBID, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+    private void queryArtistMBIDonFanartTV(String artistMBID, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 
         Log.v(FanartTVManager.class.getSimpleName(), artistMBID);
 
@@ -228,8 +226,9 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         });
     }
 
+
     @Override
-    public void fetchArtistFanarts(final MPDFile track, final Response.Listener<Pair<byte[], MPDArtist>> listener, final FanartFetchError errorListener) {
+    public void getTrackArtistMBID(final MPDFile track, final Response.Listener<String> listener, final FanartFetchError errorListener) {
         // Create a dummy artist
         final MPDArtist artist;
         if (!track.getTrackAlbumArtist().isEmpty()) {
@@ -238,64 +237,56 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             artist = new MPDArtist(track.getTrackArtist());
         }
 
-        if ( !track.getTrackAlbumArtistMBID().isEmpty()) {
+        if (!track.getTrackAlbumArtistMBID().isEmpty()) {
             artist.addMBID(track.getTrackAlbumArtistMBID());
         }
 
-        if (artist.getMBIDCount() > 0) {
-            getArtistMBIDFanart(artist.getMBID(0),track,artist, listener, errorListener);
-        } else {
-            getArtists(artist.getArtistName(), new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    JSONArray artists = null;
-                    try {
-                        artists = response.getJSONArray("artists");
-
-                        if (!artists.isNull(0)) {
-                            JSONObject artistObj = artists.getJSONObject(0);
-                            final String artistMBID = artistObj.getString("id");
-                            getArtistMBIDFanart(artistMBID,track,artist, listener, errorListener);
-                        }
-                    }  catch (JSONException e) {
-                        errorListener.fanartFetchError(track);
-                    }
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    errorListener.fanartFetchError(track);
-                }
-            });
-        }
-    }
-
-    private void getArtistMBIDFanart(String mbid,final MPDFile track, final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final FanartFetchError errorListener ) {
-        getArtistImageURL(mbid, new Response.Listener<JSONObject>() {
+        getArtists(artist.getArtistName(), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
+                JSONArray artists = null;
                 try {
-                    JSONArray backgroundImages = response.getJSONArray("artistbackground");
-                    if (backgroundImages.length() == 0) {
-                        errorListener.fanartFetchError(track);
-                    } else {
-                        for (int i = 0; i < backgroundImages.length() && i < FANART_COUNT_LIMIT; i++) {
-                            JSONObject image = backgroundImages.getJSONObject(i);
-                            getArtistImage(image.getString("url"), artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
-                                @Override
-                                public void onResponse(Pair<byte[], MPDArtist> response) {
-                                    listener.onResponse(response);
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    error.printStackTrace();
-                                }
-                            });
-                        }
+                    artists = response.getJSONArray("artists");
+
+                    if (!artists.isNull(0)) {
+                        JSONObject artistObj = artists.getJSONObject(0);
+                        final String artistMBID = artistObj.getString("id");
+                        artist.addMBID(artistMBID);
+                        listener.onResponse(artistMBID);
                     }
                 } catch (JSONException e) {
                     errorListener.fanartFetchError(track);
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                errorListener.fanartFetchError(track);
+            }
+        });
+
+    }
+
+    @Override
+    public void getArtistFanartURLs(String mbid, final Response.Listener<List<String>> listener, final FanartFetchError errorListener) {
+        queryArtistMBIDonFanartTV(mbid, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                JSONArray backgroundImages = null;
+                try {
+                    backgroundImages = response.getJSONArray("artistbackground");
+                    if (backgroundImages.length() == 0) {
+                        errorListener.imageListFetchError();
+                    } else {
+                        ArrayList<String> urls = new ArrayList<>();
+                        for (int i = 0; i < backgroundImages.length() && i < FANART_COUNT_LIMIT; i++) {
+                            JSONObject image = backgroundImages.getJSONObject(i);
+                            urls.add(image.getString("url"));
+                        }
+                        listener.onResponse(urls);
+                    }
+                } catch (JSONException exception) {
+
                 }
             }
         }, new Response.ErrorListener() {
@@ -305,4 +296,15 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             }
         });
     }
+
+    @Override
+    public void getFanartImage(MPDFile track, String url, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
+        Log.v(TAG, "Loading artist fanart: " + url);
+
+        Request<FanartResponse> byteResponse = new FanartImageRequest(url, track, listener, errorListener);
+
+        addToRequestQueue(byteResponse);
+    }
+
+
 }

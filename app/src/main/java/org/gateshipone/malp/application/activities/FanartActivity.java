@@ -25,7 +25,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.Pair;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,21 +34,21 @@ import android.widget.ViewSwitcher;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-
+import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.FanartFetchError;
+import org.gateshipone.malp.application.artworkdatabase.FanartResponse;
 import org.gateshipone.malp.application.artworkdatabase.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -69,7 +68,6 @@ public class FanartActivity extends Activity {
 
     private int mNextFanart;
     private int mCurrentFanart;
-    private List<byte[]> mFanarts;
 
     private ImageView mFanartView0;
     private ImageView mFanartView1;
@@ -77,7 +75,10 @@ public class FanartActivity extends Activity {
     private ImageButton mNextButton;
     private ImageButton mPreviousButton;
 
+    private FanartCacheManager mFanartCache;
+
     View mDecorView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         // Read theme preference
@@ -122,7 +123,6 @@ public class FanartActivity extends Activity {
         mFanartView0 = (ImageView) findViewById(R.id.fanart_view_0);
         mFanartView1 = (ImageView) findViewById(R.id.fanart_view_1);
 
-        mFanarts = new ArrayList<>();
 
         mPreviousButton = (ImageButton) findViewById(R.id.button_previous_track);
         mNextButton = (ImageButton) findViewById(R.id.button_next_track);
@@ -157,6 +157,8 @@ public class FanartActivity extends Activity {
 
             }
         });
+
+        mFanartCache = new FanartCacheManager(getApplicationContext());
     }
 
     @Override
@@ -181,7 +183,7 @@ public class FanartActivity extends Activity {
     }
 
     private void updateMPDCurrentTrack(final MPDFile track) {
-        Log.v(TAG, "New track ready, updating");
+        Log.v(TAG, "New track ready, updating: " + track.getTrackTitle() + " - " + track.getTrackArtist());
         mTrackTitle.setText(track.getTrackTitle());
         mTrackAlbum.setText(track.getTrackAlbum());
         mTrackArtist.setText(track.getTrackArtist());
@@ -197,44 +199,118 @@ public class FanartActivity extends Activity {
             cancelSwitching();
             mFanartView0.setImageBitmap(null);
             mFanartView1.setImageBitmap(null);
+            mNextFanart = 0;
 
             // FIXME refresh artwork shown
-            synchronized (mFanarts) {
-                mFanarts.clear();
-                mCurrentFanart = -1;
-                mNextFanart = 0;
-                mLastTrack = track;
-
-                FanartTVManager.getInstance(getApplicationContext()).fetchArtistFanarts(track, new Response.Listener<Pair<byte[], MPDArtist>>() {
+            mCurrentFanart = -1;
+            mLastTrack = track;
+            if (track.getTrackArtistMBID() == null || track.getTrackArtistMBID().isEmpty()) {
+                Log.v(TAG, "Track is without MBID, manually resolving");
+                FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(track, new Response.Listener<String>() {
                     @Override
-                    public void onResponse(Pair<byte[], MPDArtist> response) {
-                        Log.v(TAG, "Received fanart");
-                        if (response.first != null && (response.second.getArtistName().equals(mLastTrack.getTrackAlbumArtist()) ||response.second.getArtistName().equals(mLastTrack.getTrackArtist() ))) {
-                            mFanarts.add(response.first);
-
-                            if ( mFanarts.size() == 1 ) {
-                                updateFanartViews();
-                                mSwitchTimer = new Timer();
-                                mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
-                            }
-                            if ( mCurrentFanart == (mFanarts.size() - 2)) {
-                                mNextFanart = (mCurrentFanart + 1) % mFanarts.size();
-                            }
-                            Log.v(TAG,"Fanarts available: " + mFanarts.size() + "pointer at: " + mNextFanart);
+                    public void onResponse(String response) {
+                        mLastTrack.setTrackArtistMBID(response);
+                        Log.v(TAG, "Track: " + track + " mLasttrack: " + mLastTrack);
+                        if (track == mLastTrack) {
+                            Log.v(TAG, "Got MBID for track");
+                            checkFanartAvailable();
                         }
                     }
                 }, new FanartFetchError() {
                     @Override
+                    public void imageListFetchError() {
+
+                    }
+
+                    @Override
                     public void fanartFetchError(MPDFile track) {
-                        Log.v(TAG, "Fanart fetch error");
+
                     }
                 });
-
+            } else {
+                checkFanartAvailable();
             }
         }
-        mLastTrack = track;
 
 
+    }
+
+    private void checkFanartAvailable() {
+        Log.v(TAG, "Check fanart for: " + mLastTrack.getTrackArtistMBID() + " - " + mLastTrack.getTrackArtist());
+        if (mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID()) == 0) {
+//            FanartTVManager.getInstance(getApplicationContext()).fetchArtistFanarts(mLastTrack, new Response.Listener<Pair<byte[], MPDArtist>>() {
+//                @Override
+//                public void onResponse(Pair<byte[], MPDArtist> response) {
+//                    Log.v(TAG, "Received fanart");
+//                    mFanartCache.addFanart(response.second.getMBID(0), String.valueOf(response.first.hashCode()),response.first);
+//                    int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID());
+//                    if (fanartCount == 1) {
+//                        updateFanartViews();
+//                    }
+//                    if (mCurrentFanart == (fanartCount - 2)) {
+//                        mNextFanart = (mCurrentFanart + 1) % fanartCount;
+//                    }
+//                    Log.v(TAG, "Fanarts available: " + fanartCount + "pointer at: " + mNextFanart);
+//                }
+//            }, new FanartFetchError() {
+//                @Override
+//                public void fanartFetchError(MPDFile track) {
+//                    Log.v(TAG, "Fanart fetch error");
+//                }
+//            });
+            syncFanart(mLastTrack);
+        } else {
+            Log.v(TAG, "Fanart available, use cached without fetching");
+            mNextFanart = 0;
+            updateFanartViews();
+            syncFanart(mLastTrack);
+        }
+    }
+
+    private void syncFanart(final MPDFile track) {
+        // Get a list of fanart urls for the current artist
+        FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), new Response.Listener<List<String>>() {
+            @Override
+            public void onResponse(List<String> response) {
+                // FIXME if already in cache
+                for (final String url : response) {
+                    if ( mFanartCache.inCache(track.getTrackArtistMBID(),String.valueOf(url.hashCode())) ) {
+                        continue;
+                    }
+                    FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, new Response.Listener<FanartResponse>() {
+                        @Override
+                        public void onResponse(FanartResponse response) {
+                            Log.v(TAG, "Received fanart with size: " + response.image.length);
+                            mFanartCache.addFanart(track.getTrackArtistMBID(), String.valueOf(response.url.hashCode()), response.image);
+
+                            int fanartCount = mFanartCache.getFanartCount(response.track.getTrackArtistMBID());
+                            if (fanartCount == 1) {
+                                updateFanartViews();
+                            }
+                            if (mCurrentFanart == (fanartCount - 2)) {
+                                mNextFanart = (mCurrentFanart + 1) % fanartCount;
+                            }
+                            Log.v(TAG, "Fanarts available: " + fanartCount + "pointer at: " + mNextFanart);
+                        }
+                    }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+
+                        }
+                    });
+                }
+            }
+        }, new FanartFetchError() {
+            @Override
+            public void imageListFetchError() {
+
+            }
+
+            @Override
+            public void fanartFetchError(MPDFile track) {
+
+            }
+        });
     }
 
     private class ServerStatusListener extends MPDStatusChangeHandler {
@@ -288,39 +364,47 @@ public class FanartActivity extends Activity {
 
 
     private void updateFanartViews() {
-        synchronized (mFanarts) {
-            if ( mFanarts.size() <= 1 && mCurrentFanart != -1 ) {
-                return;
-            }
-            if (mSwitcher.getDisplayedChild() == 0) {
-                Log.v(TAG,"Switching to view 1");
-                if (mNextFanart < mFanarts.size()) {
-                    byte[] imageBytes = mFanarts.get(mNextFanart);
-                    mCurrentFanart = mNextFanart;
-                    Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    if (image != null) {
-                        mFanartView1.setImageBitmap(image);
+        Log.v(TAG, "View update requested");
+        int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackAlbumArtistMBID());
 
-                        // Move pointer with wraparound
-                        mNextFanart = (mNextFanart + 1) % mFanarts.size();
-                    }
-                }
-                mSwitcher.setDisplayedChild(1);
-            } else {
-                Log.v(TAG,"Switching to view 0");
-                if (mNextFanart < mFanarts.size()) {
-                    byte[] imageBytes = mFanarts.get(mNextFanart);
-                    mCurrentFanart = mNextFanart;
-                    Bitmap image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    if (image != null) {
-                        mFanartView0.setImageBitmap(image);
+        if (mLastTrack == null || mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) {
+            Log.v(TAG, "No mbid in file");
+            return;
+        }
 
-                        // Move pointer with wraparound
-                        mNextFanart = (mNextFanart + 1) % mFanarts.size();
-                    }
+        String mbid = mLastTrack.getTrackArtistMBID();
+
+        if (mSwitcher.getDisplayedChild() == 0) {
+            Log.v(TAG, "Switching to view 1");
+            if (mNextFanart < fanartCount) {
+                mCurrentFanart = mNextFanart;
+                Bitmap image = BitmapFactory.decodeFile(mFanartCache.getFanart(mbid, mNextFanart).getPath());
+                if (image != null) {
+                    mFanartView1.setImageBitmap(image);
+
+                    // Move pointer with wraparound
+                    mNextFanart = (mNextFanart + 1) % fanartCount;
                 }
-                mSwitcher.setDisplayedChild(0);
             }
+            mSwitcher.setDisplayedChild(1);
+        } else {
+            Log.v(TAG, "Switching to view 0");
+            if (mNextFanart < fanartCount) {
+                mCurrentFanart = mNextFanart;
+                Bitmap image = BitmapFactory.decodeFile(mFanartCache.getFanart(mbid, mNextFanart).getPath());
+                if (image != null) {
+                    mFanartView0.setImageBitmap(image);
+
+                    // Move pointer with wraparound
+                    mNextFanart = (mNextFanart + 1) % fanartCount;
+                }
+            }
+            mSwitcher.setDisplayedChild(0);
+        }
+
+        if (mSwitchTimer == null) {
+            mSwitchTimer = new Timer();
+            mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
         }
     }
 
