@@ -51,6 +51,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoring
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
+import java.io.File;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -482,7 +483,11 @@ public class FanartActivity extends Activity {
             Log.v(TAG, "Switching to view 1");
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
-                Bitmap image = BitmapFactory.decodeFile(mFanartCache.getFanart(mbid, mNextFanart).getPath());
+                File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
+                if ( null == fanartFile) {
+                    return;
+                }
+                Bitmap image = BitmapFactory.decodeFile(fanartFile.getPath());
                 if (image != null) {
                     mFanartView1.setImageBitmap(image);
 
@@ -495,7 +500,11 @@ public class FanartActivity extends Activity {
             Log.v(TAG, "Switching to view 0");
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
-                Bitmap image = BitmapFactory.decodeFile(mFanartCache.getFanart(mbid, mNextFanart).getPath());
+                File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
+                if ( null == fanartFile) {
+                    return;
+                }
+                Bitmap image = BitmapFactory.decodeFile(fanartFile.getPath());
                 if (image != null) {
                     mFanartView0.setImageBitmap(image);
 
