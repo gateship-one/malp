@@ -1,21 +1,20 @@
 /*
- * Copyright (C) 2016  Hendrik Borghorst & Frederik Luetkes
+ * Copyright (C) 2016  Hendrik Borghorst
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *     This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.gateshipone.malp.application.artworkdatabase;
+package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 
 import android.content.Context;
 import android.net.Uri;
@@ -28,6 +27,13 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.requests.ArtistImageByteRequest;
+import org.gateshipone.malp.application.artworkdatabase.network.requests.FanartImageRequest;
+import org.gateshipone.malp.application.artworkdatabase.network.requests.MALPJsonObjectRequest;
+import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.json.JSONArray;
@@ -191,7 +197,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         Log.v(FanartTVManager.class.getSimpleName(), artistName);
 
         String url = MUSICBRAINZ_API_URL + "/" + "artist/?query=artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
-
+        Log.v(TAG,"Resolve artist: " + artistName + ": " + url);
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
         addToRequestQueue(jsonObjectRequest);
@@ -241,7 +247,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             artist.addMBID(track.getTrackAlbumArtistMBID());
         }
 
-        getArtists(artist.getArtistName(), new Response.Listener<JSONObject>() {
+        getArtists(Uri.encode(artist.getArtistName()), new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 JSONArray artists = null;

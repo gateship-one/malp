@@ -15,20 +15,19 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application.artworkdatabase;
+package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 
 
 import android.util.Pair;
 
 import com.android.volley.Response;
 
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
-import java.util.List;
 
-public interface FanartProvider {
-    void getTrackArtistMBID(final MPDFile track, final Response.Listener<String> listener, final FanartFetchError errorListener);
-    void getArtistFanartURLs(final String mbid, final Response.Listener<List<String>> listener, final FanartFetchError errorListener);
-    void getFanartImage(final MPDFile track, final String url, final Response.Listener<FanartResponse> listener, final  Response.ErrorListener errorListener);
+public interface AlbumImageProvider {
+
+    void fetchAlbumImage(final MPDAlbum album, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener);
+    void cancelAll();
 }

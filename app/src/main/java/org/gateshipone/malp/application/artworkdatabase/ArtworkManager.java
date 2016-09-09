@@ -36,6 +36,12 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 
+import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.LastFMManager;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MusicBrainzManager;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;

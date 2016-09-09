@@ -39,10 +39,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.artworkdatabase.FanartFetchError;
-import org.gateshipone.malp.application.artworkdatabase.FanartResponse;
-import org.gateshipone.malp.application.artworkdatabase.FanartTVManager;
-import org.gateshipone.malp.application.artworkdatabase.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
+import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;

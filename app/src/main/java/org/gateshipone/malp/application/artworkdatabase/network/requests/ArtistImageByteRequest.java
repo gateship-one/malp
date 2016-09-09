@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application.artworkdatabase;
+package org.gateshipone.malp.application.artworkdatabase.network.requests;
 
 import android.util.Pair;
 
