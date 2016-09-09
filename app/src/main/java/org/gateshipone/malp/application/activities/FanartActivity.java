@@ -45,6 +45,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.artprovider.Fana
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
@@ -67,6 +68,8 @@ public class FanartActivity extends Activity {
 
 
     private ServerStatusListener mStateListener = null;
+
+    private ServerConnectionHandler mConnectionListener;
 
     private ViewSwitcher mSwitcher;
     private Timer mSwitchTimer;
@@ -135,7 +138,7 @@ public class FanartActivity extends Activity {
 
         setContentView(R.layout.activity_artist_fanart);
 
-        mInfoLayout = (LinearLayout)findViewById(R.id.information_layout);
+        mInfoLayout = (LinearLayout) findViewById(R.id.information_layout);
 
         mTrackTitle = (TextView) findViewById(R.id.textview_track_title);
         mTrackAlbum = (TextView) findViewById(R.id.textview_track_album);
@@ -199,6 +202,10 @@ public class FanartActivity extends Activity {
             mStateListener = new ServerStatusListener();
         }
 
+        if (null == mConnectionListener) {
+            mConnectionListener = new ServerConnectionHandler();
+        }
+
         mInfoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -218,7 +225,7 @@ public class FanartActivity extends Activity {
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
-        mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
+        mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
         mVolumeIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -237,6 +244,7 @@ public class FanartActivity extends Activity {
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
+        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
         cancelSwitching();
         mSwitchTimer = new Timer();
         mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
@@ -253,6 +261,7 @@ public class FanartActivity extends Activity {
         super.onPause();
 
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
+        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
         cancelSwitching();
     }
 
@@ -274,11 +283,11 @@ public class FanartActivity extends Activity {
         int volume = status.getVolume();
         mVolumeSeekbar.setProgress(volume);
 
-        if ( volume >= 70 ) {
+        if (volume >= 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
-        } else if ( volume >= 30 && volume < 70) {
+        } else if (volume >= 30 && volume < 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-        } else if ( volume > 0 && volume < 30 ) {
+        } else if (volume > 0 && volume < 30) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
         } else {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
@@ -383,7 +392,7 @@ public class FanartActivity extends Activity {
             public void onResponse(List<String> response) {
                 // FIXME if already in cache
                 for (final String url : response) {
-                    if ( mFanartCache.inCache(track.getTrackArtistMBID(),String.valueOf(url.hashCode())) ) {
+                    if (mFanartCache.inCache(track.getTrackArtistMBID(), String.valueOf(url.hashCode()))) {
                         continue;
                     }
                     FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, new Response.Listener<FanartResponse>() {
@@ -488,7 +497,7 @@ public class FanartActivity extends Activity {
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
                 File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
-                if ( null == fanartFile) {
+                if (null == fanartFile) {
                     return;
                 }
                 Bitmap image = BitmapFactory.decodeFile(fanartFile.getPath());
@@ -505,7 +514,7 @@ public class FanartActivity extends Activity {
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
                 File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
-                if ( null == fanartFile) {
+                if (null == fanartFile) {
                     return;
                 }
                 Bitmap image = BitmapFactory.decodeFile(fanartFile.getPath());
@@ -547,11 +556,11 @@ public class FanartActivity extends Activity {
             if (fromUser) {
                 MPDCommandHandler.setVolume(progress);
 
-                if ( progress >= 70 ) {
+                if (progress >= 70) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
-                } else if ( progress >= 30 && progress < 70) {
+                } else if (progress >= 30 && progress < 70) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-                } else if ( progress > 0 && progress < 30 ) {
+                } else if (progress > 0 && progress < 30) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
                 } else {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
@@ -616,6 +625,18 @@ public class FanartActivity extends Activity {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             // TODO Auto-generated method stub
+        }
+    }
+
+    private class ServerConnectionHandler extends MPDConnectionStateChangeHandler {
+        @Override
+        public void onConnected() {
+            updateMPDStatus(MPDStateMonitoringHandler.getLastStatus());
+        }
+
+        @Override
+        public void onDisconnected() {
+            updateMPDStatus(new MPDCurrentStatus());
         }
     }
 }
