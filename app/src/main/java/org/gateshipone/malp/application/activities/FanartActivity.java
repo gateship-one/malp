@@ -59,6 +59,9 @@ import java.util.TimerTask;
 
 public class FanartActivity extends Activity {
     private static final String TAG = FanartActivity.class.getSimpleName();
+
+    private static final int FANART_SWITCH_TIME = 12 * 1000;
+
     private TextView mTrackTitle;
     private TextView mTrackAlbum;
     private TextView mTrackArtist;
@@ -216,6 +219,9 @@ public class FanartActivity extends Activity {
         mSwitcher.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                cancelSwitching();
+                mSwitchTimer = new Timer();
+                mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
                 updateFanartViews();
             }
         });
@@ -247,7 +253,7 @@ public class FanartActivity extends Activity {
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
         cancelSwitching();
         mSwitchTimer = new Timer();
-        mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
+        mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
 
         mTrackTitle.setSelected(true);
         mTrackArtist.setSelected(true);
@@ -263,6 +269,11 @@ public class FanartActivity extends Activity {
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
         cancelSwitching();
+
+        if (!isChangingConfigurations()) {
+            // Disconnect from MPD server
+            ConnectionManager.disconnectFromServer();
+        }
     }
 
     private void updateMPDStatus(MPDCurrentStatus status) {
@@ -530,7 +541,7 @@ public class FanartActivity extends Activity {
 
         if (mSwitchTimer == null) {
             mSwitchTimer = new Timer();
-            mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
+            mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
         }
     }
 
