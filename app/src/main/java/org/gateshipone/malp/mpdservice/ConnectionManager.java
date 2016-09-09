@@ -66,7 +66,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         mPassword = null;
     }
 
-    private static ConnectionManager getInstance() {
+    private synchronized static ConnectionManager getInstance() {
         if (null == mConnectionManager) {
             mConnectionManager = new ConnectionManager();
         }

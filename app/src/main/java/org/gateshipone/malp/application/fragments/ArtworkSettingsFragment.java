@@ -17,6 +17,7 @@
 
 package org.gateshipone.malp.application.fragments;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -27,6 +28,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkDatabaseManager;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 
 
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -82,7 +84,9 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         buldLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
-                ArtworkManager.getInstance(getContext()).bulkLoadImages();
+                Intent serviceIntent = new Intent(getActivity(), BulkDownloadService.class);
+                serviceIntent.setAction(BulkDownloadService.ACTION_START_BULKDOWNLOAD);
+                getActivity().startService(serviceIntent);
                 return true;
             }
         });

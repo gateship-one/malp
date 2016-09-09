@@ -281,4 +281,7 @@
     <string name="url_lastfm" translatable="false">http://www.last.fm</string>
     <string name="url_fanarttv" translatable="false">https://fanart.tv</string>
 
+    <!-- Bulk downloader service -->
+    <string name="downloader_notification_title">Bulk download running</string>
+    <string name="downloader_notification_remaining_images">Downloaded images:</string>
 </resources>

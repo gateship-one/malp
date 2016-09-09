@@ -66,11 +66,13 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     private static ArtworkManager mInstance;
     private Context mContext;
 
-    private List<MPDAlbum> mAlbumList = null;
-    private List<MPDArtist> mArtistList = null;
+    private final List<MPDAlbum> mAlbumList = new ArrayList<>();
+    private final List<MPDArtist> mArtistList = new ArrayList<>();
 
     private MPDAlbum mCurrentBulkAlbum = null;
     private MPDArtist mCurrentBulkArtist = null;
+
+    private BulkLoadingProgressCallback mBulkProgressCallback;
 
     private ArtworkManager(Context context) {
 
@@ -78,6 +80,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         mArtistListeners = new ArrayList<>();
         mAlbumListeners = new ArrayList<>();
+
 
         mContext = context;
 
@@ -468,12 +471,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDArtist doInBackground(ArtistImageResponse... params) {
             ArtistImageResponse response = params[0];
-            if ( mCurrentBulkArtist == response.artist ) {
+            if (mCurrentBulkArtist == response.artist) {
                 fetchNextBulkArtist();
             }
 
 
-            if ( response.image == null ){
+            if (response.image == null) {
                 mDBManager.insertArtistImage(response.artist, response.image);
                 return response.artist;
             }
@@ -526,15 +529,15 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         @Override
         protected MPDAlbum doInBackground(AlbumImageResponse... params) {
             AlbumImageResponse response = params[0];
-            if ( mCurrentBulkAlbum == response.album ) {
+            if (mCurrentBulkAlbum == response.album) {
                 fetchNextBulkAlbum();
             }
-            if ( response.image == null ){
+            if (response.image == null) {
                 mDBManager.insertAlbumImage(response.album, response.image);
                 return response.album;
             }
 
-            Log.v(TAG,"Inserting image for album: " + response.album.getName());
+            Log.v(TAG, "Inserting image for album: " + response.album.getName());
             // Rescale them if to big
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -574,9 +577,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         protected Object doInBackground(List<MPDAlbum>... lists) {
             List<MPDAlbum> albumList = lists[0];
 
+            mBulkProgressCallback.startAlbumLoading(albumList.size());
+
             Log.v(TAG, "Received " + albumList.size() + " albums for bulk loading");
-            mAlbumList = albumList;
-            fetchNextBulkAlbum();
+            synchronized (mAlbumList) {
+                mAlbumList.clear();
+                mAlbumList.addAll(albumList);
+            }
+            if ( !mArtistList.isEmpty() ) {
+                fetchNextBulkAlbum();
+                fetchNextBulkArtist();
+            }
             return null;
         }
     }
@@ -588,40 +599,52 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             List<MPDArtist> artistList = lists[0];
 
             Log.v(TAG, "Received " + artistList.size() + " artists for bulk loading");
-            mArtistList = artistList;
-            fetchNextBulkArtist();
+            mBulkProgressCallback.startArtistLoading(artistList.size());
+            synchronized (mArtistList) {
+                mArtistList.clear();
+                mArtistList.addAll(artistList);
+            }
+            if ( !mAlbumList.isEmpty() ) {
+                fetchNextBulkAlbum();
+                fetchNextBulkArtist();
+            }
             return null;
         }
     }
 
-    public void bulkLoadImages() {
+    public void bulkLoadImages(BulkLoadingProgressCallback progressCallback) {
+        if (progressCallback == null) {
+            return;
+        }
+        mBulkProgressCallback = progressCallback;
         Log.v(TAG, "Start bulk loading");
-        if ( null == mAlbumList ) {
-            MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
-                @Override
-                public void handleAlbums(List<MPDAlbum> albumList) {
-                    new ParseMPDAlbumListTask().execute(albumList);
-                }
-            });
-        }
-
-        if ( null == mArtistList ) {
-            MPDQueryHandler.getArtists(new MPDResponseArtistList() {
-                @Override
-                public void handleArtists(List<MPDArtist> artistList) {
-                    new ParseMPDArtistListTask().execute(artistList);
-                }
-            });
-        }
+        MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
+            @Override
+            public void handleAlbums(List<MPDAlbum> albumList) {
+                new ParseMPDAlbumListTask().execute(albumList);
+            }
+        });
+        MPDQueryHandler.getArtists(new MPDResponseArtistList() {
+            @Override
+            public void handleArtists(List<MPDArtist> artistList) {
+                new ParseMPDArtistListTask().execute(artistList);
+            }
+        });
     }
 
     private void fetchNextBulkAlbum() {
-        if ( null == mAlbumList ) {
-            return;
+        boolean isEmpty;
+        synchronized (mAlbumList) {
+            isEmpty = mAlbumList.isEmpty();
         }
-        while (!mAlbumList.isEmpty() ) {
-            MPDAlbum album = mAlbumList.remove(0);
-            Log.v(TAG, "Bulk load next album: " + album.getName() + ":" + album.getArtistName() + " remaining: " + mAlbumList.size());
+
+        while (!isEmpty) {
+            MPDAlbum album;
+            synchronized (mAlbumList) {
+                album = mAlbumList.remove(0);
+                Log.v(TAG, "Bulk load next album: " + album.getName() + ":" + album.getArtistName() + " remaining: " + mAlbumList.size());
+                mBulkProgressCallback.albumsRemaining(mAlbumList.size());
+            }
             mCurrentBulkAlbum = album;
 
             // Check if image already there
@@ -632,19 +655,27 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 fetchAlbumImage(album);
                 return;
             }
-        }
 
-        mAlbumList = null;
+            synchronized (mAlbumList) {
+                isEmpty = mAlbumList.isEmpty();
+            }
+        }
 
     }
 
     private void fetchNextBulkArtist() {
-        if ( null == mArtistList ) {
-            return;
+        boolean isEmpty;
+        synchronized (mArtistList) {
+            isEmpty = mArtistList.isEmpty();
         }
-        while (!mArtistList.isEmpty() ) {
-            MPDArtist artist = mArtistList.remove(0);
-            Log.v(TAG, "Bulk load next artist: " + artist.getArtistName()  + " remaining: " + mArtistList.size());
+
+        while (!isEmpty) {
+            MPDArtist artist;
+            synchronized (mArtistList) {
+                artist = mArtistList.remove(0);
+                Log.v(TAG, "Bulk load next artist: " + artist.getArtistName() + " remaining: " + mArtistList.size());
+                mBulkProgressCallback.artistsRemaining(mArtistList.size());
+            }
             mCurrentBulkArtist = artist;
 
             // Check if image already there
@@ -655,9 +686,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 fetchArtistImage(artist);
                 return;
             }
-        }
 
-        mArtistList = null;
+            synchronized (mArtistList) {
+                isEmpty = mArtistList.isEmpty();
+            }
+        }
 
     }
 
@@ -712,5 +745,27 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             }
         });
 
+        Log.v(TAG,"Stop bulk loading");
+        // Stop bulk loading as well
+        synchronized (mAlbumList) {
+            Log.v(TAG,"Albums in list: " + mAlbumList.size());
+            mAlbumList.clear();
+            Log.v(TAG,"Albums in list: " + mAlbumList.size());
+        }
+        Log.v(TAG,"Stop album bulk loading");
+        synchronized (mArtistList) {
+            mArtistList.clear();
+        }
+        Log.v(TAG,"Stop artist bulk loading");
+    }
+
+    public interface BulkLoadingProgressCallback {
+        void startAlbumLoading(int albumCount);
+
+        void startArtistLoading(int artistCount);
+
+        void albumsRemaining(int remainingAlbums);
+
+        void artistsRemaining(int remainingArtists);
     }
 }

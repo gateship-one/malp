@@ -57,6 +57,10 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+
+        <service android:name=".application.artworkdatabase.BulkDownloadService"
+            android:exported="false"
+            android:process=":downloadProcess"/>
     </application>
 
 </manifest>
