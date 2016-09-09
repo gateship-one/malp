@@ -59,29 +59,44 @@
 
             <TextView
                 android:id="@+id/textview_track_title"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="TRACKTITLE"
                 android:fontFamily="sans-serif-medium"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:gravity="center_horizontal"
                 android:textSize="@dimen/material_font_style_size_title"/>
 
             <TextView
                 android:id="@+id/textview_track_album"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="TRACKTITLE"
                 android:fontFamily="sans-serif-regular"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:gravity="center_horizontal"
                 android:textSize="@dimen/material_font_style_size_subheading"/>
 
             <TextView
                 android:id="@+id/textview_track_artist"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="TRACKTITLE"
                 android:fontFamily="sans-serif-regular"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:gravity="center_horizontal"
                 android:textSize="@dimen/material_font_style_size_subheading"/>
         </LinearLayout>
 

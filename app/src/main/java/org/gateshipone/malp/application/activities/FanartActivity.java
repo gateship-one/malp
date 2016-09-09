@@ -241,6 +241,10 @@ public class FanartActivity extends Activity {
         mSwitchTimer = new Timer();
         mSwitchTimer.schedule(new ViewSwitchTask(), 5000, 5000);
 
+        mTrackTitle.setSelected(true);
+        mTrackArtist.setSelected(true);
+        mTrackAlbum.setSelected(true);
+
         hideSystemUI();
     }
 
