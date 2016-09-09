@@ -27,11 +27,13 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.AlbumImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.ArtistImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.MALPJsonObjectRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.json.JSONArray;
@@ -70,7 +72,7 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
         mRequestQueue.add(req);
     }
 
-    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
 
 
         String artistURLName = Uri.encode(artist.getArtistName().replaceAll("/", " "));
@@ -111,16 +113,6 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
 
     }
 
-    @Override
-    public void cancelAll() {
-        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-            @Override
-            public boolean apply(Request<?> request) {
-                return true;
-            }
-        });
-    }
-
 
     private void getArtistImageURL(String artistName, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 
@@ -133,17 +125,17 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getArtistImage(String url, MPDArtist artist, Response.Listener<Pair<byte[], MPDArtist>> listener, Response.ErrorListener errorListener) {
+    private void getArtistImage(String url, MPDArtist artist, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(LastFMManager.class.getSimpleName(), url);
 
-        Request<Pair<byte[], MPDArtist>> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
+        Request<ArtistImageResponse> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
 
         addToRequestQueue(byteResponse);
     }
 
 
     @Override
-    public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener) {
+    public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
         getAlbumImageURL(album, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -192,10 +184,10 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getAlbumImage(String url, MPDAlbum album, Response.Listener<Pair<byte[], MPDAlbum>> listener, Response.ErrorListener errorListener) {
+    private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(LastFMManager.class.getSimpleName(), url);
 
-        Request<Pair<byte[], MPDAlbum>> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
+        Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
 
         addToRequestQueue(byteResponse);
     }

@@ -23,11 +23,10 @@ import android.util.Pair;
 import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 
 public interface AlbumImageProvider {
-
-    void fetchAlbumImage(final MPDAlbum album, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener);
-    void cancelAll();
+    void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener);
 }

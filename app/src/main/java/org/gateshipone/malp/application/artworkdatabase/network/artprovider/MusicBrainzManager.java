@@ -30,10 +30,12 @@ import com.android.volley.VolleyError;
 
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.AlbumImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.MALPJsonObjectRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.json.JSONArray;
@@ -72,7 +74,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         mRequestQueue.add(req);
     }
 
-    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
 
         String artistURLName = Uri.encode(artist.getArtistName());
 
@@ -152,7 +154,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getArtistImage(String url, Response.Listener<Pair<byte[], MPDArtist>> listener, Response.ErrorListener errorListener) {
+    private void getArtistImage(String url, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(MusicBrainzManager.class.getSimpleName(), url);
 
 //        Request<byte[]> byteResponse = new ArtistImageByteRequest(url, listener, errorListener);
@@ -161,7 +163,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
     }
 
     @Override
-    public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener) {
+    public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
 
         if ( album.getMBID().isEmpty()) {
             resolveAlbumMBID(album, listener, errorListener);
@@ -179,7 +181,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         }
     }
 
-    private void resolveAlbumMBID( final MPDAlbum album, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener ) {
+    private void resolveAlbumMBID( final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener ) {
         Log.v(TAG,"Manually resolving MBID");
         getAlbumMBID(album, new Response.Listener<JSONObject>() {
             @Override
@@ -206,7 +208,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         });
     }
 
-    private void parseMusicBrainzReleaseJSON(final MPDAlbum album, final int releaseIndex, final JSONObject response, final Response.Listener<Pair<byte[], MPDAlbum>> listener, final AlbumFetchError errorListener) {
+    private void parseMusicBrainzReleaseJSON(final MPDAlbum album, final int releaseIndex, final JSONObject response, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
         Log.v(TAG,"Try release index:" + releaseIndex + " for album: " + album.getName());
         if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT ) {
             Log.e(TAG,"No more releases found for album: " + album.getName());
@@ -261,20 +263,11 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getAlbumImage(String url, MPDAlbum album, Response.Listener<Pair<byte[], MPDAlbum>> listener, Response.ErrorListener errorListener) {
-        Request<Pair<byte[], MPDAlbum>> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
+    private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
+        Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
         Log.v(TAG,"Get image: " + url + " for album: " + album.getName());
         addToRequestQueue(byteResponse);
     }
 
-    @Override
-    public void cancelAll() {
-        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-            @Override
-            public boolean apply(Request<?> request) {
-                return true;
-            }
-        });
-    }
 
 }

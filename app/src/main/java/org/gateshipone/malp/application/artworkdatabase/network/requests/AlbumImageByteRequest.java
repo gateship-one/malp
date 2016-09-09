@@ -23,30 +23,37 @@ import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 
-public class AlbumImageByteRequest extends Request<Pair<byte[], MPDAlbum>> {
+public class AlbumImageByteRequest extends Request<AlbumImageResponse> {
 
-    private final Response.Listener<Pair<byte[], MPDAlbum>> mListener;
+    private final Response.Listener<AlbumImageResponse> mListener;
 
     private MPDAlbum mAlbum;
+    private String mUrl;
 
 
-    public AlbumImageByteRequest(String url, MPDAlbum album, Response.Listener<Pair<byte[], MPDAlbum>> listener, Response.ErrorListener errorListener) {
+    public AlbumImageByteRequest(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
         super(Method.GET, url, errorListener);
 
         mListener = listener;
         mAlbum = album;
+        mUrl = url;
     }
 
     @Override
-    protected Response<Pair<byte[], MPDAlbum>> parseNetworkResponse(NetworkResponse response) {
-        return Response.success(new Pair<byte[], MPDAlbum>(response.data, mAlbum), null);
+    protected Response<AlbumImageResponse> parseNetworkResponse(NetworkResponse response) {
+        AlbumImageResponse imageResponse = new AlbumImageResponse();
+        imageResponse.album = mAlbum;
+        imageResponse.image = response.data;
+        imageResponse.url = mUrl;
+        return Response.success(imageResponse, null);
     }
 
     @Override
-    protected void deliverResponse(Pair<byte[], MPDAlbum> response) {
+    protected void deliverResponse(AlbumImageResponse response) {
         mListener.onResponse(response);
     }
 

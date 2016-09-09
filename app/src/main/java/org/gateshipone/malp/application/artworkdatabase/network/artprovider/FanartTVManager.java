@@ -19,7 +19,6 @@ package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -28,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.ArtistImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.FanartImageRequest;
@@ -80,7 +80,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         mRequestQueue.add(req);
     }
 
-    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+    public void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
         if (artist.getMBIDCount() > 0) {
             Log.v(TAG, "Directly trying MPD MBID");
             tryArtistMBID(0, artist, listener, errorListener);
@@ -150,7 +150,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         }
     }
 
-    private void tryArtistMBID(final int mbidIndex, final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener) {
+    private void tryArtistMBID(final int mbidIndex, final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
         if (mbidIndex < artist.getMBIDCount()) {
             queryArtistMBIDonFanartTV(artist.getMBID(0), new Response.Listener<JSONObject>() {
                 @Override
@@ -214,24 +214,13 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         addToRequestQueue(jsonObjectRequest);
     }
 
-    private void getArtistImage(String url, MPDArtist artist, Response.Listener<Pair<byte[], MPDArtist>> listener, Response.ErrorListener errorListener) {
+    private void getArtistImage(String url, MPDArtist artist, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(FanartTVManager.class.getSimpleName(), url);
 
-        Request<Pair<byte[], MPDArtist>> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
+        Request<ArtistImageResponse> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
 
         addToRequestQueue(byteResponse);
     }
-
-    @Override
-    public void cancelAll() {
-        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-            @Override
-            public boolean apply(Request<?> request) {
-                return true;
-            }
-        });
-    }
-
 
     @Override
     public void getTrackArtistMBID(final MPDFile track, final Response.Listener<String> listener, final FanartFetchError errorListener) {

@@ -17,36 +17,40 @@
 
 package org.gateshipone.malp.application.artworkdatabase.network.requests;
 
-import android.util.Pair;
-
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 
-public class ArtistImageByteRequest extends Request<Pair<byte[], MPDArtist>> {
+public class ArtistImageByteRequest extends Request<ArtistImageResponse> {
 
-    private final Response.Listener<Pair<byte[], MPDArtist>> mListener;
+    private final Response.Listener<ArtistImageResponse> mListener;
 
     private MPDArtist mArtist;
+    private String mUrl;
 
-
-    public ArtistImageByteRequest(String url, MPDArtist artist, Response.Listener<Pair<byte[], MPDArtist>> listener, Response.ErrorListener errorListener) {
+    public ArtistImageByteRequest(String url, MPDArtist artist, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         super(Method.GET, url, errorListener);
 
         mListener = listener;
         mArtist = artist;
+        mUrl = url;
     }
 
     @Override
-    protected Response<Pair<byte[], MPDArtist>> parseNetworkResponse(NetworkResponse response) {
-        return Response.success(new Pair<byte[], MPDArtist>(response.data, mArtist), null);
+    protected Response<ArtistImageResponse> parseNetworkResponse(NetworkResponse response) {
+        ArtistImageResponse imageResponse = new ArtistImageResponse();
+        imageResponse.artist = mArtist;
+        imageResponse.image = response.data;
+        imageResponse.url = mUrl;
+        return Response.success(imageResponse, null);
     }
 
     @Override
-    protected void deliverResponse(Pair<byte[], MPDArtist> response) {
+    protected void deliverResponse(ArtistImageResponse response) {
         mListener.onResponse(response);
     }
 

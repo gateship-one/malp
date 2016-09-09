@@ -17,16 +17,12 @@
 
 package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 
-
-import android.util.Pair;
-
 import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 public interface ArtistImageProvider {
-
-    void fetchArtistImage(final MPDArtist artist, final Response.Listener<Pair<byte[], MPDArtist>> listener, final ArtistFetchError errorListener);
-    void cancelAll();
+    void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener);
 }

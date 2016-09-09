@@ -41,7 +41,9 @@ import org.gateshipone.malp.application.artworkdatabase.network.artprovider.Fana
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.LastFMManager;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MusicBrainzManager;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -273,16 +275,16 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (artistProvider.equals("last_fm")) {
-            LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
+            LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDArtist> response) {
+                public void onResponse(ArtistImageResponse response) {
                     new InsertArtistImageTask().execute(response);
                 }
             }, this);
         } else if (artistProvider.equals("fanart_tv")) {
-            FanartTVManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<Pair<byte[], MPDArtist>>() {
+            FanartTVManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDArtist> response) {
+                public void onResponse(ArtistImageResponse response) {
                     new InsertArtistImageTask().execute(response);
                 }
             }, this);
@@ -310,16 +312,16 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDAlbum> response) {
+                public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
         } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDAlbum> response) {
+                public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
@@ -352,16 +354,16 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (albumProvider.equals("musicbrainz")) {
-            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDAlbum> response) {
+                public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
         } else if (albumProvider.equals("last_fm")) {
-            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<Pair<byte[], MPDAlbum>>() {
+            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
-                public void onResponse(Pair<byte[], MPDAlbum> response) {
+                public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
@@ -429,7 +431,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     public void fetchError(MPDArtist artist) {
         Log.e(TAG, "Error fetching artist: " + artist.getArtistName());
         // FIXME check if retrying again and again is a problem
-        new InsertArtistImageTask().execute(new Pair<byte[], MPDArtist>(null, artist));
+        ArtistImageResponse imageResponse = new ArtistImageResponse();
+        imageResponse.artist = artist;
+        imageResponse.image = null;
+        imageResponse.url = null;
+        new InsertArtistImageTask().execute(imageResponse);
     }
 
     /**
@@ -440,14 +446,18 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     @Override
     public void fetchError(MPDAlbum album) {
         Log.e(TAG, "Error fetching album: " + album.getName() + "-" + album.getArtistName());
-        new InsertAlbumImageTask().execute(new Pair<byte[], MPDAlbum>(null, album));
+        AlbumImageResponse imageResponse = new AlbumImageResponse();
+        imageResponse.album = album;
+        imageResponse.image = null;
+        imageResponse.url = null;
+        new InsertAlbumImageTask().execute(imageResponse);
     }
 
     /**
      * AsyncTask to insert the images to the SQLdatabase. This is necessary as the Volley response
      * is handled in the UI thread.
      */
-    private class InsertArtistImageTask extends AsyncTask<Pair<byte[], MPDArtist>, Object, MPDArtist> {
+    private class InsertArtistImageTask extends AsyncTask<ArtistImageResponse, Object, MPDArtist> {
 
         /**
          * Inserts the image to the database.
@@ -456,34 +466,34 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
          * @return the artist model that was inserted to the database.
          */
         @Override
-        protected MPDArtist doInBackground(Pair<byte[], MPDArtist>... params) {
-            Pair<byte[], MPDArtist> response = params[0];
-            if ( mCurrentBulkArtist == response.second ) {
+        protected MPDArtist doInBackground(ArtistImageResponse... params) {
+            ArtistImageResponse response = params[0];
+            if ( mCurrentBulkArtist == response.artist ) {
                 fetchNextBulkArtist();
             }
 
 
-            if ( response.first == null ){
-                mDBManager.insertArtistImage(response.second, response.first);
-                return response.second;
+            if ( response.image == null ){
+                mDBManager.insertArtistImage(response.artist, response.image);
+                return response.artist;
             }
 
             // Rescale them if to big
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+            BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
             if ((options.outHeight > 500 || options.outWidth > 500)) {
                 Log.v(TAG, "Image to big, rescaling");
                 options.inJustDecodeBounds = false;
-                Bitmap bm = BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+                Bitmap bm = BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
-                mDBManager.insertArtistImage(response.second, byteStream.toByteArray());
+                mDBManager.insertArtistImage(response.artist, byteStream.toByteArray());
             } else {
-                mDBManager.insertArtistImage(response.second, response.first);
+                mDBManager.insertArtistImage(response.artist, response.image);
             }
 
-            return response.second;
+            return response.artist;
         }
 
         /**
@@ -505,7 +515,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * AsyncTask to insert the images to the SQLdatabase. This is necessary as the Volley response
      * is handled in the UI thread.
      */
-    private class InsertAlbumImageTask extends AsyncTask<Pair<byte[], MPDAlbum>, Object, MPDAlbum> {
+    private class InsertAlbumImageTask extends AsyncTask<AlbumImageResponse, Object, MPDAlbum> {
 
         /**
          * Inserts the image to the database.
@@ -514,33 +524,33 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
          * @return the album model that was inserted to the database.
          */
         @Override
-        protected MPDAlbum doInBackground(Pair<byte[], MPDAlbum>... params) {
-            Pair<byte[], MPDAlbum> response = params[0];
-            if ( mCurrentBulkAlbum == response.second ) {
+        protected MPDAlbum doInBackground(AlbumImageResponse... params) {
+            AlbumImageResponse response = params[0];
+            if ( mCurrentBulkAlbum == response.album ) {
                 fetchNextBulkAlbum();
             }
-            if ( response.first == null ){
-                mDBManager.insertAlbumImage(response.second, response.first);
-                return response.second;
+            if ( response.image == null ){
+                mDBManager.insertAlbumImage(response.album, response.image);
+                return response.album;
             }
 
-            Log.v(TAG,"Inserting image for album: " + response.second.getName());
+            Log.v(TAG,"Inserting image for album: " + response.album.getName());
             // Rescale them if to big
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
-            BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+            BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
             if ((options.outHeight > 500 || options.outWidth > 500)) {
                 Log.v(TAG, "Image to big, rescaling");
                 options.inJustDecodeBounds = false;
-                Bitmap bm = BitmapFactory.decodeByteArray(response.first, 0, response.first.length, options);
+                Bitmap bm = BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
-                mDBManager.insertAlbumImage(response.second, byteStream.toByteArray());
+                mDBManager.insertAlbumImage(response.album, byteStream.toByteArray());
             } else {
-                mDBManager.insertAlbumImage(response.second, response.first);
+                mDBManager.insertAlbumImage(response.album, response.image);
             }
 
-            return response.second;
+            return response.album;
         }
 
         /**
