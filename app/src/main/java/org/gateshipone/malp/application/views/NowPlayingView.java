@@ -723,7 +723,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 // report the change of the view
                 if (mDragStatusReceiver != null) {
                     // set view status
-                    if (mViewSwitcher.getCurrentView() == mCoverImage) {
+                    if (mViewSwitcher.getDisplayedChild() == 0) {
                         // cover image is shown
                         mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.COVER_VIEW);
                     } else {
@@ -907,8 +907,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // get the playbackservice, when the connection is successfully established the timer gets restarted
 
-        // FIXME connect with MPD again
-
         // Reenable scrolling views after resuming
         if (mTrackName != null) {
             mTrackName.setSelected(true);
@@ -1079,7 +1077,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
 
             // set view status
-            if (mViewSwitcher.getCurrentView() == mCoverImage) {
+            if (mViewSwitcher.getDisplayedChild() == 0) {
                 // cover image is shown
                 mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.COVER_VIEW);
             } else {
@@ -1101,16 +1099,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         switch (view) {
             case COVER_VIEW:
                 // change the view only if the requested view is not displayed
-                if (mViewSwitcher.getCurrentView() != mCoverImage) {
-                    mViewSwitcher.showNext();
-                }
+                mViewSwitcher.setDisplayedChild(0);
                 color = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
                 break;
             case PLAYLIST_VIEW:
                 // change the view only if the requested view is not displayed
-                if (mViewSwitcher.getCurrentView() != mPlaylistView) {
-                    mViewSwitcher.showNext();
-                }
+                mViewSwitcher.setDisplayedChild(1);
                 color = ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent);
                 break;
         }

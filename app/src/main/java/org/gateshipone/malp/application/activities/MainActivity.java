@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity
     private ActionBarDrawerToggle mDrawerToggle;
 
     private VIEW_SWITCHER_STATUS mNowPlayingViewSwitcherStatus;
-    private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus = null;
+    private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus;
 
     private MPDProfileManager mProfileManager;
 
@@ -466,6 +466,7 @@ public class MainActivity extends AppCompatActivity
 
                 // set view switcher status
                 if (mSavedNowPlayingViewSwitcherStatus != null) {
+                    Log.v(TAG,"Restoring switcher status: " + mSavedNowPlayingViewSwitcherStatus);
                     nowPlayingView.setViewSwitcherStatus(mSavedNowPlayingViewSwitcherStatus);
                     mNowPlayingViewSwitcherStatus = mSavedNowPlayingViewSwitcherStatus;
                 }
@@ -604,6 +605,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSwitchedViews(VIEW_SWITCHER_STATUS view) {
         mNowPlayingViewSwitcherStatus = view;
+        Log.v(TAG,"onSwitchedViews(" + view);
     }
 
     @Override
