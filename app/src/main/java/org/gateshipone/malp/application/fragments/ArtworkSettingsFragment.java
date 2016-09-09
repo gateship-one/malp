@@ -17,6 +17,7 @@
 
 package org.gateshipone.malp.application.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -29,9 +30,11 @@ import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkDatabaseManager;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
+import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 
 
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private FABFragmentCallback mFABCallback = null;
 
     /**
      * Called to do initial creation of a fragment.
@@ -103,8 +106,29 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 
         // set toolbar behaviour and title
-        MainActivity activity = (MainActivity) getActivity();
+
+        if (null != mFABCallback) {
+            mFABCallback.setupFAB(false, null);
+            mFABCallback.setupToolbar(getString(R.string.artwork_settings), false, false, false);
+        }
     }
+
+    /**
+     * Called when the fragment is first attached to its context.
+     */
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mFABCallback = (FABFragmentCallback) context;
+        } catch (ClassCastException e) {
+            mFABCallback = null;
+        }
+    }
+
 
     /**
      * Called when the Fragment is no longer resumed.
