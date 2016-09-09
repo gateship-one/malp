@@ -25,7 +25,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.Artist
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 
-public class ArtistImageByteRequest extends Request<ArtistImageResponse> {
+public class ArtistImageByteRequest extends MALPRequest<ArtistImageResponse> {
 
     private final Response.Listener<ArtistImageResponse> mListener;
 

@@ -27,7 +27,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumI
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 
-public class AlbumImageByteRequest extends Request<AlbumImageResponse> {
+public class AlbumImageByteRequest extends MALPRequest<AlbumImageResponse> {
 
     private final Response.Listener<AlbumImageResponse> mListener;
 
