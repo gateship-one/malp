@@ -20,6 +20,7 @@ package org.gateshipone.malp.application.activities;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -79,6 +80,7 @@ import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
@@ -356,7 +358,7 @@ public class MainActivity extends AppCompatActivity
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
                     return true;
                 case R.id.action_show_artist:
-                    onArtistSelected(track.getTrackArtist());
+                    onArtistSelected(new MPDArtist(track.getTrackArtist()));
                     return true;
                 case R.id.action_show_album:
                     onAlbumSelected(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
@@ -545,8 +547,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onArtistSelected(String artistname) {
-        Log.v(TAG, "Artist selected: " + artistname);
+    public void onArtistSelected(MPDArtist artist) {
+        Log.v(TAG, "Artist selected: " + artist);
 
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
@@ -559,7 +561,8 @@ public class MainActivity extends AppCompatActivity
         // Create fragment and give it an argument for the selected article
         AlbumsFragment newFragment = new AlbumsFragment();
         Bundle args = new Bundle();
-        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artistname);
+        args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artist.getArtistName());
+        args.putParcelable(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTIST, artist);
 
 
         newFragment.setArguments(args);
@@ -758,6 +761,13 @@ public class MainActivity extends AppCompatActivity
                 toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
             }
 
+        }
+    }
+
+    public void setupToolbarImage(Bitmap bm) {
+        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
+        if (collapsingImage != null) {
+            collapsingImage.setImageBitmap(bm);
         }
     }
 

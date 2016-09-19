@@ -20,6 +20,7 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
@@ -42,6 +43,7 @@ import org.gateshipone.malp.application.adapters.ArtistsAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
+import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -254,11 +256,11 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
         MPDArtist artist = (MPDArtist) mArtistAdapter.getItem(position);
 
-        mSelectedCallback.onArtistSelected(artist.getArtistName());
+        mSelectedCallback.onArtistSelected(artist);
     }
 
     public interface ArtistSelectedCallback {
-        void onArtistSelected(String artistname);
+        void onArtistSelected(MPDArtist artistname);
     }
 
 

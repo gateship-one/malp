@@ -23,6 +23,7 @@ import android.util.Log;
 
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public class CoverBitmapLoader {
@@ -48,6 +49,16 @@ public class CoverBitmapLoader {
         }
     }
 
+    public void getArtistImage(MPDArtist artist) {
+        if ( artist == null) {
+            return;
+        }
+
+        // start the loader thread to load the image async
+        Thread loaderThread = new Thread(new ArtistImageRunner(artist));
+        loaderThread.start();
+    }
+
     private class ImageRunner implements Runnable {
 
         /**
@@ -62,6 +73,30 @@ public class CoverBitmapLoader {
             } catch (ImageNotFoundException e) {
                 Log.v(TAG,"Image notfound");
                 ArtworkManager.getInstance(mContext).fetchAlbumImage(mTrack);
+            }
+        }
+    }
+
+    private class ArtistImageRunner implements Runnable {
+
+        private MPDArtist mArtist;
+
+        public ArtistImageRunner(MPDArtist artist) {
+            mArtist = artist;
+        }
+
+        /**
+         * Load the image for the given track from the mediastore.
+         */
+        @Override
+        public void run() {
+            try {
+                Bitmap artistImage = ArtworkManager.getInstance(mContext).getArtistImage(mArtist);
+                mListener.receiveBitmap(artistImage);
+                Log.v(TAG,"Image found");
+            } catch (ImageNotFoundException e) {
+                Log.v(TAG,"Image notfound");
+                ArtworkManager.getInstance(mContext).fetchArtistImage(mArtist);
             }
         }
     }

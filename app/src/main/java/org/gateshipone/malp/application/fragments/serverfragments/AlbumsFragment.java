@@ -20,12 +20,14 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,20 +45,24 @@ import org.gateshipone.malp.application.adapters.AlbumsAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumsLoader;
+import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 import java.util.List;
 
-public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener {
+public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener {
     public final static String TAG = AlbumsFragment.class.getSimpleName();
 
     /**
      * Definition of bundled extras
      */
     public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
+
+    public static final String BUNDLE_STRING_EXTRA_ARTIST = "artist";
 
     public static final String BUNDLE_STRING_EXTRA_PATH = "album_path";
 
@@ -79,11 +85,16 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private String mArtistName;
     private String mAlbumsPath;
 
+    private MPDArtist mArtist;
+
     private AlbumSelectedCallback mAlbumSelectCallback;
 
     private FABFragmentCallback mFABCallback = null;
 
     private boolean mUseList = false;
+
+    private CoverBitmapLoader mBitmapLoader;
+
 
 
     @Override
@@ -118,6 +129,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         if (null != args) {
             mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
             mAlbumsPath = args.getString(BUNDLE_STRING_EXTRA_PATH);
+            mArtist = args.getParcelable(BUNDLE_STRING_EXTRA_ARTIST);
         } else {
             mArtistName = "";
             mAlbumsPath = "";
@@ -150,6 +162,9 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             }
         });
 
+        mBitmapLoader = new CoverBitmapLoader(getContext(), this);
+
+
         return rootView;
     }
 
@@ -161,6 +176,9 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             if (null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 mFABCallback.setupToolbar(mArtistName, false, false, false);
+                if ( mArtist != null) {
+                    mBitmapLoader.getArtistImage(mArtist);
+                }
             } else if (null != mAlbumsPath && !mAlbumsPath.equals(""))  {
                 String lastPath = mAlbumsPath;
                 String pathSplit[] = mAlbumsPath.split("/");
@@ -344,6 +362,21 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         } else {
             // If the album has an artist, use it as the filtering criteria
             mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName(), album.getMBID());
+        }
+    }
+
+    @Override
+    public void receiveBitmap(final Bitmap bm) {
+        if ( null != mFABCallback ) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Log.v(TAG,"Got image: " + bm.getWidth() + ":" +bm.getHeight());
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
+                    mFABCallback.setupToolbarImage(bm);
+                }
+            });
+
         }
     }
 

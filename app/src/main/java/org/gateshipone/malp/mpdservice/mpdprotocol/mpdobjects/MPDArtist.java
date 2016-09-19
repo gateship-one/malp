@@ -18,9 +18,12 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.ArrayList;
 
-public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
+public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcelable {
     /* Artist properties */
     private String pArtistName;
 
@@ -33,6 +36,24 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
         pArtistName = name;
         pMBIDs = new ArrayList<>();
     }
+
+    protected MPDArtist(Parcel in) {
+        pArtistName = in.readString();
+        pMBIDs = in.createStringArrayList();
+        mImageFetching = in.readByte() != 0;
+    }
+
+    public static final Creator<MPDArtist> CREATOR = new Creator<MPDArtist>() {
+        @Override
+        public MPDArtist createFromParcel(Parcel in) {
+            return new MPDArtist(in);
+        }
+
+        @Override
+        public MPDArtist[] newArray(int size) {
+            return new MPDArtist[size];
+        }
+    };
 
     public String getArtistName() {
         return pArtistName;
@@ -88,5 +109,18 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist> {
 
     public synchronized boolean getFetching() {
         return mImageFetching;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(pArtistName);
+        String[] mbids = pMBIDs.toArray(new String[pMBIDs.size()]);
+        dest.writeStringArray(mbids);
+        dest.writeByte(mImageFetching ? (byte)1 : (byte)0);
     }
 }
