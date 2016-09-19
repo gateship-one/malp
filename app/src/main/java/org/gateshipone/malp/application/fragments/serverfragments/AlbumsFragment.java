@@ -367,11 +367,10 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
     @Override
     public void receiveBitmap(final Bitmap bm) {
-        if ( null != mFABCallback ) {
+        if ( null != mFABCallback && bm != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Log.v(TAG,"Got image: " + bm.getWidth() + ":" +bm.getHeight());
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
                     mFABCallback.setupToolbarImage(bm);
                 }
