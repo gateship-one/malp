@@ -85,7 +85,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         if (data == null) {
             mModelData.clear();
         } else {
-            mModelData = data;
+            mModelData.clear();
+            mModelData.addAll(data);
         }
         synchronized (mFilteredModelData) {
             mFilteredModelData.clear();
