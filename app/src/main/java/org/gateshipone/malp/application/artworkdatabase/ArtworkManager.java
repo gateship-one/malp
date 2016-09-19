@@ -660,6 +660,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 isEmpty = mAlbumList.isEmpty();
             }
         }
+        if ( mArtistList.isEmpty() ) {
+            mBulkProgressCallback.finishedLoading();
+        }
 
     }
 
@@ -690,6 +693,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             synchronized (mArtistList) {
                 isEmpty = mArtistList.isEmpty();
             }
+        }
+
+        if ( mAlbumList.isEmpty() ) {
+            mBulkProgressCallback.finishedLoading();
         }
 
     }
@@ -757,6 +764,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             mArtistList.clear();
         }
         Log.v(TAG,"Stop artist bulk loading");
+
+        mBulkProgressCallback.finishedLoading();
     }
 
     public interface BulkLoadingProgressCallback {
@@ -767,5 +776,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         void albumsRemaining(int remainingAlbums);
 
         void artistsRemaining(int remainingArtists);
+
+        void finishedLoading();
     }
 }

@@ -171,6 +171,14 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         updateNotification();
     }
 
+    @Override
+    public void finishedLoading() {
+        mNotificationManager.cancel(NOTIFICATION_ID);
+        stopForeground(true);
+        MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
+        stopSelf();
+    }
+
     private void updateNotification() {
         if ((mSumImageDownloads - (mRemainingArtists + mRemainingAlbums)) % 10 == 0) {
             mBuilder.setProgress(mSumImageDownloads, mSumImageDownloads - (mRemainingArtists + mRemainingAlbums), false);
