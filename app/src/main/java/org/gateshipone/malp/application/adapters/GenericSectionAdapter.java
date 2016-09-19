@@ -44,7 +44,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     protected List<T> mModelData;
 
-    protected List<T> mFilteredModelData;
+    protected final List<T> mFilteredModelData;
 
     private String mFilterString;
 
@@ -52,6 +52,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      * Variable to store the current scroll speed. Used for image view optimizations
      */
     protected int mScrollSpeed;
+
+
+    /**
+     * Task used to do the filtering of the list asynchronously
+     */
+    private FilterTask mFilterTask;
 
 
     public GenericSectionAdapter() {
@@ -62,6 +68,9 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         mPositionSectionMap = new HashMap<>();
 
         mModelData = new ArrayList<>();
+
+        mFilteredModelData = new ArrayList<>();
+        mFilterString = "";
     }
 
     /**
@@ -78,8 +87,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         } else {
             mModelData = data;
         }
-        // create sectionlist for fastscrolling
+        synchronized (mFilteredModelData) {
+            mFilteredModelData.clear();
+        }
 
+        // create sectionlist for fastscrolling
         createSections();
 
         notifyDataSetChanged();
@@ -105,7 +117,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     @Override
     public int getSectionForPosition(int pos) {
 
-        String sectionTitle = mModelData.get(pos).getSectionTitle();
+        String sectionTitle = ((MPDGenericItem)getItem(pos)).getSectionTitle();
 
         char itemSection;
         if (sectionTitle.length() > 0) {
@@ -134,11 +146,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     @Override
     public int getCount() {
-
-        if (mFilteredModelData != null) {
-            return mFilteredModelData.size();
-        } else {
-            return mModelData.size();
+        synchronized (mFilteredModelData) {
+            if (!mFilteredModelData.isEmpty() || !mFilterString.isEmpty()) {
+                return mFilteredModelData.size();
+            } else {
+                return mModelData.size();
+            }
         }
     }
 
@@ -150,10 +163,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     @Override
     public Object getItem(int position) {
-        if (mFilteredModelData != null) {
-            return mFilteredModelData.get(position);
-        } else {
-            return mModelData.get(position);
+        synchronized (mFilteredModelData) {
+            if (!mFilteredModelData.isEmpty() || !mFilterString.isEmpty()) {
+                return mFilteredModelData.get(position);
+            } else {
+                return mModelData.get(position);
+            }
         }
     }
 
@@ -182,16 +197,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         mSectionPositions.clear();
         mPositionSectionMap.clear();
 
-        List<T> sectionList;
-
-        if (mFilteredModelData != null) {
-            sectionList = mFilteredModelData;
-        } else {
-            sectionList = mModelData;
-        }
-
-        if (sectionList.size() > 0) {
-            MPDGenericItem currentModel = sectionList.get(0);
+        if (getCount() > 0) {
+            MPDGenericItem currentModel = (MPDGenericItem) getItem(0);
 
             char lastSection;
             if (currentModel.getSectionTitle().length() > 0) {
@@ -206,7 +213,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
             for (int i = 1; i < getCount(); i++) {
 
-                currentModel = sectionList.get(i);
+                currentModel = (MPDGenericItem) getItem(i);
 
                 char currentSection;
                 if (currentModel.getSectionTitle().length() > 0) {
@@ -231,15 +238,25 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     public void applyFilter(String filterString) {
         if (!filterString.equals(mFilterString)) {
             mFilterString = filterString;
+            if (mFilterTask != null) {
+                mFilterTask.cancel(true);
+            }
+            mFilterTask = new FilterTask();
+            mFilterTask.execute(filterString);
         }
-        new FilterTask().execute(filterString);
+
     }
 
     public void removeFilter() {
-        if (mFilterString != null && !mFilterString.isEmpty()) {
-            mFilteredModelData = null;
+        if (!mFilterString.isEmpty()) {
+            synchronized (mFilteredModelData) {
+                mFilteredModelData.clear();
+            }
+
+            mFilterString = "";
 
             createSections();
+
         }
     }
 
@@ -247,11 +264,16 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
         @Override
         protected Pair<List<T>, String> doInBackground(String... lists) {
-            ArrayList<T> resultList = new ArrayList<>();
+            List<T> resultList = new ArrayList<>();
 
             String filterString = lists[0];
 
             for (T elem : mModelData) {
+                // Check if task was cancelled from the outside.
+                if (isCancelled()) {
+                    resultList.clear();
+                    return new Pair<>(resultList, filterString);
+                }
                 if (elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase())) {
                     resultList.add(elem);
                 }
@@ -261,8 +283,13 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         }
 
         protected void onPostExecute(Pair<List<T>, String> result) {
-            if (mFilterString.equals(result.second)) {
-                mFilteredModelData = result.first;
+            if (!isCancelled() && mFilterString.equals(result.second)) {
+
+                synchronized (mFilteredModelData) {
+                    mFilteredModelData.clear();
+
+                    mFilteredModelData.addAll(result.first);
+                }
                 createSections();
             }
         }
