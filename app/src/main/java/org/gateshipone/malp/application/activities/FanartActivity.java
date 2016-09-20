@@ -19,9 +19,12 @@ package org.gateshipone.malp.application.activities;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -39,6 +42,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
@@ -329,10 +333,11 @@ public class FanartActivity extends Activity {
             mFanartView1.setImageBitmap(null);
             mNextFanart = 0;
 
+
             // FIXME refresh artwork shown
             mCurrentFanart = -1;
             mLastTrack = track;
-            if (track.getTrackArtistMBID() == null || track.getTrackArtistMBID().isEmpty()) {
+            if ((track.getTrackArtistMBID() == null || track.getTrackArtistMBID().isEmpty()) && downloadAllowed()) {
                 FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(track, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
@@ -372,6 +377,9 @@ public class FanartActivity extends Activity {
 
     private void syncFanart(final MPDFile track) {
         // Get a list of fanart urls for the current artist
+        if ( !downloadAllowed() ) {
+            return;
+        }
         FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), new Response.Listener<List<String>>() {
             @Override
             public void onResponse(List<String> response) {
@@ -519,6 +527,20 @@ public class FanartActivity extends Activity {
             mSwitchTimer.purge();
             mSwitchTimer = null;
         }
+    }
+
+    private boolean downloadAllowed() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        ConnectivityManager cm =
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (null == netInfo) {
+            return false;
+        }
+        boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+        boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
+        return isWifi || !wifiOnly;
     }
 
     private class VolumeSeekBarListener implements SeekBar.OnSeekBarChangeListener {

@@ -91,13 +91,6 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
         mSumImageDownloads = 0;
 
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MALP_BulkDownloader");
-
-        // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
-        mWakelock.acquire();
-
         mConnectionStateChangeReceiver = new ConnectionStateReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -124,6 +117,24 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
         if (intent.getAction().equals(ACTION_START_BULKDOWNLOAD)) {
             Log.v(TAG, "Starting bulk download in service with thread id: " + Thread.currentThread().getId());
+
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(BulkDownloadService.this);
+            ConnectivityManager cm =
+                    (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            if (null == netInfo) {
+                return START_NOT_STICKY;
+            }
+            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+            boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
+
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MALP_BulkDownloader");
+
+            // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
+            mWakelock.acquire();
             ConnectionManager.reconnectLastServer(this);
         }
         return START_STICKY;
