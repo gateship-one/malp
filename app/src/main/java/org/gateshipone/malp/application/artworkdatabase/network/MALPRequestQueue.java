@@ -72,18 +72,13 @@ public class MALPRequestQueue extends RequestQueue implements RequestQueue.Reque
         return mInstance;
     }
 
-    @Override
-    public void onRequestFinished(Request request) {
-        Log.v(TAG,"Request finished");
-    }
-
 
     @Override
     public <T> Request<T> add(Request<T> request) {
         if ( null == request ) {
             return null;
         }
-        Log.v(TAG,"RATE LIMITING REQUEST ADDED");
+        // Add a request to the internal queue
         synchronized (mLimitingRequestQueue ) {
             mLimitingRequestQueue.add(request);
             if (null == mLimiterTimer) {
@@ -100,20 +95,24 @@ public class MALPRequestQueue extends RequestQueue implements RequestQueue.Reque
         super.add(request);
     }
 
+    @Override
+    public void onRequestFinished(Request request) {
+        // Nothing done here
+    }
+
     private class LimiterTask extends TimerTask {
         @Override
         public void run() {
             synchronized (mLimitingRequestQueue ) {
                 Request request = mLimitingRequestQueue.poll();
                 if (null != request) {
+                    // Forward the request to the volley request queue
                     realAddRequest(request);
-                    Log.v(TAG,"RATE LIMITING FORWARED");
                 } else {
                     // Stop the timer, no requests left
                     mLimiterTimer.cancel();
                     mLimiterTimer.purge();
                     mLimiterTimer = null;
-                    Log.v(TAG,"RATE LIMITING EMPTY, STOPPING");
                 }
             }
 
@@ -129,7 +128,6 @@ public class MALPRequestQueue extends RequestQueue implements RequestQueue.Reque
         synchronized (mLimitingRequestQueue) {
             for (Request<?> request : mLimitingRequestQueue) {
                 if (filter.apply(request)) {
-                    Log.v(TAG,"Canceling request: " + request);
                     request.cancel();
                     mLimitingRequestQueue.remove(request);
                 }
