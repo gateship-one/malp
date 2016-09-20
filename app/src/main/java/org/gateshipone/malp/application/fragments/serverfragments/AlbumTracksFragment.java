@@ -18,6 +18,7 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
@@ -39,30 +40,28 @@ import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
+import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 import java.util.List;
 
-public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
+public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener {
     public final static String TAG = AlbumTracksFragment.class.getSimpleName();
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
      * retrieve from the MPD server.
      */
-    public static final String BUNDLE_STRING_EXTRA_ARTISTNAME = "artistname";
-    public static final String BUNDLE_STRING_EXTRA_ALBUMNAME = "albumname";
-    public static final String BUNDLE_STRING_EXTRA_ALBUMMBID = "albumMBID";
+    public static final String BUNDLE_STRING_EXTRA_ALBUM = "album";
 
     /**
      * Album definition variables
      */
-    private String mAlbumName;
-    private String mArtistName;
-    private String mAlbumMBID;
+    private MPDAlbum mAlbum;
 
     /**
      * Main ListView of this fragment
@@ -76,6 +75,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     private FileAdapter mFileAdapter;
 
+    private CoverBitmapLoader mBitmapLoader;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -87,9 +88,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
         if (null != args) {
-            mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
-            mAlbumName = args.getString(BUNDLE_STRING_EXTRA_ALBUMNAME);
-            mAlbumMBID = args.getString(BUNDLE_STRING_EXTRA_ALBUMMBID);
+            mAlbum = args.getParcelable(BUNDLE_STRING_EXTRA_ALBUM);
         }
 
         // Create the needed adapter for the ListView
@@ -117,6 +116,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
         setHasOptionsMenu(true);
 
+        mBitmapLoader = new CoverBitmapLoader(getContext(), this);
+
         // Return the ready inflated and configured fragment view.
         return rootView;
     }
@@ -131,7 +132,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
         if (null != mFABCallback) {
             mFABCallback.setupFAB(true, new FABOnClickListener());
-            mFABCallback.setupToolbar(mAlbumName, false, false, false);
+            mFABCallback.setupToolbar(mAlbum.getName(), false, false, false);
+        }
+
+        if (mAlbum != null) {
+            mBitmapLoader.getAlbumImage(mAlbum);
         }
     }
 
@@ -161,7 +166,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(), mAlbumName, mArtistName, mAlbumMBID);
+        return new AlbumTracksLoader(getActivity(), mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
     }
 
     /**
@@ -282,8 +287,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 enqueueAlbum();
                 return true;
             case R.id.action_show_all_tracks:
-                mArtistName = "";
-                mAlbumMBID = "";
+                mAlbum.setMBID("");
+                mAlbum.setArtistName("");
                 getLoaderManager().destroyLoader(0);
 
                 getLoaderManager().initLoader(0, getArguments(), this);
@@ -313,7 +318,20 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     }
 
     private void enqueueAlbum() {
-        MPDQueryHandler.addArtistAlbum(mAlbumName, mArtistName, mAlbumMBID);
+        MPDQueryHandler.addArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+    }
+
+    @Override
+    public void receiveBitmap(final Bitmap bm) {
+        if (null != mFABCallback && bm != null) {
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
+                    mFABCallback.setupToolbarImage(bm);
+                }
+            });
+        }
     }
 
     private class FABOnClickListener implements View.OnClickListener {
@@ -322,7 +340,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         public void onClick(View v) {
             MPDCommandHandler.setRandom(false);
             MPDCommandHandler.setRepeat(false);
-            MPDQueryHandler.playArtistAlbum(mAlbumName, mArtistName, mAlbumMBID);
+            MPDQueryHandler.playArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
         }
     }
 

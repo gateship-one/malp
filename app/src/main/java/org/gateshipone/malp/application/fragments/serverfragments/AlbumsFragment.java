@@ -96,7 +96,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private CoverBitmapLoader mBitmapLoader;
 
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -176,13 +175,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             if (null != mArtistName && !mArtistName.equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 mFABCallback.setupToolbar(mArtistName, false, false, false);
-                if ( mArtist != null) {
+                if (mArtist != null) {
                     mBitmapLoader.getArtistImage(mArtist);
                 }
-            } else if (null != mAlbumsPath && !mAlbumsPath.equals(""))  {
+            } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
                 String lastPath = mAlbumsPath;
                 String pathSplit[] = mAlbumsPath.split("/");
-                if (pathSplit.length > 0 ) {
+                if (pathSplit.length > 0) {
                     lastPath = pathSplit[pathSplit.length - 1];
                 }
                 mFABCallback.setupFAB(true, new FABOnClickListener());
@@ -194,7 +193,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             }
         }
 
-        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter)mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
     /**
@@ -226,7 +225,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter)mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
 
@@ -357,17 +356,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
 
         // Check if the album already has an artist set. If not use the artist of the fragment
-        if ( album.getArtistName().isEmpty() && (null != mArtistName && !mArtistName.isEmpty()) ) {
-            mAlbumSelectCallback.onAlbumSelected(album.getName(),mArtistName,"");
-        } else {
-            // If the album has an artist, use it as the filtering criteria
-            mAlbumSelectCallback.onAlbumSelected(album.getName(), album.getArtistName(), album.getMBID());
-        }
+        mAlbumSelectCallback.onAlbumSelected(album);
     }
 
     @Override
     public void receiveBitmap(final Bitmap bm) {
-        if ( null != mFABCallback && bm != null) {
+        if (null != mFABCallback && bm != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -375,13 +369,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                     mFABCallback.setupToolbarImage(bm);
                 }
             });
-
         }
     }
 
 
     public interface AlbumSelectedCallback {
-        void onAlbumSelected(String albumname, String artistname, String mbid);
+        void onAlbumSelected(MPDAlbum album);
     }
 
 

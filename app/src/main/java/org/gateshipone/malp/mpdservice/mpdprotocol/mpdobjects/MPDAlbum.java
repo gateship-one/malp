@@ -18,7 +18,10 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
-public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelable {
     /* Album properties */
     private String mName;
 
@@ -37,6 +40,25 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
     }
 
     /* Getters */
+
+    protected MPDAlbum(Parcel in) {
+        mName = in.readString();
+        mMBID = in.readString();
+        mArtistName = in.readString();
+        mImageFetching = in.readByte() != 0;
+    }
+
+    public static final Creator<MPDAlbum> CREATOR = new Creator<MPDAlbum>() {
+        @Override
+        public MPDAlbum createFromParcel(Parcel in) {
+            return new MPDAlbum(in);
+        }
+
+        @Override
+        public MPDAlbum[] newArray(int size) {
+            return new MPDAlbum[size];
+        }
+    };
 
     public String getName() {
         return mName;
@@ -100,5 +122,18 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum> {
 
     public synchronized boolean getFetching() {
         return mImageFetching;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mName);
+        dest.writeString(mMBID);
+        dest.writeString(mArtistName);
+        dest.writeByte((byte) (mImageFetching ? 1 : 0));
     }
 }

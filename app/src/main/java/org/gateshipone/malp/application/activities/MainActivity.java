@@ -80,6 +80,7 @@ import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
@@ -361,7 +362,14 @@ public class MainActivity extends AppCompatActivity
                     onArtistSelected(new MPDArtist(track.getTrackArtist()));
                     return true;
                 case R.id.action_show_album:
-                    onAlbumSelected(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
+                    MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
+                    if (!track.getTrackAlbumArtist().isEmpty()) {
+                        tmpAlbum.setArtistName(track.getTrackAlbumArtist());
+                    } else {
+                        tmpAlbum.setArtistName(track.getTrackArtist());
+                    }
+                    tmpAlbum.setMBID(track.getTrackAlbumMBID());
+                    onAlbumSelected(tmpAlbum);
                     return true;
                 case R.id.action_show_details:
                     // Open song details dialog
@@ -511,9 +519,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onAlbumSelected(String albumname, String artistname, String mbid) {
-        Log.v(TAG, "Album selected: " + albumname + ":" + artistname);
-
+    public void onAlbumSelected(MPDAlbum album) {
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
@@ -526,9 +532,7 @@ public class MainActivity extends AppCompatActivity
         // Create fragment and give it an argument for the selected article
         AlbumTracksFragment newFragment = new AlbumTracksFragment();
         Bundle args = new Bundle();
-        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMNAME, albumname);
-        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artistname);
-        args.putString(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUMMBID, mbid);
+        args.putParcelable(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUM, album);
 
         newFragment.setArguments(args);
 
