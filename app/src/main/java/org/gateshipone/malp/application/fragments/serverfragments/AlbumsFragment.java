@@ -82,7 +82,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     private int mLastPosition;
 
-    private String mArtistName;
     private String mAlbumsPath;
 
     private MPDArtist mArtist;
@@ -126,12 +125,11 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         /* Check if an artistname was given in the extras */
         Bundle args = getArguments();
         if (null != args) {
-            mArtistName = args.getString(BUNDLE_STRING_EXTRA_ARTISTNAME);
             mAlbumsPath = args.getString(BUNDLE_STRING_EXTRA_PATH);
             mArtist = args.getParcelable(BUNDLE_STRING_EXTRA_ARTIST);
         } else {
-            mArtistName = "";
             mAlbumsPath = "";
+            mArtist = null;
         }
 
         mAdapterView.setAdapter(mAlbumsAdapter);
@@ -172,9 +170,9 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         super.onResume();
 
         if (null != mFABCallback) {
-            if (null != mArtistName && !mArtistName.equals("")) {
+            if (null != mArtist && !mArtist.getArtistName().equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
-                mFABCallback.setupToolbar(mArtistName, false, false, false);
+                mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 if (mArtist != null) {
                     mBitmapLoader.getArtistImage(mArtist);
                 }
@@ -275,7 +273,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        if (null != mArtistName && !mArtistName.equals("")) {
+        if (null != mArtist && !mArtist.getArtistName().equals("")) {
             menuInflater.inflate(R.menu.fragment_menu_albums, menu);
 
             // get tint color
@@ -316,7 +314,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     @Override
     public Loader<List<MPDAlbum>> onCreateLoader(int id, Bundle args) {
-        return new AlbumsLoader(getActivity(), mArtistName, mAlbumsPath);
+        return new AlbumsLoader(getActivity(), mArtist == null ? "" : mArtist.getArtistName(), mAlbumsPath);
     }
 
     /**
@@ -355,6 +353,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
 
+        if ( mArtist != null) {
+            if( !mArtist.getArtistName().equals(album.getArtistName()) ) {
+                album.setArtistName(mArtist.getArtistName());
+            }
+        }
+
         // Check if the album already has an artist set. If not use the artist of the fragment
         mAlbumSelectCallback.onAlbumSelected(album);
     }
@@ -391,14 +395,14 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     }
 
     private void enqueueArtist() {
-        MPDQueryHandler.addArtist(mArtistName);
+        MPDQueryHandler.addArtist(mArtist.getArtistName());
     }
 
     private class FABOnClickListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
-            MPDQueryHandler.playArtist(mArtistName);
+            MPDQueryHandler.playArtist(mArtist.getArtistName());
         }
     }
 

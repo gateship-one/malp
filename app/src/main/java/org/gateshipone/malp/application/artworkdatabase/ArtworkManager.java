@@ -765,7 +765,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
         Log.v(TAG,"Stop artist bulk loading");
 
-        mBulkProgressCallback.finishedLoading();
+        if ( null != mBulkProgressCallback ) {
+            mBulkProgressCallback.finishedLoading();
+        }
     }
 
     public interface BulkLoadingProgressCallback {

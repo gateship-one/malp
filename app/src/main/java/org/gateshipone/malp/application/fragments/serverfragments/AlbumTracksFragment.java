@@ -25,6 +25,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -89,6 +90,9 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         Bundle args = getArguments();
         if (null != args) {
             mAlbum = args.getParcelable(BUNDLE_STRING_EXTRA_ALBUM);
+            if ( null != mAlbum) {
+                Log.v(TAG,"Album:" + mAlbum.getName() + ":" + mAlbum.getArtistName());
+            }
         }
 
         // Create the needed adapter for the ListView
