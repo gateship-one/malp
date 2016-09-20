@@ -18,7 +18,6 @@
 package org.gateshipone.malp.application.artworkdatabase;
 
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 
@@ -28,13 +27,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.activities.MainActivity;
+import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -62,6 +69,9 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
     private ActionReceiver mBroadcastReceiver;
 
+    private PowerManager.WakeLock mWakelock;
+
+    private ConnectionStateReceiver mConnectionStateChangeReceiver;
 
     /**
      * Called when the service is created because it is requested by an activity
@@ -81,12 +91,23 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
         mSumImageDownloads = 0;
 
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MALP_BulkDownloader");
 
+        // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
+        mWakelock.acquire();
+
+        mConnectionStateChangeReceiver = new ConnectionStateReceiver();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(mConnectionStateChangeReceiver, filter);
     }
 
     @Override
     public void onDestroy() {
         unregisterReceiver(mBroadcastReceiver);
+        unregisterReceiver(mConnectionStateChangeReceiver);
         Log.v(TAG, "Calling super.onDestroy()");
         super.onDestroy();
         Log.v(TAG, "Called super.onDestroy()");
@@ -177,6 +198,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         stopForeground(true);
         MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
         stopSelf();
+        mWakelock.release();
     }
 
     private void updateNotification() {
@@ -222,8 +244,39 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 mNotificationManager.cancel(NOTIFICATION_ID);
                 stopForeground(true);
                 MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
+                mWakelock.release();
                 stopSelf();
             }
+        }
+    }
+
+    private class ConnectionStateReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(BulkDownloadService.this);
+
+            ConnectivityManager cm =
+                    (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            if (null == netInfo) {
+                return;
+            }
+            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+            boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
+
+            if (wifiOnly && !isWifi) {
+                // Cancel all downloads
+                Log.v(TAG, "Cancel all downloads because of connection change");
+                MALPRequestQueue.getInstance(BulkDownloadService.this).cancelAll(new RequestQueue.RequestFilter() {
+                    @Override
+                    public boolean apply(Request<?> request) {
+                        return true;
+                    }
+                });
+            }
+
         }
     }
 }
