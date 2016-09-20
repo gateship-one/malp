@@ -312,7 +312,6 @@ public class FanartActivity extends Activity {
     }
 
     private void updateMPDCurrentTrack(final MPDFile track) {
-        Log.v(TAG, "New track ready, updating: " + track.getTrackTitle() + " - " + track.getTrackArtist());
         mTrackTitle.setText(track.getTrackTitle());
         mTrackAlbum.setText(track.getTrackAlbum());
         mTrackArtist.setText(track.getTrackArtist());
@@ -334,14 +333,11 @@ public class FanartActivity extends Activity {
             mCurrentFanart = -1;
             mLastTrack = track;
             if (track.getTrackArtistMBID() == null || track.getTrackArtistMBID().isEmpty()) {
-                Log.v(TAG, "Track is without MBID, manually resolving");
                 FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(track, new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
                         mLastTrack.setTrackArtistMBID(response);
-                        Log.v(TAG, "Track: " + track + " mLasttrack: " + mLastTrack);
                         if (track == mLastTrack) {
-                            Log.v(TAG, "Got MBID for track");
                             checkFanartAvailable();
                         }
                     }
@@ -365,31 +361,9 @@ public class FanartActivity extends Activity {
     }
 
     private void checkFanartAvailable() {
-        Log.v(TAG, "Check fanart for: " + mLastTrack.getTrackArtistMBID() + " - " + mLastTrack.getTrackArtist());
         if (mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID()) == 0) {
-//            FanartTVManager.getInstance(getApplicationContext()).fetchArtistFanarts(mLastTrack, new Response.Listener<Pair<byte[], MPDArtist>>() {
-//                @Override
-//                public void onResponse(Pair<byte[], MPDArtist> response) {
-//                    Log.v(TAG, "Received fanart");
-//                    mFanartCache.addFanart(response.second.getMBID(0), String.valueOf(response.first.hashCode()),response.first);
-//                    int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID());
-//                    if (fanartCount == 1) {
-//                        updateFanartViews();
-//                    }
-//                    if (mCurrentFanart == (fanartCount - 2)) {
-//                        mNextFanart = (mCurrentFanart + 1) % fanartCount;
-//                    }
-//                    Log.v(TAG, "Fanarts available: " + fanartCount + "pointer at: " + mNextFanart);
-//                }
-//            }, new FanartFetchError() {
-//                @Override
-//                public void fanartFetchError(MPDFile track) {
-//                    Log.v(TAG, "Fanart fetch error");
-//                }
-//            });
             syncFanart(mLastTrack);
         } else {
-            Log.v(TAG, "Fanart available, use cached without fetching");
             mNextFanart = 0;
             updateFanartViews();
             syncFanart(mLastTrack);
@@ -409,7 +383,6 @@ public class FanartActivity extends Activity {
                     FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, new Response.Listener<FanartResponse>() {
                         @Override
                         public void onResponse(FanartResponse response) {
-                            Log.v(TAG, "Received fanart with size: " + response.image.length);
                             mFanartCache.addFanart(track.getTrackArtistMBID(), String.valueOf(response.url.hashCode()), response.image);
 
                             int fanartCount = mFanartCache.getFanartCount(response.track.getTrackArtistMBID());
@@ -419,7 +392,6 @@ public class FanartActivity extends Activity {
                             if (mCurrentFanart == (fanartCount - 2)) {
                                 mNextFanart = (mCurrentFanart + 1) % fanartCount;
                             }
-                            Log.v(TAG, "Fanarts available: " + fanartCount + "pointer at: " + mNextFanart);
                         }
                     }, new Response.ErrorListener() {
                         @Override
@@ -493,18 +465,15 @@ public class FanartActivity extends Activity {
 
 
     private void updateFanartViews() {
-        Log.v(TAG, "View update requested");
-        int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackAlbumArtistMBID());
+        int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID());
 
         if (mLastTrack == null || mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) {
-            Log.v(TAG, "No mbid in file");
             return;
         }
 
         String mbid = mLastTrack.getTrackArtistMBID();
 
         if (mSwitcher.getDisplayedChild() == 0) {
-            Log.v(TAG, "Switching to view 1");
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
                 File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
@@ -521,7 +490,6 @@ public class FanartActivity extends Activity {
             }
             mSwitcher.setDisplayedChild(1);
         } else {
-            Log.v(TAG, "Switching to view 0");
             if (mNextFanart < fanartCount) {
                 mCurrentFanart = mNextFanart;
                 File fanartFile = mFanartCache.getFanart(mbid, mNextFanart);
