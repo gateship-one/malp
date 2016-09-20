@@ -21,7 +21,7 @@
         android:title="@string/preference_default_view_title" />
 
     <ListPreference
-        android:defaultValue="library_view_list"
+        android:defaultValue="library_view_grid"
         android:dialogTitle="@string/preference_library_view_message"
         android:entries="@array/preference_library_view"
         android:entryValues="@array/preference_library_view_values"

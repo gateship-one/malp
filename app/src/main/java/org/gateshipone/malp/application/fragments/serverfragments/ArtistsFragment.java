@@ -79,7 +79,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String libraryView = sharedPref.getString("pref_library_view", "library_view_list");
+        String libraryView = sharedPref.getString("pref_library_view", "library_view_gridcc");
 
         if (libraryView.equals("library_view_list")) {
             mUseList = true;
