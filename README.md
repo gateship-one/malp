@@ -18,9 +18,8 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
  - Basic playlist management (add songs to saved lists, remove songs from saved lists, remove lists, save lists)
  - Multiple server profiles
  - Server statistics **(here is also the update database button)**
- 
-## Planned Features: ##
- - Artwork support with MusicBrainz as artwork provider
+ - Artwork support with MusicBrainz,Last.fm, Fanart.tv as artwork provider (Album, artist images)
+ - Fanart view for tablets or stuff like that (click on the cover in the now playing view, or select fullscreen mode from menu)
 
 ## Description ##
 
