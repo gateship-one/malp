@@ -20,6 +20,7 @@ package org.gateshipone.malp.application.views;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
@@ -27,6 +28,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.view.MenuItem;
@@ -52,6 +54,7 @@ import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
+import org.gateshipone.malp.application.fragments.serverfragments.SavedPlaylistsFragment;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -287,13 +290,45 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_clear_playlist:
-                MPDQueryHandler.clearPlaylist();
+                final AlertDialog.Builder removeListBuilder = new AlertDialog.Builder(getContext());
+                removeListBuilder.setTitle(getContext().getString(R.string.action_delete_playlist));
+                removeListBuilder.setMessage(getContext().getString(R.string.dialog_message_delete_current_playlist));
+                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MPDQueryHandler.clearPlaylist();
+                    }
+                });
+                removeListBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                removeListBuilder.create().show();
                 break;
             case R.id.action_save_playlist:
                 OnSaveDialogListener plDialogCallback = new OnSaveDialogListener() {
                     @Override
-                    public void onSaveObject(String title) {
-                        MPDQueryHandler.savePlaylist(title);
+                    public void onSaveObject(final String title) {
+                        AlertDialog.Builder overWriteBuilder = new AlertDialog.Builder(getContext());
+                        overWriteBuilder.setTitle(getContext().getString(R.string.action_overwrite_playlist));
+                        overWriteBuilder.setMessage(getContext().getString(R.string.dialog_message_overwrite_playlist) + ' ' + title + '?');
+                        overWriteBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                MPDQueryHandler.removePlaylist(title);
+                                MPDQueryHandler.savePlaylist(title);
+                            }
+                        });
+                        overWriteBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        overWriteBuilder.create().show();
+
                     }
 
                     @Override

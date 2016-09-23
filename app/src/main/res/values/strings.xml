@@ -48,6 +48,9 @@
     <string name="action_play_playlist">Play playlist</string>
     <string name="action_remove_playlist">Remove playlist</string>
 
+    <string name="action_overwrite_playlist">Overwrite playlist</string>
+    <string name="action_delete_playlist">Delete playlist</string>
+
     <string name="action_play_everything">Play everything</string>
 
     <string name="action_show_artist">Show artist</string>
@@ -156,7 +159,13 @@
     <string name="dialog_action_cancel">Cancel</string>
     <string name="dialog_action_save">Save</string>
     <string name="dialog_action_ok">OK</string>
+    <string name="dialog_action_yes">Yes</string>
+    <string name="dialog_action_no">No</string>
     <string name="dialog_choose_playlist">Choose playlist</string>
+
+    <string name="dialog_message_overwrite_playlist">Do you want to overwrite the playlist:</string>
+    <string name="dialog_message_delete_playlist">Do you want really want to delete the playlist:</string>
+    <string name="dialog_message_delete_current_playlist">Do you want really want to delete the playlist?</string>
 
     <!-- dialog default names  -->
     <string name="default_playlist_title">New Playlist</string>

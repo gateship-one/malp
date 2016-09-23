@@ -19,9 +19,11 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MenuInflater;
@@ -164,16 +166,32 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
             return super.onContextItemSelected(item);
         }
 
-        MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(info.position);
+        final MPDPlaylist playlist = (MPDPlaylist) mPlaylistAdapter.getItem(info.position);
         switch (item.getItemId()) {
             case R.id.action_add_playlist:
                 MPDQueryHandler.loadPlaylist(playlist.getPath());
                 return true;
             case R.id.action_remove_playlist:
-                MPDQueryHandler.removePlaylist(playlist.getPath());
-                mPlaylistAdapter.swapModel(null);
-                getLoaderManager().destroyLoader(0);
-                getLoaderManager().initLoader(0, getArguments(), this);
+                final AlertDialog.Builder removeListBuilder = new AlertDialog.Builder(getContext());
+                removeListBuilder.setTitle(getContext().getString(R.string.action_delete_playlist));
+                removeListBuilder.setMessage(getContext().getString(R.string.dialog_message_delete_playlist) + ' ' + playlist.getSectionTitle() + '?');
+                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        MPDQueryHandler.removePlaylist(playlist.getPath());
+                        mPlaylistAdapter.swapModel(null);
+                        getLoaderManager().destroyLoader(0);
+                        getLoaderManager().initLoader(0, getArguments(), SavedPlaylistsFragment.this);
+                    }
+                });
+                removeListBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                });
+                removeListBuilder.create().show();
+
                 return true;
             case R.id.action_play_playlist:
                 MPDQueryHandler.playPlaylist(playlist.getPath());

@@ -149,4 +149,11 @@
     <string name="preference_artwork_clear_blocked_artist_summary">Entfernt alle Einträge für Interpreten in der Datenbank für die einmal kein Bild gefunden wurde.</string>
     <string name="downloader_notification_title">Herunterladen aktiv</string>
     <string name="downloader_notification_remaining_images">Heruntergeladene Bilder:</string>
+    <string name="action_delete_playlist">Liste löschen</string>
+    <string name="action_overwrite_playlist">Liste überschreiben</string>
+    <string name="dialog_action_no">Nein</string>
+    <string name="dialog_action_yes">Ja</string>
+    <string name="dialog_message_delete_current_playlist">Möchten Sie wirklich die Liste löschen?</string>
+    <string name="dialog_message_delete_playlist">Möchten Sie wirklich die folgende Liste löschen:</string>
+    <string name="dialog_message_overwrite_playlist">Möchten Sie wirklich die folgende Liste überschreiben:</string>
 </resources>
