@@ -5,6 +5,8 @@ Development sources of a new MPD client for Android.
 
 This whole project is licensed under the  **GPLv3 or later** license (see LICENSE)
 
+[Screenshots](https://github.com/gateship-one/malp/wiki/Screenshots)
+
 ## Requirements: ##
  - Android 5.0
  - MPD >= 0.14
@@ -18,8 +20,9 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
  - Basic playlist management (add songs to saved lists, remove songs from saved lists, remove lists, save lists)
  - Multiple server profiles
  - Server statistics **(here is also the update database button)**
- - Artwork support with MusicBrainz,Last.fm, Fanart.tv as artwork provider (Album, artist images)
+ - Artwork support with MusicBrainz,Last.fm, Fanart.tv as artwork provider (Album, artist images and fullscreen fanart)
  - Fanart view for tablets or stuff like that (click on the cover in the now playing view, or select fullscreen mode from menu)
+ - Bulkdownloader to download all artwork to local memory
 
 ## Description ##
 
