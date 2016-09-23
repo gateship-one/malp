@@ -117,6 +117,8 @@
     <string name="fragment_profile_password">Password:</string>
     <string name="fragment_profile_port">Port:</string>
 
+    <string name="fragment_profile_default_name">New Profile</string>
+
     <!-- Now playing view text view values -->
     <string name="song_track_no">Track No.:</string>
     <string name="song_playlist_no">Playlist No.:</string>

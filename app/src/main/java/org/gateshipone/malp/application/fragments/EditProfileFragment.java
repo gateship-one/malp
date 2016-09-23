@@ -63,22 +63,6 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
-        /* Check if an artistname/albumame was given in the extras */
-        Bundle args = getArguments();
-        if (null != args) {
-            mOldProfile = args.getParcelable(EXTRA_PROFILE);
-            if (mOldProfile != null) {
-                mProfilename = mOldProfile.getProfileName();
-                mHostname = mOldProfile.getHostname();
-                mPassword = mOldProfile.getPassword();
-                mPort = mOldProfile.getPort();
-            } else {
-                mHostname = "";
-                mProfilename = "";
-                mPassword = "";
-                mPort = 6600;
-            }
-        }
 
         mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
         mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
@@ -89,11 +73,32 @@ public class EditProfileFragment extends Fragment {
         mPortView.setMaxValue(65535);
         mPortView.setMinValue(1);
 
+        /* Check if an artistname/albumame was given in the extras */
+        Bundle args = getArguments();
+        if (null != args) {
+            mOldProfile = args.getParcelable(EXTRA_PROFILE);
+            if (mOldProfile != null) {
+                mProfilename = mOldProfile.getProfileName();
+                mHostname = mOldProfile.getHostname();
+                mPassword = mOldProfile.getPassword();
+                mPort = mOldProfile.getPort();
 
-        mProfilenameView.setText(mProfilename);
+                mProfilenameView.setText(mProfilename);
+            } else {
+                mHostname = "";
+                mProfilename = "";
+                mPassword = "";
+                mPort = 6600;
+
+                mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
+            }
+        }
+
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
         mPortView.setValue(mPort);
+
+        mProfilenameView.setSelectAllOnFocus(true);
 
 
         // Return the ready inflated and configured fragment view.
@@ -128,15 +133,15 @@ public class EditProfileFragment extends Fragment {
         super.onPause();
 
         boolean profileChanged = false;
-        if (!mProfilenameView.getText().toString().equals(mProfilenameView)) {
+        if (!mProfilenameView.getText().toString().equals(mProfilename)) {
             profileChanged = true;
             mProfilename = mProfilenameView.getText().toString();
         }
-        if (!mHostnameView.getText().toString().equals(mHostnameView)) {
+        if (!mHostnameView.getText().toString().equals(mHostname)) {
             profileChanged = true;
             mHostname = mHostnameView.getText().toString();
         }
-        if (!mPasswordView.getText().toString().equals(mPasswordView)) {
+        if (!mPasswordView.getText().toString().equals(mPassword)) {
             profileChanged = true;
             mPassword = mPasswordView.getText().toString();
         }
