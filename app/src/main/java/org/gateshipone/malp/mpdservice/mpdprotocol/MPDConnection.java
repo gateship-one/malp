@@ -743,7 +743,7 @@ public class MPDConnection {
 
             // Remove multiple entries when one artist is in list with and without MBID
             for (int i = 0; i < artistList.size(); i++) {
-                MPDArtist arStist = artistList.get(i);
+                MPDArtist artist = artistList.get(i);
                 if (i + 1 != artistList.size()) {
                     MPDArtist nextArtist = artistList.get(i + 1);
                     if (!artist.getArtistName().equals(nextArtist.getArtistName()) || artist.getMBIDCount() != 0) {
