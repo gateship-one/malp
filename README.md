@@ -39,7 +39,7 @@ With earlier versions you will get only one entry, that merges all "Greatest Hit
 
 **If you think an album is missing tracks, try the "Show all Tracks" in the menu of the right upper corner**
 
-This client also parses the MusicBrainz tags that MPD provides so in the future this will be used to fetch artwork.
+This client also parses the MusicBrainz tags that MPD provides to accelerate artwork downloading.
 
 If the version of MPD is new enough, it can use ranged playlist retrieval of the current playlist, so that only the viewed
 parts of the playlist are fetched from the server (MPD v. 0.15 and greater).
