@@ -27,7 +27,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -42,7 +41,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
@@ -565,7 +563,6 @@ public class FanartActivity extends Activity {
         boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
         String artistProvider = sharedPref.getString("pref_artist_provider","fanart_tv");
         boolean artistDownloadEnabled = !artistProvider.equals("off");
-        Log.v(TAG,"Artwork download provider for artists: " + artistProvider + " enabled:" + artistDownloadEnabled);
         boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
         return (isWifi || !wifiOnly) && artistDownloadEnabled;
     }

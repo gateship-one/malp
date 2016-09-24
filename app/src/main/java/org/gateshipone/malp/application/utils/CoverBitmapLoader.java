@@ -80,10 +80,8 @@ public class CoverBitmapLoader {
             try {
                 Bitmap albumImage = ArtworkManager.getInstance(mContext).getAlbumImageForTrack(mTrack);
                 mListener.receiveBitmap(albumImage);
-                Log.v(TAG,"Image found");
             } catch (ImageNotFoundException e) {
-                Log.v(TAG,"Image notfound");
-                ArtworkManager.getInstance(mContext).fetchAlbumImage(mTrack);
+                // FIXME, fetch image here and connect to notifier?
             }
         }
     }
@@ -104,10 +102,8 @@ public class CoverBitmapLoader {
             try {
                 Bitmap artistImage = ArtworkManager.getInstance(mContext).getArtistImage(mArtist);
                 mListener.receiveBitmap(artistImage);
-                Log.v(TAG,"Image found");
             } catch (ImageNotFoundException e) {
-                Log.v(TAG,"Image notfound");
-                ArtworkManager.getInstance(mContext).fetchArtistImage(mArtist);
+                // FIXME, fetch image here and connect to notifier?
             }
         }
     }

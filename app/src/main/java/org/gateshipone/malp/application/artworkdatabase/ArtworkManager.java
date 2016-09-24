@@ -240,10 +240,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             // Check if ID is available (should be the case). If not use the album name for
             // lookup.
             // FIXME use artistname also
-            Log.v(TAG, "Could not use MPDs MBID");
             image = mDBManager.getAlbumImage(album.getName());
         } else {
-            Log.v(TAG, "Useing MPDs MBID");
             // If id is available use it.
             image = mDBManager.getAlbumImage(album);
         }
@@ -745,6 +743,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * it is important to cancel all requests when changing the provider in settings.
      */
     public void cancelAllRequests() {
+        Log.v(TAG,"Cancel all download requests");
         MALPRequestQueue.getInstance(mContext).cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
@@ -752,18 +751,13 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             }
         });
 
-        Log.v(TAG,"Stop bulk loading");
         // Stop bulk loading as well
         synchronized (mAlbumList) {
-            Log.v(TAG,"Albums in list: " + mAlbumList.size());
             mAlbumList.clear();
-            Log.v(TAG,"Albums in list: " + mAlbumList.size());
         }
-        Log.v(TAG,"Stop album bulk loading");
         synchronized (mArtistList) {
             mArtistList.clear();
         }
-        Log.v(TAG,"Stop artist bulk loading");
 
         if ( null != mBulkProgressCallback ) {
             mBulkProgressCallback.finishedLoading();
