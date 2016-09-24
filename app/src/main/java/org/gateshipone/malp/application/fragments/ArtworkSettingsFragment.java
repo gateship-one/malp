@@ -40,14 +40,6 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     private FABFragmentCallback mFABCallback = null;
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        view.setBackgroundColor(ThemeUtils.getThemeColor(getContext(),R.color.colorBackground));
-
-        return view;
-    }
-
     /**
      * Called to do initial creation of a fragment.
      *

@@ -43,14 +43,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private OnArtworkSettingsRequestedCallback mArtworkCallback;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = super.onCreateView(inflater, container, savedInstanceState);
-        view.setBackgroundColor(ThemeUtils.getThemeColor(getContext(),R.color.colorBackground));
-
-        return view;
-    }
-
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
