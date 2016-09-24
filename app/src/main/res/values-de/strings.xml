@@ -157,4 +157,5 @@
     <string name="dialog_message_delete_playlist">Möchten Sie wirklich die folgende Liste löschen:</string>
     <string name="dialog_message_overwrite_playlist">Möchten Sie wirklich die folgende Liste überschreiben:</string>
     <string name="fragment_profile_default_name">Neues Profil</string>
+    <string name="provider_off">Aus</string>
 </resources>

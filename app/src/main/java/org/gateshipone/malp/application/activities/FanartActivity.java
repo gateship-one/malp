@@ -64,6 +64,10 @@ import java.util.TimerTask;
 public class FanartActivity extends Activity {
     private static final String TAG = FanartActivity.class.getSimpleName();
 
+    private static final String STATE_ARTWORK_POINTER = "artwork_pointer";
+    private static final String STATE_ARTWORK_POINTER_NEXT = "artwork_pointer_next";
+    private static final String STATE_LAST_TRACK = "last_track";
+
     private static final int FANART_SWITCH_TIME = 12 * 1000;
 
     private TextView mTrackTitle;
@@ -278,6 +282,26 @@ public class FanartActivity extends Activity {
             // Disconnect from MPD server
             ConnectionManager.disconnectFromServer();
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        savedInstanceState.putInt(STATE_ARTWORK_POINTER, mCurrentFanart);
+        savedInstanceState.putInt(STATE_ARTWORK_POINTER_NEXT, mNextFanart);
+        savedInstanceState.putParcelable(STATE_LAST_TRACK, mLastTrack);
+
+        // Always call the superclass so it can save the view hierarchy state
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        // Always call the superclass so it can restore the view hierarchy
+        super.onRestoreInstanceState(savedInstanceState);
+
+        // Restore state members from saved instance
+        mCurrentFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER);
+        mNextFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER_NEXT);
+        mLastTrack= savedInstanceState.getParcelable(STATE_LAST_TRACK);
     }
 
     private void updateMPDStatus(MPDCurrentStatus status) {
@@ -539,8 +563,11 @@ public class FanartActivity extends Activity {
             return false;
         }
         boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+        String artistProvider = sharedPref.getString("pref_artist_provider","fanart_tv");
+        boolean artistDownloadEnabled = !artistProvider.equals("off");
+        Log.v(TAG,"Artwork download provider for artists: " + artistProvider + " enabled:" + artistDownloadEnabled);
         boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
-        return isWifi || !wifiOnly;
+        return (isWifi || !wifiOnly) && artistDownloadEnabled;
     }
 
     private class VolumeSeekBarListener implements SeekBar.OnSeekBarChangeListener {
