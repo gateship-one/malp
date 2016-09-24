@@ -342,6 +342,9 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     }
 
     public int indexCompare(MPDFile compFile) {
+        if ( !pTrackAlbumMBID.equals(compFile.pTrackAlbumMBID)) {
+            return pTrackAlbumMBID.compareTo(compFile.pTrackAlbumMBID);
+        }
         // Compare disc numbers first
         if (pDiscNumber > compFile.pDiscNumber) {
             return 1;
