@@ -81,7 +81,7 @@ public class CoverBitmapLoader {
                 Bitmap albumImage = ArtworkManager.getInstance(mContext).getAlbumImageForTrack(mTrack);
                 mListener.receiveBitmap(albumImage);
             } catch (ImageNotFoundException e) {
-                // FIXME, fetch image here and connect to notifier?
+                ArtworkManager.getInstance(mContext).fetchAlbumImage(mTrack);
             }
         }
     }
@@ -103,7 +103,7 @@ public class CoverBitmapLoader {
                 Bitmap artistImage = ArtworkManager.getInstance(mContext).getArtistImage(mArtist);
                 mListener.receiveBitmap(artistImage);
             } catch (ImageNotFoundException e) {
-                // FIXME, fetch image here and connect to notifier?
+                ArtworkManager.getInstance(mContext).fetchArtistImage(mArtist);
             }
         }
     }
