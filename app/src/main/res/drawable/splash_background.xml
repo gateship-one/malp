@@ -22,5 +22,5 @@
     <item>
         <color android:color="#f57c00" />
     </item>
-
+    <item android:drawable="@drawable/ic_malp_splash"/>
 </layer-list>
