@@ -197,6 +197,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mDragHelper = ViewDragHelper.create(this, 1f, new BottomDragCallbackHelper());
         mStateListener = new ServerStatusListener();
         mConnectionStateListener = new ServerConnectionListener();
+        mLastStatus = new MPDCurrentStatus();
+        mLastTrack = new MPDFile("");
     }
 
     /**
