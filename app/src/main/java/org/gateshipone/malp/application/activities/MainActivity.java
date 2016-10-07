@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
@@ -211,7 +212,7 @@ public class MainActivity extends AppCompatActivity
                 break;
         }
 
-        if ( mProfileManager.getProfiles().size() == 0 ) {
+        if (mProfileManager.getProfiles().size() == 0) {
             navId = R.id.nav_profiles;
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -244,7 +245,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new SavedPlaylistsFragment();
             } else if (navId == R.id.nav_files) {
                 fragment = new FilesFragment();
-            } else if ( navId == R.id.nav_profiles) {
+            } else if (navId == R.id.nav_profiles) {
                 fragment = new ProfilesFragment();
             }
 
@@ -253,7 +254,6 @@ public class MainActivity extends AppCompatActivity
             transaction.commit();
         }
         mConnectionStateListener = new ConnectionStateListener();
-
 
 
     }
@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity
 
             // Check if the menu is created for the currently playing song. If this is the case, do not show play as next item.
             MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
-            if (status != null &&  ((AdapterView.AdapterContextMenuInfo)menuInfo).position == status.getCurrentSongIndex()) {
+            if (status != null && ((AdapterView.AdapterContextMenuInfo) menuInfo).position == status.getCurrentSongIndex()) {
                 menu.findItem(R.id.action_song_play_next).setVisible(false);
             }
         }
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity
                     // Open song details dialog
                     SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
                     Bundle songArgs = new Bundle();
-                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile)track);
+                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) track);
                     songDetailsDialog.setArguments(songArgs);
                     songDetailsDialog.show(getSupportFragmentManager(), "SongDetails");
                     return true;
@@ -476,7 +476,7 @@ public class MainActivity extends AppCompatActivity
 
                 // set view switcher status
                 if (mSavedNowPlayingViewSwitcherStatus != null) {
-                    Log.v(TAG,"Restoring switcher status: " + mSavedNowPlayingViewSwitcherStatus);
+                    Log.v(TAG, "Restoring switcher status: " + mSavedNowPlayingViewSwitcherStatus);
                     nowPlayingView.setViewSwitcherStatus(mSavedNowPlayingViewSwitcherStatus);
                     mNowPlayingViewSwitcherStatus = mSavedNowPlayingViewSwitcherStatus;
                 }
@@ -541,8 +541,8 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
@@ -572,8 +572,9 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
+        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -612,7 +613,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSwitchedViews(VIEW_SWITCHER_STATUS view) {
         mNowPlayingViewSwitcherStatus = view;
-        Log.v(TAG,"onSwitchedViews(" + view);
+        Log.v(TAG, "onSwitchedViews(" + view);
     }
 
     @Override
@@ -634,8 +635,9 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
+        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -679,8 +681,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
         // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
@@ -811,8 +813,13 @@ public class MainActivity extends AppCompatActivity
 
         android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            newFragment.setEnterTransition(new Slide(Gravity.START));
+            newFragment.setExitTransition(new Slide(Gravity.END));
+        } else {
+            newFragment.setEnterTransition(new Slide(Gravity.LEFT));
+            newFragment.setExitTransition(new Slide(Gravity.RIGHT));
+        }
 
         transaction.addToBackStack("FilesFragment" + path);
         transaction.replace(R.id.fragment_container, newFragment);
@@ -841,8 +848,9 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
+        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -866,8 +874,8 @@ public class MainActivity extends AppCompatActivity
 
         android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        newFragment.setEnterTransition(new Slide(GravityCompat.START));
-        newFragment.setExitTransition(new Slide(GravityCompat.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
 
         transaction.addToBackStack("ArtworkSettingsFragment");
         transaction.replace(R.id.fragment_container, newFragment);
