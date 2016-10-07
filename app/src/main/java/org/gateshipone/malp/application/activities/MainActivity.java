@@ -541,8 +541,8 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
@@ -572,8 +572,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -634,8 +634,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -679,8 +679,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));
         // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
@@ -811,8 +811,8 @@ public class MainActivity extends AppCompatActivity
 
         android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));
 
         transaction.addToBackStack("FilesFragment" + path);
         transaction.replace(R.id.fragment_container, newFragment);
@@ -841,8 +841,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));        // Replace whatever is in the fragment_container view with this
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));        // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
@@ -866,8 +866,8 @@ public class MainActivity extends AppCompatActivity
 
         android.support.v4.app.FragmentTransaction transaction = fragmentManager.beginTransaction();
 
-        newFragment.setEnterTransition(new Slide(Gravity.START));
-        newFragment.setExitTransition(new Slide(Gravity.END));
+        newFragment.setEnterTransition(new Slide(GravityCompat.START));
+        newFragment.setExitTransition(new Slide(GravityCompat.END));
 
         transaction.addToBackStack("ArtworkSettingsFragment");
         transaction.replace(R.id.fragment_container, newFragment);
