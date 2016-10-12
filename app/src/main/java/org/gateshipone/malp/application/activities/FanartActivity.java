@@ -495,11 +495,11 @@ public class FanartActivity extends Activity {
 
 
     private void updateFanartViews() {
-        int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID());
-
+        // Check if a track is available, cancel otherwise
         if (mLastTrack == null || mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) {
             return;
         }
+        int fanartCount = mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID());
 
         String mbid = mLastTrack.getTrackArtistMBID();
 
