@@ -193,7 +193,10 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     }
 
     private void getArtists(String artistName, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-
+        if ( artistName == null || artistName.isEmpty() ) {
+            // Cancel the nonsense here
+            return;
+        }
         Log.v(FanartTVManager.class.getSimpleName(), artistName);
 
         String url = MUSICBRAINZ_API_URL + "/" + "artist/?query=artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
