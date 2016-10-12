@@ -199,7 +199,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
         switch (item.getItemId()) {
             case R.id.action_song_enqueue:
-                MPDQueryHandler.addSong(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.addPath(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_song_play:
                 MPDQueryHandler.playSong(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
@@ -223,7 +223,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 MPDQueryHandler.loadPlaylist(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_add_directory:
-                MPDQueryHandler.addDirectory(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
+                MPDQueryHandler.addPath(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
             case R.id.action_play_directory:
                 MPDQueryHandler.playDirectory(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
@@ -283,7 +283,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_directory:
-                MPDQueryHandler.addDirectory(mPath);
+                MPDQueryHandler.addPath(mPath);
                 return true;
             case R.id.action_show_albums_from_here:
                 mCallback.showAlbumsForPath(mPath);

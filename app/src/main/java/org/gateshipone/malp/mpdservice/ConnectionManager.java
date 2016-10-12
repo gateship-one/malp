@@ -159,7 +159,6 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         }
     }
 
-    // FIXME create timertask
 
     private class ReconnectTask extends TimerTask {
 

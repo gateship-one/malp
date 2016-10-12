@@ -17,36 +17,18 @@
 
 package org.gateshipone.malp.application.fragments.serverfragments;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.content.DialogInterface;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.adapters.FileAdapter;
-import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.loaders.PlaylistsLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
-import org.w3c.dom.Text;
-
-import java.util.List;
 
 public class SongDetailsDialog extends DialogFragment {
 
@@ -100,16 +82,23 @@ public class SongDetailsDialog extends DialogFragment {
 
         mTrackURI = (TextView) rootView.findViewById(R.id.now_playing_text_track_uri);
 
-        if ( null != mFile) {
+        if (null != mFile) {
             mTrackTitle.setText(mFile.getTrackTitle());
             mTrackAlbum.setText(mFile.getTrackAlbum());
             mTrackArtist.setText(mFile.getTrackArtist());
             mTrackAlbumArtist.setText(mFile.getTrackAlbumArtist());
 
-            // FIXME total track count
-            mTrackNo.setText(String.valueOf(mFile.getTrackNumber()));
-            // FIXME total disc count
-            mTrackDisc.setText(String.valueOf(mFile.getDiscNumber()));
+            if (mFile.getAlbumTrackCount() != 0) {
+                mTrackNo.setText(String.valueOf(mFile.getTrackNumber()) + '/' + String.valueOf(mFile.getAlbumTrackCount()));
+            } else {
+                mTrackNo.setText(String.valueOf(mFile.getTrackNumber()));
+            }
+
+            if (mFile.getAlbumDiscCount() != 0) {
+                mTrackDisc.setText(String.valueOf(mFile.getDiscNumber()) + '/' + String.valueOf(mFile.getAlbumDiscCount()));
+            } else {
+                mTrackDisc.setText(String.valueOf(mFile.getDiscNumber()));
+            }
             mTrackDate.setText(mFile.getDate());
             mTrackDuration.setText(FormatHelper.formatTracktimeFromS(mFile.getLength()));
 
@@ -121,17 +110,17 @@ public class SongDetailsDialog extends DialogFragment {
             mTrackURI.setText(mFile.getPath());
         }
 
-        ((Button)rootView.findViewById(R.id.button_enqueue)).setOnClickListener(new View.OnClickListener() {
+        ((Button) rootView.findViewById(R.id.button_enqueue)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if ( null != mFile ) {
-                    MPDQueryHandler.addSong(mFile.getPath());
+                if (null != mFile) {
+                    MPDQueryHandler.addPath(mFile.getPath());
                 }
                 dismiss();
             }
         });
 
-        ((Button)rootView.findViewById(R.id.button_cancel)).setOnClickListener(new View.OnClickListener() {
+        ((Button) rootView.findViewById(R.id.button_cancel)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 dismiss();

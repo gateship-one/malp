@@ -222,7 +222,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 MPDQueryHandler.playSong(track.getPath());
                 return true;
             case R.id.action_song_enqueue:
-                MPDQueryHandler.addSong(track.getPath());
+                MPDQueryHandler.addPath(track.getPath());
                 return true;
             case R.id.action_song_play_next:
                 MPDQueryHandler.playSongNext(track.getPath());

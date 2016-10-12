@@ -214,8 +214,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
             startInterpolation();
         } catch (IOException e) {
-            // FIXME
-            e.printStackTrace();
+            mMPDConnection.disconnectFromServer();
         }
 
     }

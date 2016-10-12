@@ -123,7 +123,6 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
                     mSaveCallback.onCreateNewObject();
                 } else {
                     // override existing playlist
-                    // FIXME show confirmation dialog
                     MPDPlaylist playlist = (MPDPlaylist) mPlaylistsListViewAdapter.getItem(which);
                     String objectTitle = playlist.getPath();
                     mSaveCallback.onSaveObject(objectTitle);

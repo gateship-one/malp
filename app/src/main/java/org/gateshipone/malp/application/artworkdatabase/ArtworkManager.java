@@ -431,7 +431,6 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     @Override
     public void fetchError(MPDArtist artist) {
         Log.e(TAG, "Error fetching artist: " + artist.getArtistName());
-        // FIXME check if retrying again and again is a problem
         ArtistImageResponse imageResponse = new ArtistImageResponse();
         imageResponse.artist = artist;
         imageResponse.image = null;

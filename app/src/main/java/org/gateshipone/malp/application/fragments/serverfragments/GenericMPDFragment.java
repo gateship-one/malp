@@ -83,7 +83,6 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
 
         @Override
         public void onDisconnected() {
-            // FIXME only call if attached to activity, crash: (java.lang.IllegalStateException: Fragment AlbumTracksFragment{1722043a} not attached to Activity)
             if ( !isDetached() ) {
                 getLoaderManager().destroyLoader(0);
                 finishedLoading();

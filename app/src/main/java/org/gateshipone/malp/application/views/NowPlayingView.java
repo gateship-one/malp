@@ -24,7 +24,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -45,8 +44,6 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 
-import java.util.Timer;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.FanartActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
@@ -54,7 +51,6 @@ import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
-import org.gateshipone.malp.application.fragments.serverfragments.SavedPlaylistsFragment;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -366,7 +362,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 addURLDialog.setCallback(new TextDialogCallback() {
                     @Override
                     public void onFinished(String text) {
-                        MPDQueryHandler.addSong(text);
+                        MPDQueryHandler.addPath(text);
                     }
                 });
                 Bundle textDialogArgs = new Bundle();

@@ -305,7 +305,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     private void enqueueTrack(int index) {
         MPDFile track = (MPDFile) mFileAdapter.getItem(index);
 
-        MPDQueryHandler.addSong(track.getPath());
+        MPDQueryHandler.addPath(track.getPath());
     }
 
     private void play(int index) {
