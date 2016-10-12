@@ -122,7 +122,6 @@ public class MPDQueryHandler extends MPDGenericHandler {
         }
 
         MPDHandlerAction mpdAction = (MPDHandlerAction) msg.obj;
-        /* Catch MPD exceptions here for now. */
 
         // ResponseHandler used to return the requested items to the caller
         MPDResponseHandler responseHandler;
@@ -301,14 +300,14 @@ public class MPDQueryHandler extends MPDGenericHandler {
             String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
             String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
 
-            mMPDConnection.addAlbumTracks(albumname, artistname,albumMBID);
+            mMPDConnection.addAlbumTracks(albumname, artistname, albumMBID);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM) {
             String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
             String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
             String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
 
             mMPDConnection.clearPlaylist();
-            mMPDConnection.addAlbumTracks(albumname, artistname,albumMBID);
+            mMPDConnection.addAlbumTracks(albumname, artistname, albumMBID);
             mMPDConnection.playSongIndex(0);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST) {
             String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
@@ -327,36 +326,26 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG_NEXT) {
             String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
-            try {
-                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1);
+
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
             String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
-            try {
-                mMPDConnection.addSong(url);
-                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mMPDConnection.addSong(url);
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
             mMPDConnection.clearPlaylist();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT) {
 
-            try {
-                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
-                if (index < status.getCurrentSongIndex()) {
-                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex());
-                } else if (index > status.getCurrentSongIndex()) {
-                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
+            if (index < status.getCurrentSongIndex()) {
+                mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex());
+            } else if (index > status.getCurrentSongIndex()) {
+                mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
             }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
             int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
@@ -392,11 +381,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
             responseHandler = mpdAction.getResponseHandler();
 
             MPDStatistics stats = null;
-            try {
-                stats = mMPDConnection.getServerStatistics();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            stats = mMPDConnection.getServerStatistics();
+
 
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = stats;
@@ -529,7 +515,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      * This only shows album that lay in the given path. This feature is only available for servers
      * >= 0.19.
      *
-     * @param path Path to list albums for
+     * @param path            Path to list albums for
      * @param responseHandler The Handler that is used for asynchronous callback calls when the result
      *                        of the MPD server is ready and parsed.
      */

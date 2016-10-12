@@ -1177,20 +1177,27 @@ public class MPDConnection {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public synchronized MPDCurrentStatus getCurrentServerStatus() throws IOException {
+    public synchronized MPDCurrentStatus getCurrentServerStatus() {
         MPDCurrentStatus status = new MPDCurrentStatus();
 
     /* Request status */
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
-        if (!readyRead()) {
-            return status;
+        try {
+            if (!readyRead()) {
+                return status;
+            }
+        } catch (IOException e) {
+            handleReadError();
         }
     /* Response line from MPD */
-        String response = pReader.readLine();
+        String response = null;
+        try {
+            response = pReader.readLine();
+        } catch (IOException e) {
+            handleReadError();
+        }
         while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
-
-
             if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
                 status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_REPEAT)) {
@@ -1254,7 +1261,11 @@ public class MPDConnection {
                 status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
             }
 
-            response = pReader.readLine();
+            try {
+                response = pReader.readLine();
+            } catch (IOException e) {
+                handleReadError();
+            }
         }
 
         startIdleWait();
@@ -1266,17 +1277,21 @@ public class MPDConnection {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public synchronized MPDStatistics getServerStatistics() throws IOException {
+    public synchronized MPDStatistics getServerStatistics() {
         MPDStatistics stats = new MPDStatistics();
 
-    /* Request status */
+        /* Request status */
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_STATISTICS);
 
-    /* Response line from MPD */
-        String response;
-        while (readyRead()) {
+        /* Response line from MPD */
+        String response = null;
+        try {
             response = pReader.readLine();
+        } catch (IOException e) {
+            handleReadError();
+        }
 
+        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_STATS_UPTIME)) {
                 stats.setServerUptime(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_UPTIME.length())));
             } else if (response.startsWith(MPDResponses.MPD_STATS_PLAYTIME)) {
@@ -1292,6 +1307,11 @@ public class MPDConnection {
             } else if (response.startsWith(MPDResponses.MPD_STATS_DB_LAST_UPDATE)) {
                 stats.setLastDBUpdate(Long.valueOf(response.substring(MPDResponses.MPD_STATS_DB_LAST_UPDATE.length())));
             }
+            try {
+                response = pReader.readLine();
+            } catch (IOException e) {
+                handleReadError();
+            }
         }
 
         startIdleWait();
@@ -1302,13 +1322,18 @@ public class MPDConnection {
      * This will query the current song playing on the mpd server.
      *
      * @return MPDFile entry for the song playing.
-     * @throws IOException
      */
-    public synchronized MPDFile getCurrentSong() throws IOException {
+    public synchronized MPDFile getCurrentSong() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
 
         // Reuse the parsing function for tracks here.
-        List<MPDFileEntry> retList = parseMPDTracks("", "");
+        List<MPDFileEntry> retList = null;
+        try {
+            retList = parseMPDTracks("", "");
+        } catch (IOException e) {
+            handleReadError();
+            return null;
+        }
         if (retList.size() == 1) {
             // If one element is in the list it is safe to assume that this element is
             // the current song. So casting is no problem.
@@ -1492,11 +1517,8 @@ public class MPDConnection {
      */
     public synchronized boolean seekSeconds(int seconds) {
         MPDCurrentStatus status = null;
-        try {
-            status = getCurrentServerStatus();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        status = getCurrentServerStatus();
+
 
         sendMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(), seconds));
 

@@ -199,24 +199,20 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             }
         }
         mLastTimeBase = System.nanoTime();
-        try {
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+
+        MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
 
-            if ( status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex()) {
-                // New track started playing. Get it and inform the listener.
-                mLastFile = mMPDConnection.getCurrentSong();
-                distributeNewTrack(mLastFile);
-            }
-
-            mLastStatus = status;
-            distributeNewStatus(status);
-
-            startInterpolation();
-        } catch (IOException e) {
-            mMPDConnection.disconnectFromServer();
+        if (status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex()) {
+            // New track started playing. Get it and inform the listener.
+            mLastFile = mMPDConnection.getCurrentSong();
+            distributeNewTrack(mLastFile);
         }
 
+        mLastStatus = status;
+        distributeNewStatus(status);
+
+        startInterpolation();
     }
 
     private void interpolateState() {
@@ -233,7 +229,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     }
 
     private synchronized void startInterpolation() {
-        if ( mMPDConnection.isConnected() ) {
+        if (mMPDConnection.isConnected()) {
             if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 if (null != mInterpolateTimer) {
                     mInterpolateTimer.cancel();
