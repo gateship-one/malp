@@ -578,7 +578,8 @@ public class MPDConnection {
 //                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
 //                }
             }
-
+        } else {
+            throw new IOException();
         }
     }
 
@@ -1180,7 +1181,7 @@ public class MPDConnection {
     public synchronized MPDCurrentStatus getCurrentServerStatus() {
         MPDCurrentStatus status = new MPDCurrentStatus();
 
-    /* Request status */
+        /* Request status */
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
 
         try {
@@ -1189,8 +1190,9 @@ public class MPDConnection {
             }
         } catch (IOException e) {
             handleReadError();
+            return status;
         }
-    /* Response line from MPD */
+        /* Response line from MPD */
         String response = null;
         try {
             response = pReader.readLine();
@@ -1283,6 +1285,14 @@ public class MPDConnection {
         /* Request status */
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_STATISTICS);
 
+        try {
+            if (!readyRead()) {
+                return stats;
+            }
+        } catch (IOException e) {
+            handleReadError();
+            return stats;
+        }
         /* Response line from MPD */
         String response = null;
         try {
