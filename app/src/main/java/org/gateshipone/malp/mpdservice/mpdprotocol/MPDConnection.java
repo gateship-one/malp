@@ -655,6 +655,7 @@ public class MPDConnection {
                 albumName = response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length());
                 tempAlbum = new MPDAlbum(albumName);
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID)) {
+                // FIXME this crashed with a null-ptr. This should not happen. Investigate if repeated. (Protocol should always send "Album:" first
                 tempAlbum.setMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME)) {
                 /* Check if the response is a albumartist. */
