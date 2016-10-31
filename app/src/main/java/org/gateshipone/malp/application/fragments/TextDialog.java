@@ -68,7 +68,7 @@ public class TextDialog extends DialogFragment {
 
 
         // create edit text for title
-        final EditText editTextTitle = new EditText(getActivity());
+        final EditText editTextTitle = new EditText(builder.getContext());
         editTextTitle.setText(mText);
 
         // Add a listener that just removes the text on first clicking

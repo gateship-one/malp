@@ -24,7 +24,7 @@
         android:translateX="262.2869"
         android:translateY="-283.34617">
         <path
-            android:strokeColor="?android:attr/textColorPrimary"
+            android:strokeColor="#ffffff"
             android:strokeAlpha="0.76470588"
             android:strokeWidth="0.5"
             android:pathData="M -220.89255,289.88628 l -7.43035,1.96381 -11.57922,3.06033 c -0.83815,0.22214

@@ -55,7 +55,7 @@ public class CurrentPlaylistTrackItem extends TrackListViewItem {
             mNumberView.setTextColor(color);
             mSeparator.setTextColor(color);
         } else {
-            int color = ContextCompat.getColor(getContext(), R.color.colorTextLight);
+            int color = ThemeUtils.getThemeColor(getContext(),R.attr.malp_color_text_background_primary);
             mTitleView.setTextColor(color);
             mNumberView.setTextColor(color);
             mSeparator.setTextColor(color);

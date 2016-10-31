@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="sans-serif-regular"
         android:textSize="@dimen/material_font_style_size_subheading"
-        android:textColor="?android:textColorPrimary"
+        android:textColor="?attr/malp_color_text_background_primary"
         />
 
     <TextView
@@ -42,8 +42,7 @@
         android:layout_height="wrap_content"
         android:ellipsize="end"
         android:maxLines="1"
-        android:singleLine="true"
-        android:textColor="?android:attr/textColorSecondary"
+        android:textColor="?attr/malp_color_text_background_secondary"
         android:fontFamily="sans-serif-regular"
         android:textSize="@dimen/material_font_style_size_body_1"
 

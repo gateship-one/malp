@@ -149,7 +149,7 @@
                     android:background="?android:selectableItemBackground"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_skip_previous_48dp"
-                    android:tint="@color/colorTextLight" />
+                    android:tint="?attr/malp_color_text_accent" />
 
                 <ImageButton
                     android:id="@+id/button_playpause"
@@ -159,7 +159,7 @@
                     android:background="?android:selectableItemBackground"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_pause_circle_fill_48dp"
-                    android:tint="@color/colorTextLight" />
+                    android:tint="?attr/malp_color_text_accent" />
 
                 <ImageButton
                     android:id="@+id/button_stop"
@@ -169,7 +169,7 @@
                     android:background="?android:selectableItemBackground"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_stop_black_48dp"
-                    android:tint="@color/colorTextLight" />
+                    android:tint="?attr/malp_color_text_accent" />
 
                 <ImageButton
                     android:id="@+id/button_next_track"
@@ -179,7 +179,7 @@
                     android:background="?android:selectableItemBackground"
                     android:scaleType="fitCenter"
                     android:src="@drawable/ic_skip_next_48dp"
-                    android:tint="@color/colorTextLight" />
+                    android:tint="?attr/malp_color_text_accent" />
             </LinearLayout>
         </LinearLayout>
 

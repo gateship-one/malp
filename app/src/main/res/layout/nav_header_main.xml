@@ -39,7 +39,8 @@
         android:padding="@dimen/material_screen_edge_spacing"
         android:text="@string/app_name"
         android:fontFamily="sans-serif-thin"
-        android:textSize="@dimen/material_font_style_size_body_1"
+        android:textSize="@dimen/material_font_style_size_headline"
+        android:textColor="?attr/malp_color_text_accent"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
 </RelativeLayout>

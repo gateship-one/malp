@@ -24,7 +24,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
@@ -744,7 +746,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 if (mViewSwitcher.getCurrentView() != mPlaylistView) {
                     color = ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent);
                 } else {
-                    color = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+                    color = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
                 }
 
                 // tint the button
@@ -985,7 +987,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         switch (status.getRepeat()) {
             case 0:
                 mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
-                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor)));
+                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
                 break;
             case 1:
                 mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
@@ -996,7 +998,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // update random button
         switch (status.getRandom()) {
             case 0:
-                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor)));
+                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
                 break;
             case 1:
                 mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.colorAccent)));
@@ -1023,6 +1025,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         } else {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
         }
+        mVolumeIcon.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
 
 
         mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex() + 1) + getResources().getString(R.string.track_number_album_count_separator) +
@@ -1064,10 +1067,25 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         if ( null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
+            // get tint color
+            int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_background_primary);
+
+            Drawable drawable = getResources().getDrawable(R.drawable.cover_placeholder, null);
+            drawable = DrawableCompat.wrap(drawable);
+            DrawableCompat.setTint(drawable, tintColor);
+
             // Show the placeholder image until the cover fetch process finishes
-            mCoverImage.setImageResource(R.drawable.cover_placeholder);
+            mCoverImage.setImageDrawable(drawable);
+
+            tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
+
+            drawable = getResources().getDrawable(R.drawable.cover_placeholder_128dp, null);
+            drawable = DrawableCompat.wrap(drawable);
+            DrawableCompat.setTint(drawable, tintColor);
+
+
             // The same for the small header image
-            mTopCoverImage.setImageResource(R.drawable.cover_placeholder_128dp);
+            mTopCoverImage.setImageDrawable(drawable);
             // Start the cover loader
             mCoverLoader.getImage(track);
         }

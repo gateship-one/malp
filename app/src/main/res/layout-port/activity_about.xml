@@ -39,7 +39,7 @@
             android:fontFamily="sans-serif-light"
             android:gravity="center"
             android:text="@string/app_name_nice"
-            android:textColor="?attr/andrompd_color_accent"
+            android:textColor="?attr/malp_color_accent"
             android:textSize="@dimen/material_font_style_size_headline" />
 
         <LinearLayout
@@ -54,7 +54,7 @@
                 android:fontFamily="sans-serif-regular"
                 android:gravity="center"
                 android:text="@string/activity_about_version"
-                android:textColor="@color/colorTextLightSecondary"
+                android:textColor="?attr/malp_color_text_background_secondary"
                 android:textSize="@dimen/material_font_style_size_subheading" />
 
             <TextView
@@ -64,7 +64,7 @@
                 android:fontFamily="sans-serif-regular"
                 android:gravity="center"
                 android:text="@string/app_name"
-                android:textColor="@color/colorTextLightSecondary"
+                android:textColor="?attr/malp_color_text_background_secondary"
                 android:textSize="@dimen/material_font_style_size_subheading" />
         </LinearLayout>
 

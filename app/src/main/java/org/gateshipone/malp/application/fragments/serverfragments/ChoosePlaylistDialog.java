@@ -35,6 +35,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.loaders.PlaylistsLoader;
+import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
@@ -140,7 +141,7 @@ public class ChoosePlaylistDialog extends DialogFragment implements LoaderManage
 
         // set divider
         AlertDialog dlg = builder.create();
-        dlg.getListView().setDivider(new ColorDrawable(ContextCompat.getColor(getContext(), R.color.colorDivider)));
+        dlg.getListView().setDivider(new ColorDrawable(ThemeUtils.getThemeColor(getContext(),R.attr.malp_color_background_selected)));
         dlg.getListView().setDividerHeight(getResources().getDimensionPixelSize(R.dimen.list_divider_size));
 
         return dlg;

@@ -8,6 +8,8 @@
         <item>darkgrey</item>
         <item>brown</item>
         <item>lightgreen</item>
+        <item>red</item>
+        <item>oleddark</item>
     </string-array>
 
     <string-array name="preference_default_view_values" translatable="false">

@@ -268,7 +268,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         menuInflater.inflate(R.menu.fragment_menu_album_tracks, menu);
 
         // get tint color
-        int tintColor = ThemeUtils.getThemeColor(getContext(), android.R.attr.textColor);
+        int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
 
         Drawable drawable = menu.findItem(R.id.action_add_album).getIcon();
         drawable = DrawableCompat.wrap(drawable);

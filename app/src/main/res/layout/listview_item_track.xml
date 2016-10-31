@@ -52,6 +52,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:fontFamily="sans-serif-regular"
+                android:textColor="?attr/malp_color_text_background_primary"
                 android:textSize="@dimen/material_font_style_size_subheading" />
 
             <TextView
@@ -61,6 +62,7 @@
                 android:maxLines="1"
                 android:text="@string/track_item_separator"
                 android:fontFamily="sans-serif-regular"
+                android:textColor="?attr/malp_color_text_background_primary"
                 android:textSize="@dimen/material_font_style_size_subheading" />
 
             <TextView
@@ -69,6 +71,7 @@
                 android:layout_height="wrap_content"
                 android:maxLines="1"
                 android:fontFamily="sans-serif-regular"
+                android:textColor="?attr/malp_color_text_background_primary"
                 android:textSize="@dimen/material_font_style_size_subheading"/>
         </LinearLayout>
 
@@ -85,7 +88,7 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:singleLine="true"
-                android:textColor="?android:attr/textColorSecondary"
+                android:textColor="?attr/malp_color_text_background_secondary"
                 android:fontFamily="sans-serif-regular"
                 android:textSize="@dimen/material_font_style_size_body_1"/>
 
@@ -94,6 +97,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
+                android:textColor="?attr/malp_color_text_background_secondary"
                 android:maxLines="1" />
         </RelativeLayout>
     </LinearLayout>

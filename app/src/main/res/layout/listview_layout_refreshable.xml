@@ -20,13 +20,13 @@
     android:id="@+id/refresh_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorBackground">
+    android:background="?attr/malp_color_background">
 
     <ListView
         android:id="@+id/main_listview"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:divider="@color/colorDivider"
+        android:divider="?attr/malp_color_background_selected"
         android:dividerHeight="@dimen/list_divider_size"
         android:fastScrollAlwaysVisible="false"
         android:fastScrollEnabled="true"

@@ -47,6 +47,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 
 import org.gateshipone.malp.R;
@@ -129,30 +130,65 @@ public class MainActivity extends AppCompatActivity
 
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString("pref_theme", "orange");
-
-        switch (themePref) {
-            case "indigo":
-                setTheme(R.style.AppTheme_indigo);
-                break;
-            case "orange":
-                setTheme(R.style.AppTheme_orange);
-                break;
-            case "deeporange":
-                setTheme(R.style.AppTheme_deepOrange);
-                break;
-            case "blue":
-                setTheme(R.style.AppTheme_blue);
-                break;
-            case "darkgrey":
-                setTheme(R.style.AppTheme_darkGrey);
-                break;
-            case "brown":
-                setTheme(R.style.AppTheme_brown);
-                break;
-            case "lightgreen":
-                setTheme(R.style.AppTheme_lightGreen);
-                break;
+        String themePref = sharedPref.getString("pref_theme", "indigo");
+        boolean darkTheme = sharedPref.getBoolean("pref_key_dark_theme",true);
+        if ( darkTheme) {
+            switch (themePref) {
+                case "indigo":
+                    setTheme(R.style.AppTheme_indigo);
+                    break;
+                case "orange":
+                    setTheme(R.style.AppTheme_orange);
+                    break;
+                case "deeporange":
+                    setTheme(R.style.AppTheme_deepOrange);
+                    break;
+                case "blue":
+                    setTheme(R.style.AppTheme_blue);
+                    break;
+                case "darkgrey":
+                    setTheme(R.style.AppTheme_darkGrey);
+                    break;
+                case "brown":
+                    setTheme(R.style.AppTheme_brown);
+                    break;
+                case "lightgreen":
+                    setTheme(R.style.AppTheme_lightGreen);
+                    break;
+                case "red":
+                    setTheme(R.style.AppTheme_red);
+                    break;
+            }
+        } else {
+            switch (themePref) {
+                case "indigo":
+                    setTheme(R.style.AppTheme_indigo_light);
+                    break;
+                case "orange":
+                    setTheme(R.style.AppTheme_orange_light);
+                    break;
+                case "deeporange":
+                    setTheme(R.style.AppTheme_deepOrange_light);
+                    break;
+                case "blue":
+                    setTheme(R.style.AppTheme_blue_light);
+                    break;
+                case "darkgrey":
+                    setTheme(R.style.AppTheme_darkGrey_light);
+                    break;
+                case "brown":
+                    setTheme(R.style.AppTheme_brown_light);
+                    break;
+                case "lightgreen":
+                    setTheme(R.style.AppTheme_lightGreen_light);
+                    break;
+                case "red":
+                    setTheme(R.style.AppTheme_red_light);
+                    break;
+            }
+        }
+        if ( themePref.equals("oleddark") ) {
+            setTheme(R.style.AppTheme_oledDark);
         }
 
         setContentView(R.layout.activity_main);
@@ -956,12 +992,16 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onConnected() {
             Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_connected), Snackbar.LENGTH_SHORT);
+            TextView sbText = (TextView)sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this,R.attr.malp_color_text_accent));
             sb.show();
         }
 
         @Override
         public void onDisconnected() {
             Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_disconnected), Snackbar.LENGTH_SHORT);
+            TextView sbText = (TextView)sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this,R.attr.malp_color_text_accent));
             sb.show();
         }
     }

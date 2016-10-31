@@ -32,9 +32,11 @@
             android:id="@+id/item_artists_cover_placeholder"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:padding="16dp"
             android:scaleType="centerCrop"
             android:src="@drawable/cover_placeholder_128dp"
-            android:background="@color/colorBackgroundDark"/>
+            android:tint="?attr/malp_color_text_background_primary"
+            android:background="?attr/malp_cover_background"/>
 
         <ImageView
             android:id="@+id/item_artists_cover_image"
@@ -59,7 +61,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/gradient_gridview_item" />
+            android:background="?attr/malp_grid_gradient" />
 
         <TextView
             android:id="@+id/item_grid_text"
@@ -69,9 +71,9 @@
             android:ellipsize="marquee"
             android:fadingEdgeLength="16sp"
             android:fontFamily="sans-serif-light"
+            android:textColor="#ffffff"
             android:gravity="center_vertical|center_horizontal"
             android:maxLines="1"
-            android:singleLine="true"
             android:textSize="14sp" />
     </RelativeLayout>
 

@@ -186,6 +186,8 @@
     <string name="preference_theme_item_dark_grey">Dark Grey</string>
     <string name="preference_theme_item_brown">Brown</string>
     <string name="preference_theme_item_light_green">Light Green</string>
+    <string name="preference_theme_item_red">Red</string>
+    <string name="preference_theme_item_oled_dark">OLED Dark</string>
 
     <string-array name="preference_odyssey_styles">
         <item>@string/preference_theme_item_indigo</item>
@@ -195,7 +197,12 @@
         <item>@string/preference_theme_item_dark_grey</item>
         <item>@string/preference_theme_item_brown</item>
         <item>@string/preference_theme_item_light_green</item>
+        <item>@string/preference_theme_item_red</item>
+        <item>@string/preference_theme_item_oled_dark</item>
     </string-array>
+
+    <string name="preference_dark_theme_title">Dark theme</string>
+    <string name="preference_dark_theme_message">Use a dark theme</string>
 
     <string name="preference_default_view_title">Default view</string>
     <string name="preference_default_view_message">Select default view</string>

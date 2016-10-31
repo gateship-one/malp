@@ -160,4 +160,8 @@
     <string name="provider_off">Aus</string>
     <string name="preference_generic_hardware_keys_title">Geräteknöpfe verwenden</string>
     <string name="preference_generic_hardware_keys_text">Die Verwendung der Geräteknöpfe zur Steuerung der Wiedergabe erlauben</string>
+    <string name="preference_dark_theme_message">Verwende ein dunkles Design</string>
+    <string name="preference_dark_theme_title">Dunkles Design</string>
+    <string name="preference_theme_item_red">Rot</string>
+    <string name="preference_theme_item_oled_dark">OLED (dunkel)</string>
 </resources>
