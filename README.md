@@ -1,6 +1,8 @@
 ![Logo](https://raw.githubusercontent.com/gateship-one/malp/master/app/src/main/res/drawable/icon_512.png)
 # M.A.L.P. #
 
+<a href="https://play.google.com/store/apps/details?id=org.gateshipone.malp"><img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60"></a>
+
 Development sources of a new MPD client for Android.
 
 This whole project is licensed under the  **GPLv3 or later** license (see LICENSE)
