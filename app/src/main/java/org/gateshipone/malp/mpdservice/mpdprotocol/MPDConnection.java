@@ -571,7 +571,6 @@ public class MPDConnection {
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
                 if (compareTime > RESPONSE_TIMEOUT) {
                     Log.e(TAG, "Stuck waiting for server response");
-                    new Exception().printStackTrace();
                     throw new IOException();
                 }
 //                if ( compareTime > 500L * 1000L * 1000L ) {
@@ -2137,7 +2136,9 @@ public class MPDConnection {
 
             // Reset the timeout again
             try {
-                pSocket.setSoTimeout(SOCKET_TIMEOUT);
+                if ( pSocket != null ) {
+                    pSocket.setSoTimeout(SOCKET_TIMEOUT);
+                }
             } catch (SocketException e) {
                 e.printStackTrace();
             }
@@ -2157,7 +2158,9 @@ public class MPDConnection {
     /**
      * This will start the timeout to set the connection to the idle state after use.
      */
-    private void startIdleWait() {
+    private synchronized void startIdleWait() {
+        // REMOVE ME
+        // Log.v(TAG,"startIdleWait: " + this + " thread: " + Thread.currentThread().getId());
         /**
          * Check if a timer was running and then remove it.
          * This will reset the timeout.
@@ -2174,7 +2177,9 @@ public class MPDConnection {
     /**
      * This will stop a potential running timeout task.
      */
-    private void stopIdleWait() {
+    private synchronized void stopIdleWait() {
+        // REMOVE ME
+        // Log.v(TAG,"stopIdleWait: " + this + " thread: " + Thread.currentThread().getId());
         if (null != mIdleWait) {
             mIdleWait.cancel();
             mIdleWait.purge();
