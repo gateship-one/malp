@@ -158,4 +158,6 @@
     <string name="dialog_message_overwrite_playlist">Möchten Sie wirklich die folgende Liste überschreiben:</string>
     <string name="fragment_profile_default_name">Neues Profil</string>
     <string name="provider_off">Aus</string>
+    <string name="preference_generic_hardware_keys_title">Geräteknöpfe verwenden</string>
+    <string name="preference_generic_hardware_keys_text">Die Verwendung der Geräteknöpfe zur Steuerung der Wiedergabe erlauben</string>
 </resources>

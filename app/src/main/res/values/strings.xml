@@ -225,6 +225,9 @@
         <item>@string/preference_library_view_grid</item>
     </string-array>
 
+    <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
+    <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>
+
     <!-- artwork preferences -->
     <string name="preference_artwork_album_provider_title">Album image provider</string>
     <string name="preference_artwork_album_provider_summary">Select an provider for album cover images.</string>

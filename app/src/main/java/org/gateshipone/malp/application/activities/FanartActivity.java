@@ -27,6 +27,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -109,6 +110,8 @@ public class FanartActivity extends Activity {
 
 
     private FanartCacheManager mFanartCache;
+
+    private boolean mHardwareControls;
 
     View mDecorView;
 
@@ -266,6 +269,10 @@ public class FanartActivity extends Activity {
         mTrackAlbum.setSelected(true);
 
         hideSystemUI();
+
+        // Check if hardware key control is enabled by the user
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control",true);
     }
 
     @Override
@@ -300,6 +307,71 @@ public class FanartActivity extends Activity {
         mCurrentFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER);
         mNextFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER_NEXT);
         mLastTrack= savedInstanceState.getParcelable(STATE_LAST_TRACK);
+    }
+
+    /**
+     * Handles the volume keys of the device to control MPDs volume.
+     * @param event KeyEvent that was pressed by the user.
+     * @return True if handled by MALP
+     */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if ( mHardwareControls ) {
+            int action = event.getAction();
+            int keyCode = event.getKeyCode();
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.increaseVolume();
+                    }
+                    return true;
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.decreaseVolume();
+                    }
+                    return true;
+                case KeyEvent.KEYCODE_MEDIA_PLAY: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.play();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.togglePause();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PAUSE: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.pause();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_STOP: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.stop();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_NEXT: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.nextSong();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.previousSong();
+                    }
+                    return true;
+                }
+                default:
+                    return super.dispatchKeyEvent(event);
+            }
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 
     private void updateMPDStatus(MPDCurrentStatus status) {

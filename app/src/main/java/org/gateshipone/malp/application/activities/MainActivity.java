@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
@@ -36,7 +35,7 @@ import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -47,9 +46,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 
 import org.gateshipone.malp.R;
@@ -69,16 +66,15 @@ import org.gateshipone.malp.application.fragments.serverfragments.ArtistsFragmen
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.FilesFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.MyMusicTabsFragment;
-import org.gateshipone.malp.application.fragments.serverfragments.OutputsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.PlaylistTracksFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.SavedPlaylistsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.SearchFragment;
-import org.gateshipone.malp.application.fragments.serverfragments.ServerStatisticFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDialog;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -92,7 +88,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, FilesFragment.FilesCallback,
-        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback {
+        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
 
     private static final String TAG = "MainActivity";
@@ -117,6 +114,8 @@ public class MainActivity extends AppCompatActivity
     private FloatingActionButton mFAB;
 
     private ConnectionStateListener mConnectionStateListener;
+
+    private boolean mHardwareControls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -389,7 +388,6 @@ public class MainActivity extends AppCompatActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        Log.v(TAG, "Navdrawer item selected");
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
 
@@ -449,7 +447,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        Log.v(TAG, "onResume");
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
 
@@ -487,6 +484,11 @@ public class MainActivity extends AppCompatActivity
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
+
+        // Check if hardware key control is enabled by the user
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
+        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control",true);
     }
 
     @Override
@@ -506,6 +508,8 @@ public class MainActivity extends AppCompatActivity
             ConnectionManager.disconnectFromServer();
         }
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -552,8 +556,6 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onArtistSelected(MPDArtist artist) {
-        Log.v(TAG, "Artist selected: " + artist);
-
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
@@ -613,13 +615,77 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSwitchedViews(VIEW_SWITCHER_STATUS view) {
         mNowPlayingViewSwitcherStatus = view;
-        Log.v(TAG, "onSwitchedViews(" + view);
     }
 
     @Override
     public void onStartDrag() {
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
+    }
+
+    /**
+     * Handles the volume keys of the device to control MPDs volume.
+     * @param event KeyEvent that was pressed by the user.
+     * @return True if handled by MALP
+     */
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if ( mHardwareControls ) {
+            int action = event.getAction();
+            int keyCode = event.getKeyCode();
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_VOLUME_UP:
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.increaseVolume();
+                    }
+                    return true;
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.decreaseVolume();
+                    }
+                    return true;
+                case KeyEvent.KEYCODE_MEDIA_PLAY: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.play();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.togglePause();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PAUSE: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.pause();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_STOP: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.stop();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_NEXT: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.nextSong();
+                    }
+                    return true;
+                }
+                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: {
+                    if (action == KeyEvent.ACTION_UP) {
+                        MPDCommandHandler.previousSong();
+                    }
+                    return true;
+                }
+                default:
+                    return super.dispatchKeyEvent(event);
+            }
+        } else {
+            return super.dispatchKeyEvent(event);
+        }
     }
 
     @Override
@@ -877,6 +943,13 @@ public class MainActivity extends AppCompatActivity
 
         // Commit the transaction
         transaction.commit();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_use_hardware_control")) {
+            mHardwareControls = sharedPreferences.getBoolean("pref_use_hardware_control",true);
+        }
     }
 
     private class ConnectionStateListener extends MPDConnectionStateChangeHandler {

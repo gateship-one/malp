@@ -29,6 +29,7 @@ import java.util.TimerTask;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 
 /**
  * This is a subclass of the generic handler that allows to execute simple commands to the connected MPD server.
@@ -43,6 +44,11 @@ public class MPDCommandHandler extends MPDGenericHandler {
      * Name of the thread created for the Looper.
      */
     private static final String THREAD_NAME = "NetCommandHandler";
+
+    /**
+     * Value to step the volume. Used for increase/decreaseVolume method.
+     */
+    private static final int VOLUME_STEP_SIZE = 3;
 
 
     /**
@@ -118,7 +124,23 @@ public class MPDCommandHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PAUSE) {
             mMPDConnection.pause(true);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PLAY) {
-            mMPDConnection.pause(false);
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+            if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING ) {
+                mMPDConnection.pause(false);
+            } else {
+                mMPDConnection.playSongIndex(status.getCurrentSongIndex());
+            }
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_TOGGLE_PAUSE) {
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+            if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+                mMPDConnection.pause(true);
+            } else if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING ) {
+                mMPDConnection.pause(false);
+            } else {
+                mMPDConnection.playSongIndex(status.getCurrentSongIndex());
+            }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_RANDOM) {
             boolean random = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_RANDOM) == 1;
             mMPDConnection.setRandom(random);
@@ -143,6 +165,24 @@ public class MPDCommandHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
             int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
             mMPDConnection.toggleOutput(outputID);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME) {
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+
+            // Limit the volume value to 100(%)
+            int targetVolume = status.getVolume() + VOLUME_STEP_SIZE;
+            if ( targetVolume > 100 ) {
+                targetVolume = 100;
+            }
+            mMPDConnection.setVolume(targetVolume);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME) {
+            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+
+            // Limit the volume value to 0(%)
+            int targetVolume = status.getVolume() - VOLUME_STEP_SIZE;
+            if ( targetVolume < 0 ) {
+                targetVolume = 0;
+            }
+            mMPDConnection.setVolume(targetVolume);
         }
     }
 
@@ -220,6 +260,19 @@ public class MPDCommandHandler extends MPDGenericHandler {
      */
     public static void pause() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PAUSE);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Pause playbakc if in playing state.
+     */
+    public static void togglePause() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_TOGGLE_PAUSE);
         Message msg = Message.obtain();
         if (msg == null) {
             return;
@@ -383,6 +436,34 @@ public class MPDCommandHandler extends MPDGenericHandler {
         }
 
         action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME, volume);
+
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Increases the volume a notch
+     * */
+    public static void increaseVolume() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Decreases the volume a notch
+     * */
+    public static void decreaseVolume() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
 
         msg.obj = action;
         MPDCommandHandler.getHandler().sendMessage(msg);
