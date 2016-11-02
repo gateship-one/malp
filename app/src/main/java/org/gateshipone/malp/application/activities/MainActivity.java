@@ -846,7 +846,7 @@ public class MainActivity extends AppCompatActivity
             setTitle(title);
 
             params.setScrollFlags( AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-        } else if (!scrollingEnabled && showImage) {
+        } else if (!scrollingEnabled && showImage && collapsingImage != null) {
             toolbar.setTitleEnabled(true);
             toolbar.setPadding(0, 0, 0, 0);
             toolbar.setTitle(title);
