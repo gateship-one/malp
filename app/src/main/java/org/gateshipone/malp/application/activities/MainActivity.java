@@ -38,6 +38,7 @@ import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.ContextMenu;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.View;
@@ -584,8 +585,8 @@ public class MainActivity extends AppCompatActivity
         // fragment,
         // and add the transaction to the back stack so the user can navigate
         // back
-        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
-        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setEnterTransition(new Slide(Gravity.BOTTOM));
+        newFragment.setExitTransition(new Slide(Gravity.TOP));
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
@@ -613,8 +614,8 @@ public class MainActivity extends AppCompatActivity
         newFragment.setArguments(args);
 
         android.support.v4.app.FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        newFragment.setEnterTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.START, getResources().getConfiguration().getLayoutDirection())));
-        newFragment.setExitTransition(new Slide(GravityCompat.getAbsoluteGravity(GravityCompat.END, getResources().getConfiguration().getLayoutDirection())));
+        newFragment.setEnterTransition(new Slide(Gravity.BOTTOM));
+        newFragment.setExitTransition(new Slide(Gravity.TOP));
         // Replace whatever is in the fragment_container view with this
         // fragment,
         // and add the transaction to the back stack so the user can navigate
