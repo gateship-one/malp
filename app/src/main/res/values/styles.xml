@@ -310,7 +310,7 @@
         <item name="android:colorPrimary">?attr/malp_color_primary</item>
         <item name="android:colorBackground">?attr/malp_color_background</item>
         <item name="android:colorPressedHighlight">?attr/malp_color_background_selected</item>
-        <item name="android:textColorPrimary">?attr/malp_color_text_accent</item>
+        <item name="android:textColorPrimary">?attr/malp_color_text_background_primary</item>
         <item name="android:textColorSecondary">?attr/malp_color_text_background_secondary</item>
         <item name="android:textColorTertiary">?attr/malp_color_text_background_secondary</item>
         <item name="android:textColor">?attr/malp_color_text_background_primary</item>
