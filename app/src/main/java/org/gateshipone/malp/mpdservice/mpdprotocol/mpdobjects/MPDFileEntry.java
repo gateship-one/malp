@@ -17,7 +17,7 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
-public abstract class MPDFileEntry implements MPDGenericItem {
+public abstract class MPDFileEntry implements MPDGenericItem,Comparable<MPDFileEntry> {
     protected String mPath;
 
     // FIXME to some date format of java
@@ -42,4 +42,41 @@ public abstract class MPDFileEntry implements MPDGenericItem {
     public String getLastModified() {
         return mLastModified;
     }
+
+    /**
+     * This methods defines an hard order of directory, files, playlists
+     * @param another
+     * @return
+     */
+    @Override
+    public int compareTo(MPDFileEntry another) {
+        if ( another == null) {
+            return -1;
+        }
+
+        if ( this instanceof MPDDirectory ) {
+            if ( another instanceof MPDDirectory ) {
+                return ((MPDDirectory)this).compareTo((MPDDirectory)another);
+            } else if (another instanceof MPDPlaylist || another instanceof MPDFile) {
+                return -1;
+            }
+        } else if ( this instanceof MPDFile ) {
+            if ( another instanceof MPDDirectory ) {
+                return 1;
+            } else if (another instanceof MPDPlaylist) {
+                return -1;
+            } else if ( another instanceof MPDFile) {
+                return ((MPDFile)this).compareTo((MPDFile)another);
+            }
+        } else if ( this instanceof MPDPlaylist ) {
+            if ( another instanceof MPDPlaylist) {
+                return ((MPDPlaylist)this).compareTo((MPDPlaylist)another);
+            } else if ( another instanceof MPDDirectory || another instanceof MPDFile) {
+                return 1;
+            }
+        }
+
+        return -1;
+    }
+
 }

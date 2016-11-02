@@ -1148,7 +1148,9 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
         try {
         /* Parse the return */
-            return parseMPDTracks("", "");
+            List<MPDFileEntry> retList = parseMPDTracks("", "");
+            Collections.sort(retList);
+            return retList;
         } catch (IOException e) {
             e.printStackTrace();
             return null;

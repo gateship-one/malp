@@ -33,4 +33,11 @@ public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
         }
         return title;
     }
+
+    public int compareTo(MPDDirectory another) {
+        if ( another == null ) {
+            return -1;
+        }
+        return getSectionTitle().compareTo(another.getSectionTitle());
+    }
 }

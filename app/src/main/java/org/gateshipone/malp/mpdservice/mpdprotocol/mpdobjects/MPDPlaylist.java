@@ -32,4 +32,24 @@ public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
     public String getSectionTitle() {
         return mPath;
     }
+
+    public int compareTo(MPDPlaylist another) {
+        if ( another == null ) {
+            return -1;
+        }
+
+        String title = mPath;
+        String[] pathSplit = title.split("/");
+        if ( pathSplit.length > 0 ) {
+            title = pathSplit[pathSplit.length - 1];
+        }
+
+
+        String titleAnother = mPath;
+        String[] pathSplitAnother = title.split("/");
+        if ( pathSplit.length > 0 ) {
+            titleAnother = pathSplit[pathSplit.length - 1];
+        }
+        return title.compareTo(titleAnother);
+    }
 }

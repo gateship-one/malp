@@ -361,4 +361,24 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
             return -1;
         }
     }
+
+    public int compareTo(MPDFile another) {
+        if ( another == null ) {
+            return -1;
+        }
+
+        String title = mPath;
+        String[] pathSplit = title.split("/");
+        if ( pathSplit.length > 0 ) {
+            title = pathSplit[pathSplit.length - 1];
+        }
+
+
+        String titleAnother = mPath;
+        String[] pathSplitAnother = title.split("/");
+        if ( pathSplit.length > 0 ) {
+            titleAnother = pathSplit[pathSplit.length - 1];
+        }
+        return title.compareTo(titleAnother);
+    }
 }
