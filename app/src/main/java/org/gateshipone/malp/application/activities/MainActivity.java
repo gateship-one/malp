@@ -31,6 +31,9 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.OnApplyWindowInsetsListener;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.view.WindowInsetsCompat;
 import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
 import android.util.Log;
@@ -833,42 +836,26 @@ public class MainActivity extends AppCompatActivity
         }
         // set scrolling behaviour
         CollapsingToolbarLayout toolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+        AppBarLayout layout = (AppBarLayout) findViewById(R.id.appbar);
 
-        // set title for both the activity and the collapsingToolbarlayout for both cases
-        // where and image is shown and not.
-        if (toolbar != null) {
-            toolbar.setTitle(title);
-
+        if (scrollingEnabled && !showImage) {
+            toolbar.setTitleEnabled(false);
+            toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
             setTitle(title);
 
+            params.setScrollFlags( AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+        } else if (!scrollingEnabled && showImage) {
+            toolbar.setTitleEnabled(true);
+            toolbar.setPadding(0, 0, 0, 0);
+            toolbar.setTitle(title);
 
-            AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-            AppBarLayout layout = (AppBarLayout) findViewById(R.id.appbar);
-            if (layout != null) {
-                layout.setExpanded(true, false);
-            }
-
-            if (scrollingEnabled) {
-                params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-            } else {
-                params.setScrollFlags(0);
-            }
-
-            if (showImage && collapsingImage != null) {
-                // Enable title of collapsingToolbarlayout for smooth transition
-                toolbar.setTitleEnabled(true);
-                setToolbarImage(getResources().getDrawable(R.drawable.cover_placeholder, null));
-                params.setScrollFlags(params.getScrollFlags() | AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL | AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED);
-
-                // Reset the previously added padding again.
-                toolbar.setPadding(0, 0, 0, 0);
-            } else {
-                // Disable title for collapsingToolbarLayout and show normal title
-                toolbar.setTitleEnabled(false);
-                // Set the padding to match the statusbar height if a picture is shown.
-                toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
-            }
-
+            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
+        } else {
+            toolbar.setTitleEnabled(false);
+            toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
+            setTitle(title);
+            params.setScrollFlags(0);
         }
     }
 
