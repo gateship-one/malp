@@ -91,7 +91,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         synchronized (mFilteredModelData) {
             mFilteredModelData.clear();
         }
-
+        setScrollSpeed(0);
         // create sectionlist for fastscrolling
         createSections();
 
@@ -291,6 +291,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
 
                     mFilteredModelData.addAll(result.first);
                 }
+                setScrollSpeed(0);
                 createSections();
             }
         }
