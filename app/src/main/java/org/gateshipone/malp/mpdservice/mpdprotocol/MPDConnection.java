@@ -236,7 +236,6 @@ public class MPDConnection {
 
         /* Check if the socket is connected */
         if (pSocket.isConnected()) {
-            Log.v(TAG, "MPD server is connected");
             /* Try reading from the stream */
 
             /* Create the reader used for reading from the socket. */
@@ -257,7 +256,6 @@ public class MPDConnection {
             String versionString = "";
             while (readyRead()) {
                 readString = pReader.readLine();
-                Log.v(TAG, "Read string: " + readString);
                 /* Look out for the greeting message */
                 if (readString.startsWith("OK MPD ")) {
                     versionString = readString.substring(7);
@@ -304,8 +302,6 @@ public class MPDConnection {
      * try to authenticate with the server
      */
     private boolean authenticateMPDServer() throws IOException {
-        Log.v(TAG, "authenticateMPDServer: " + this + " ready: " + pMPDConnectionReady + " connection idle: " + pMPDConnectionIdle);
-
         /* Check if connection really is good to go. */
         if (!pMPDConnectionReady || pMPDConnectionIdle) {
             return false;
@@ -830,21 +826,18 @@ public class MPDConnection {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Could not parse disc number: " + discNumber);
                     }
 
                     if (discNumberSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
                         } catch (NumberFormatException e) {
-                            Log.w(TAG, "Could not parse disc number: " + discNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Could not parse disc number: " + discNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_NUMBER)) {
@@ -858,20 +851,17 @@ public class MPDConnection {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Could not parse track number: " + trackNumber);
                     }
                     if (trackNumbersSep.length > 1) {
                         try {
                             ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
                         } catch (NumberFormatException e) {
-                            Log.w(TAG, "Could not parse track number: " + trackNumber);
                         }
                     }
                 } else {
                     try {
                         ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Could not parse track number: " + trackNumber);
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_LAST_MODIFIED)) {
@@ -1258,7 +1248,6 @@ public class MPDConnection {
                 /* Third is channel count */
                         status.setChannelCount(Integer.valueOf(audioInfoSep[2]));
                     } catch (NumberFormatException e) {
-                        Log.w(TAG, "Error parsing audio properties");
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
@@ -2158,7 +2147,7 @@ public class MPDConnection {
 
 
     /**
-     * This will start the timeout to set the connection to the idle state after use.
+     * This will start the timeout to set the connection tto the idle state after use.
      */
     private synchronized void startIdleWait() {
         // REMOVE ME
