@@ -192,20 +192,7 @@ public class FanartActivity extends Activity {
         mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (null != mLastStatus) {
-                    if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                        MPDCommandHandler.pause();
-                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
-                        MPDCommandHandler.play();
-                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                        int lastIndex = mLastStatus.getCurrentSongIndex();
-                        if (lastIndex >= 0) {
-                            MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
-                        } else {
-                            MPDCommandHandler.playSongIndex(0);
-                        }
-                    }
-                }
+                MPDCommandHandler.togglePause();
             }
         });
 
@@ -272,7 +259,7 @@ public class FanartActivity extends Activity {
 
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control",true);
+        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control", true);
     }
 
     @Override
@@ -306,17 +293,18 @@ public class FanartActivity extends Activity {
         // Restore state members from saved instance
         mCurrentFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER);
         mNextFanart = savedInstanceState.getInt(STATE_ARTWORK_POINTER_NEXT);
-        mLastTrack= savedInstanceState.getParcelable(STATE_LAST_TRACK);
+        mLastTrack = savedInstanceState.getParcelable(STATE_LAST_TRACK);
     }
 
     /**
      * Handles the volume keys of the device to control MPDs volume.
+     *
      * @param event KeyEvent that was pressed by the user.
      * @return True if handled by MALP
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if ( mHardwareControls ) {
+        if (mHardwareControls) {
             int action = event.getAction();
             int keyCode = event.getKeyCode();
             switch (keyCode) {
@@ -471,7 +459,7 @@ public class FanartActivity extends Activity {
 
     private void syncFanart(final MPDFile track) {
         // Get a list of fanart urls for the current artist
-        if ( !downloadAllowed() ) {
+        if (!downloadAllowed()) {
             return;
         }
         FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), new Response.Listener<List<String>>() {
@@ -633,7 +621,7 @@ public class FanartActivity extends Activity {
             return false;
         }
         boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
-        String artistProvider = sharedPref.getString("pref_artist_provider","fanart_tv");
+        String artistProvider = sharedPref.getString("pref_artist_provider", "fanart_tv");
         boolean artistDownloadEnabled = !artistProvider.equals("off");
         boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
         return (isWifi || !wifiOnly) && artistDownloadEnabled;

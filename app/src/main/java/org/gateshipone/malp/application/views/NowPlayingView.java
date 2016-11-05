@@ -721,18 +721,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mTopPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                    MPDCommandHandler.pause();
-                } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
-                    MPDCommandHandler.play();
-                } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                    int lastIndex = mLastStatus.getCurrentSongIndex();
-                    if (lastIndex >= 0) {
-                        MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
-                    } else {
-                        MPDCommandHandler.playSongIndex(0);
-                    }
-                }
+                MPDCommandHandler.togglePause();
             }
         });
 
@@ -805,20 +794,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomPlayPauseButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                if (null != mLastStatus) {
-                    if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                        MPDCommandHandler.pause();
-                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
-                        MPDCommandHandler.play();
-                    } else if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-                        int lastIndex = mLastStatus.getCurrentSongIndex();
-                        if (lastIndex >= 0) {
-                            MPDCommandHandler.playSongIndex(mLastStatus.getCurrentSongIndex());
-                        } else {
-                            MPDCommandHandler.playSongIndex(0);
-                        }
-                    }
-                }
+                MPDCommandHandler.togglePause();
             }
         });
 
