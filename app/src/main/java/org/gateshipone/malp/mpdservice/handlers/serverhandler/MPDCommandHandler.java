@@ -65,6 +65,7 @@ public class MPDCommandHandler extends MPDGenericHandler {
      */
     protected MPDCommandHandler(Looper looper) {
         super(looper);
+        mMPDConnection.setID("Command");
     }
 
     /**

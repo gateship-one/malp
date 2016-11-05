@@ -86,6 +86,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
      */
     private MPDStateMonitoringHandler(Looper looper) {
         super(looper);
+        mMPDConnection.setID("Status");
     }
 
     /**

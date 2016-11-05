@@ -33,6 +33,7 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutpu
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -77,6 +78,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      */
     protected MPDQueryHandler(Looper looper) {
         super(looper);
+        mMPDConnection.setID("Query");
     }
 
     /**

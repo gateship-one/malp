@@ -68,6 +68,13 @@ import java.util.concurrent.Semaphore;
 public class MPDConnection {
     private static final String TAG = "MPDConnection";
 
+    private String mID;
+
+    /**
+     * Set this flag to enable debugging in this class. DISABLE before releasing
+     */
+    private static final boolean DEBUG_ENABLED = false;
+
     /**
      * Timeout to wait for socket operations
      */
@@ -155,10 +162,11 @@ public class MPDConnection {
     /**
      * Creates disconnected MPDConnection with following parameters
      */
-    public MPDConnection() {
+    public MPDConnection(String id) {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
+        mID = id;
         mServerCapabilities = new MPDCapabilities("", null, null);
 
     }
@@ -168,7 +176,7 @@ public class MPDConnection {
      * Clear up connection state variables.
      */
     private void handleReadError() {
-        Log.e(TAG, "Read error exception. Disconnecting and cleaning up");
+        printDebug("Read error exception. Disconnecting and cleaning up");
 
         try {
             /* Clear reader/writer up */
@@ -186,7 +194,7 @@ public class MPDConnection {
             }
             pSocket = null;
         } catch (IOException e) {
-            Log.e(TAG, "Error during read error handling");
+            printDebug("Error during read error handling");
         }
 
         /* Clear up connection state variables */
@@ -320,7 +328,7 @@ public class MPDConnection {
                 success = true;
             } else if (readString.startsWith("ACK")) {
                 success = false;
-                Log.e(TAG, "Could not successfully authenticate with mpd server");
+                printDebug("Could not successfully authenticate with mpd server");
             }
         }
 
@@ -362,7 +370,7 @@ public class MPDConnection {
                 pSocket = null;
             }
         } catch (IOException e) {
-            Log.e(TAG, "Error during disconnecting:" + e.toString());
+            printDebug("Error during disconnecting:" + e.toString());
         }
 
         /* Clear up connection state variables */
@@ -392,6 +400,7 @@ public class MPDConnection {
      * @param command
      */
     private void sendMPDCommand(String command) {
+        printDebug("Send command: " + command);
         // Stop possible idling timeout tasks.
         stopIdleWait();
 
@@ -413,6 +422,7 @@ public class MPDConnection {
              */
             pWriter.println(command);
             pWriter.flush();
+            printDebug("Sent command: " + command);
 
             // This waits until the server sends a response (OK,ACK(failure) or the requested data)
             try {
@@ -420,6 +430,9 @@ public class MPDConnection {
             } catch (IOException e) {
                 handleReadError();
             }
+            printDebug("Sent command, got response");
+        } else {
+            printDebug("Connection not ready, command not sent");
         }
     }
 
@@ -509,6 +522,7 @@ public class MPDConnection {
         /* Send the "noidle" command to the server to initiate noidle */
         pWriter.println(MPDCommands.MPD_COMMAND_STOP_IDLE);
         pWriter.flush();
+        printDebug("Sent deidle request");
 
         /* Wait for idle thread to release the lock, which means we are finished waiting */
         try {
@@ -516,7 +530,7 @@ public class MPDConnection {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        printDebug("Deidle lock acquired");
 
         mIdleWaitLock.release();
 
@@ -559,6 +573,7 @@ public class MPDConnection {
      * the response.
      */
     private void waitForResponse() throws IOException {
+        printDebug("Waiting for response");
         if (null != pReader) {
             long currentTime = System.nanoTime();
 
@@ -566,7 +581,8 @@ public class MPDConnection {
                 long compareTime = System.nanoTime() - currentTime;
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
                 if (compareTime > RESPONSE_TIMEOUT) {
-                    Log.e(TAG, "Stuck waiting for server response");
+                    printDebug("Stuck waiting for server response");
+                    printStackTrace();
                     throw new IOException();
                 }
 //                if ( compareTime > 500L * 1000L * 1000L ) {
@@ -585,8 +601,9 @@ public class MPDConnection {
      */
     public boolean checkResponse() throws IOException {
         boolean success = false;
-        waitForResponse();
         String response;
+
+        printDebug("Check response");
 
         // Wait for data to be available to read. MPD communication could take some time.
         while (readyRead()) {
@@ -595,14 +612,15 @@ public class MPDConnection {
                 success = true;
             } else if (response.startsWith("ACK")) {
                 success = false;
-                Log.e(TAG, "Server response error: " + response);
+                printDebug("Server response error: " + response);
             }
         }
 
+        printDebug("Response: " + success);
         // The command was handled now it is time to set the connection to idle again (after the timeout,
         // to prevent disconnecting).
         startIdleWait();
-
+        printDebug("Started idle wait");
         // Return if successful or not.
         return success;
     }
@@ -2059,6 +2077,7 @@ public class MPDConnection {
     private String waitForIdleResponse() {
         if (null != pReader) {
             try {
+                printDebug("Waiting for input from server");
                 // Set thread to sleep, because there should be no line available to read.
                 String response = pReader.readLine();
 
@@ -2101,6 +2120,8 @@ public class MPDConnection {
             // This will block this thread until the server has some data available to read again.
             String response = waitForIdleResponse();
 
+            printDebug("Idle over with response: " + response);
+
             // This happens when disconnected
             if (null == response) {
                 Log.w(TAG, "Probably disconnected during idling");
@@ -2111,27 +2132,28 @@ public class MPDConnection {
             // At this position idling is over.
             if (response.startsWith("changed")) {
                 try {
-                    if (checkResponse()) {
+                    while (readyRead()) {
+                        response = pReader.readLine();
+                        if (response.startsWith("OK")) {
+                            printDebug("Deidled with status ok");
+                        } else if (response.startsWith("ACK")) {
+                            printDebug("Server response error: " + response);
+                        }
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
-            // No further handling necessary then
-            /*else if (response.startsWith("OK")) {
-
-            }*/
-
             // Set the connection as non-idle again.
             pMPDConnectionIdle = false;
 
             // Reset the timeout again
             try {
-                if ( pSocket != null ) {
+                if (pSocket != null) {
                     pSocket.setSoTimeout(SOCKET_TIMEOUT);
                 }
             } catch (SocketException e) {
-                e.printStackTrace();
+                printStackTrace();
             }
 
             // Release the lock for possible threads waiting from outside this idling thread (handler thread).
@@ -2141,7 +2163,10 @@ public class MPDConnection {
             if (null != pIdleListener) {
                 pIdleListener.onNonIdle();
             }
+            printDebug("Idling over");
 
+            // Start the idle clock again
+            startIdleWait();
         }
     }
 
@@ -2151,7 +2176,7 @@ public class MPDConnection {
      */
     private synchronized void startIdleWait() {
         // REMOVE ME
-        // Log.v(TAG,"startIdleWait: " + this + " thread: " + Thread.currentThread().getId());
+        // printDebug("startIdleWait: " + this + " thread: " + Thread.currentThread().getId());
         /**
          * Check if a timer was running and then remove it.
          * This will reset the timeout.
@@ -2170,7 +2195,7 @@ public class MPDConnection {
      */
     private synchronized void stopIdleWait() {
         // REMOVE ME
-        // Log.v(TAG,"stopIdleWait: " + this + " thread: " + Thread.currentThread().getId());
+        // printDebug("stopIdleWait: " + this + " thread: " + Thread.currentThread().getId());
         if (null != mIdleWait) {
             mIdleWait.cancel();
             mIdleWait.purge();
@@ -2186,6 +2211,25 @@ public class MPDConnection {
         @Override
         public void run() {
             startIdleing();
+        }
+    }
+
+    public void setID(String id) {
+        mID = id;
+    }
+
+    private void printDebug(String debug) {
+        if (!DEBUG_ENABLED) {
+            return;
+        }
+
+        Log.v(TAG, mID + ':' + "Idle:" + pMPDConnectionIdle + ':' + debug);
+    }
+
+    private void printStackTrace() {
+        StackTraceElement[] st = new Exception().getStackTrace();
+        for (StackTraceElement el: st) {
+            printDebug(el.toString());
         }
     }
 }
