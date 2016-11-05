@@ -24,4 +24,6 @@ package org.gateshipone.malp.application.adapters;
  */
 public interface ScrollSpeedAdapter {
     void setScrollSpeed(int speed);
+    void addImageLoadTime(long time);
+    long getAverageImageLoadTime();
 }

@@ -34,6 +34,7 @@ import android.widget.ViewSwitcher;
 import java.lang.ref.WeakReference;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
@@ -48,7 +49,7 @@ public class GenericGridItem extends RelativeLayout {
     private AsyncLoader mLoaderTask;
     protected boolean mCoverDone = false;
 
-    public GenericGridItem(Context context, String labelText, ViewGroup.LayoutParams layoutParams) {
+    public GenericGridItem(Context context, String labelText, ViewGroup.LayoutParams layoutParams, GenericSectionAdapter adapter) {
         super(context);
 
         setLayoutParams(layoutParams);
@@ -63,6 +64,7 @@ public class GenericGridItem extends RelativeLayout {
 
         mHolder = new AsyncLoader.CoverViewHolder();
         mHolder.gridItem = this;
+        mHolder.mAdapter = adapter;
         mHolder.imageDimension = new Pair<>(mImageView.getWidth(), mImageView.getHeight());
 
         mCoverDone = false;

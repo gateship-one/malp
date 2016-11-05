@@ -84,7 +84,7 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements 
                 gridItem.setTitle(label);
             } else {
                 // Create new view if no reusable is available
-                convertView = new GenericGridItem(mContext, label, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()));
+                convertView = new GenericGridItem(mContext, label, new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth()), this);
             }
 
             // This will prepare the view for fetching the image from the internet if not already saved in local database.

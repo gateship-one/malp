@@ -23,6 +23,7 @@ import android.os.AsyncTask;
 import android.util.Pair;
 
 
+import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
 import org.gateshipone.malp.application.listviewitems.GenericGridItem;
@@ -39,6 +40,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
     private static final String TAG = AsyncLoader.class.getSimpleName();
     private CoverViewHolder mCover;
 
+    private long mStartTime;
+
     /**
      * Wrapper class for covers
      */
@@ -47,10 +50,13 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
         public GenericGridItem gridItem;
         public ArtworkManager artworkManager;
         public MPDGenericItem modelItem;
+        public GenericSectionAdapter mAdapter;
     }
 
     @Override
     protected Bitmap doInBackground(CoverViewHolder... params) {
+        // Save the time when loading started for later duration calculation
+        mStartTime = System.currentTimeMillis();
         mCover = params[0];
         Bitmap image = null;
         // Check if model item is artist or album
@@ -136,8 +142,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
 
     @Override
     protected void onPostExecute(Bitmap result) {
-
         super.onPostExecute(result);
+        mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
 
         // set mCover if exists
         if ( null != result ) {

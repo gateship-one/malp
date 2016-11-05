@@ -53,6 +53,16 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
      */
     protected int mScrollSpeed;
 
+    /**
+     * Determines how the new time value affects the average (0.0(new value has no effect) - 1.0(average is only the new value, no smoothing)
+     */
+    private static final float mSmoothingFactor = 0.3f;
+
+    /**
+     * Smoothed average(exponential smoothing) value
+     */
+    private long mAvgImageTime;
+
 
     /**
      * Task used to do the filtering of the list asynchronously
@@ -185,12 +195,36 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     }
 
     /**
-     * Sets the scrollspeed of the parent GridView. For smoother scrolling
+     * Sets the scrollspeed in items per second.
      *
      * @param speed
      */
     public void setScrollSpeed(int speed) {
         mScrollSpeed = speed;
+    }
+
+    /**
+     * Returns the smoothed average loading time of images.
+     * This value is used by the scrollspeed listener to determine if
+     * the scrolling is slow enough to render images (artist, album images)
+     * @return Average time to load an image in ms
+     */
+    public long getAverageImageLoadTime() {
+        return mAvgImageTime == 0 ? 1: mAvgImageTime;
+    }
+
+    /**
+     * This method adds new loading times to the smoothed average.
+     * Should only be called from the async cover loader.
+     * @param time Time in ms to load a image
+     */
+    public void addImageLoadTime(long time) {
+        // Implement exponential smoothing here
+        if ( mAvgImageTime == 0 ) {
+            mAvgImageTime = time;
+        } else {
+            mAvgImageTime = (long) (((1 - mSmoothingFactor) * mAvgImageTime) + (mSmoothingFactor * time));
+        }
     }
 
     private void createSections() {
