@@ -62,6 +62,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     private ConnectionManager() {
         MPDStateMonitoringHandler.registerConnectionStateListener(this);
+        MPDQueryHandler.registerConnectionStateListener(this);
+        MPDCommandHandler.registerConnectionStateListener(this);
         mHostname = null;
         mPassword = null;
     }
@@ -129,7 +131,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
 
     @Override
-    public void onConnected() {
+    public synchronized void onConnected() {
         mConnected = true;
 
         mReconnectCounter = 0;
@@ -143,7 +145,14 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     @Override
-    public void onDisconnected() {
+    public synchronized void onDisconnected() {
+        // Check if another handler already signaled the disconnect
+        if ( !mConnected) {
+            return;
+        }
+
+        // Save that we are already disconnected.
+        mConnected = false;
         if ( !mDisconnectRequested ) {
             if (null != mReconnectTimer) {
                 mReconnectTimer.cancel();
