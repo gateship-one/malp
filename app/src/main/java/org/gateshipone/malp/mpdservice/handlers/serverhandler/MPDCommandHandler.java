@@ -26,6 +26,7 @@ import android.util.Log;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
@@ -487,5 +488,11 @@ public class MPDCommandHandler extends MPDGenericHandler {
         MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
+    public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        getHandler().internalRegisterConnectionStateListener(stateHandler);
+    }
 
+    public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        getHandler().internalUnregisterConnectionStateListener(stateHandler);
+    }
 }
