@@ -143,10 +143,10 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
     @Override
     protected void onPostExecute(Bitmap result) {
         super.onPostExecute(result);
-        mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
 
         // set mCover if exists
         if ( null != result ) {
+            mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
             mCover.gridItem.setImage(result);
         }
     }
