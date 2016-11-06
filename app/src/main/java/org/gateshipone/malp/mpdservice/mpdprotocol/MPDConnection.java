@@ -2229,6 +2229,10 @@ public class MPDConnection {
         mID = id;
     }
 
+    /**
+     * Central method to read a line from the sockets reader
+     * @return The read string. null if no data is available.
+     */
     private String readLine() {
         if (pReader != null) {
             try {
@@ -2239,9 +2243,14 @@ public class MPDConnection {
                 handleSocketError();
             }
         }
-        return "";
+        return null;
     }
 
+    /**
+     * Central method to write a line to the sockets writer. Socket will be flushed afterwards
+     * to ensure that the string is sent.
+     * @param line String to write to the socket.
+     */
     private void writeLine(String line) {
         if (pWriter != null) {
             pWriter.println(line);
