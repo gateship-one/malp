@@ -46,13 +46,13 @@ public class MPDCapabilities {
         }
 
         // Only MPD servers greater version 0.14 have ranged playlist fetching, this allows fallback
-        if ( pMinorVersion > 14) {
+        if ( pMinorVersion > 14 || pMajorVersion > 1) {
             mHasRangedCurrentPlaylist = true;
         } else {
             mHasRangedCurrentPlaylist = false;
         }
 
-        if ( pMinorVersion >= 19 ) {
+        if ( pMinorVersion >= 19 || pMajorVersion > 1 ) {
             mHasListGroup = true;
             mHasListFiltering = true;
         }
@@ -79,7 +79,7 @@ public class MPDCapabilities {
             for (String tag : tags ) {
                 if ( tag.contains("MUSICBRAINZ")) {
                     mHasMusicBrainzTags = true;
-                    Log.v(TAG,"Sever has MusicBrainz support");
+                    Log.v(TAG,"Server has MusicBrainz support");
                     break;
                 }
             }
