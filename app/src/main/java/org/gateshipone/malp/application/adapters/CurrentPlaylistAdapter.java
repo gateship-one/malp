@@ -384,6 +384,13 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                     e.printStackTrace();
                 }
 
+                if ( mWindowedPlaylists.length <= start / WINDOW_SIZE) {
+                    // Obviously we received old data here. Abort handling.
+                    // Crash reported via Google Play (07.11.2016)
+                    mListsLock.release();
+                    return;
+                }
+
                 // If a ranged playlist is used, then the list block is saved into the array of list blocks at
                 // the position depending on the start position and the WINDOW_SIZE
                 mWindowedPlaylists[start / WINDOW_SIZE] = trackList;
@@ -440,6 +447,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         public void onDisconnected() {
             mPlaylist = null;
             mLastStatus = null;
+            updatePlaylist();
             notifyDataSetChanged();
         }
     }
