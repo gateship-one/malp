@@ -135,8 +135,8 @@ public class MainActivity extends AppCompatActivity
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String themePref = sharedPref.getString("pref_theme", "indigo");
-        boolean darkTheme = sharedPref.getBoolean("pref_key_dark_theme",true);
-        if ( darkTheme) {
+        boolean darkTheme = sharedPref.getBoolean("pref_key_dark_theme", true);
+        if (darkTheme) {
             switch (themePref) {
                 case "indigo":
                     setTheme(R.style.AppTheme_indigo);
@@ -191,12 +191,16 @@ public class MainActivity extends AppCompatActivity
                     break;
             }
         }
-        if ( themePref.equals("oleddark") ) {
+        if (themePref.equals("oleddark")) {
             setTheme(R.style.AppTheme_oledDark);
         }
 
         setContentView(R.layout.activity_main);
 
+        // restore elevation behaviour as pre 24 support lib
+        AppBarLayout layout = (AppBarLayout) findViewById(R.id.appbar);
+        layout.setStateListAnimator(null);
+        ViewCompat.setElevation(layout, 0);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -528,7 +532,7 @@ public class MainActivity extends AppCompatActivity
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
-        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control",true);
+        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control", true);
     }
 
     @Override
@@ -665,12 +669,13 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Handles the volume keys of the device to control MPDs volume.
+     *
      * @param event KeyEvent that was pressed by the user.
      * @return True if handled by MALP
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
-        if ( mHardwareControls ) {
+        if (mHardwareControls) {
             int action = event.getAction();
             int keyCode = event.getKeyCode();
             switch (keyCode) {
@@ -845,7 +850,7 @@ public class MainActivity extends AppCompatActivity
             toolbar.setPadding(0, getStatusBarHeight(), 0, 0);
             setTitle(title);
 
-            params.setScrollFlags( AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+            params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
         } else if (!scrollingEnabled && showImage && collapsingImage != null) {
             toolbar.setTitleEnabled(true);
             toolbar.setPadding(0, 0, 0, 0);
@@ -972,7 +977,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals("pref_use_hardware_control")) {
-            mHardwareControls = sharedPreferences.getBoolean("pref_use_hardware_control",true);
+            mHardwareControls = sharedPreferences.getBoolean("pref_use_hardware_control", true);
         }
     }
 
@@ -980,16 +985,16 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onConnected() {
             Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_connected), Snackbar.LENGTH_SHORT);
-            TextView sbText = (TextView)sb.getView().findViewById(android.support.design.R.id.snackbar_text);
-            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this,R.attr.malp_color_text_accent));
+            TextView sbText = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this, R.attr.malp_color_text_accent));
             sb.show();
         }
 
         @Override
         public void onDisconnected() {
             Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_disconnected), Snackbar.LENGTH_SHORT);
-            TextView sbText = (TextView)sb.getView().findViewById(android.support.design.R.id.snackbar_text);
-            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this,R.attr.malp_color_text_accent));
+            TextView sbText = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this, R.attr.malp_color_text_accent));
             sb.show();
         }
     }
