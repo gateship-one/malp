@@ -907,7 +907,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
         mPlaylistView.onPause();
 
-        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener(this);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener(this);
     }
 
     /**
@@ -934,7 +934,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
 
         mPlaylistView.onResume();
-        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(this);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener(this);
     }
 
 

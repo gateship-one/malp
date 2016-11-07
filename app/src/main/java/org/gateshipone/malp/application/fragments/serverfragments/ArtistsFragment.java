@@ -138,14 +138,14 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
-        ArtworkManager.getInstance(getContext()).registerOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext()).unregisterOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
     }
 
     /**

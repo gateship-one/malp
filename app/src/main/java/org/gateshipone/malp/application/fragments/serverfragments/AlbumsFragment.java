@@ -191,7 +191,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             }
         }
 
-        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
     /**
@@ -223,7 +223,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
 

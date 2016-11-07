@@ -78,10 +78,10 @@ public class CoverBitmapLoader {
         @Override
         public void run() {
             try {
-                Bitmap albumImage = ArtworkManager.getInstance(mContext).getAlbumImageForTrack(mTrack);
+                Bitmap albumImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImageForTrack(mTrack);
                 mListener.receiveBitmap(albumImage);
             } catch (ImageNotFoundException e) {
-                ArtworkManager.getInstance(mContext).fetchAlbumImage(mTrack);
+                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mTrack);
             }
         }
     }
@@ -100,10 +100,10 @@ public class CoverBitmapLoader {
         @Override
         public void run() {
             try {
-                Bitmap artistImage = ArtworkManager.getInstance(mContext).getArtistImage(mArtist);
+                Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getArtistImage(mArtist);
                 mListener.receiveBitmap(artistImage);
             } catch (ImageNotFoundException e) {
-                ArtworkManager.getInstance(mContext).fetchArtistImage(mArtist);
+                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchArtistImage(mArtist);
             }
         }
     }
@@ -122,12 +122,12 @@ public class CoverBitmapLoader {
         @Override
         public void run() {
             try {
-                Bitmap artistImage = ArtworkManager.getInstance(mContext).getAlbumImage(mAlbum);
+                Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImage(mAlbum);
                 mListener.receiveBitmap(artistImage);
                 Log.v(TAG,"Image found");
             } catch (ImageNotFoundException e) {
                 Log.v(TAG,"Image notfound");
-                ArtworkManager.getInstance(mContext).fetchAlbumImage(mAlbum);
+                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mAlbum);
             }
         }
     }

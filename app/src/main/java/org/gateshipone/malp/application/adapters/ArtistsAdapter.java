@@ -46,7 +46,7 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements 
         mListView = rootGrid;
 
         mUseList = useList;
-        mArtworkManager = ArtworkManager.getInstance(context);
+        mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
 
     }
 

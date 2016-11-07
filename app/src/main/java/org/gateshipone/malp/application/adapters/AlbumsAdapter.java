@@ -46,7 +46,7 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements Ar
 
         mUseList = useList;
 
-        mArtworkManager = ArtworkManager.getInstance(context);
+        mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
     }
 
     @Override
