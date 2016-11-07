@@ -39,7 +39,6 @@ public class MPDProfileManager {
     public MPDProfileManager(Context context) {
         /* Create instance of the helper class to get the writable DB later. */
         mDBHelper = new MPDProfileDBHelper(context);
-
     }
 
     /**

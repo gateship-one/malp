@@ -84,7 +84,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         getInstance().mPassword = profile.getPassword();
         getInstance().mPort = profile.getPort();
 
-        MPDProfileManager profileManager = new MPDProfileManager(context);
+        MPDProfileManager profileManager = new MPDProfileManager(context.getApplicationContext());
         profileManager.deleteProfile(profile);
         profile.setAutoconnect(true);
         profileManager.addProfile(profile);
@@ -124,7 +124,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public static void autoConnect(Context context) {
-        MPDProfileManager profileManager = new MPDProfileManager(context);
+        MPDProfileManager profileManager = new MPDProfileManager(context.getApplicationContext());
 
         setParameters(profileManager.getAutoconnectProfile(),context);
     }

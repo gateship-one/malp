@@ -86,7 +86,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             MPDQueryHandler.registerConnectionStateListener(mConnectionHandler);
         }
         if ( null == mProfileManager ) {
-            mProfileManager = new MPDProfileManager(this);
+            mProfileManager = new MPDProfileManager(getApplicationContext());
         }
 
         mSumImageDownloads = 0;

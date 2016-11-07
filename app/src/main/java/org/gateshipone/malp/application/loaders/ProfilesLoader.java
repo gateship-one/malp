@@ -32,7 +32,7 @@ public class ProfilesLoader extends AsyncTaskLoader<List<MPDServerProfile>> {
 
     public ProfilesLoader(Context context) {
         super(context);
-        mProfileManager = new MPDProfileManager(context);
+        mProfileManager = new MPDProfileManager(getContext().getApplicationContext());
 
     }
 
