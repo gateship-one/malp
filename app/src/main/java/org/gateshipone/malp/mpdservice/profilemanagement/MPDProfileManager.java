@@ -165,6 +165,7 @@ public class MPDProfileManager {
             profile.setPort(serverPort);
 
             cursor.close();
+            db.close();
             return profile;
         }
 
