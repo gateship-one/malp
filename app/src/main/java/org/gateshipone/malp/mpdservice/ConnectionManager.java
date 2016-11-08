@@ -44,7 +44,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     /**
      * Long time to wait for reconnect
      */
-    private static final int LONG_RECONNECT_TIME = 5 * 60 * 1000;
+    private static final int LONG_RECONNECT_TIME = 1 * 60 * 1000;
 
     private static final int SHORT_RECONNECT_TRIES = 5;
 
@@ -52,7 +52,6 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private String mPassword;
     private int mPort;
 
-    private boolean mConnected;
     private boolean mDisconnectRequested;
 
     private Timer mReconnectTimer;
@@ -132,8 +131,6 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     @Override
     public synchronized void onConnected() {
-        mConnected = true;
-
         mReconnectCounter = 0;
         mDisconnectRequested = false;
 
@@ -146,19 +143,9 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     @Override
     public synchronized void onDisconnected() {
-        // Check if another handler already signaled the disconnect
-        if ( !mConnected) {
-            return;
-        }
-
-        // Save that we are already disconnected.
-        mConnected = false;
-        if ( !mDisconnectRequested ) {
-            if (null != mReconnectTimer) {
-                mReconnectTimer.cancel();
-                mReconnectTimer.purge();
-                mReconnectTimer = null;
-            }
+        // Check if disconnect was user requested or not.
+        // Also check if reconnect timeout is already running
+        if ( !mDisconnectRequested && null == mReconnectTimer ) {
             mReconnectTimer = new Timer();
             if ( mReconnectCounter <= SHORT_RECONNECT_TRIES ) {
                 mReconnectTimer.schedule(new ReconnectTask(), SHORT_RECONNECT_TIME);
@@ -173,6 +160,13 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
         @Override
         public void run() {
+            // Remove existing timer
+            if (null != mReconnectTimer) {
+                mReconnectTimer.cancel();
+                mReconnectTimer.purge();
+                mReconnectTimer = null;
+            }
+
             // Increase connection try counter
             mReconnectCounter++;
             reconnectLastServer(null);
