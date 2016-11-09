@@ -379,6 +379,6 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         if ( pathSplit.length > 0 ) {
             titleAnother = pathSplit[pathSplit.length - 1];
         }
-        return title.compareTo(titleAnother);
+        return title.toLowerCase().compareTo(titleAnother.toLowerCase());
     }
 }
