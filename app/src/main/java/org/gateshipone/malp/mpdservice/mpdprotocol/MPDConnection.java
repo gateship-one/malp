@@ -1057,7 +1057,9 @@ public class MPDConnection {
     public synchronized List<MPDFileEntry> getPlaylists() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
         try {
-            return parseMPDTracks("", "");
+            List<MPDFileEntry> playlists = parseMPDTracks("", "");
+            Collections.sort(playlists);
+            return playlists;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
