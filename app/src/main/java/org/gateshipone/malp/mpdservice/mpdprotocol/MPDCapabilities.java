@@ -46,13 +46,13 @@ public class MPDCapabilities {
         }
 
         // Only MPD servers greater version 0.14 have ranged playlist fetching, this allows fallback
-        if ( pMinorVersion > 14 || pMajorVersion > 1) {
+        if ( pMinorVersion > 14 || pMajorVersion > 0) {
             mHasRangedCurrentPlaylist = true;
         } else {
             mHasRangedCurrentPlaylist = false;
         }
 
-        if ( pMinorVersion >= 19 || pMajorVersion > 1 ) {
+        if ( pMinorVersion >= 19 || pMajorVersion > 0 ) {
             mHasListGroup = true;
             mHasListFiltering = true;
         }
