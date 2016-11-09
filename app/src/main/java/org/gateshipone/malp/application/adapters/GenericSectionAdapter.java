@@ -102,10 +102,20 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
             mFilteredModelData.clear();
         }
         setScrollSpeed(0);
-        // create sectionlist for fastscrolling
-        createSections();
 
-        notifyDataSetChanged();
+        if ( mFilterString.isEmpty()) {
+            // create sectionlist for fastscrolling
+            createSections();
+
+            notifyDataSetChanged();
+        } else {
+            // Refilter the new data
+            if (mFilterTask != null) {
+                mFilterTask.cancel(true);
+            }
+            mFilterTask = new FilterTask();
+            mFilterTask.execute(mFilterString);
+        }
     }
 
     /**
