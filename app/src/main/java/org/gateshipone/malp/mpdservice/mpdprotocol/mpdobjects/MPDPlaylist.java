@@ -45,11 +45,11 @@ public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
         }
 
 
-        String titleAnother = mPath;
-        String[] pathSplitAnother = title.split("/");
-        if ( pathSplit.length > 0 ) {
-            titleAnother = pathSplit[pathSplit.length - 1];
+        String titleAnother = another.mPath;
+        String[] pathSplitAnother = titleAnother.split("/");
+        if ( pathSplitAnother.length > 0 ) {
+            titleAnother = pathSplitAnother[pathSplitAnother.length - 1];
         }
-        return title.compareTo(titleAnother);
+        return title.toLowerCase().compareTo(titleAnother.toLowerCase());
     }
 }
