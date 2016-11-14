@@ -49,7 +49,7 @@ public class MPDCommandHandler extends MPDGenericHandler {
     /**
      * Value to step the volume. Used for increase/decreaseVolume method.
      */
-    private static final int VOLUME_STEP_SIZE = 3;
+    private static final int VOLUME_STEP_SIZE = 2;
 
 
     /**

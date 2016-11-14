@@ -232,6 +232,21 @@
         <item>@string/preference_library_view_grid</item>
     </string-array>
 
+
+    <string name="preference_volume_control_title">Select volume control view</string>
+    <string name="preference_volume_control_message">Select volume control view</string>
+    <string name="preference_volume_control_summary">Select the type of view that is used to control the volume of music playback</string>
+
+    <string name="preference_volume_control_off">Off</string>
+    <string name="preference_volume_control_seekbar">Slider</string>
+    <string name="preference_volume_control_buttons">Buttons</string>
+
+    <string-array name="preference_volume_control">
+        <item>@string/preference_volume_control_off</item>
+        <item>@string/preference_volume_control_seekbar</item>
+        <item>@string/preference_volume_control_buttons</item>
+    </string-array>
+
     <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
     <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>
 

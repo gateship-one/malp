@@ -164,4 +164,10 @@
     <string name="preference_dark_theme_title">Dunkles Design</string>
     <string name="preference_theme_item_red">Rot</string>
     <string name="preference_theme_item_oled_dark">OLED (dunkel)</string>
+    <string name="preference_volume_control_buttons">Knöpfe</string>
+    <string name="preference_volume_control_message">Lautstärkeregler wählen</string>
+    <string name="preference_volume_control_off">Aus</string>
+    <string name="preference_volume_control_seekbar">Schieberegler</string>
+    <string name="preference_volume_control_summary">Wählen Sie die Art der Lautstärkereglung</string>
+    <string name="preference_volume_control_title">Lautstärkeregler wählen</string>
 </resources>

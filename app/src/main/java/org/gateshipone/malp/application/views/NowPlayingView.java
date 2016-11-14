@@ -22,10 +22,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -65,7 +67,13 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
-public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener {
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
+        SharedPreferences.OnSharedPreferenceChangeListener{
+
+    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 175;
 
     private final ViewDragHelper mDragHelper;
 
@@ -161,8 +169,17 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     private SeekBar mVolumeSeekbar;
     private ImageView mVolumeIcon;
+    private ImageView mVolumeIconButtons;
+
+    private TextView mVolumeText;
+
+    private ImageButton mVolumeMinus;
+    private ImageButton mVolumePlus;
 
     private LinearLayout mHeaderTextLayout;
+
+    private LinearLayout mVolumeSeekbarLayout;
+    private LinearLayout mVolumeButtonLayout;
 
     /**
      * Various textviews for track information
@@ -394,6 +411,29 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals("pref_volume_control_view")) {
+            setVolumeControlSetting();
+        }
+    }
+
+
+    private void setVolumeControlSetting() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String volumeControlView = sharedPref.getString("pref_volume_control_view", "volume_control_seekbar");
+
+        if ( volumeControlView.equals("volume_control_off")) {
+            mVolumeSeekbarLayout.setVisibility(GONE);
+            mVolumeButtonLayout.setVisibility(GONE);
+        } else if ( volumeControlView.equals("volume_control_seekbar")) {
+            mVolumeSeekbarLayout.setVisibility(VISIBLE);
+            mVolumeButtonLayout.setVisibility(GONE);
+        } else if ( volumeControlView.equals("volume_control_buttons")) {
+            mVolumeSeekbarLayout.setVisibility(GONE);
+            mVolumeButtonLayout.setVisibility(VISIBLE);
+        }
+    }
 
     /**
      * Observer class for changes of the drag status.
@@ -711,6 +751,49 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
+
+        /* Volume control buttons */
+        mVolumeIconButtons = (ImageView)findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.setVolume(0);
+            }
+        });
+
+        mVolumeText = (TextView)findViewById(R.id.volume_button_text);
+
+        mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
+
+        mVolumeMinus.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MPDCommandHandler.decreaseVolume();
+            }
+        });
+
+        mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
+        mVolumePlus.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MPDCommandHandler.increaseVolume();
+            }
+        });
+
+        /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
+        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener();
+        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener();
+
+        /* Set the listener to the plus/minus button */
+        mVolumeMinus.setOnLongClickListener(minusListener);
+        mVolumeMinus.setOnTouchListener(minusListener);
+
+        mVolumePlus.setOnLongClickListener(plusListener);
+        mVolumePlus.setOnTouchListener(plusListener);
+
+        mVolumeSeekbarLayout = (LinearLayout)findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = (LinearLayout)findViewById(R.id.volume_button_layout);
+
         // set dragging part default to bottom
         mDragOffset = 1.0f;
         mDraggedUpButtons.setVisibility(INVISIBLE);
@@ -908,6 +991,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mPlaylistView.onPause();
 
         ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener(this);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     /**
@@ -935,6 +1020,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         mPlaylistView.onResume();
         ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener(this);
+
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
+
+        setVolumeControlSetting();
     }
 
 
@@ -994,15 +1085,21 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         if ( volume >= 70 ) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_high_black_48dp);
         } else if ( volume >= 30 && volume < 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_medium_black_48dp);
         } else if ( volume > 0 && volume < 30 ) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_low_black_48dp);
         } else {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_mute_black_48dp);
         }
         mVolumeIcon.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
+        mVolumeIconButtons.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
 
+        mVolumeText.setText(String.valueOf(volume) + '%');
 
         mPlaylistNo.setText(String.valueOf(status.getCurrentSongIndex() + 1) + getResources().getString(R.string.track_number_album_count_separator) +
                 String.valueOf(status.getPlaylistLength()));
@@ -1307,6 +1404,57 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                         }
                     });
                 }
+            }
+        }
+    }
+
+    /**
+     * Class to handle long button clicks on the volume buttons. Repeats the action until the
+     * user removes his finger from the button again, which cancels the spawned TimerTask.
+     */
+    private class VolumeButtonLongClickListener implements OnLongClickListener, OnTouchListener {
+
+        private Timer mRepeater = null;
+
+        @Override
+        public boolean onLongClick(View v) {
+            if ( v.equals(mVolumePlus)) {
+                mRepeater = new Timer();
+                mRepeater.scheduleAtFixedRate(new IncreaseVolumeTask(),0 , VOLUME_CONTROL_REPEAT_PERIOD );
+                return true;
+            } else if (v.equals(mVolumeMinus)) {
+                mRepeater = new Timer();
+                mRepeater.scheduleAtFixedRate(new DecreaseVolumeTask(),0 , VOLUME_CONTROL_REPEAT_PERIOD );
+                return true;
+            }
+            return false;
+         }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getAction()== MotionEvent.ACTION_UP) {
+                if ( null != mRepeater ) {
+                    mRepeater.cancel();
+                    mRepeater.purge();
+                    mRepeater = null;
+                }
+            }
+            return false;
+        }
+
+        private class IncreaseVolumeTask extends TimerTask {
+
+            @Override
+            public void run() {
+                MPDCommandHandler.increaseVolume();
+            }
+        }
+
+        private class DecreaseVolumeTask extends TimerTask {
+
+            @Override
+            public void run() {
+                MPDCommandHandler.decreaseVolume();
             }
         }
     }

@@ -24,6 +24,12 @@
         <item>library_view_grid</item>
     </string-array>
 
+    <string-array name="preference_volume_control_values" translatable="false">
+        <item>volume_control_off</item>
+        <item>volume_control_seekbar</item>
+        <item>volume_control_buttons</item>
+    </string-array>
+
     <string-array name="preference_artwork_album_provider_values" translatable="false">
         <item>off</item>
         <item>musicbrainz</item>
