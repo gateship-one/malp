@@ -47,7 +47,7 @@ public class FanartCacheManager {
      * @param mbid MBID to check for cached entries
      * @return number of cached entries for mbid
      */
-    public int getFanartCount(String mbid) {
+    public synchronized int getFanartCount(String mbid) {
         File artistDir = new File(mCacheBasePath + "/" + mbid);
         if (!artistDir.exists()) {
             return 0;
@@ -64,7 +64,7 @@ public class FanartCacheManager {
      * @param index Index of the fanart that is requested
      * @return File object that contains the image
      */
-    public File getFanart(String mbid, int index) {
+    public synchronized File getFanart(String mbid, int index) {
         if (index >= getFanartCount(mbid)) {
             return null;
         }
@@ -93,7 +93,7 @@ public class FanartCacheManager {
      * @param mbid
      * @param image
      */
-    public void addFanart(String mbid, String name,byte[] image) {
+    public synchronized void addFanart(String mbid, String name,byte[] image) {
         int newIndex = getFanartCount(mbid);
         Log.v(TAG,"Add fanart: " + newIndex + "for mbid: " + mbid);
 
@@ -127,7 +127,7 @@ public class FanartCacheManager {
         }
     }
 
-    public boolean inCache(String mbid, String name) {
+    public synchronized boolean inCache(String mbid, String name) {
         Log.v(TAG,"Check if exists: " + mCacheBasePath + "/" + mbid + "/" + name );
         File checkFile = new File(mCacheBasePath + "/" + mbid + "/" + name);
         return checkFile.exists();
