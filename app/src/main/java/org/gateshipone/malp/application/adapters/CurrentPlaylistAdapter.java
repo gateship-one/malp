@@ -26,13 +26,17 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.CurrentPlaylistTrackItem;
+import org.gateshipone.malp.application.listviewitems.GenericGridItem;
+import org.gateshipone.malp.application.listviewitems.TrackListViewItem;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -149,6 +153,8 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
      */
     private boolean mWindowEnabled = true;
 
+    private ArtworkManager mArtworkManager;
+
 
     /**
      * Public constructor for this adapter
@@ -171,6 +177,8 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         }
         mListsLock = new Semaphore(1);
         mClearTimer = null;
+
+        mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
     }
 
     /**
@@ -227,7 +235,9 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             MPDFile previousTrack;
             if( position > 0 ) {
                 previousTrack = getTrack(position - 1);
-                newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+                if ( previousTrack != null ) {
+                    newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+                }
             } else {
                 newAlbum = true;
             }
@@ -262,15 +272,25 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
 
             // Check if reusable object is available
-            if (!newAlbum && convertView != null) {
+            if (!newAlbum && convertView != null && !((CurrentPlaylistTrackItem)convertView).isSectionView()) {
                 CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
                 tracksListViewItem.setTrackNumber(trackNumber);
                 tracksListViewItem.setTitle(trackTitle);
                 tracksListViewItem.setAdditionalInformation(trackInformation);
                 tracksListViewItem.setDuration(trackDuration);
-            } else {
+            } else if ( newAlbum ){
                 // If not create a new Listitem
-                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, newAlbum ? trackAlbum : null);
+                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, trackAlbum);
+                // This will prepare the view for fetching the image from the internet if not already saved in local database.
+                // Dummy MPDAlbum
+                MPDAlbum tmpAlbum = new MPDAlbum(trackAlbum);
+                tmpAlbum.setMBID(track.getTrackAlbumMBID());
+                ((TrackListViewItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
+
+                // Start async image loading
+                ((TrackListViewItem) convertView).startCoverImageTask();
+            } else {
+                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, null);
             }
 
             if (null != mLastStatus && mLastStatus.getCurrentSongIndex() == position) {

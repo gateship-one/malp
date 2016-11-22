@@ -20,10 +20,8 @@ package org.gateshipone.malp.application.listviewitems;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -31,15 +29,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import java.lang.ref.WeakReference;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
-public class GenericGridItem extends RelativeLayout {
+public class GenericGridItem extends RelativeLayout implements CoverLoadable {
 
     protected final AsyncLoader.CoverViewHolder mHolder;
     protected final ImageView mImageView;
@@ -63,7 +59,7 @@ public class GenericGridItem extends RelativeLayout {
         mSwitcher = (ViewSwitcher) findViewById(R.id.item_grid_viewswitcher);
 
         mHolder = new AsyncLoader.CoverViewHolder();
-        mHolder.gridItem = this;
+        mHolder.coverLoadable = this;
         mHolder.mAdapter = adapter;
         mHolder.imageDimension = new Pair<>(mImageView.getWidth(), mImageView.getHeight());
 
@@ -104,7 +100,6 @@ public class GenericGridItem extends RelativeLayout {
         }
         mHolder.artworkManager = artworkManager;
         mHolder.modelItem = modelItem;
-
     }
 
     /**

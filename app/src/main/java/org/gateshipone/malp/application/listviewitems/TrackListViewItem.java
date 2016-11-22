@@ -19,28 +19,43 @@ package org.gateshipone.malp.application.listviewitems;
 
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Pair;
 import android.view.LayoutInflater;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
 
 /**
  * Class that can be used for all track type items (albumtracks, playlist tracks, etc)
  */
-public class TrackListViewItem extends LinearLayout {
+public class TrackListViewItem extends LinearLayout implements CoverLoadable{
     protected TextView mTitleView;
     protected TextView mSeparator;
     protected TextView mAdditionalInfoView;
     protected TextView mNumberView;
     protected TextView mDurationView;
     protected TextView mSectionHeader;
+    protected ImageView mSectionImage;
     protected LinearLayout mSectionHeaderLayout;
+
+    protected final ViewSwitcher mSwitcher;
+
+    private AsyncLoader mLoaderTask;
+    protected final AsyncLoader.CoverViewHolder mHolder;
+    protected boolean mCoverDone = false;
+
 
     /**
      * Constructor with basic properties
@@ -59,10 +74,18 @@ public class TrackListViewItem extends LinearLayout {
             inflater.inflate(R.layout.listview_item_playlist_track, this, true);
             mSectionHeader = (TextView)findViewById(R.id.section_header_text);
             mSectionHeaderLayout = (LinearLayout)findViewById(R.id.section_header);
-
+            mSectionImage = (ImageView)findViewById(R.id.section_header_image);
+            mSwitcher = (ViewSwitcher)findViewById(R.id.section_header_image_switcher);
             setSectionHeader(sectionTitle);
+
+            mHolder = new AsyncLoader.CoverViewHolder();
+            mHolder.coverLoadable = this;
+            mHolder.mAdapter = null;
+            mHolder.imageDimension = new Pair<>(mSectionImage.getWidth(), mSectionImage.getHeight());
         } else {
             inflater.inflate(R.layout.listview_item_track, this, true);
+            mHolder = null;
+            mSwitcher = null;
         }
 
 
@@ -96,6 +119,25 @@ public class TrackListViewItem extends LinearLayout {
         } else {
             imageView.setVisibility(GONE);
         }
+    }
+
+    /**
+     * Starts the image retrieval task
+     */
+    public void startCoverImageTask() {
+        if (mLoaderTask == null && mHolder.artworkManager != null && mHolder.modelItem != null && !mCoverDone) {
+            mLoaderTask = new AsyncLoader();
+            mLoaderTask.execute(mHolder);
+        }
+    }
+
+
+    public void prepareArtworkFetching(ArtworkManager artworkManager, MPDGenericItem modelItem) {
+        if (!modelItem.equals(mHolder.modelItem) || !mCoverDone) {
+            setImage(null);
+        }
+        mHolder.artworkManager = artworkManager;
+        mHolder.modelItem = modelItem;
     }
 
     /**
@@ -140,5 +182,48 @@ public class TrackListViewItem extends LinearLayout {
     public void setAdditionalInformation(String information) {
         mSeparator.setVisibility(VISIBLE);
         mAdditionalInfoView.setText(information);
+    }
+
+    public boolean isSectionView() {
+        return mSectionHeaderLayout != null;
+    }
+
+    /**
+     * If this ListItem gets detached from the parent it makes no sense to let
+     * the task for image retrieval running. (non-Javadoc)
+     *
+     * @see android.view.View#onDetachedFromWindow()
+     */
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        if (mLoaderTask != null) {
+            mLoaderTask.cancel(true);
+            mLoaderTask = null;
+        }
+    }
+
+    @Override
+    public void setImage(Bitmap image) {
+        if (null != image) {
+            mCoverDone = true;
+
+            mSectionImage.setImageBitmap(image);
+            mSwitcher.setDisplayedChild(1);
+        } else {
+            // Cancel old task
+            if (mLoaderTask != null) {
+                mLoaderTask.cancel(true);
+            }
+            mLoaderTask = null;
+
+            mCoverDone = false;
+            mSwitcher.setOutAnimation(null);
+            mSwitcher.setInAnimation(null);
+            mSectionImage.setImageDrawable(null);
+            mSwitcher.setDisplayedChild(0);
+            mSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
+            mSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
+        }
     }
 }
