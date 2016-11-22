@@ -1271,7 +1271,7 @@ public class MPDConnection {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME)) {
                 status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DURATION)) {
-                status.setTrackLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length())));
+                status.setTrackLength(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length()))));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_BITRATE)) {
                 status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION)) {
