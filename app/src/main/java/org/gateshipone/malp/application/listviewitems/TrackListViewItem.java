@@ -39,6 +39,8 @@ public class TrackListViewItem extends LinearLayout {
     protected TextView mAdditionalInfoView;
     protected TextView mNumberView;
     protected TextView mDurationView;
+    protected TextView mSectionHeader;
+    protected LinearLayout mSectionHeaderLayout;
 
     /**
      * Constructor with basic properties
@@ -48,12 +50,21 @@ public class TrackListViewItem extends LinearLayout {
      * @param information Additional bottom line information of this item (e.g. Artistname - Albumname)
      * @param duration String of formatted duration of this track (eg.: 3:21 )
      */
-    public TrackListViewItem(Context context, String number, String title, String information, String duration, boolean showIcon) {
+    public TrackListViewItem(Context context, String number, String title, String information, String duration, boolean showIcon, String sectionTitle) {
         super(context);
 
         // Inflate the view with the given layout
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.listview_item_track, this, true);
+        if ( sectionTitle != null && !sectionTitle.isEmpty()) {
+            inflater.inflate(R.layout.listview_item_playlist_track, this, true);
+            mSectionHeader = (TextView)findViewById(R.id.section_header_text);
+            mSectionHeaderLayout = (LinearLayout)findViewById(R.id.section_header);
+
+            setSectionHeader(sectionTitle);
+        } else {
+            inflater.inflate(R.layout.listview_item_track, this, true);
+        }
+
 
         mTitleView = (TextView)findViewById(R.id.track_title);
         mAdditionalInfoView = (TextView)findViewById(R.id.track_additional_information);
@@ -109,6 +120,17 @@ public class TrackListViewItem extends LinearLayout {
      */
     public void setTrackNumber(String number) {
         mNumberView.setText(number);
+    }
+
+    public void setSectionHeader(String header) {
+        if ( mSectionHeader != null ) {
+            if ( header != null && !header.isEmpty()) {
+                mSectionHeader.setText(header);
+            } else {
+                // Hide away old header
+                mSectionHeaderLayout.setVisibility(GONE);
+            }
+        }
     }
 
     /**

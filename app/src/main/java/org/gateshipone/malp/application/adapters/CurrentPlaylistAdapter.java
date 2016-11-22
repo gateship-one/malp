@@ -223,7 +223,14 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         // Check if the track was available in local data set already (or is currently fetching)
         if (track != null) {
-
+            boolean newAlbum = false;
+            MPDFile previousTrack;
+            if( position > 0 ) {
+                previousTrack = getTrack(position - 1);
+                newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+            } else {
+                newAlbum = true;
+            }
             // Get track title
             String trackTitle = track.getTrackTitle();
 
@@ -235,11 +242,13 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             // additional information (artist + album)
             String trackInformation;
 
+            String trackAlbum = track.getTrackAlbum();
+
             // Check which information is available and set the separator accordingly.
             if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + track.getTrackAlbum();
+                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + trackAlbum;
             } else if (track.getTrackArtist().isEmpty()) {
-                trackInformation = track.getTrackAlbum();
+                trackInformation = trackAlbum;
             } else if (track.getTrackAlbum().isEmpty()) {
                 trackInformation = track.getTrackArtist();
             } else {
@@ -253,7 +262,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
 
             // Check if reusable object is available
-            if (convertView != null) {
+            if (!newAlbum && convertView != null) {
                 CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
                 tracksListViewItem.setTrackNumber(trackNumber);
                 tracksListViewItem.setTitle(trackTitle);
@@ -261,7 +270,7 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                 tracksListViewItem.setDuration(trackDuration);
             } else {
                 // If not create a new Listitem
-                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
+                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, newAlbum ? trackAlbum : null);
             }
 
             if (null != mLastStatus && mLastStatus.getCurrentSongIndex() == position) {

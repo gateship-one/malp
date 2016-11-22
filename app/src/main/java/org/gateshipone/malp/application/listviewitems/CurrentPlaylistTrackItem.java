@@ -27,7 +27,7 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 public class CurrentPlaylistTrackItem extends TrackListViewItem {
 
     public CurrentPlaylistTrackItem(Context context) {
-        super(context,"","","","",false);
+        super(context,"","","","",false,"");
 
         mTitleView.setText(getResources().getText(R.string.track_item_loading));
 
@@ -39,8 +39,8 @@ public class CurrentPlaylistTrackItem extends TrackListViewItem {
     /**
      * Constructor that already sets the values for each view.
      */
-    public CurrentPlaylistTrackItem(Context context, String number, String title, String information, String duration) {
-        super(context, number, title, information, duration, false);
+    public CurrentPlaylistTrackItem(Context context, String number, String title, String information, String duration, String sectionTitle) {
+        super(context, number, title, information, duration, false, sectionTitle);
 
     }
 
