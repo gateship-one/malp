@@ -663,19 +663,26 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return;
         }
         mBulkProgressCallback = progressCallback;
+        mArtistList.clear();
+        mAlbumList.clear();
         Log.v(TAG, "Start bulk loading");
-        MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
-            @Override
-            public void handleAlbums(List<MPDAlbum> albumList) {
-                new ParseMPDAlbumListTask().execute(albumList);
-            }
-        });
-        MPDQueryHandler.getArtists(new MPDResponseArtistList() {
-            @Override
-            public void handleArtists(List<MPDArtist> artistList) {
-                new ParseMPDArtistListTask().execute(artistList);
-            }
-        });
+        if (!mAlbumProvider.equals(mContext.getString((R.string.pref_artwork_provider_none_key)))) {
+            MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {
+                @Override
+                public void handleAlbums(List<MPDAlbum> albumList) {
+                    new ParseMPDAlbumListTask().execute(albumList);
+                }
+            });
+        }
+
+        if (!mArtistProvider.equals(mContext.getString((R.string.pref_artwork_provider_none_key)))) {
+            MPDQueryHandler.getArtists(new MPDResponseArtistList() {
+                @Override
+                public void handleArtists(List<MPDArtist> artistList) {
+                    new ParseMPDArtistListTask().execute(artistList);
+                }
+            });
+        }
     }
 
     private void fetchNextBulkAlbum() {
