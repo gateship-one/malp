@@ -126,8 +126,12 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             if (null == netInfo) {
                 return START_NOT_STICKY;
             }
-            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+            boolean wifiOnly = sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key), getResources().getBoolean(R.bool.pref_download_wifi_default));
             boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
+
+            if (wifiOnly && !isWifi) {
+                return START_NOT_STICKY;
+            }
 
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -274,7 +278,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             if (null == netInfo) {
                 return;
             }
-            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+            boolean wifiOnly = sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key), getResources().getBoolean(R.bool.pref_download_wifi_default));
             boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
 
             if (wifiOnly && !isWifi) {

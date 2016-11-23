@@ -134,64 +134,46 @@ public class MainActivity extends AppCompatActivity
 
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString("pref_theme", "indigo");
-        boolean darkTheme = sharedPref.getBoolean("pref_key_dark_theme", true);
+        String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
+        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key),getResources().getBoolean(R.bool.pref_theme_dark_default));
         if (darkTheme) {
-            switch (themePref) {
-                case "indigo":
-                    setTheme(R.style.AppTheme_indigo);
-                    break;
-                case "orange":
-                    setTheme(R.style.AppTheme_orange);
-                    break;
-                case "deeporange":
-                    setTheme(R.style.AppTheme_deepOrange);
-                    break;
-                case "blue":
-                    setTheme(R.style.AppTheme_blue);
-                    break;
-                case "darkgrey":
-                    setTheme(R.style.AppTheme_darkGrey);
-                    break;
-                case "brown":
-                    setTheme(R.style.AppTheme_brown);
-                    break;
-                case "lightgreen":
-                    setTheme(R.style.AppTheme_lightGreen);
-                    break;
-                case "red":
-                    setTheme(R.style.AppTheme_red);
-                    break;
+            if (themePref.equals(getString(R.string.pref_indigo_key))) {
+                setTheme(R.style.AppTheme_indigo);
+            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
+                setTheme(R.style.AppTheme_orange);
+            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
+                setTheme(R.style.AppTheme_deepOrange);
+            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
+                setTheme(R.style.AppTheme_blue);
+            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
+                setTheme(R.style.AppTheme_darkGrey);
+            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
+                setTheme(R.style.AppTheme_brown);
+            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
+                setTheme(R.style.AppTheme_lightGreen);
+            } else if (themePref.equals(getString(R.string.pref_red_key))) {
+                setTheme(R.style.AppTheme_red);
             }
         } else {
-            switch (themePref) {
-                case "indigo":
-                    setTheme(R.style.AppTheme_indigo_light);
-                    break;
-                case "orange":
-                    setTheme(R.style.AppTheme_orange_light);
-                    break;
-                case "deeporange":
-                    setTheme(R.style.AppTheme_deepOrange_light);
-                    break;
-                case "blue":
-                    setTheme(R.style.AppTheme_blue_light);
-                    break;
-                case "darkgrey":
-                    setTheme(R.style.AppTheme_darkGrey_light);
-                    break;
-                case "brown":
-                    setTheme(R.style.AppTheme_brown_light);
-                    break;
-                case "lightgreen":
-                    setTheme(R.style.AppTheme_lightGreen_light);
-                    break;
-                case "red":
-                    setTheme(R.style.AppTheme_red_light);
-                    break;
+            if (themePref.equals(getString(R.string.pref_indigo_key))) {
+                setTheme(R.style.AppTheme_indigo_light);
+            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
+                setTheme(R.style.AppTheme_orange_light);
+            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
+                setTheme(R.style.AppTheme_deepOrange_light);
+            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
+                setTheme(R.style.AppTheme_blue_light);
+            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
+                setTheme(R.style.AppTheme_darkGrey_light);
+            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
+                setTheme(R.style.AppTheme_brown_light);
+            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
+                setTheme(R.style.AppTheme_lightGreen_light);
+            } else if (themePref.equals(getString(R.string.pref_red_key))) {
+                setTheme(R.style.AppTheme_red_light);
             }
         }
-        if (themePref.equals("oleddark")) {
+        if (themePref.equals(getString(R.string.pref_oleddark_key))) {
             setTheme(R.style.AppTheme_oledDark);
         }
 
@@ -233,27 +215,23 @@ public class MainActivity extends AppCompatActivity
         registerForContextMenu(findViewById(R.id.main_listview));
 
         // Read default view preference
-        String defaultView = sharedPref.getString("pref_default_view", "my_music_albums");
+        String defaultView = sharedPref.getString(getString(R.string.pref_start_view_key), getString(R.string.pref_view_default));
 
         // the default tab for mymusic
         MyMusicTabsFragment.DEFAULTTAB defaultTab = null;
         // the nav ressource id to mark the right item in the nav drawer
         int navId = R.id.nav_library;
 
-        switch (defaultView) {
-            case "my_music_artists":
-                defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
-                break;
-            case "my_music_albums":
-                defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
-                break;
-            case "playlists":
-                navId = R.id.nav_saved_playlists;
-                break;
-            case "files":
-                navId = R.id.nav_files;
-                break;
+        if ( defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
+            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
+        } else if ( defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
+            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
+        } else if ( defaultView.equals(getString(R.string.pref_view_playlists_key))) {
+            navId = R.id.nav_saved_playlists;
+        } else if ( defaultView.equals(getString(R.string.pref_view_files_key))) {
+            navId = R.id.nav_files;
         }
+
 
         if (mProfileManager.getProfiles().size() == 0) {
             navId = R.id.nav_profiles;
@@ -532,7 +510,7 @@ public class MainActivity extends AppCompatActivity
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
-        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control", true);
+        mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
     }
 
     @Override
@@ -976,8 +954,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_use_hardware_control")) {
-            mHardwareControls = sharedPreferences.getBoolean("pref_use_hardware_control", true);
+        if (key.equals(getString(R.string.pref_hardware_controls_key))) {
+            mHardwareControls = sharedPreferences.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
         }
     }
 

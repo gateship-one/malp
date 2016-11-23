@@ -48,7 +48,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
 
         // add listener to open artwork settings
-        Preference openArtwork = findPreference("pref_key_artwork_settings");
+        Preference openArtwork = findPreference(getString(R.string.pref_artwork_settings_key));
         openArtwork.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -110,7 +110,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_theme") || key.equals("pref_key_dark_theme")) {
+        if (key.equals(getString(R.string.pref_theme_key)) || key.equals(getString(R.string.pref_dark_theme_key))) {
             Intent intent = getActivity().getIntent();
             getActivity().finish();
             startActivity(intent);

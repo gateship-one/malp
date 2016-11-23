@@ -50,7 +50,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         super.onCreate(savedInstanceState);
 
         // add listener to clear album data
-        Preference clearAlbums = findPreference("pref_clear_album");
+        Preference clearAlbums = findPreference(getString(R.string.pref_clear_album_key));
         clearAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -60,7 +60,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         });
 
         // add listener to clear artist data
-        Preference clearArtist = findPreference("pref_clear_artist");
+        Preference clearArtist = findPreference(getString(R.string.pref_clear_artist_key));
         clearArtist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -69,7 +69,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference clearBlockedAlbums = findPreference("pref_clear_blocked_album");
+        Preference clearBlockedAlbums = findPreference(getString(R.string.pref_clear_blocked_album_key));
         clearBlockedAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -78,7 +78,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference clearBlockedArtists = findPreference("pref_clear_blocked_artist");
+        Preference clearBlockedArtists = findPreference(getString(R.string.pref_clear_blocked_artist_key));
         clearBlockedArtists.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -87,7 +87,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference buldLoad = findPreference("pref_bulk_load");
+        Preference buldLoad = findPreference(getString(R.string.pref_bulk_load_key));
         buldLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -160,7 +160,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_album_provider")|| key.equals("pref_artist_provider")) {
+        if (key.equals(getString(R.string.pref_album_provider_key))|| key.equals(getString(R.string.pref_artist_provider_key))) {
             ArtworkManager.getInstance(getContext().getApplicationContext()).cancelAllRequests();
         }
     }
