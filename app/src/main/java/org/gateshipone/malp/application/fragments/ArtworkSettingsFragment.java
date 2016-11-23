@@ -24,17 +24,12 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkDatabaseManager;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.application.utils.ThemeUtils;
 
 
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -50,7 +45,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         super.onCreate(savedInstanceState);
 
         // add listener to clear album data
-        Preference clearAlbums = findPreference("pref_clear_album");
+        Preference clearAlbums = findPreference(getString(R.string.pref_clear_album_key));
         clearAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -60,7 +55,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
         });
 
         // add listener to clear artist data
-        Preference clearArtist = findPreference("pref_clear_artist");
+        Preference clearArtist = findPreference(getString(R.string.pref_clear_artist_key));
         clearArtist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -69,7 +64,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference clearBlockedAlbums = findPreference("pref_clear_blocked_album");
+        Preference clearBlockedAlbums = findPreference(getString(R.string.pref_clear_blocked_album_key));
         clearBlockedAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -78,7 +73,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference clearBlockedArtists = findPreference("pref_clear_blocked_artist");
+        Preference clearBlockedArtists = findPreference(getString(R.string.pref_clear_blocked_artist_key));
         clearBlockedArtists.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
@@ -87,12 +82,19 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
             }
         });
 
-        Preference buldLoad = findPreference("pref_bulk_load");
-        buldLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        Preference bulkLoad = findPreference(getString(R.string.pref_bulk_load_key));
+        bulkLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 
             public boolean onPreferenceClick(Preference preference) {
                 Intent serviceIntent = new Intent(getActivity(), BulkDownloadService.class);
                 serviceIntent.setAction(BulkDownloadService.ACTION_START_BULKDOWNLOAD);
+                SharedPreferences sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ARTIST_PROVIDER, sharedPref.getString(getString(R.string.pref_artist_provider_key),
+                        getString(R.string.pref_artwork_provider_artist_default)));
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ALBUM_PROVIDER, sharedPref.getString(getString(R.string.pref_album_provider_key),
+                        getString(R.string.pref_artwork_provider_album_default)));
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_WIFI_ONLY, sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key),
+                        getResources().getBoolean(R.bool.pref_download_wifi_default)));
                 getActivity().startService(serviceIntent);
                 return true;
             }
@@ -160,7 +162,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_album_provider")|| key.equals("pref_artist_provider")) {
+        if (key.equals(getString(R.string.pref_album_provider_key))|| key.equals(getString(R.string.pref_artist_provider_key))) {
             ArtworkManager.getInstance(getContext().getApplicationContext()).cancelAllRequests();
         }
     }

@@ -119,27 +119,47 @@ public class FanartActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString("pref_theme", "indigo");
-
-        switch (themePref) {
-            case "indigo":
+        String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
+        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key),getResources().getBoolean(R.bool.pref_theme_dark_default));
+        if (darkTheme) {
+            if (themePref.equals(getString(R.string.pref_indigo_key))) {
                 setTheme(R.style.AppTheme_indigo);
-                break;
-            case "orange":
+            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
                 setTheme(R.style.AppTheme_orange);
-                break;
-            case "deeporange":
+            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
                 setTheme(R.style.AppTheme_deepOrange);
-                break;
-            case "blue":
+            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
                 setTheme(R.style.AppTheme_blue);
-                break;
-            case "darkgrey":
+            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
                 setTheme(R.style.AppTheme_darkGrey);
-                break;
-            case "brown":
+            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
                 setTheme(R.style.AppTheme_brown);
-                break;
+            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
+                setTheme(R.style.AppTheme_lightGreen);
+            } else if (themePref.equals(getString(R.string.pref_red_key))) {
+                setTheme(R.style.AppTheme_red);
+            }
+        } else {
+            if (themePref.equals(getString(R.string.pref_indigo_key))) {
+                setTheme(R.style.AppTheme_indigo_light);
+            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
+                setTheme(R.style.AppTheme_orange_light);
+            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
+                setTheme(R.style.AppTheme_deepOrange_light);
+            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
+                setTheme(R.style.AppTheme_blue_light);
+            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
+                setTheme(R.style.AppTheme_darkGrey_light);
+            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
+                setTheme(R.style.AppTheme_brown_light);
+            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
+                setTheme(R.style.AppTheme_lightGreen_light);
+            } else if (themePref.equals(getString(R.string.pref_red_key))) {
+                setTheme(R.style.AppTheme_red_light);
+            }
+        }
+        if (themePref.equals(getString(R.string.pref_oleddark_key))) {
+            setTheme(R.style.AppTheme_oledDark);
         }
         super.onCreate(savedInstanceState);
         mDecorView = getWindow().getDecorView();
@@ -259,7 +279,7 @@ public class FanartActivity extends Activity {
 
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mHardwareControls = sharedPref.getBoolean("pref_use_hardware_control", true);
+        mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
     }
 
     @Override
@@ -620,9 +640,9 @@ public class FanartActivity extends Activity {
         if (null == netInfo) {
             return false;
         }
-        boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
-        String artistProvider = sharedPref.getString("pref_artist_provider", "fanart_tv");
-        boolean artistDownloadEnabled = !artistProvider.equals("off");
+        boolean wifiOnly = sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key), getResources().getBoolean(R.bool.pref_download_wifi_default));
+        String artistProvider = sharedPref.getString(getString(R.string.pref_artist_provider_key), getString(R.string.pref_artwork_provider_artist_default));
+        boolean artistDownloadEnabled = !artistProvider.equals(getString(R.string.provider_off));
         boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
         return (isWifi || !wifiOnly) && artistDownloadEnabled;
     }

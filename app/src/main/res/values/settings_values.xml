@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2016  Hendrik Borghorst & Frederik Luetkes
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<resources>
+    <string name="pref_theme_key" translatable="false">pref_theme</string>
+    <string name="pref_dark_theme_key" translatable="false">pref_dark_theme</string>
+    <string name="pref_library_view_key" translatable="false">pref_library_view</string>
+    <string name="pref_start_view_key" translatable="false">pref_start_view</string>
+    <string name="pref_artwork_settings_key" translatable="false">pref_artwork_settings</string>
+    <string name="pref_volume_controls_key" translatable="false">pref_volume_controls_key</string>
+
+    <string name="pref_hardware_controls_key" translatable="false">pref_hardware_controls_key</string>
+    <bool name="pref_hardware_controls_default">true</bool>
+
+    <string name="pref_indigo_key" translatable="false">indigo</string>
+    <string name="pref_orange_key" translatable="false">orange</string>
+    <string name="pref_deeporange_key" translatable="false">deeporange</string>
+    <string name="pref_blue_key" translatable="false">blue</string>
+    <string name="pref_darkgrey_key" translatable="false">darkgrey</string>
+    <string name="pref_brown_key" translatable="false">brown</string>
+    <string name="pref_lightgreen_key" translatable="false">lightgreen</string>
+    <string name="pref_red_key" translatable="false">red</string>
+    <string name="pref_oleddark_key" translatable="false">oleddark</string>
+    <string name="pref_theme_default" translatable="false">@string/pref_deeporange_key</string>
+    <bool name="pref_theme_dark_default">true</bool>
+
+    <string-array name="preference_style_values" translatable="false">
+        <item>@string/pref_indigo_key</item>
+        <item>@string/pref_orange_key</item>
+        <item>@string/pref_deeporange_key</item>
+        <item>@string/pref_blue_key</item>
+        <item>@string/pref_darkgrey_key</item>
+        <item>@string/pref_brown_key</item>
+        <item>@string/pref_lightgreen_key</item>
+        <item>@string/pref_red_key</item>
+        <item>@string/pref_oleddark_key</item>
+    </string-array>
+
+    <string name="pref_view_my_music_artists_key" translatable="false">my_music_artists</string>
+    <string name="pref_view_my_music_albums_key" translatable="false">my_music_albums</string>
+    <string name="pref_view_playlists_key" translatable="false">playlists</string>
+    <string name="pref_view_files_key" translatable="false">files</string>
+    <string name="pref_view_default" translatable="false">@string/pref_view_my_music_albums_key</string>
+
+    <string-array name="preference_default_view_values" translatable="false">
+        <item>@string/pref_view_my_music_artists_key</item>
+        <item>@string/pref_view_my_music_albums_key</item>
+        <item>@string/pref_view_playlists_key</item>
+        <item>@string/pref_view_files_key</item>
+    </string-array>
+
+
+    <string name="pref_library_view_list_key" translatable="false">library_view_list_key</string>
+    <string name="pref_library_view_grid_key" translatable="false">library_view_grid_key</string>
+    <string name="pref_library_view_default" translatable="false">@string/pref_library_view_grid_key</string>
+
+    <string-array name="preference_library_view_values" translatable="false">
+        <item>@string/pref_library_view_list_key</item>
+        <item>@string/pref_library_view_grid_key</item>
+    </string-array>
+
+    <string name="pref_volume_control_view_off_key" translatable="false">volume_control_off_key</string>
+    <string name="pref_volume_control_view_seekbar_key" translatable="false">volume_control_seekbar_key</string>
+    <string name="pref_volume_control_view_buttons_key" translatable="false">volume_control_buttons_key</string>
+    <string name="pref_volume_control_view_default" translatable="false">@string/pref_volume_control_view_seekbar_key</string>
+
+    <string-array name="preference_volume_control_values" translatable="false">
+        <item>@string/pref_volume_control_view_off_key</item>
+        <item>@string/pref_volume_control_view_seekbar_key</item>
+        <item>@string/pref_volume_control_view_buttons_key</item>
+    </string-array>
+
+    <!--
+
+      Artwork specific settings
+
+    -->
+
+    <string name="pref_album_provider_key" translatable="false">pref_album_provider</string>
+    <string name="pref_artist_provider_key" translatable="false">pref_artist_provider</string>
+    <string name="pref_download_wifi_only_key" translatable="false">pref_download_wifi_only</string>
+    <bool name="pref_download_wifi_default">true</bool>
+    <string name="pref_clear_artist_key" translatable="false">pref_clear_artist</string>
+    <string name="pref_clear_album_key" translatable="false">pref_clear_album</string>
+    <string name="pref_clear_blocked_artist_key" translatable="false">pref_clear_blocked_artist</string>
+    <string name="pref_clear_blocked_album_key" translatable="false">pref_clear_blocked_album</string>
+    <string name="pref_bulk_load_key" translatable="false">pref_bulk_load</string>
+
+    <string name="pref_artwork_provider_musicbrainz_key" translatable="false">musicbrainz</string>
+    <string name="pref_artwork_provider_lastfm_key" translatable="false">last_fm</string>
+    <string name="pref_artwork_provider_fanarttv_key" translatable="false">fanart_tv</string>
+    <string name="pref_artwork_provider_none_key" translatable="false">off</string>
+    <string name="pref_artwork_provider_album_default" translatable="false">@string/pref_artwork_provider_musicbrainz_key</string>
+    <string name="pref_artwork_provider_artist_default" translatable="false">@string/pref_artwork_provider_fanarttv_key</string>
+
+    <string-array name="preference_artwork_album_provider_values" translatable="false">
+        <item>@string/pref_artwork_provider_none_key</item>
+        <item>@string/pref_artwork_provider_musicbrainz_key</item>
+        <item>@string/pref_artwork_provider_lastfm_key</item>
+    </string-array>
+
+    <string-array name="preference_artwork_artist_provider_values" translatable="false">
+        <item>@string/pref_artwork_provider_none_key</item>
+        <item>@string/pref_artwork_provider_lastfm_key</item>
+        <item>@string/pref_artwork_provider_fanarttv_key</item>
+    </string-array>
+</resources>

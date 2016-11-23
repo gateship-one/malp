@@ -30,6 +30,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
@@ -52,8 +53,12 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
     private static final int NOTIFICATION_ID = 42;
 
-    private static final String ACTION_CANCEL = "cancel_download";
-    public static final String ACTION_START_BULKDOWNLOAD = "start_download";
+    private static final String ACTION_CANCEL = "org.gateshipone.malp.cancel_download";
+    public static final String ACTION_START_BULKDOWNLOAD = "org.gateshipone.malp.start_download";
+
+    public static final String BUNDLE_KEY_ARTIST_PROVIDER = "org.gateshipone.malp.artist_provider";
+    public static final String BUNDLE_KEY_ALBUM_PROVIDER = "org.gateshipone.malp.album_provider";
+    public static final String BUNDLE_KEY_WIFI_ONLY = "org.gateshipone.malp.wifi_only";
 
     private MPDProfileManager mProfileManager;
 
@@ -72,6 +77,8 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
     private PowerManager.WakeLock mWakelock;
 
     private ConnectionStateReceiver mConnectionStateChangeReceiver;
+
+    private boolean mWifiOnly;
 
     /**
      * Called when the service is created because it is requested by an activity
@@ -118,7 +125,24 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         if (intent != null && intent.getAction() != null && intent.getAction().equals(ACTION_START_BULKDOWNLOAD)) {
             Log.v(TAG, "Starting bulk download in service with thread id: " + Thread.currentThread().getId());
 
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(BulkDownloadService.this);
+            // reset counter
+            mRemainingArtists = 0;
+            mRemainingAlbums = 0;
+            mSumImageDownloads = 0;
+
+            String artistProvider = getString(R.string.pref_artwork_provider_artist_default);
+            String albumProvider = getString(R.string.pref_artwork_provider_album_default);
+            mWifiOnly = true;
+
+            // read setting from extras
+            Bundle extras = intent.getExtras();
+            if (extras != null) {
+                artistProvider = extras.getString(BUNDLE_KEY_ARTIST_PROVIDER, getString(R.string.pref_artwork_provider_artist_default));
+                albumProvider = extras.getString(BUNDLE_KEY_ALBUM_PROVIDER, getString(R.string.pref_artwork_provider_album_default));
+                mWifiOnly = intent.getBooleanExtra(BUNDLE_KEY_WIFI_ONLY, true);
+            }
+
+
             ConnectivityManager cm =
                     (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
@@ -126,12 +150,19 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             if (null == netInfo) {
                 return START_NOT_STICKY;
             }
-            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
             boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
+
+            if (mWifiOnly && !isWifi) {
+                return START_NOT_STICKY;
+            }
 
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             mWakelock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     "MALP_BulkDownloader");
+
+
+            ArtworkManager artworkManager = ArtworkManager.getInstance(getApplicationContext());
+            artworkManager.initialize(artistProvider, albumProvider, mWifiOnly);
 
             // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
             mWakelock.acquire();
@@ -274,7 +305,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             if (null == netInfo) {
                 return;
             }
-            boolean wifiOnly = sharedPref.getBoolean("pref_download_wifi_only", true);
+            boolean wifiOnly = sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key), getResources().getBoolean(R.bool.pref_download_wifi_default));
             boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
 
             if (wifiOnly && !isWifi) {

@@ -191,19 +191,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                NetworkResponse networkResponse = error.networkResponse;
-                if (networkResponse != null && networkResponse.statusCode == 503) {
-                    // If MusicBrainz returns 503 this is probably because of rate limiting
-                    Log.e(TAG, "Rate limit reached");
-                    mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-                        @Override
-                        public boolean apply(Request<?> request) {
-                            return true;
-                        }
-                    });
-                } else {
-                    errorListener.fetchError(album);
-                }
+                errorListener.fetchVolleyError(album, error);
             }
         });
     }
@@ -212,7 +200,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         Log.v(TAG,"Try release index:" + releaseIndex + " for album: " + album.getName());
         if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT ) {
             Log.e(TAG,"No more releases found for album: " + album.getName());
-            errorListener.fetchError(album);
+            errorListener.fetchVolleyError(album, null);
             return;
         }
         try {
@@ -232,15 +220,15 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
                             parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
                         } else {
                             Log.v(TAG,"All releases exhausted for album: " + album.getName());
-                            errorListener.fetchError(album);
+                            errorListener.fetchVolleyError(album, error);
                         }
                     }
                 });
             } else {
-                errorListener.fetchError(album);
+                errorListener.fetchVolleyError(album, null);
             }
         } catch (JSONException e) {
-            errorListener.fetchError(album);
+            errorListener.fetchJSONException(album,e);
         }
 
     }

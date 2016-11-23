@@ -23,7 +23,7 @@
         android:dialogTitle="@string/preference_artwork_album_provider_title"
         android:entries="@array/preference_artwork_album_provider_entries"
         android:entryValues="@array/preference_artwork_album_provider_values"
-        android:key="pref_album_provider"
+        android:key="@string/pref_album_provider_key"
         android:persistent="true"
         android:summary="@string/preference_artwork_album_provider_summary"
         android:title="@string/preference_artwork_album_provider_title" />
@@ -32,7 +32,7 @@
         android:dialogTitle="@string/preference_artwork_artist_provider_title"
         android:entries="@array/preference_artwork_artist_provider_entries"
         android:entryValues="@array/preference_artwork_artist_provider_values"
-        android:key="pref_artist_provider"
+        android:key="@string/pref_artist_provider_key"
         android:persistent="true"
         android:summary="@string/preference_artwork_artist_provider_summary"
         android:title="@string/preference_artwork_artist_provider_title" />
@@ -40,28 +40,28 @@
         android:title="@string/preference_artwork_wifi_only_title"
         android:summary="@string/preference_artwork_wifi_only_text"
         android:persistent="true"
-        android:defaultValue="true"
-        android:key="pref_download_wifi_only"
+        android:defaultValue="@bool/pref_download_wifi_default"
+        android:key="@string/pref_download_wifi_only_key"
         />
     <Preference
-        android:key="pref_clear_artist"
-        android:title="@string/preference_artwork_clear_artist"
-        android:summary="@string/preference_artwork_clear_artist_summary"/>
-    <Preference
-        android:key="pref_clear_album"
+        android:key="@string/pref_clear_album_key"
         android:title="@string/preference_artwork_clear_album"
         android:summary="@string/preference_artwork_clear_album_summary"/>
     <Preference
-        android:key="pref_clear_blocked_artist"
-        android:title="@string/preference_artwork_clear_blocked_artist"
-        android:summary="@string/preference_artwork_clear_blocked_artist_summary"/>
+        android:key="@string/pref_clear_artist_key"
+        android:title="@string/preference_artwork_clear_artist"
+        android:summary="@string/preference_artwork_clear_artist_summary"/>
     <Preference
-        android:key="pref_clear_blocked_album"
+        android:key="@string/pref_clear_blocked_album_key"
         android:title="@string/preference_artwork_clear_blocked_album"
         android:summary="@string/preference_artwork_clear_blocked_album_summary"/>
+    <Preference
+        android:key="@string/pref_clear_blocked_artist_key"
+        android:title="@string/preference_artwork_clear_blocked_artist"
+        android:summary="@string/preference_artwork_clear_blocked_artist_summary"/>
 
     <Preference
-        android:key="pref_bulk_load"
+        android:key="@string/pref_bulk_load_key"
         android:title="@string/preference_artwork_bulk_load"
         android:summary="@string/preference_artwork_bulk_load_summary"/>
 

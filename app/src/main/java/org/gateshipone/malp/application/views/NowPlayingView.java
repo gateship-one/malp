@@ -413,7 +413,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("pref_volume_control_view")) {
+        if (key.equals(getContext().getString(R.string.pref_volume_controls_key))) {
             setVolumeControlSetting();
         }
     }
@@ -421,15 +421,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     private void setVolumeControlSetting() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String volumeControlView = sharedPref.getString("pref_volume_control_view", "volume_control_seekbar");
+        String volumeControlView = sharedPref.getString(getContext().getString(R.string.pref_volume_controls_key), getContext().getString(R.string.pref_volume_control_view_default));
 
-        if ( volumeControlView.equals("volume_control_off")) {
+        if ( volumeControlView.equals(getContext().getString(R.string.preference_volume_control_off))) {
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(GONE);
-        } else if ( volumeControlView.equals("volume_control_seekbar")) {
+        } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_seekbar_key))) {
             mVolumeSeekbarLayout.setVisibility(VISIBLE);
             mVolumeButtonLayout.setVisibility(GONE);
-        } else if ( volumeControlView.equals("volume_control_buttons")) {
+        } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_buttons_key))) {
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(VISIBLE);
         }
@@ -919,10 +919,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         });
 
         mCoverLoader = new CoverBitmapLoader(getContext(), new CoverReceiverClass());
-
-        invalidate();
-
-
     }
 
     /**

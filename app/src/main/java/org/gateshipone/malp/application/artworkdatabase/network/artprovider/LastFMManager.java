@@ -92,22 +92,22 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                                 getArtistImage(image.getString("#text"), artist, listener, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        errorListener.fetchError(artist);
+                                        errorListener.fetchVolleyError(artist, error);
                                     }
                                 });
                             } else {
-                                errorListener.fetchError(artist);
+                                errorListener.fetchVolleyError(artist, null);
                             }
                         }
                     }
                 } catch (JSONException e) {
-                    errorListener.fetchError(artist);
+                    errorListener.fetchJSONException(artist, e);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                errorListener.fetchError(artist);
+                errorListener.fetchVolleyError(artist, error);
             }
         });
 
@@ -151,23 +151,23 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
                                 getAlbumImage(image.getString("#text"), album, listener, new Response.ErrorListener() {
                                     @Override
                                     public void onErrorResponse(VolleyError error) {
-                                        errorListener.fetchError(album);
+                                        errorListener.fetchVolleyError(album, error);
                                     }
                                 });
                             } else {
-                                errorListener.fetchError(album);
+                                errorListener.fetchVolleyError(album, null);
                             }
 
                         }
                     }
                 } catch (JSONException e) {
-                    errorListener.fetchError(album);
+                    errorListener.fetchJSONException(album, e);
                 }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                errorListener.fetchError(album);
+                errorListener.fetchVolleyError(album, error);
             }
         });
     }
