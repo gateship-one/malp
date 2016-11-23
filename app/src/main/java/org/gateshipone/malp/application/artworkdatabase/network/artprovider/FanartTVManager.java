@@ -110,41 +110,29 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
                                         getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
                                             @Override
                                             public void onErrorResponse(VolleyError error) {
-                                                errorListener.fetchError(artist);
+                                                errorListener.fetchVolleyError(artist, error);
                                             }
                                         });
 
                                     } catch (JSONException e) {
-                                        errorListener.fetchError(artist);
+                                        errorListener.fetchJSONException(artist, e);
                                     }
                                 }
                             }, new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError error) {
-                                    errorListener.fetchError(artist);
+                                    errorListener.fetchVolleyError(artist, error);
                                 }
                             });
                         }
                     } catch (JSONException e) {
-                        errorListener.fetchError(artist);
+                        errorListener.fetchJSONException(artist, e);
                     }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    NetworkResponse networkResponse = error.networkResponse;
-                    if (networkResponse != null && networkResponse.statusCode == 503) {
-                        // If MusicBrainz returns 503 this is probably because of rate limiting
-                        Log.e(TAG, "Rate limit reached");
-                        mRequestQueue.cancelAll(new RequestQueue.RequestFilter() {
-                            @Override
-                            public boolean apply(Request<?> request) {
-                                return true;
-                            }
-                        });
-                    } else {
-                        errorListener.fetchError(artist);
-                    }
+                    errorListener.fetchVolleyError(artist, error);
                 }
             });
         }
@@ -168,7 +156,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
                                     tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
                                 } else {
                                     // All tried
-                                    errorListener.fetchError(artist);
+                                    errorListener.fetchVolleyError(artist, null);
                                 }
                             }
                         });
@@ -179,14 +167,14 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
                             tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
                         } else {
                             // All tried
-                            errorListener.fetchError(artist);
+                            errorListener.fetchJSONException(artist, e);
                         }
                     }
                 }
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    errorListener.fetchError(artist);
+                    errorListener.fetchVolleyError(artist, error);
                 }
             });
         }

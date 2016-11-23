@@ -30,11 +30,12 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.util.Pair;
 
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
@@ -51,6 +52,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -75,6 +77,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     private BulkLoadingProgressCallback mBulkProgressCallback;
 
+    private String mArtistProvider;
+
+    private String mAlbumProvider;
+
+    private boolean mWifiOnly;
+
     private ArtworkManager(Context context) {
 
         mDBManager = ArtworkDatabaseManager.getInstance(context);
@@ -89,6 +97,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         mContext.registerReceiver(receiver, filter);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        mArtistProvider = sharedPref.getString(context.getString(R.string.pref_artist_provider_key), context.getString(R.string.pref_artwork_provider_artist_default));
+        mAlbumProvider = sharedPref.getString(context.getString(R.string.pref_album_provider_key), context.getString(R.string.pref_artwork_provider_album_default));
+        mWifiOnly = sharedPref.getBoolean(context.getString(R.string.pref_download_wifi_only_key), context.getResources().getBoolean(R.bool.pref_download_wifi_default));
     }
 
     public static synchronized ArtworkManager getInstance(Context context) {
@@ -96,6 +109,24 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             mInstance = new ArtworkManager(context);
         }
         return mInstance;
+    }
+
+    public void setWifiOnly(boolean wifiOnly) {
+        mWifiOnly = wifiOnly;
+    }
+
+    public void setAlbumProvider(String albumProvider) {
+        mAlbumProvider = albumProvider;
+    }
+
+    public void setArtistProvider(String artistProvider) {
+        mArtistProvider = artistProvider;
+    }
+
+    public void initialize(String artistProvider, String albumProvider, boolean wifiOnly) {
+        mArtistProvider = artistProvider;
+        mAlbumProvider = albumProvider;
+        mWifiOnly = wifiOnly;
     }
 
     public Bitmap getArtistImage(final MPDArtist artist) throws ImageNotFoundException {
@@ -262,28 +293,24 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @param artist Artist to fetch an image for.
      */
     public void fetchArtistImage(final MPDArtist artist) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String artistProvider = sharedPref.getString(mContext.getString(R.string.pref_artist_provider_key), mContext.getString(R.string.pref_artwork_provider_artist_default));
-
         ConnectivityManager cm =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        boolean wifiOnly = sharedPref.getBoolean(mContext.getString(R.string.pref_download_wifi_only_key), mContext.getResources().getBoolean(R.bool.pref_download_wifi_default));
 
         boolean isWifi = cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI || cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET;
 
-        if (wifiOnly && !isWifi) {
+        if (mWifiOnly && !isWifi) {
             return;
         }
 
-        if (artistProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
+        if (mArtistProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
             LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
                 @Override
                 public void onResponse(ArtistImageResponse response) {
                     new InsertArtistImageTask().execute(response);
                 }
             }, this);
-        } else if (artistProvider.equals(mContext.getString(R.string.pref_artwork_provider_fanarttv_key))) {
+        } else if (mArtistProvider.equals(mContext.getString(R.string.pref_artwork_provider_fanarttv_key))) {
             FanartTVManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
                 @Override
                 public void onResponse(ArtistImageResponse response) {
@@ -299,28 +326,23 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @param album Album to fetch an image for.
      */
     public void fetchAlbumImage(final MPDAlbum album) {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
-        String albumProvider = sharedPref.getString(mContext.getString(R.string.pref_album_provider_key), mContext.getString(R.string.pref_artwork_provider_album_default));
-
-        boolean wifiOnly = sharedPref.getBoolean(mContext.getString(R.string.pref_download_wifi_only_key), mContext.getResources().getBoolean(R.bool.pref_download_wifi_default));
-
         ConnectivityManager cm =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         boolean isWifi = cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI || cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET;
 
-        if (wifiOnly && !isWifi) {
+        if (mWifiOnly && !isWifi) {
             return;
         }
 
-        if (albumProvider.equals(mContext.getString(R.string.pref_artwork_provider_musicbrainz_key))) {
+        if (mAlbumProvider.equals(mContext.getString(R.string.pref_artwork_provider_musicbrainz_key))) {
             MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
                 public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
             }, this);
-        } else if (albumProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
+        } else if (mAlbumProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
             LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
                 @Override
                 public void onResponse(AlbumImageResponse response) {
@@ -397,13 +419,58 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
     }
 
+
+
+    /**
+     * Interface implementation to handle errors during fetching of album images
+     *
+     * @param album Album that resulted in a fetch error
+     */
+    public void fetchJSONException(MPDAlbum album, JSONException exception) {
+        Log.e(TAG, "Error fetching album: " + album.getName() + "-" + album.getArtistName());
+        AlbumImageResponse imageResponse = new AlbumImageResponse();
+        imageResponse.album = album;
+        imageResponse.image = null;
+        imageResponse.url = null;
+        new InsertAlbumImageTask().execute(imageResponse);
+    }
+
+    public void fetchVolleyError(MPDAlbum album, VolleyError error) {
+        Log.e(TAG, "VolleyError for album: " + album.getName() + "-" + album.getArtistName());
+
+        if (error != null) {
+            NetworkResponse networkResponse = error.networkResponse;
+            /**
+             * Rate limit probably reached. Discontinue downloading to prevent
+             * ban on the servers.
+             */
+            if (networkResponse != null && networkResponse.statusCode == 503) {
+                mAlbumList.clear();
+                cancelAllRequests();
+                boolean isEmpty;
+                synchronized (mArtistList) {
+                    isEmpty = mArtistList.isEmpty();
+                }
+                if (isEmpty && mBulkProgressCallback != null) {
+                    mBulkProgressCallback.finishedLoading();
+                }
+                return;
+            }
+        }
+
+        AlbumImageResponse imageResponse = new AlbumImageResponse();
+        imageResponse.album = album;
+        imageResponse.image = null;
+        imageResponse.url = null;
+        new InsertAlbumImageTask().execute(imageResponse);
+    }
+
     /**
      * Interface implementation to handle errors during fetching of artist images
      *
      * @param artist Artist that resulted in a fetch error
      */
-    @Override
-    public void fetchError(MPDArtist artist) {
+    public void fetchJSONException(MPDArtist artist, JSONException exception) {
         Log.e(TAG, "Error fetching artist: " + artist.getArtistName());
         ArtistImageResponse imageResponse = new ArtistImageResponse();
         imageResponse.artist = artist;
@@ -412,19 +479,33 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         new InsertArtistImageTask().execute(imageResponse);
     }
 
-    /**
-     * Interface implementation to handle errors during fetching of album images
-     *
-     * @param album Album that resulted in a fetch error
-     */
-    @Override
-    public void fetchError(MPDAlbum album) {
-        Log.e(TAG, "Error fetching album: " + album.getName() + "-" + album.getArtistName());
-        AlbumImageResponse imageResponse = new AlbumImageResponse();
-        imageResponse.album = album;
+    public void fetchVolleyError(MPDArtist artist, VolleyError error) {
+        Log.e(TAG, "VolleyError fetching: " + artist.getArtistName());
+
+        if (error != null) {
+            NetworkResponse networkResponse = error.networkResponse;
+            /**
+             * Rate limit probably reached. Discontinue downloading to prevent
+             * ban on the servers.
+             */
+            if (networkResponse != null && networkResponse.statusCode == 503) {
+                mArtistList.clear();
+                cancelAllRequests();
+                boolean isEmpty;
+                synchronized (mAlbumList) {
+                    isEmpty = mAlbumList.isEmpty();
+                }
+                if (isEmpty && mBulkProgressCallback != null) {
+                    mBulkProgressCallback.finishedLoading();
+                }
+                return;
+            }
+        }
+        ArtistImageResponse imageResponse = new ArtistImageResponse();
+        imageResponse.artist = artist;
         imageResponse.image = null;
         imageResponse.url = null;
-        new InsertAlbumImageTask().execute(imageResponse);
+        new InsertArtistImageTask().execute(imageResponse);
     }
 
     /**
@@ -555,10 +636,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mAlbumList.clear();
                 mAlbumList.addAll(albumList);
             }
-            if ( !mArtistList.isEmpty() ) {
-                fetchNextBulkAlbum();
-                fetchNextBulkArtist();
-            }
+            fetchNextBulkAlbum();
             return null;
         }
     }
@@ -575,10 +653,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mArtistList.clear();
                 mArtistList.addAll(artistList);
             }
-            if ( !mAlbumList.isEmpty() ) {
-                fetchNextBulkAlbum();
-                fetchNextBulkArtist();
-            }
+            fetchNextBulkArtist();
             return null;
         }
     }
@@ -690,7 +765,6 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
             ConnectivityManager cm =
                     (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -699,10 +773,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             if (null == netInfo) {
                 return;
             }
-            boolean wifiOnly = sharedPref.getBoolean(mContext.getString(R.string.pref_download_wifi_only_key), mContext.getResources().getBoolean(R.bool.pref_download_wifi_default));
             boolean isWifi = netInfo.getType() == ConnectivityManager.TYPE_WIFI || netInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
 
-            if (wifiOnly && !isWifi) {
+            if (mWifiOnly && !isWifi) {
                 // Cancel all downloads
                 Log.v(TAG, "Cancel all downloads because of connection change");
                 cancelAllRequests();

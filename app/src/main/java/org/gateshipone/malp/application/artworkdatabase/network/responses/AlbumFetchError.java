@@ -18,8 +18,15 @@
 package org.gateshipone.malp.application.artworkdatabase.network.responses;
 
 
+import android.content.Context;
+
+import com.android.volley.VolleyError;
+
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.json.JSONException;
 
 public interface AlbumFetchError {
-    void fetchError(MPDAlbum album);
+    void fetchJSONException(MPDAlbum album, JSONException exception);
+
+    void fetchVolleyError(MPDAlbum album, VolleyError error);
 }
