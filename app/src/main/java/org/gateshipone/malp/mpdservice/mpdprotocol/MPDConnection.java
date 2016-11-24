@@ -677,7 +677,7 @@ public class MPDConnection {
         String albumName = "";
 
         MPDAlbum tempAlbum = null;
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             /* Check if the response is an album */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME)) {
                 /* We found an album, add it to the list. */
@@ -733,7 +733,7 @@ public class MPDConnection {
 
         MPDArtist tempArtist = null;
 
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
 
             if (response == null) {
                 /* skip this invalid (empty) response */
@@ -820,7 +820,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = readLine();
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             /* This if block will just check all the different response possible by MPDs file/dir/playlist response */
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (null != tempFileEntry) {
@@ -1326,7 +1326,7 @@ public class MPDConnection {
 
         response = readLine();
 
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_STATS_UPTIME)) {
                 stats.setServerUptime(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_UPTIME.length())));
             } else if (response.startsWith(MPDResponses.MPD_STATS_PLAYTIME)) {
@@ -1873,7 +1873,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = readLine();
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_OUTPUT_ID)) {
                 if (null != outputName) {
                     MPDOutput tempOutput = new MPDOutput(outputName, outputActive, outputId);
@@ -1919,7 +1919,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = readLine();
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_COMMAND)) {
                 commandName = response.substring(MPDResponses.MPD_COMMAND.length());
                 commandList.add(commandName);
@@ -1947,7 +1947,7 @@ public class MPDConnection {
 
         /* Response line from MPD */
         String response = readLine();
-        while (isConnected() && !response.startsWith("OK") && !response.startsWith("ACK")) {
+        while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_TAGTYPE)) {
                 tagName = response.substring(MPDResponses.MPD_TAGTYPE.length());
                 tagList.add(tagName);
