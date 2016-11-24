@@ -78,6 +78,10 @@ public class FileListItem extends AbsImageListViewItem {
         } else {
             mItemIcon.setVisibility(GONE);
         }
+
+        /* Show loading text */
+        mSeparator.setVisibility(GONE);
+        mTitleView.setText(getResources().getText(R.string.track_item_loading));
     }
 
     /**
@@ -114,6 +118,10 @@ public class FileListItem extends AbsImageListViewItem {
         } else {
             mItemIcon.setVisibility(GONE);
         }
+
+        /* Show loading text */
+        mSeparator.setVisibility(GONE);
+        mTitleView.setText(getResources().getText(R.string.track_item_loading));
     }
 
     /**
@@ -298,6 +306,7 @@ public class FileListItem extends AbsImageListViewItem {
             }
             mItemIcon.setImageDrawable(icon);
         }
+        mSeparator.setVisibility(VISIBLE);
 
         mAdditionalInfoView.setText(trackInformation);
     }
