@@ -19,18 +19,13 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
-import org.gateshipone.malp.application.listviewitems.CurrentPlaylistTrackItem;
-import org.gateshipone.malp.application.listviewitems.GenericGridItem;
-import org.gateshipone.malp.application.listviewitems.TrackListViewItem;
-import org.gateshipone.malp.application.utils.FormatHelper;
+import org.gateshipone.malp.application.listviewitems.FileListItem;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
@@ -241,67 +236,38 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
             } else {
                 newAlbum = true;
             }
-            // Get track title
-            String trackTitle = track.getTrackTitle();
-
-            // If no trackname is available (e.g. streaming URLs) show path
-            if (null == trackTitle || trackTitle.isEmpty()) {
-                trackTitle = track.getPath();
-            }
-
-            // additional information (artist + album)
-            String trackInformation;
 
             String trackAlbum = track.getTrackAlbum();
 
-            // Check which information is available and set the separator accordingly.
-            if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + trackAlbum;
-            } else if (track.getTrackArtist().isEmpty()) {
-                trackInformation = trackAlbum;
-            } else if (track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist();
-            } else {
-                trackInformation = "";
-            }
-
-            // Get the number of the track
-            String trackNumber = String.valueOf(position + 1);
-
-            // Get the preformatted duration of the track.
-            String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
-
             // Check if reusable object is available
-            if (!newAlbum && convertView != null && !((CurrentPlaylistTrackItem)convertView).isSectionView()) {
-                CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
-                tracksListViewItem.setTrackNumber(trackNumber);
-                tracksListViewItem.setTitle(trackTitle);
-                tracksListViewItem.setAdditionalInformation(trackInformation);
-                tracksListViewItem.setDuration(trackDuration);
+            if (!newAlbum && convertView != null && !((FileListItem)convertView).isSectionView()) {
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setTrack(track, mContext);
+                tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
             } else if ( newAlbum ){
                 // If not create a new Listitem
-                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, trackAlbum);
+                convertView = new FileListItem(mContext, track, position + 1,false, trackAlbum);
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 // Dummy MPDAlbum
                 MPDAlbum tmpAlbum = new MPDAlbum(trackAlbum);
                 tmpAlbum.setMBID(track.getTrackAlbumMBID());
-                ((TrackListViewItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
+                ((FileListItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
 
                 // Start async image loading
-                ((TrackListViewItem) convertView).startCoverImageTask();
+                ((FileListItem) convertView).startCoverImageTask();
             } else {
-                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration, null);
+                convertView = new FileListItem(mContext, track, position + 1, false);
             }
 
             if (null != mLastStatus && mLastStatus.getCurrentSongIndex() == position) {
-                ((CurrentPlaylistTrackItem) convertView).setPlaying(true);
+                ((FileListItem) convertView).setPlaying(true);
             } else {
-                ((CurrentPlaylistTrackItem) convertView).setPlaying(false);
+                ((FileListItem) convertView).setPlaying(false);
             }
         } else {
             // If the element is not yet received we will show an empty view, that notifies the user about
             // the running fetch.
-            convertView = new CurrentPlaylistTrackItem(mContext);
+            convertView = new FileListItem(mContext, false);
         }
 
         // The view that is used for the position in the list

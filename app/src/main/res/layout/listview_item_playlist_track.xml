@@ -15,11 +15,15 @@
   ~     along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:minHeight="@dimen/material_list_item_height"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:minHeight="@dimen/material_list_item_height"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/section_header"
@@ -77,5 +81,6 @@
     </LinearLayout>
 
     <include layout="@layout/listview_item_track" />
+    </LinearLayout>
 
-</LinearLayout>
+</RelativeLayout>

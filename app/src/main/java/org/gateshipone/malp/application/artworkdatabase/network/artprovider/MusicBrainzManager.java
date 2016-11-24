@@ -45,6 +45,8 @@ import org.json.JSONObject;
 public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvider {
     private static final String TAG = MusicBrainzManager.class.getSimpleName();
 
+    private static final String LUCENE_SPECIAL_CHARACTERS_REGEX = "([+\\-\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\?\\:\\\\\\/])";
+
     private static final String MUSICBRAINZ_API_URL = "http://musicbrainz.org/ws/2";
     private static final String COVERART_ARCHIVE_API_URL = "http://coverartarchive.org";
 
@@ -236,7 +238,9 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
 
     private void getAlbumMBID(MPDAlbum album, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String albumName = Uri.encode(album.getName());
+        albumName = albumName.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX, "\\$1");
         String artistName = Uri.encode(album.getArtistName());
+        artistName = artistName.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX, "\\$1");
         String url;
         if (!artistName.isEmpty()) {
             url = MUSICBRAINZ_API_URL + "/" + "release/?query=release:" + albumName + "%20AND%20artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;

@@ -35,41 +35,16 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
-public class GenericGridItem extends RelativeLayout implements CoverLoadable {
+public class GenericGridItem extends AbsImageListViewItem {
 
-    protected final AsyncLoader.CoverViewHolder mHolder;
-    protected final ImageView mImageView;
     protected final TextView mTitleView;
-    protected final ViewSwitcher mSwitcher;
 
-    private AsyncLoader mLoaderTask;
-    protected boolean mCoverDone = false;
 
-    public GenericGridItem(Context context, String labelText, ViewGroup.LayoutParams layoutParams, GenericSectionAdapter adapter) {
-        super(context);
 
-        setLayoutParams(layoutParams);
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        inflater.inflate(R.layout.gridview_item, this, true);
-        setLayoutParams(layoutParams);
+    public GenericGridItem(Context context, String labelText, GenericSectionAdapter adapter) {
+        super(context,R.layout.gridview_item, R.id.item_artists_cover_image, R.id.item_grid_viewswitcher, adapter);
 
-        mImageView = (ImageView) findViewById(R.id.item_artists_cover_image);
         mTitleView = (TextView) findViewById(R.id.item_grid_text);
-
-        mSwitcher = (ViewSwitcher) findViewById(R.id.item_grid_viewswitcher);
-
-        mHolder = new AsyncLoader.CoverViewHolder();
-        mHolder.coverLoadable = this;
-        mHolder.mAdapter = adapter;
-        mHolder.imageDimension = new Pair<>(mImageView.getWidth(), mImageView.getHeight());
-
-        mCoverDone = false;
-        mSwitcher.setOutAnimation(null);
-        mSwitcher.setInAnimation(null);
-        mImageView.setImageDrawable(null);
-        mSwitcher.setDisplayedChild(0);
-        mSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-        mSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
 
         mTitleView.setText(labelText);
     }
@@ -80,63 +55,5 @@ public class GenericGridItem extends RelativeLayout implements CoverLoadable {
      */
     public void setTitle(String text) {
         mTitleView.setText(text);
-    }
-
-
-    /**
-     * Starts the image retrieval task
-     */
-    public void startCoverImageTask() {
-        if (mLoaderTask == null && mHolder.artworkManager != null && mHolder.modelItem != null && !mCoverDone) {
-            mLoaderTask = new AsyncLoader();
-            mLoaderTask.execute(mHolder);
-        }
-    }
-
-
-    public void prepareArtworkFetching(ArtworkManager artworkManager, MPDGenericItem modelItem) {
-        if (!modelItem.equals(mHolder.modelItem) || !mCoverDone) {
-            setImage(null);
-        }
-        mHolder.artworkManager = artworkManager;
-        mHolder.modelItem = modelItem;
-    }
-
-    /**
-     * If this GridItem gets detached from the parent it makes no sense to let
-     * the task for image retrieval running. (non-Javadoc)
-     *
-     * @see android.view.View#onDetachedFromWindow()
-     */
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        if (mLoaderTask != null) {
-            mLoaderTask.cancel(true);
-            mLoaderTask = null;
-        }
-    }
-
-    public void setImage(Bitmap image) {
-        if (null != image) {
-            mCoverDone = true;
-
-            mImageView.setImageBitmap(image);
-            mSwitcher.setDisplayedChild(1);
-        } else {
-            // Cancel old task
-            if (mLoaderTask != null) {
-                mLoaderTask.cancel(true);
-            }
-            mLoaderTask = null;
-
-            mCoverDone = false;
-            mSwitcher.setOutAnimation(null);
-            mSwitcher.setInAnimation(null);
-            mImageView.setImageDrawable(null);
-            mSwitcher.setDisplayedChild(0);
-            mSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-            mSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-        }
     }
 }
