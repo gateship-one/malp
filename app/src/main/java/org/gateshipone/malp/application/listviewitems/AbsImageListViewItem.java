@@ -2,17 +2,13 @@ package org.gateshipone.malp.application.listviewitems;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
-import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
@@ -48,6 +44,14 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
         mHolder.mAdapter = adapter;
 
         mCoverDone = false;
+        if ( null != mImageView && null != mSwitcher) {
+            mSwitcher.setOutAnimation(null);
+            mSwitcher.setInAnimation(null);
+            mImageView.setImageDrawable(null);
+            mSwitcher.setDisplayedChild(0);
+            mSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
+            mSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
+        }
     }
 
     /**
@@ -64,8 +68,12 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
     }
 
 
+    /**
+     * Prepares the view to load an image when the scrolling view deems it is ready (scrollspeed slow enough).
+     * @param artworkManager ArtworkManager instance used to get the image.
+     * @param modelItem ModelItem to get the image for (MPDAlbum/MPDArtist)
+     */
     public void prepareArtworkFetching(ArtworkManager artworkManager, MPDGenericItem modelItem) {
-        Log.v(TAG,"Load image for model: " + modelItem.getSectionTitle());
         if (!modelItem.equals(mHolder.modelItem) || !mCoverDone) {
             setImage(null);
         }
@@ -88,10 +96,16 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
         }
     }
 
+    /**
+     * Sets the image of this view with a smooth fading animation.
+     * If null is supplied it will reset the cover placeholder image.
+     * @param image Image to show inside the view. null will result in the placeholder being shown.
+     */
     public void setImage(Bitmap image) {
         if ( null == mImageView || null == mSwitcher) {
             return;
         }
+
         if (null != image) {
             mCoverDone = true;
 

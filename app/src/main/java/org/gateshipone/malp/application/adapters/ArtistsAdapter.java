@@ -71,29 +71,32 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements 
                 convertView = new SimpleListItem(mContext, label,null);
             }
         } else {
-
+            GenericGridItem gridItem;
+            ViewGroup.LayoutParams layoutParams;
             // Check if a view can be recycled
-            if (convertView != null) {
-                GenericGridItem gridItem = (GenericGridItem) convertView;
-
-                // Make sure to reset the layoutParams in case of change (rotation for example)
-                ViewGroup.LayoutParams layoutParams = gridItem.getLayoutParams();
+            if (convertView == null) {
+                // Create new view if no reusable is available
+                gridItem = new GenericGridItem(mContext, label, this);
+                layoutParams = new android.widget.AbsListView.LayoutParams(((GridView)mListView).getColumnWidth(), ((GridView)mListView).getColumnWidth());
+            } else {
+                gridItem = (GenericGridItem) convertView;
+                gridItem.setTitle(label);
+                layoutParams = gridItem.getLayoutParams();
                 layoutParams.height = ((GridView)mListView).getColumnWidth();
                 layoutParams.width = ((GridView)mListView).getColumnWidth();
-                gridItem.setLayoutParams(layoutParams);
-                gridItem.setTitle(label);
-            } else {
-                // Create new view if no reusable is available
-                convertView = new GenericGridItem(mContext, label, this);
             }
 
+            // Make sure to reset the layoutParams in case of change (rotation for example)
+            gridItem.setLayoutParams(layoutParams);
+
             // This will prepare the view for fetching the image from the internet if not already saved in local database.
-            ((GenericGridItem)convertView).prepareArtworkFetching(mArtworkManager, artist);
+            gridItem.prepareArtworkFetching(mArtworkManager, artist);
 
             // Check if the scroll speed currently is already 0, then start the image task right away.
             if (mScrollSpeed == 0) {
-                ((GenericGridItem) convertView).startCoverImageTask();
+                gridItem.startCoverImageTask();
             }
+            return gridItem;
         }
         return convertView;
     }
