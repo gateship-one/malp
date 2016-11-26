@@ -50,8 +50,7 @@ import java.util.concurrent.Semaphore;
  * This decreases the memory footprint because the adapter is able to clear unneeded list blocks when
  * not longer needed (e.g. the user scrolled away)
  */
-public class CurrentPlaylistAdapter extends BaseAdapter {
-
+public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
     /**
      * States of list blocks.
      */
@@ -253,8 +252,11 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
                 tmpAlbum.setMBID(track.getTrackAlbumMBID());
                 ((FileListItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
 
-                // Start async image loading
-                ((FileListItem) convertView).startCoverImageTask();
+                // Start async image loading if not scrolling at the moment. Otherwise the ScrollSpeedListener
+                // starts the loading.
+                if ( mScrollSpeed == 0) {
+                    ((FileListItem) convertView).startCoverImageTask();
+                }
             } else {
                 convertView = new FileListItem(mContext, track, position + 1, false);
             }
