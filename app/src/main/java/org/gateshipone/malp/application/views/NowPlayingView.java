@@ -422,13 +422,24 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String volumeControlView = sharedPref.getString(getContext().getString(R.string.pref_volume_controls_key), getContext().getString(R.string.pref_volume_control_view_default));
 
+        LinearLayout volLayout = (LinearLayout)findViewById(R.id.volume_control_layout);
+
         if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_off_key))) {
+            if ( volLayout != null) {
+                volLayout.setVisibility(GONE);
+            }
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(GONE);
         } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_seekbar_key))) {
+            if ( volLayout != null) {
+                volLayout.setVisibility(VISIBLE);
+            }
             mVolumeSeekbarLayout.setVisibility(VISIBLE);
             mVolumeButtonLayout.setVisibility(GONE);
         } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_buttons_key))) {
+            if ( volLayout != null) {
+                volLayout.setVisibility(VISIBLE);
+            }
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(VISIBLE);
         }
