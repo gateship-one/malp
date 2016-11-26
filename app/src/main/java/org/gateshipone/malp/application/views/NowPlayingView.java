@@ -58,6 +58,7 @@ import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylist
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -72,8 +73,6 @@ import java.util.TimerTask;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
         SharedPreferences.OnSharedPreferenceChangeListener{
-
-    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 175;
 
     private final ViewDragHelper mDragHelper;
 
@@ -423,7 +422,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String volumeControlView = sharedPref.getString(getContext().getString(R.string.pref_volume_controls_key), getContext().getString(R.string.pref_volume_control_view_default));
 
-        if ( volumeControlView.equals(getContext().getString(R.string.preference_volume_control_off))) {
+        if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_off_key))) {
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(GONE);
         } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_seekbar_key))) {
@@ -781,8 +780,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         });
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
-        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener();
-        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener();
+        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP);
+        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN);
 
         /* Set the listener to the plus/minus button */
         mVolumeMinus.setOnLongClickListener(minusListener);
@@ -1404,55 +1403,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
-    /**
-     * Class to handle long button clicks on the volume buttons. Repeats the action until the
-     * user removes his finger from the button again, which cancels the spawned TimerTask.
-     */
-    private class VolumeButtonLongClickListener implements OnLongClickListener, OnTouchListener {
 
-        private Timer mRepeater = null;
-
-        @Override
-        public boolean onLongClick(View v) {
-            if ( v.equals(mVolumePlus)) {
-                mRepeater = new Timer();
-                mRepeater.scheduleAtFixedRate(new IncreaseVolumeTask(),0 , VOLUME_CONTROL_REPEAT_PERIOD );
-                return true;
-            } else if (v.equals(mVolumeMinus)) {
-                mRepeater = new Timer();
-                mRepeater.scheduleAtFixedRate(new DecreaseVolumeTask(),0 , VOLUME_CONTROL_REPEAT_PERIOD );
-                return true;
-            }
-            return false;
-         }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction()== MotionEvent.ACTION_UP) {
-                if ( null != mRepeater ) {
-                    mRepeater.cancel();
-                    mRepeater.purge();
-                    mRepeater = null;
-                }
-            }
-            return false;
-        }
-
-        private class IncreaseVolumeTask extends TimerTask {
-
-            @Override
-            public void run() {
-                MPDCommandHandler.increaseVolume();
-            }
-        }
-
-        private class DecreaseVolumeTask extends TimerTask {
-
-            @Override
-            public void run() {
-                MPDCommandHandler.decreaseVolume();
-            }
-        }
-    }
 
 }

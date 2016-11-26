@@ -131,6 +131,50 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/volume_button_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:paddingEnd="@dimen/material_screen_edge_spacing"
+                android:paddingStart="@dimen/material_screen_edge_spacing">
+
+                <ImageButton
+                    android:id="@+id/volume_button_minus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="?android:selectableItemBackground"
+                    android:tint="?attr/malp_color_text_accent"
+                    android:src="@drawable/ic_minus_black_48dp"/>
+                <ImageView
+                    android:id="@+id/volume_icon_buttons"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/ic_volume_high_black_48dp"
+                    android:tint="?android:textColor" />
+                <TextView
+                    android:id="@+id/volume_button_text"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:textColor="?attr/malp_color_text_accent"
+                    android:layout_marginEnd="4dp"
+                    android:text="100%"/>
+                <ImageButton
+                    android:id="@+id/volume_button_plus"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="4dp"
+                    android:background="?android:selectableItemBackground"
+                    android:tint="?attr/malp_color_text_accent"
+                    android:src="@drawable/ic_plus_black_48dp"/>
+
+            </LinearLayout>
+
+
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"

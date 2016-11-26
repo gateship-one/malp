@@ -21,6 +21,7 @@ package org.gateshipone.malp.application.activities;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -47,6 +48,8 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.Fanart
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
+import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
@@ -107,6 +110,17 @@ public class FanartActivity extends Activity {
      */
     private SeekBar mVolumeSeekbar;
     private ImageView mVolumeIcon;
+    private ImageView mVolumeIconButtons;
+
+    private TextView mVolumeText;
+
+    private ImageButton mVolumeMinus;
+    private ImageButton mVolumePlus;
+
+    private LinearLayout mHeaderTextLayout;
+
+    private LinearLayout mVolumeSeekbarLayout;
+    private LinearLayout mVolumeButtonLayout;
 
 
     private FanartCacheManager mFanartCache;
@@ -257,6 +271,48 @@ public class FanartActivity extends Activity {
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
+        /* Volume control buttons */
+        mVolumeIconButtons = (ImageView)findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                MPDCommandHandler.setVolume(0);
+            }
+        });
+
+        mVolumeText = (TextView)findViewById(R.id.volume_button_text);
+
+        mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
+
+        mVolumeMinus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MPDCommandHandler.decreaseVolume();
+            }
+        });
+
+        mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
+        mVolumePlus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MPDCommandHandler.increaseVolume();
+            }
+        });
+
+        /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
+        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP);
+        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN);
+
+        /* Set the listener to the plus/minus button */
+        mVolumeMinus.setOnLongClickListener(minusListener);
+        mVolumeMinus.setOnTouchListener(minusListener);
+
+        mVolumePlus.setOnLongClickListener(plusListener);
+        mVolumePlus.setOnTouchListener(plusListener);
+
+        mVolumeSeekbarLayout = (LinearLayout)findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = (LinearLayout)findViewById(R.id.volume_button_layout);
+
         mFanartCache = new FanartCacheManager(getApplicationContext());
     }
 
@@ -280,6 +336,8 @@ public class FanartActivity extends Activity {
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+
+        setVolumeControlSetting();
     }
 
     @Override
@@ -400,15 +458,23 @@ public class FanartActivity extends Activity {
         int volume = status.getVolume();
         mVolumeSeekbar.setProgress(volume);
 
-        if (volume >= 70) {
+        if ( volume >= 70 ) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
-        } else if (volume >= 30 && volume < 70) {
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_high_black_48dp);
+        } else if ( volume >= 30 && volume < 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-        } else if (volume > 0 && volume < 30) {
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_medium_black_48dp);
+        } else if ( volume > 0 && volume < 30 ) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_low_black_48dp);
         } else {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
+            mVolumeIconButtons.setImageResource(R.drawable.ic_volume_mute_black_48dp);
         }
+        mVolumeIcon.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(this, R.attr.malp_color_text_accent)));
+        mVolumeIconButtons.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(this, R.attr.malp_color_text_accent)));
+
+        mVolumeText.setText(String.valueOf(volume) + '%');
 
         // Update position seekbar & textviews
         mPositionSeekbar.setMax(status.getTrackLength());
@@ -730,6 +796,22 @@ public class FanartActivity extends Activity {
         @Override
         public void onStopTrackingTouch(SeekBar seekBar) {
             // TODO Auto-generated method stub
+        }
+    }
+
+    private void setVolumeControlSetting() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String volumeControlView = sharedPref.getString(this.getString(R.string.pref_volume_controls_key), this.getString(R.string.pref_volume_control_view_default));
+
+        if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_off_key))) {
+            mVolumeSeekbarLayout.setVisibility(View.GONE);
+            mVolumeButtonLayout.setVisibility(View.GONE);
+        } else if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_seekbar_key))) {
+            mVolumeSeekbarLayout.setVisibility(View.VISIBLE);
+            mVolumeButtonLayout.setVisibility(View.GONE);
+        } else if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_buttons_key))) {
+            mVolumeSeekbarLayout.setVisibility(View.GONE);
+            mVolumeButtonLayout.setVisibility(View.VISIBLE);
         }
     }
 
