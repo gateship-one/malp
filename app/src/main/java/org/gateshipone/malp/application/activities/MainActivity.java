@@ -469,7 +469,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        final NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
 
 
@@ -502,6 +502,18 @@ public class MainActivity extends AppCompatActivity
                 mSavedNowPlayingViewSwitcherStatus = null;
             }
             nowPlayingView.onResume();
+
+            /*
+             * HACK: Request new layout of the NowPlayingView, otherwise
+             * it has wrong values for the drag range and is drawn below the screen.
+             * This is only necessary for > Android 7
+             */
+            nowPlayingView.post(new Runnable() {
+                @Override
+                public void run() {
+                    nowPlayingView.requestLayout();
+                }
+            });
         }
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
