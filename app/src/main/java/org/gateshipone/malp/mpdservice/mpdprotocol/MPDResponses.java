@@ -23,6 +23,7 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_ALBUM_MBID = "MUSICBRAINZ_ALBUMID: ";
 
     public static final String MPD_RESPONSE_ARTIST_NAME = "Artist: ";
+    public static final String MPD_RESPONSE_ALBUMARTIST_NAME = "AlbumArtist: ";
     public static final String MPD_RESPONSE_FILE = "file: ";
     public static final String MPD_RESPONSE_DIRECTORY = "directory: ";
     public static final String MPD_RESPONSE_TRACK_TITLE = "Title: ";

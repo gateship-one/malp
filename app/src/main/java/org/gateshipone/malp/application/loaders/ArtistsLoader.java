@@ -32,9 +32,11 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
 
     private MPDResponseArtistList pArtistResponseHandler;
 
-    public ArtistsLoader(Context context) {
-        super(context);
+    private boolean mUseAlbumArtists;
 
+    public ArtistsLoader(Context context, boolean useAlbumArtists) {
+        super(context);
+        mUseAlbumArtists = useAlbumArtists;
         pArtistResponseHandler = new ArtistResponseHandler();
     }
 
@@ -60,6 +62,10 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
 
     @Override
     public void onForceLoad() {
-        MPDQueryHandler.getArtists(pArtistResponseHandler);
+        if( !mUseAlbumArtists) {
+            MPDQueryHandler.getArtists(pArtistResponseHandler);
+        } else {
+            MPDQueryHandler.getAlbumArtists(pArtistResponseHandler);
+        }
     }
 }

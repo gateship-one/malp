@@ -746,6 +746,12 @@ public class MPDConnection {
                 }
                 artistName = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length());
                 tempArtist = new MPDArtist(artistName);
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUMARTIST_NAME)) {
+                if (null != tempArtist) {
+                    artistList.add(tempArtist);
+                }
+                artistName = response.substring(MPDResponses.MPD_RESPONSE_ALBUMARTIST_NAME.length());
+                tempArtist = new MPDArtist(artistName);
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID)) {
                 artistMBID = response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length());
                 tempArtist.addMBID(artistMBID);
@@ -779,7 +785,7 @@ public class MPDConnection {
                 MPDArtist artist = artistList.get(i);
                 if (i + 1 != artistList.size()) {
                     MPDArtist nextArtist = artistList.get(i + 1);
-                    if (!artist.getArtistName().equals(nextArtist.getArtistName()) || artist.getMBIDCount() != 0) {
+                    if (!artist.getArtistName().equals(nextArtist.getArtistName())) {
                         clearedList.add(artist);
                     }
                 } else {
@@ -1041,6 +1047,22 @@ public class MPDConnection {
     public synchronized List<MPDArtist> getArtists() {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
+        try {
+            return parseMPDArtists();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Get a list of all album artists available in MPDs database
+     *
+     * @return List of MPDArtist objects
+     */
+    public synchronized List<MPDArtist> getAlbumArtists() {
+        // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
             return parseMPDArtists();
         } catch (IOException e) {

@@ -181,7 +181,10 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
      */
     @Override
     public Loader<List<MPDArtist>> onCreateLoader(int id, Bundle args) {
-        return new ArtistsLoader(getActivity());
+        // Read albumartists/artists preference
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean useAlbumArtists = sharedPref.getBoolean(getString(R.string.pref_use_album_artists_key), getResources().getBoolean(R.bool.pref_use_album_artists_default));
+        return new ArtistsLoader(getActivity(), useAlbumArtists);
     }
 
     /**

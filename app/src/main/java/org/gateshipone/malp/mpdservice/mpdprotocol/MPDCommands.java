@@ -66,6 +66,14 @@ public class MPDCommands {
         }
     }
 
+    public static String MPD_COMMAND_REQUEST_ALBUMARTISTS(boolean groupMBID) {
+        if ( !groupMBID ) {
+            return "list albumartist";
+        } else {
+            return "list albumartist group MUSICBRAINZ_ARTISTID";
+        }
+    }
+
     public static final String MPD_COMMAND_REQUEST_ALL_FILES = "listallinfo";
 
     /* Control commands */

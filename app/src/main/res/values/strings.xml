@@ -232,6 +232,8 @@
         <item>@string/preference_library_view_grid</item>
     </string-array>
 
+    <string name="preference_use_album_artists_title">Use AlbumArtist tag</string>
+    <string name="preference_use_album_artists_text">Use the "AlbumArtist" tag for the artist list.</string>
 
     <string name="preference_volume_control_title">Select volume control view</string>
     <string name="preference_volume_control_message">Select volume control view</string>

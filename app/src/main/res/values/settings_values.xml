@@ -28,6 +28,10 @@
     <string name="pref_hardware_controls_key" translatable="false">pref_hardware_controls_key</string>
     <bool name="pref_hardware_controls_default">true</bool>
 
+    <string name="pref_use_album_artists_key" translatable="false">pref_use_album_artists_key</string>
+    <bool name="pref_use_album_artists_default" translatable="false">false</bool>
+
+
     <string name="pref_indigo_key" translatable="false">indigo</string>
     <string name="pref_orange_key" translatable="false">orange</string>
     <string name="pref_deeporange_key" translatable="false">deeporange</string>
