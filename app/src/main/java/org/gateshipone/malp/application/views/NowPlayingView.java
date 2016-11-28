@@ -34,6 +34,7 @@ import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -959,7 +960,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         // Calculate the maximal range that the view is allowed to be dragged
-        mDragRange = (getHeight() - mHeaderView.getHeight());
+        mDragRange = (getMeasuredHeight() - mHeaderView.getMeasuredHeight());
 
         // New temporary top position, to fix the view at top or bottom later if state is idle.
         int newTop = mTopPosition;
