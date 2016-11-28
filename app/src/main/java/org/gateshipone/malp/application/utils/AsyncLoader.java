@@ -26,12 +26,10 @@ import android.util.Pair;
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
-import org.gateshipone.malp.application.listviewitems.GenericGridItem;
+import org.gateshipone.malp.application.listviewitems.CoverLoadable;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
-
-import java.lang.ref.WeakReference;
 
 /*
  * Loaderclass for covers
@@ -47,7 +45,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
      */
     public static class CoverViewHolder {
         public Pair<Integer, Integer> imageDimension;
-        public GenericGridItem gridItem;
+        public CoverLoadable coverLoadable;
         public ArtworkManager artworkManager;
         public MPDGenericItem modelItem;
         public GenericSectionAdapter mAdapter;
@@ -146,8 +144,10 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
 
         // set mCover if exists
         if ( null != result ) {
-            mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
-            mCover.gridItem.setImage(result);
+            if ( mCover.mAdapter != null) {
+                mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
+            }
+            mCover.coverLoadable.setImage(result);
         }
     }
 }

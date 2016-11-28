@@ -27,6 +27,7 @@ import android.widget.ListView;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.CurrentPlaylistAdapter;
+import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
@@ -60,11 +61,11 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         // Get the main ListView of this fragment
         mListView = (ListView) this.findViewById(R.id.main_listview);
 
-
         // Create the needed adapter for the ListView
         mPlaylistAdapter = new CurrentPlaylistAdapter(getContext(),mListView);
 
         mListView.setOnItemClickListener(this);
+        mListView.setOnScrollListener(new ScrollSpeedListener(mPlaylistAdapter, mListView));
 
         // Return the ready inflated and configured fragment view.
         mContext = context;

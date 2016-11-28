@@ -65,7 +65,9 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
                 }
             });
         }
-        getLoaderManager().restartLoader(0, getArguments(), this);
+        if ( !isDetached()) {
+            getLoaderManager().restartLoader(0, getArguments(), this);
+        }
     }
 
 

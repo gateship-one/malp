@@ -19,20 +19,19 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
 
-import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.listviewitems.CurrentPlaylistTrackItem;
-import org.gateshipone.malp.application.utils.FormatHelper;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.listviewitems.FileListItem;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -51,8 +50,7 @@ import java.util.concurrent.Semaphore;
  * This decreases the memory footprint because the adapter is able to clear unneeded list blocks when
  * not longer needed (e.g. the user scrolled away)
  */
-public class CurrentPlaylistAdapter extends BaseAdapter {
-
+public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
     /**
      * States of list blocks.
      */
@@ -149,6 +147,8 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
      */
     private boolean mWindowEnabled = true;
 
+    private ArtworkManager mArtworkManager;
+
 
     /**
      * Public constructor for this adapter
@@ -171,6 +171,8 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
         }
         mListsLock = new Semaphore(1);
         mClearTimer = null;
+
+        mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
     }
 
     /**
@@ -223,56 +225,51 @@ public class CurrentPlaylistAdapter extends BaseAdapter {
 
         // Check if the track was available in local data set already (or is currently fetching)
         if (track != null) {
-
-            // Get track title
-            String trackTitle = track.getTrackTitle();
-
-            // If no trackname is available (e.g. streaming URLs) show path
-            if (null == trackTitle || trackTitle.isEmpty()) {
-                trackTitle = track.getPath();
-            }
-
-            // additional information (artist + album)
-            String trackInformation;
-
-            // Check which information is available and set the separator accordingly.
-            if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + track.getTrackAlbum();
-            } else if (track.getTrackArtist().isEmpty()) {
-                trackInformation = track.getTrackAlbum();
-            } else if (track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist();
+            boolean newAlbum = false;
+            MPDFile previousTrack;
+            if( position > 0 ) {
+                previousTrack = getTrack(position - 1);
+                if ( previousTrack != null ) {
+                    newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+                }
             } else {
-                trackInformation = "";
+                newAlbum = true;
             }
 
-            // Get the number of the track
-            String trackNumber = String.valueOf(position + 1);
-
-            // Get the preformatted duration of the track.
-            String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
+            String trackAlbum = track.getTrackAlbum();
 
             // Check if reusable object is available
-            if (convertView != null) {
-                CurrentPlaylistTrackItem tracksListViewItem = (CurrentPlaylistTrackItem) convertView;
-                tracksListViewItem.setTrackNumber(trackNumber);
-                tracksListViewItem.setTitle(trackTitle);
-                tracksListViewItem.setAdditionalInformation(trackInformation);
-                tracksListViewItem.setDuration(trackDuration);
-            } else {
+            if (!newAlbum && convertView != null && !((FileListItem)convertView).isSectionView()) {
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setTrack(track, mContext);
+                tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+            } else if ( newAlbum ){
                 // If not create a new Listitem
-                convertView = new CurrentPlaylistTrackItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration);
+                convertView = new FileListItem(mContext, track, position + 1,false, trackAlbum);
+                // This will prepare the view for fetching the image from the internet if not already saved in local database.
+                // Dummy MPDAlbum
+                MPDAlbum tmpAlbum = new MPDAlbum(trackAlbum);
+                tmpAlbum.setMBID(track.getTrackAlbumMBID());
+                ((FileListItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
+
+                // Start async image loading if not scrolling at the moment. Otherwise the ScrollSpeedListener
+                // starts the loading.
+                if ( mScrollSpeed == 0) {
+                    ((FileListItem) convertView).startCoverImageTask();
+                }
+            } else {
+                convertView = new FileListItem(mContext, track, position + 1, false);
             }
 
             if (null != mLastStatus && mLastStatus.getCurrentSongIndex() == position) {
-                ((CurrentPlaylistTrackItem) convertView).setPlaying(true);
+                ((FileListItem) convertView).setPlaying(true);
             } else {
-                ((CurrentPlaylistTrackItem) convertView).setPlaying(false);
+                ((FileListItem) convertView).setPlaying(false);
             }
         } else {
             // If the element is not yet received we will show an empty view, that notifies the user about
             // the running fetch.
-            convertView = new CurrentPlaylistTrackItem(mContext);
+            convertView = new FileListItem(mContext, false);
         }
 
         // The view that is used for the position in the list

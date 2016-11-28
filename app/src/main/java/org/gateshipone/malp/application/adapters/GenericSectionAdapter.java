@@ -30,7 +30,7 @@ import java.util.List;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
-public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends BaseAdapter implements SectionIndexer, ScrollSpeedAdapter {
+public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends ScrollSpeedAdapter implements SectionIndexer {
     private static final String TAG = "GenericSectionAdapter";
     /**
      * Variables used for sectioning (fast scroll).
@@ -47,21 +47,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
     protected final List<T> mFilteredModelData;
 
     private String mFilterString;
-
-    /**
-     * Variable to store the current scroll speed. Used for image view optimizations
-     */
-    protected int mScrollSpeed;
-
-    /**
-     * Determines how the new time value affects the average (0.0(new value has no effect) - 1.0(average is only the new value, no smoothing)
-     */
-    private static final float mSmoothingFactor = 0.3f;
-
-    /**
-     * Smoothed average(exponential smoothing) value
-     */
-    private long mAvgImageTime;
 
 
     /**
@@ -204,38 +189,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Ba
         return position;
     }
 
-    /**
-     * Sets the scrollspeed in items per second.
-     *
-     * @param speed
-     */
-    public void setScrollSpeed(int speed) {
-        mScrollSpeed = speed;
-    }
-
-    /**
-     * Returns the smoothed average loading time of images.
-     * This value is used by the scrollspeed listener to determine if
-     * the scrolling is slow enough to render images (artist, album images)
-     * @return Average time to load an image in ms
-     */
-    public long getAverageImageLoadTime() {
-        return mAvgImageTime == 0 ? 1: mAvgImageTime;
-    }
-
-    /**
-     * This method adds new loading times to the smoothed average.
-     * Should only be called from the async cover loader.
-     * @param time Time in ms to load a image
-     */
-    public void addImageLoadTime(long time) {
-        // Implement exponential smoothing here
-        if ( mAvgImageTime == 0 ) {
-            mAvgImageTime = time;
-        } else {
-            mAvgImageTime = (long) (((1 - mSmoothingFactor) * mAvgImageTime) + (mSmoothingFactor * time));
-        }
-    }
 
     private void createSections() {
         mSectionList.clear();

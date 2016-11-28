@@ -286,7 +286,6 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 mNotificationManager.cancel(NOTIFICATION_ID);
                 stopForeground(true);
                 MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
-                mWakelock.release();
                 stopSelf();
             }
         }

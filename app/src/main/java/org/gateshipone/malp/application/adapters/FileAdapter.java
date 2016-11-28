@@ -22,10 +22,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.listviewitems.GenericFileListItem;
-import org.gateshipone.malp.application.listviewitems.TrackListViewItem;
-import org.gateshipone.malp.application.utils.FormatHelper;
+import org.gateshipone.malp.application.listviewitems.FileListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -69,58 +66,28 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
         MPDFileEntry file = (MPDFileEntry)getItem(position);
-        if (file instanceof MPDFile) {
-
-            MPDFile track = (MPDFile) file;
-
-            // Get track title
-            String trackTitle = track.getTrackTitle();
-
-            if ( null == trackTitle || trackTitle.isEmpty() ) {
-                trackTitle = track.getPath();
-            }
-
-            // additional information (artist + album)
-            String trackInformation;
-            if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist() + mContext.getResources().getString(R.string.track_item_separator) + track.getTrackAlbum();
-            } else if (track.getTrackArtist().isEmpty() ) {
-                trackInformation = track.getTrackAlbum();
-            } else if (track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist();
+        if ( file instanceof MPDFile) {
+            if ( null != convertView ) {
+                ((FileListItem)convertView).setTrack((MPDFile) file, mContext);
+                return convertView;
             } else {
-                trackInformation = "";
+                return new FileListItem(mContext, (MPDFile) file, mShowIcons);
             }
-
-            String trackNumber = "";
-            if (mShowTrackNumbers) {
-                if ( 0 != track.getDiscNumber() ) {
-                    trackNumber = String.valueOf(track.getDiscNumber()) + mContext.getResources().getString(R.string.track_item_separator);
-                }
-                // Get the number of the track
-                trackNumber += String.valueOf(track.getTrackNumber());
+        } else if (file instanceof MPDDirectory) {
+            if ( null != convertView ) {
+                ((FileListItem)convertView).setDirectory((MPDDirectory) file, mContext);
+                return convertView;
             } else {
-                trackNumber = String.valueOf(position + 1);
+                return new FileListItem(mContext, (MPDDirectory) file, mShowIcons);
             }
-
-
-            // Get the preformatted duration of the track.
-            String trackDuration = FormatHelper.formatTracktimeFromS(track.getLength());
-
-            // Check if reusable object is available
-
-            // If not create a new Listitem
-            convertView = new TrackListViewItem(mContext, trackNumber, trackTitle, trackInformation, trackDuration,mShowIcons);
-
-
-            return convertView;
-        } else if (file instanceof MPDPlaylist || file instanceof MPDDirectory) {
-
-            convertView = new GenericFileListItem(mContext, (MPDFileEntry)file, mShowIcons);
-
-
-            return convertView;
+        } else if ( file instanceof MPDPlaylist ) {
+            if ( null != convertView ) {
+                ((FileListItem)convertView).setPlaylist((MPDPlaylist) file, mContext);
+                return convertView;
+            }else {
+                return new FileListItem(mContext, (MPDPlaylist) file, mShowIcons);
+            }
         }
-        return new TrackListViewItem(mContext, "", "", "", "",mShowIcons);
+        return new FileListItem(mContext, mShowIcons);
     }
 }
