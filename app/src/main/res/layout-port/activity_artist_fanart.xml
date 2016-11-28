@@ -69,6 +69,7 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/material_font_style_size_title"/>
 
             <TextView
@@ -83,6 +84,7 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/material_font_style_size_subheading"/>
 
             <TextView
@@ -97,6 +99,7 @@
                 android:scrollHorizontally="true"
                 android:singleLine="true"
                 android:gravity="center_horizontal"
+                android:textColor="@android:color/white"
                 android:textSize="@dimen/material_font_style_size_subheading"/>
         </LinearLayout>
 
