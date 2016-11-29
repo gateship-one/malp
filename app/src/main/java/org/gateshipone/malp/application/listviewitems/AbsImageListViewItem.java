@@ -59,9 +59,6 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
      */
     public void startCoverImageTask() {
         if (mLoaderTask == null && mHolder.artworkManager != null && mHolder.modelItem != null && !mCoverDone) {
-            if ( null != mImageView ) {
-                mHolder.imageDimension = new Pair<>(mImageView.getWidth(), mImageView.getHeight());
-            }
             mLoaderTask = new AsyncLoader();
             mLoaderTask.execute(mHolder);
         }

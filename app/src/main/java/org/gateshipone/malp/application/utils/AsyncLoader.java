@@ -18,9 +18,7 @@
 package org.gateshipone.malp.application.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
-import android.util.Pair;
 
 
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
@@ -38,13 +36,15 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
     private static final String TAG = AsyncLoader.class.getSimpleName();
     private CoverViewHolder mCover;
 
+    /**
+     * Time when loading of the image started to determine the loading speed of images.
+     */
     private long mStartTime;
 
     /**
      * Wrapper class for covers
      */
     public static class CoverViewHolder {
-        public Pair<Integer, Integer> imageDimension;
         public CoverLoadable coverLoadable;
         public ArtworkManager artworkManager;
         public MPDGenericItem modelItem;
@@ -74,7 +74,6 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             }
         } else if (mCover.modelItem instanceof MPDAlbum) {
             MPDAlbum album = (MPDAlbum)mCover.modelItem;
-
             try {
                 // Check if image is available. If it is not yet fetched it will throw an exception.
                 // If it was already searched for and not found, this will be null.
@@ -89,54 +88,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             }
         }
         return image;
-
     }
 
-    /**
-     * Resize retrieved bitmap if necessary
-     */
-    private Bitmap decodeSampledBitmapFromResource(String pathName, int reqWidth, int reqHeight) {
-
-        // First decode with inJustDecodeBounds=true to check dimensions
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-
-        // Calculate inSampleSize
-        if (reqWidth == 0 && reqHeight == 0) {
-            // check if the layout of the view already set
-            options.inSampleSize = 1;
-        } else {
-            options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
-        }
-
-        // Decode bitmap with inSampleSize set
-        options.inJustDecodeBounds = false;
-        return BitmapFactory.decodeFile(pathName, options);
-    }
-
-    /**
-     * Calculate sample size to resize the bitmap
-     */
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-        if (height > reqHeight || width > reqWidth) {
-
-            final int halfHeight = height / 2;
-            final int halfWidth = width / 2;
-
-            // Calculate the largest inSampleSize value that is a power of 2 and
-            // keeps both height and width larger than the requested height and width.
-            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
-                inSampleSize *= 2;
-            }
-        }
-
-        return inSampleSize;
-    }
 
     @Override
     protected void onPostExecute(Bitmap result) {
@@ -144,6 +97,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
 
         // set mCover if exists
         if ( null != result ) {
+            // Check how long image loading took and notify the adapter about the time.
             if ( mCover.mAdapter != null) {
                 mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
             }
