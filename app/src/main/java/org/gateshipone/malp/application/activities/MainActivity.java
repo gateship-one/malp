@@ -61,6 +61,7 @@ import android.widget.TextView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
+import org.gateshipone.malp.application.utils.HardwareKeyHandler;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
@@ -658,58 +659,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         if (mHardwareControls) {
-            int action = event.getAction();
-            int keyCode = event.getKeyCode();
-            switch (keyCode) {
-                case KeyEvent.KEYCODE_VOLUME_UP:
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.increaseVolume();
-                    }
-                    return true;
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.decreaseVolume();
-                    }
-                    return true;
-                case KeyEvent.KEYCODE_MEDIA_PLAY: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.play();
-                    }
-                    return true;
-                }
-                case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.togglePause();
-                    }
-                    return true;
-                }
-                case KeyEvent.KEYCODE_MEDIA_PAUSE: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.pause();
-                    }
-                    return true;
-                }
-                case KeyEvent.KEYCODE_MEDIA_STOP: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.stop();
-                    }
-                    return true;
-                }
-                case KeyEvent.KEYCODE_MEDIA_NEXT: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.nextSong();
-                    }
-                    return true;
-                }
-                case KeyEvent.KEYCODE_MEDIA_PREVIOUS: {
-                    if (action == KeyEvent.ACTION_UP) {
-                        MPDCommandHandler.previousSong();
-                    }
-                    return true;
-                }
-                default:
-                    return super.dispatchKeyEvent(event);
+            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
+                return super.dispatchKeyEvent(event);
             }
+            else return true;
         } else {
             return super.dispatchKeyEvent(event);
         }
