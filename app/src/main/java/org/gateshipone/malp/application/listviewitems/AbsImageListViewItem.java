@@ -31,6 +31,7 @@ import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
+import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
@@ -48,7 +49,7 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
     protected final AsyncLoader.CoverViewHolder mHolder;
 
 
-    public AbsImageListViewItem(Context context, int layoutID, int imageviewID, int switcherID, GenericSectionAdapter adapter) {
+    public AbsImageListViewItem(Context context, int layoutID, int imageviewID, int switcherID, ScrollSpeedAdapter adapter) {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

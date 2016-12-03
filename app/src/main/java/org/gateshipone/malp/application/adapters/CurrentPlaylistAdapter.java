@@ -67,6 +67,12 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
         LIST_READY
     }
 
+    private enum VIEW_TYPES {
+        TYPE_TRACK_ITEM,
+        TYPE_SECTION_TRACK_ITEM,
+        TYPE_COUNT
+    }
+
     /**
      * Time to wait until old list blocks are removed from the memory. (30s)
      */
@@ -204,6 +210,41 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
     }
 
     /**
+     * Returns the type (section track or normal track) of the item at the given position
+     * @param position Position of the item in question
+     * @return the int value of the enum {@link VIEW_TYPES}
+     */
+    @Override
+    public int getItemViewType(int position) {
+        // Get MPDFile at the given index used for this item.
+        MPDFile track = getTrack(position);
+        boolean newAlbum = false;
+
+        // Check if the track was available in local data set already (or is currently fetching)
+        if (track != null) {
+            MPDFile previousTrack;
+            if (position > 0) {
+                previousTrack = getTrack(position - 1);
+                if (previousTrack != null) {
+                    newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+                }
+            } else {
+                return VIEW_TYPES.TYPE_SECTION_TRACK_ITEM.ordinal();
+            }
+        }
+        return newAlbum ? VIEW_TYPES.TYPE_SECTION_TRACK_ITEM.ordinal() :VIEW_TYPES.TYPE_TRACK_ITEM.ordinal();
+    }
+
+    /**
+     *
+     * @return The count of values in the enum {@link VIEW_TYPES}.
+     */
+    @Override
+    public int getViewTypeCount() {
+        return VIEW_TYPES.TYPE_COUNT.ordinal();
+    }
+
+    /**
      * Returns an id for an position. Currently it is just the position itself.
      *
      * @param position Position to get the id for.
@@ -229,47 +270,50 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
         // Check if the track was available in local data set already (or is currently fetching)
         if (track != null) {
-            boolean newAlbum = false;
-            MPDFile previousTrack;
-            if( position > 0 ) {
-                previousTrack = getTrack(position - 1);
-                if ( previousTrack != null ) {
-                    newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
-                }
-            } else {
-                newAlbum = true;
-            }
-
             String trackAlbum = track.getTrackAlbum();
 
-            // Check if reusable object is available
-            if (!newAlbum && convertView != null && !((FileListItem)convertView).isSectionView()) {
-                FileListItem tracksListViewItem = (FileListItem) convertView;
-                tracksListViewItem.setTrack(track, mContext);
-                tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
-            } else if ( newAlbum ){
-                // If not create a new Listitem
-                convertView = new FileListItem(mContext, track, position + 1,false, trackAlbum);
+            // Create new ViewItem
+            VIEW_TYPES type = VIEW_TYPES.values()[getItemViewType(position)];
+            if (type == VIEW_TYPES.TYPE_TRACK_ITEM) {
+                if ( convertView == null ) {
+                    // If not create a new Listitem
+                    convertView = new FileListItem(mContext, track, position + 1, false);
+                } else {
+                    FileListItem tracksListViewItem = (FileListItem) convertView;
+                    tracksListViewItem.setTrack(track, mContext);
+                    tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+                }
+            } else if (type == VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) {
+                if ( convertView == null ) {
+                    // If not create a new Listitem
+                    convertView = new FileListItem(mContext, track, position + 1, false, trackAlbum, this);
+                } else {
+                    FileListItem tracksListViewItem = (FileListItem) convertView;
+                    tracksListViewItem.setSectionHeader(trackAlbum);
+                    tracksListViewItem.setTrack(track, mContext);
+                    tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+                }
+                ((FileListItem)convertView).setImage(null);
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 // Dummy MPDAlbum
                 MPDAlbum tmpAlbum = new MPDAlbum(trackAlbum);
                 tmpAlbum.setMBID(track.getTrackAlbumMBID());
-                ((FileListItem)convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
+                ((FileListItem) convertView).prepareArtworkFetching(mArtworkManager, tmpAlbum);
 
                 // Start async image loading if not scrolling at the moment. Otherwise the ScrollSpeedListener
                 // starts the loading.
-                if ( mScrollSpeed == 0) {
+                if (mScrollSpeed == 0) {
                     ((FileListItem) convertView).startCoverImageTask();
                 }
-            } else {
-                convertView = new FileListItem(mContext, track, position + 1, false);
             }
+
 
             if (null != mLastStatus && mLastStatus.getCurrentSongIndex() == position) {
                 ((FileListItem) convertView).setPlaying(true);
             } else {
                 ((FileListItem) convertView).setPlaying(false);
             }
+
         } else {
             // If the element is not yet received we will show an empty view, that notifies the user about
             // the running fetch.
@@ -342,6 +386,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
         /**
          * Callback not used for this adapter.
+         *
          * @param track
          */
         protected void onNewTrackReady(MPDFile track) {
@@ -357,9 +402,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
         /**
          * Called when a list of songs is ready.
+         *
          * @param trackList List of MPDFile objects containing a list of mpds tracks.
-         * @param start If a range was given to the request initially this contains the start of the window
-         * @param end If a range was given to the request initially this contains the end of the window
+         * @param start     If a range was given to the request initially this contains the start of the window
+         * @param end       If a range was given to the request initially this contains the end of the window
          */
         @Override
         public void handleTracks(List<MPDFileEntry> trackList, int start, int end) {
@@ -385,7 +431,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
                     e.printStackTrace();
                 }
 
-                if ( mWindowedPlaylists.length <= start / WINDOW_SIZE) {
+                if (mWindowedPlaylists.length <= start / WINDOW_SIZE) {
                     // Obviously we received old data here. Abort handling.
                     // Crash reported via Google Play (07.11.2016)
                     mListsLock.release();
@@ -427,7 +473,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
         /**
          * Called when the connection to the MPD server is established successfully. This will
          * check if the server supports ranged playlists.
-         *
+         * <p>
          * After this it will update the playlist to the initial state.
          */
         @Override
@@ -528,6 +574,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
     /**
      * Requests the list block for a given list index. This maps the index to the list block index.
+     *
      * @param index Index to fetch the block for.
      */
     private void fetchWindow(int index) {
@@ -543,6 +590,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
     /**
      * This will return the MPDFile entry for a given position. This could be null (e.g. block is still fetching).
+     *
      * @param position Position of the track to get
      * @return the MPDFile at position or null if not ready.
      */

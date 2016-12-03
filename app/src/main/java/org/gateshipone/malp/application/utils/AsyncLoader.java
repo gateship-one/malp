@@ -26,6 +26,7 @@ import android.os.AsyncTask;
 
 
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
+import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
 import org.gateshipone.malp.application.listviewitems.CoverLoadable;
@@ -52,7 +53,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
         public CoverLoadable coverLoadable;
         public ArtworkManager artworkManager;
         public MPDGenericItem modelItem;
-        public GenericSectionAdapter mAdapter;
+        public ScrollSpeedAdapter mAdapter;
     }
 
     @Override

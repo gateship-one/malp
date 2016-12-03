@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
@@ -93,11 +94,11 @@ public class FileListItem extends AbsImageListViewItem {
      * @param context Context used for creation of View
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      */
-    public FileListItem(Context context, String sectionTitle, boolean showIcon) {
+    public FileListItem(Context context, String sectionTitle, boolean showIcon, ScrollSpeedAdapter adapter) {
         super(context, R.layout.listview_item_playlist_track,
                 R.id.section_header_image,
                 R.id.section_header_image_switcher,
-                null);
+                adapter);
         mIsSectionHeader = true;
 
         // Inflate the view with the given layout
@@ -140,8 +141,8 @@ public class FileListItem extends AbsImageListViewItem {
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      * @param sectionTitle Title of the section (album title for example)
      */
-    public FileListItem(Context context, MPDFile track, int trackNo, boolean showIcon, String sectionTitle) {
-        this(context, sectionTitle, false);
+    public FileListItem(Context context, MPDFile track, int trackNo, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
+        this(context, sectionTitle, false, adapter);
         setTrack(track, context);
         mNumberView.setText(String.valueOf(trackNo));
         if (showIcon) {

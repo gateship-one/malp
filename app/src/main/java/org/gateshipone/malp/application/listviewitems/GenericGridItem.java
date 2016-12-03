@@ -35,6 +35,7 @@ import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
+import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
@@ -45,7 +46,7 @@ public class GenericGridItem extends AbsImageListViewItem {
 
 
 
-    public GenericGridItem(Context context, String labelText, GenericSectionAdapter adapter) {
+    public GenericGridItem(Context context, String labelText, ScrollSpeedAdapter adapter) {
         super(context,R.layout.gridview_item, R.id.item_artists_cover_image, R.id.item_grid_viewswitcher, adapter);
 
         mTitleView = (TextView) findViewById(R.id.item_grid_text);
