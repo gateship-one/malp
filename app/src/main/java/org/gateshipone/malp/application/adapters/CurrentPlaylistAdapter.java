@@ -78,7 +78,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
      */
     private static final int CLEANUP_TIMEOUT = 30 * 1000;
 
-    private static final String TAG = "CurrentPLAdapter";
+    private static final String TAG = CurrentPlaylistAdapter.class.getSimpleName();
 
     /**
      * Size of the list blocks. Should not be to small to reduce network stress but not to big because

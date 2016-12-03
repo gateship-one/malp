@@ -25,7 +25,6 @@ package org.gateshipone.malp.application.listviewitems;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -64,7 +63,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      */
     public FileListItem(Context context, boolean showIcon) {
-        super(context, R.layout.listview_item_track, 0, 0, null);
+        super(context, R.layout.listview_item_file, 0, 0, null);
 
         mTitleView = (TextView) findViewById(R.id.track_title);
         mAdditionalInfoView = (TextView) findViewById(R.id.track_additional_information);
@@ -95,7 +94,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      */
     public FileListItem(Context context, String sectionTitle, boolean showIcon, ScrollSpeedAdapter adapter) {
-        super(context, R.layout.listview_item_playlist_track,
+        super(context, R.layout.listview_item_section_track,
                 R.id.section_header_image,
                 R.id.section_header_image_switcher,
                 adapter);

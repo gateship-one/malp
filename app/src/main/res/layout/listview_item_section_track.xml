@@ -84,7 +84,7 @@
                 android:background="?attr/malp_color_background_selected" />
         </LinearLayout>
 
-        <include layout="@layout/listview_item_track" />
+        <include layout="@layout/listview_item_file" />
     </LinearLayout>
 
 </RelativeLayout>
