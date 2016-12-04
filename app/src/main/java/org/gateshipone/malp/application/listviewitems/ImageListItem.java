@@ -24,35 +24,31 @@ package org.gateshipone.malp.application.listviewitems;
 
 import android.content.Context;
 import android.view.LayoutInflater;
-
+import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 
-public class SimpleListItem extends LinearLayout {
+public class ImageListItem extends AbsImageListViewItem {
 
     TextView mMainView;
     TextView mDetailsView;
 
-    public SimpleListItem(Context context, String text, String details) {
-        super(context);
-        if (null == details) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inflater.inflate(R.layout.listview_item_simple, this, true);
-        } else {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            inflater.inflate(R.layout.listview_item_details, this, true);
 
-            mDetailsView = (TextView) findViewById(R.id.item_details);
-            if ( !details.isEmpty()) {
-                mDetailsView.setText(details);
-            } else {
-                mDetailsView.setVisibility(GONE);
-            }
+    public ImageListItem(Context context, String text, String details, ScrollSpeedAdapter adapter) {
+        super(context, R.layout.listview_item_image, R.id.item_image, R.id.item_image_viewswitcher, adapter);
+
+        mMainView = (TextView)findViewById(R.id.item_text);
+        mDetailsView = (TextView)findViewById(R.id.item_details);
+
+        if ( details == null || details.isEmpty() ) {
+            mDetailsView.setVisibility(GONE);
+        } else {
+            mDetailsView.setText(details);
         }
 
-        mMainView = (TextView) findViewById(R.id.item_text);
         mMainView.setText(text);
 
     }

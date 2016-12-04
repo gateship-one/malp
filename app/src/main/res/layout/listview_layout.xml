@@ -32,7 +32,7 @@
         android:divider="?attr/malp_color_background_selected"
         android:dividerHeight="@dimen/list_divider_size"
         android:nestedScrollingEnabled="true"
-        android:scrollingCache="false"
+        android:scrollingCache="true"
         android:scrollbarStyle="outsideOverlay"
         />
 

@@ -38,7 +38,7 @@
         android:nestedScrollingEnabled="true"
         android:numColumns="auto_fit"
         android:scrollbarStyle="outsideOverlay"
-        android:scrollingCache="false"
+        android:scrollingCache="true"
         android:stretchMode="columnWidth"
         android:verticalSpacing="8dp" />
 

@@ -30,7 +30,7 @@ import android.widget.GridView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.GenericGridItem;
-import org.gateshipone.malp.application.listviewitems.SimpleListItem;
+import org.gateshipone.malp.application.listviewitems.ImageListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements ArtworkManager.onNewArtistImageListener{
@@ -65,15 +65,25 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements 
 
         if ( mUseList ) {
             // Check if a view can be recycled
+            ImageListItem listItem;
             if (convertView != null) {
-                SimpleListItem listItem = (SimpleListItem) convertView;
-
+                listItem = (ImageListItem) convertView;
+                listItem.setImage(null);
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
             } else {
                 // Create new view if no reusable is available
-                convertView = new SimpleListItem(mContext, label,null);
+                listItem = new ImageListItem(mContext, label, null, this);
             }
+
+            // This will prepare the view for fetching the image from the internet if not already saved in local database.
+            listItem.prepareArtworkFetching(mArtworkManager, artist);
+
+            // Check if the scroll speed currently is already 0, then start the image task right away.
+            if (mScrollSpeed == 0) {
+                listItem.startCoverImageTask();
+            }
+            return listItem;
         } else {
             GenericGridItem gridItem;
             ViewGroup.LayoutParams layoutParams;
@@ -102,7 +112,6 @@ public class ArtistsAdapter extends GenericSectionAdapter<MPDArtist> implements 
             }
             return gridItem;
         }
-        return convertView;
     }
 
     @Override

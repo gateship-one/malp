@@ -22,7 +22,6 @@
 package org.gateshipone.malp.application.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -31,7 +30,7 @@ import android.widget.GridView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.GenericGridItem;
-import org.gateshipone.malp.application.listviewitems.SimpleListItem;
+import org.gateshipone.malp.application.listviewitems.ImageListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements ArtworkManager.onNewAlbumImageListener {
@@ -67,16 +66,26 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements Ar
 
         if ( mUseList ) {
             // Check if a view can be recycled
+            ImageListItem listItem;
             if (convertView != null) {
-                SimpleListItem listItem = (SimpleListItem) convertView;
-
+                listItem = (ImageListItem) convertView;
+                listItem.setImage(null);
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
                 listItem.setDetails(albumArtist );
             } else {
                 // Create new view if no reusable is available
-                convertView = new SimpleListItem(mContext,label, albumArtist);
+                listItem = new ImageListItem(mContext, label, albumArtist, this);
             }
+
+            // This will prepare the view for fetching the image from the internet if not already saved in local database.
+            listItem.prepareArtworkFetching(mArtworkManager, album);
+
+            // Check if the scroll speed currently is already 0, then start the image task right away.
+            if (mScrollSpeed == 0) {
+                listItem.startCoverImageTask();
+            }
+            return listItem;
         } else {
             GenericGridItem gridItem;
             ViewGroup.LayoutParams layoutParams;
@@ -106,8 +115,6 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements Ar
             }
             return gridItem;
         }
-
-        return convertView;
     }
 
     @Override
