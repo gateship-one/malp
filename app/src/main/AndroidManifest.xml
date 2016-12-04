@@ -47,7 +47,7 @@
         <activity
             android:name=".application.activities.MainActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.orange"
+            android:theme="@style/AppTheme.deepOrange"
             android:windowSoftInputMode="adjustPan" />
         <activity
             android:name="org.gateshipone.malp.application.activities.AboutActivity"
@@ -70,6 +70,11 @@
             android:name=".application.artworkdatabase.BulkDownloadService"
             android:exported="false"
             android:process=":downloadProcess" />
+
+        <service
+            android:name=".application.widget.WidgetService"
+            android:exported="false"
+            android:process=":widgetService" />
     </application>
 
 </manifest>
