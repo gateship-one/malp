@@ -108,9 +108,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         mAdapterView.setAdapter(mArtistAdapter);
         mAdapterView.setOnItemClickListener(this);
 
-        if (!mUseList) {
-            mAdapterView.setOnScrollListener(new ScrollSpeedListener(mArtistAdapter, mAdapterView));
-        }
+        mAdapterView.setOnScrollListener(new ScrollSpeedListener(mArtistAdapter, mAdapterView));
 
         // register for context menu
         registerForContextMenu(mAdapterView);
