@@ -36,19 +36,6 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnItemClickListener {
-    /**
-     * Parameters for bundled extra arguments for this fragment. Necessary to define which playlist to
-     * retrieve from the MPD server.
-     */
-    public static final String BUNDLE_STRING_EXTRA_PLAYLISTNAME = "playlistname";
-
-    private String mPlaylistPath;
-
-    /**
-     * Main ListView of this fragment
-     */
-    private ListView mListView;
-
     Context mContext;
 
 
@@ -63,13 +50,13 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         LayoutInflater.from(context).inflate(R.layout.listview_layout, this, true);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) this.findViewById(R.id.main_listview);
+        ListView listView = (ListView) this.findViewById(R.id.main_listview);
 
         // Create the needed adapter for the ListView
-        mPlaylistAdapter = new CurrentPlaylistAdapter(getContext(),mListView);
+        mPlaylistAdapter = new CurrentPlaylistAdapter(getContext(), listView);
 
-        mListView.setOnItemClickListener(this);
-        mListView.setOnScrollListener(new ScrollSpeedListener(mPlaylistAdapter, mListView));
+        listView.setOnItemClickListener(this);
+        listView.setOnScrollListener(new ScrollSpeedListener(mPlaylistAdapter, listView));
 
         // Return the ready inflated and configured fragment view.
         mContext = context;
@@ -98,6 +85,9 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         return null;
     }
 
+    /**
+     * Triggers a jump to the currently playing song. Not animated.
+     */
     public void jumpToCurrentSong() {
         mPlaylistAdapter.jumpToCurrent();
     }
