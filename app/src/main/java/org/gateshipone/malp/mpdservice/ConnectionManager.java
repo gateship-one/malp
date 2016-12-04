@@ -31,6 +31,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -96,9 +97,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         String password = getInstance().mPassword;
         int port = getInstance().mPort;
 
-        MPDStateMonitoringHandler.setServerParameters(hostname, password, port);
-        MPDQueryHandler.setServerParameters(hostname, password, port);
-        MPDCommandHandler.setServerParameters(hostname, password, port);
+        MPDConnection.getInstance().setServerParameters(hostname, password, port);
     }
 
     public static void reconnectLastServer(Context context) {
@@ -111,19 +110,12 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
         instance.mDisconnectRequested = false;
 
-        MPDStateMonitoringHandler.connectToMPDServer();
-
-        MPDQueryHandler.connectToMPDServer();
-
         MPDCommandHandler.connectToMPDServer();
     }
 
     public static void disconnectFromServer() {
         getInstance().mDisconnectRequested = true;
 
-        MPDStateMonitoringHandler.disconnectFromMPDServer();
-        MPDQueryHandler.disconnectFromMPDServer();
-        MPDCommandHandler.disconnectFromMPDServer();
     }
 
     public static void autoConnect(Context context) {

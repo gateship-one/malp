@@ -123,19 +123,19 @@ public class MPDConnection {
     /**
      * Only get the server capabilities if server parameters changed
      */
-    boolean mCapabilitiesChanged;
+    private boolean mCapabilitiesChanged;
 
     /**
      * One listener for the state of the connection (connected, disconnected)
      */
-    private MPDConnectionStateChangeListener pStateListener = null;
+    private ArrayList<MPDConnectionStateChangeListener> pStateListeners = null;
 
     /**
      * One listener for the idle state of the connection. Can be used to react
      * to changes to the server from other clients. When the server is deidled (from outside)
      * it will notify this listener.
      */
-    private MPDConnectionIdleChangeListener pIdleListener = null;
+    private ArrayList<MPDConnectionIdleChangeListener> pIdleListeners = null;
 
     /**
      * Thread that will spawn when the server is not requested at the moment. Will start an
@@ -162,16 +162,26 @@ public class MPDConnection {
      */
     boolean mRequestedDeidle;
 
+    private static MPDConnection mInstance;
+
+    public static synchronized MPDConnection getInstance() {
+        if ( null == mInstance) {
+            mInstance = new MPDConnection("global");
+        }
+        return mInstance;
+    }
 
     /**
      * Creates disconnected MPDConnection with following parameters
      */
-    public MPDConnection(String id) {
+    private MPDConnection(String id) {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
         mID = id;
         mServerCapabilities = new MPDCapabilities("", null, null);
+        pIdleListeners = new ArrayList<>();
+        pStateListeners = new ArrayList<>();
     }
 
     /**
@@ -230,7 +240,7 @@ public class MPDConnection {
      * This is the actual start of the connection. It tries to resolve the hostname
      * and initiates the connection to the address and the configured tcp-port.
      */
-    public void connectToServer() throws IOException {
+    public void connectToServer() {
         /* If a socket is already open, close it and destroy it. */
         if ((null != pSocket) && (pSocket.isConnected())) {
             disconnectFromServer();
@@ -243,7 +253,11 @@ public class MPDConnection {
         pMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
         pSocket = new Socket();
-        pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
+        try {
+            pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
+        } catch (IOException e) {
+            handleSocketError();
+        }
 
         /* Check if the socket is connected */
         if (pSocket.isConnected()) {
@@ -251,27 +265,43 @@ public class MPDConnection {
 
             /* Create the reader used for reading from the socket. */
             if (pReader == null) {
-                pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
+                try {
+                    pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
+                } catch (IOException e) {
+                    handleSocketError();
+                }
             }
 
             /* Create the writer used for writing to the socket */
             if (pWriter == null) {
-                pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
+                try {
+                    pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
+                } catch (IOException e) {
+                    handleSocketError();
+                }
             }
 
-            waitForResponse();
+            try {
+                waitForResponse();
+            } catch (IOException e) {
+                handleSocketError();
+            }
 
             /* If connected try to get MPDs version */
             String readString = null;
 
             String versionString = "";
-            while (readyRead()) {
-                readString = readLine();
-                /* Look out for the greeting message */
-                if (readString.startsWith("OK MPD ")) {
-                    versionString = readString.substring(7);
+            try {
+                while (readyRead()) {
+                    readString = readLine();
+                    /* Look out for the greeting message */
+                    if (readString.startsWith("OK MPD ")) {
+                        versionString = readString.substring(7);
 
+                    }
                 }
+            } catch (IOException e) {
+                handleSocketError();
             }
             pMPDConnectionReady = true;
 
@@ -285,11 +315,21 @@ public class MPDConnection {
                 // Get available commands
                 sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
 
-                List<String> commands = parseMPDCommands();
+                List<String> commands = null;
+                try {
+                    commands = parseMPDCommands();
+                } catch (IOException e) {
+                    handleSocketError();
+                }
 
                 // Get list of supported tags
                 sendMPDCommand(MPDCommands.MPD_COMMAND_GET_TAGS);
-                List<String> tags = parseMPDTagTypes();
+                List<String> tags = null;
+                try {
+                    tags = parseMPDTagTypes();
+                } catch (IOException e) {
+                    handleSocketError();
+                }
 
                 mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
                 mCapabilitiesChanged = false;
@@ -300,7 +340,11 @@ public class MPDConnection {
             startIdleWait();
 
             // Set the timeout to infinite again
-            pSocket.setSoTimeout(SOCKET_TIMEOUT);
+            try {
+                pSocket.setSoTimeout(SOCKET_TIMEOUT);
+            } catch (SocketException e) {
+                handleSocketError();
+            }
 
             // Notify listener
             notifyConnected();
@@ -312,7 +356,7 @@ public class MPDConnection {
      * If the password for the MPDConnection is set then the client should
      * try to authenticate with the server
      */
-    private boolean authenticateMPDServer() throws IOException {
+    private boolean authenticateMPDServer() {
         /* Check if connection really is good to go. */
         if (!pMPDConnectionReady || pMPDConnectionIdle) {
             return false;
@@ -325,14 +369,18 @@ public class MPDConnection {
         String readString = null;
 
         boolean success = false;
-        while (readyRead()) {
-            readString = readLine();
-            if (readString.startsWith("OK")) {
-                success = true;
-            } else if (readString.startsWith("ACK")) {
-                success = false;
-                printDebug("Could not successfully authenticate with mpd server");
+        try {
+            while (readyRead()) {
+                readString = readLine();
+                if (readString.startsWith("OK")) {
+                    success = true;
+                } else if (readString.startsWith("ACK")) {
+                    success = false;
+                    printDebug("Could not successfully authenticate with mpd server");
+                }
             }
+        } catch (IOException e) {
+            handleSocketError();
         }
 
 
@@ -585,8 +633,8 @@ public class MPDConnection {
         pIdleThread.start();
 
 
-        if (null != pIdleListener) {
-            pIdleListener.onIdle();
+        for ( MPDConnectionIdleChangeListener listener: pIdleListeners) {
+            listener.onIdle();
         }
     }
 
@@ -2054,8 +2102,8 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is now ready to be used.
      */
     private void notifyConnected() {
-        if (null != pStateListener) {
-            pStateListener.onConnected();
+        for ( MPDConnectionStateChangeListener listener: pStateListeners ) {
+            listener.onConnected();
         }
     }
 
@@ -2063,8 +2111,8 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is disconnect and not ready for use.
      */
     private void notifyDisconnect() {
-        if (null != pStateListener) {
-            pStateListener.onDisconnected();
+        for ( MPDConnectionStateChangeListener listener: pStateListeners ) {
+            listener.onDisconnected();
         }
     }
 
@@ -2074,7 +2122,7 @@ public class MPDConnection {
      * @param listener Listener to be connected
      */
     public void setStateListener(MPDConnectionStateChangeListener listener) {
-        pStateListener = listener;
+        pStateListeners.add(listener);
     }
 
     /**
@@ -2083,7 +2131,7 @@ public class MPDConnection {
      * @param listener
      */
     public void setpIdleListener(MPDConnectionIdleChangeListener listener) {
-        pIdleListener = listener;
+        pIdleListeners.add(listener);
     }
 
     /**
@@ -2197,8 +2245,8 @@ public class MPDConnection {
             mIdleWaitLock.release();
 
             // Notify a possible listener for deidling.
-            if (null != pIdleListener) {
-                pIdleListener.onNonIdle();
+            for ( MPDConnectionIdleChangeListener listener: pIdleListeners) {
+                listener.onNonIdle();
             }
             printDebug("Idling over");
 

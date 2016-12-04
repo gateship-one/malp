@@ -74,7 +74,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     protected MPDGenericHandler(Looper looper) {
         super(looper);
         mConnectionStateListener = new ArrayList<>();
-        mMPDConnection = new MPDConnection("NOTSET");
+        mMPDConnection = MPDConnection.getInstance();
 
         // Register all handlers as StateObservers with the MPDConnection. This ensures that all subclasses
         // will get a notification about connection state changes.
@@ -124,12 +124,8 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
             mMPDConnection.setServerParameters(hostname, password, port);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER) {
             // Connect to the mpd server. Server parameters have to be set before.
-            try {
-                mMPDConnection.connectToServer();
-            } catch (IOException e) {
-                // If connection failed notify observers about the disconnect.
-                onDisconnected();
-            }
+            mMPDConnection.connectToServer();
+
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
             // Disconnect from the mpd server.
             mMPDConnection.disconnectFromServer();
