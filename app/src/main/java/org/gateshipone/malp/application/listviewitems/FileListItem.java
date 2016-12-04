@@ -261,42 +261,54 @@ public class FileListItem extends AbsImageListViewItem {
      * @param context Context used for String extraction
      */
     public void setTrack(MPDFile track, Context context) {
-        String trackNumber;
+        if ( track != null ) {
+            String trackNumber;
 
-        if (track.getAlbumDiscCount() > 0) {
-            trackNumber = String.valueOf(track.getDiscNumber()) + '-' + String.valueOf(track.getTrackNumber());
-        } else {
-            trackNumber = String.valueOf(track.getTrackNumber());
-        }
+            if (track.getAlbumDiscCount() > 0) {
+                trackNumber = String.valueOf(track.getDiscNumber()) + '-' + String.valueOf(track.getTrackNumber());
+            } else {
+                trackNumber = String.valueOf(track.getTrackNumber());
+            }
 
         /* Extract the information from the track */
-        mNumberView.setText(trackNumber);
-        // Get the preformatted duration of the track.
-        mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
+            mNumberView.setText(trackNumber);
+            // Get the preformatted duration of the track.
+            mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
 
-        // Get track title
-        String trackTitle = track.getTrackTitle();
+            // Get track title
+            String trackTitle = track.getTrackTitle();
 
-        // If no trackname is available (e.g. streaming URLs) show path
-        if (null == trackTitle || trackTitle.isEmpty()) {
-            trackTitle = track.getPath();
-        }
-        mTitleView.setText(trackTitle);
+            // If no trackname is available (e.g. streaming URLs) show path
+            if (null == trackTitle || trackTitle.isEmpty()) {
+                trackTitle = track.getPath();
+            }
+            mTitleView.setText(trackTitle);
 
-        // additional information (artist + album)
-        String trackInformation;
+            // additional information (artist + album)
+            String trackInformation;
 
-        String trackAlbum = track.getTrackAlbum();
+            String trackAlbum = track.getTrackAlbum();
 
-        // Check which information is available and set the separator accordingly.
-        if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-            trackInformation = track.getTrackArtist() + context.getResources().getString(R.string.track_item_separator) + trackAlbum;
-        } else if (track.getTrackArtist().isEmpty()) {
-            trackInformation = trackAlbum;
-        } else if (track.getTrackAlbum().isEmpty()) {
-            trackInformation = track.getTrackArtist();
+            // Check which information is available and set the separator accordingly.
+            if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                trackInformation = track.getTrackArtist() + context.getResources().getString(R.string.track_item_separator) + trackAlbum;
+            } else if (track.getTrackArtist().isEmpty()) {
+                trackInformation = trackAlbum;
+            } else if (track.getTrackAlbum().isEmpty()) {
+                trackInformation = track.getTrackArtist();
+            } else {
+                trackInformation = "";
+            }
+            mAdditionalInfoView.setText(trackInformation);
+            mSeparator.setVisibility(VISIBLE);
+            mNumberView.setVisibility(VISIBLE);
+            mAdditionalInfoView.setVisibility(VISIBLE);
         } else {
-            trackInformation = "";
+            /* Show loading text */
+            mSeparator.setVisibility(GONE);
+            mTitleView.setText(getResources().getText(R.string.track_item_loading));
+            mNumberView.setVisibility(GONE);
+            mAdditionalInfoView.setVisibility(GONE);
         }
 
         if (mShowIcon) {
@@ -310,9 +322,8 @@ public class FileListItem extends AbsImageListViewItem {
             }
             mItemIcon.setImageDrawable(icon);
         }
-        mSeparator.setVisibility(VISIBLE);
 
-        mAdditionalInfoView.setText(trackInformation);
+
     }
 
     /**

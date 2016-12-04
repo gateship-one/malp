@@ -317,7 +317,13 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
         } else {
             // If the element is not yet received we will show an empty view, that notifies the user about
             // the running fetch.
-            convertView = new FileListItem(mContext, false);
+            if ( convertView == null ) {
+                // If not create a new Listitem
+                convertView = new FileListItem(mContext, null, position + 1, false);
+            } else {
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setTrack(null, mContext);
+            }
         }
 
         // The view that is used for the position in the list
