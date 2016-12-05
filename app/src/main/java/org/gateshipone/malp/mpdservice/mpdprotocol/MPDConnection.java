@@ -240,7 +240,7 @@ public class MPDConnection {
      * This is the actual start of the connection. It tries to resolve the hostname
      * and initiates the connection to the address and the configured tcp-port.
      */
-    public void connectToServer() {
+    public synchronized void connectToServer() {
         /* If a socket is already open, close it and destroy it. */
         if ((null != pSocket) && (pSocket.isConnected())) {
             disconnectFromServer();
@@ -257,6 +257,7 @@ public class MPDConnection {
             pSocket.connect(new InetSocketAddress(pHostname, pPort), SOCKET_TIMEOUT);
         } catch (IOException e) {
             handleSocketError();
+            return;
         }
 
         /* Check if the socket is connected */
@@ -269,6 +270,7 @@ public class MPDConnection {
                     pReader = new BufferedReader(new InputStreamReader(pSocket.getInputStream()));
                 } catch (IOException e) {
                     handleSocketError();
+                    return;
                 }
             }
 
@@ -278,6 +280,7 @@ public class MPDConnection {
                     pWriter = new PrintWriter(new OutputStreamWriter(pSocket.getOutputStream()));
                 } catch (IOException e) {
                     handleSocketError();
+                    return;
                 }
             }
 
@@ -285,6 +288,7 @@ public class MPDConnection {
                 waitForResponse();
             } catch (IOException e) {
                 handleSocketError();
+                return;
             }
 
             /* If connected try to get MPDs version */
@@ -302,6 +306,7 @@ public class MPDConnection {
                 }
             } catch (IOException e) {
                 handleSocketError();
+                return;
             }
             pMPDConnectionReady = true;
 
@@ -320,6 +325,7 @@ public class MPDConnection {
                     commands = parseMPDCommands();
                 } catch (IOException e) {
                     handleSocketError();
+                    return;
                 }
 
                 // Get list of supported tags
@@ -329,6 +335,7 @@ public class MPDConnection {
                     tags = parseMPDTagTypes();
                 } catch (IOException e) {
                     handleSocketError();
+                    return;
                 }
 
                 mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
@@ -344,6 +351,7 @@ public class MPDConnection {
                 pSocket.setSoTimeout(SOCKET_TIMEOUT);
             } catch (SocketException e) {
                 handleSocketError();
+                return;
             }
 
             // Notify listener

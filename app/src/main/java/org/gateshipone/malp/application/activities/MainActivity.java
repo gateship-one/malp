@@ -62,6 +62,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
+import org.gateshipone.malp.application.widget.WidgetService;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
@@ -510,6 +511,7 @@ public class MainActivity extends AppCompatActivity
         }
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
+
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
 
         // Check if hardware key control is enabled by the user
@@ -537,6 +539,11 @@ public class MainActivity extends AppCompatActivity
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
+
+        // Notify the widget to also connect if possible
+        Intent connectIntent = new Intent(this, WidgetService.class);
+        connectIntent.setAction(WidgetService.ACTION_CONNECT);
+        startService(connectIntent);
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -700,6 +707,11 @@ public class MainActivity extends AppCompatActivity
         ConnectionManager.disconnectFromServer();
         ConnectionManager.setParameters(profile, this);
         ConnectionManager.reconnectLastServer(getApplicationContext());
+
+        // Notify the widget to also connect if possible
+        Intent connectIntent = new Intent(this, WidgetService.class);
+        connectIntent.setAction(WidgetService.ACTION_PROFILE_CHANGED);
+        startService(connectIntent);
     }
 
     @Override

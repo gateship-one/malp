@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (C) 2016 Team Gateship-One
+  ~ (Hendrik Borghorst & Frederik Luetkes)
+  ~
+  ~ The AUTHORS.md file contains a detailed contributors list:
+  ~ <https://github.com/gateship-one/malp/blob/master/AUTHORS.md>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWidgetBackground"
+    android:orientation="horizontal">
+    <ImageView
+        android:id="@+id/widget_icon"
+        android:layout_width="96dp"
+        android:layout_height="match_parent"
+        android:src="@drawable/icon_outline_256dp"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-regular"
+            android:text="@string/widget_disconnected"
+            android:textAlignment="center"
+            android:textSize="@dimen/material_font_style_size_headline" />
+
+        <Button
+            android:id="@+id/widget_connect_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/widget_connect"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent_deepOrange"
+            android:textSize="@dimen/material_font_style_size_subheading" />
+    </LinearLayout>
+</LinearLayout>

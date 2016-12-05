@@ -57,6 +57,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private String mPassword;
     private int mPort;
 
+    private boolean mAutoConnect = true;
+
     private boolean mDisconnectRequested;
 
     private Timer mReconnectTimer;
@@ -114,8 +116,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public static void disconnectFromServer() {
-        getInstance().mDisconnectRequested = true;
-
+        mConnectionManager.mDisconnectRequested = true;
     }
 
     public static void autoConnect(Context context) {
@@ -137,10 +138,17 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         }
     }
 
+    public synchronized static void setAutoconnect(boolean enabled) {
+        getInstance().mAutoConnect = enabled;
+    }
+
     @Override
     public synchronized void onDisconnected() {
         // Check if disconnect was user requested or not.
         // Also check if reconnect timeout is already running
+        if ( !mAutoConnect ) {
+            return;
+        }
         if ( !mDisconnectRequested && null == mReconnectTimer ) {
             mReconnectTimer = new Timer();
             if ( mReconnectCounter <= SHORT_RECONNECT_TRIES ) {

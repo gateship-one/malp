@@ -29,12 +29,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
@@ -106,6 +108,9 @@ public class WidgetService extends Service {
 
     private WidgetMPDStatusHandler mServerStatusListener;
 
+    private MPDCurrentStatus mLastStatus;
+    private MPDFile mLastTrack;
+
     /**
      * No bindable service.
      *
@@ -122,32 +127,6 @@ public class WidgetService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        mServerStatusListener = new WidgetMPDStatusHandler(this);
-        mServerConnectionStateListener = new WidgetMPDConnectionStateListener(this);
-
-        /* Register callback handlers to MPD service handlers */
-        MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
-        MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
-    }
-
-    @Override
-    public void onDestroy() {
-        unregisterReceiver(mBroadcastReceiver);
-        super.onDestroy();
-
-        /* Unregister MPD service handlers */
-        MPDCommandHandler.unregisterConnectionStateListener(mServerConnectionStateListener);
-        MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusListener);
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent == null) {
-            return START_NOT_STICKY;
-        }
-        String action = intent.getAction();
-        handleAction(action);
         mBroadcastReceiver = new WidgetBroadcastReceiver();
 
         IntentFilter filter = new IntentFilter();
@@ -162,6 +141,40 @@ public class WidgetService extends Service {
 
 
         registerReceiver(mBroadcastReceiver, filter);
+
+        mServerStatusListener = new WidgetMPDStatusHandler(this);
+        mServerConnectionStateListener = new WidgetMPDConnectionStateListener(this);
+
+        /* Register callback handlers to MPD service handlers */
+        MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
+        MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
+
+        mProfileManager = new MPDProfileManager(this);
+        ConnectionManager.setAutoconnect(false);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mBroadcastReceiver);
+
+        notifyDisconnected();
+
+        /* Unregister MPD service handlers */
+        MPDCommandHandler.unregisterConnectionStateListener(mServerConnectionStateListener);
+        MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusListener);
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) {
+            return START_NOT_STICKY;
+        }
+        String action = intent.getAction();
+        if ( null != action ) {
+            handleAction(action);
+        }
         return START_STICKY;
     }
 
@@ -191,7 +204,9 @@ public class WidgetService extends Service {
     }
 
     private void onMPDConnect() {
-        connectMPDServer();
+        checkMPDConnection();
+        notifyNewTrack(mLastTrack);
+        notifyNewStatus(mLastStatus);
     }
 
     private void onMPDDisconnect() {
@@ -199,37 +214,46 @@ public class WidgetService extends Service {
     }
 
     private void onProfileChanged() {
+        MPDCommandHandler.disconnectFromMPDServer();
         ConnectionManager.disconnectFromServer();
         MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
         ConnectionManager.setParameters(profile, this);
     }
 
     private void notifyDisconnected() {
+        Log.v(TAG,"Disconnected from server");
         Intent intent = new Intent();
         intent.setAction(ACTION_SERVER_DISCONNECTED);
         sendBroadcast(intent);
+
+        stopSelf();
     }
 
     private void notifyNewTrack(MPDFile track) {
         Intent intent = new Intent();
         intent.setAction(ACTION_TRACK_CHANGED);
         intent.putExtra(INTENT_EXTRA_TRACK, track);
+        sendBroadcast(intent);
     }
 
     private void notifyNewStatus(MPDCurrentStatus status) {
         Intent intent = new Intent();
-        intent.setAction(ACTION_TRACK_CHANGED);
+        intent.setAction(ACTION_STATUS_CHANGED);
         intent.putExtra(INTENT_EXTRA_STATUS, status);
+        sendBroadcast(intent);
     }
 
     /**
      * Ensures an MPD server is connected before performing an action.
      */
     private void checkMPDConnection() {
-        connectMPDServer();
+        if (!MPDConnection.getInstance().isConnected()) {
+            connectMPDServer();
+        }
     }
 
     private void connectMPDServer() {
+        Log.v(TAG,"Connecting MPD");
         /* Set the connection parameters */
         ConnectionManager.disconnectFromServer();
         MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
@@ -244,6 +268,7 @@ public class WidgetService extends Service {
      * @param action Action received via an {@link Intent}
      */
     private void handleAction(String action) {
+        Log.v(TAG,"Received action: " + action);
         if (action.equals(ACTION_PLAY)) {
             onPlay();
         } else if (action.equals(ACTION_PAUSE)) {
@@ -275,7 +300,9 @@ public class WidgetService extends Service {
                 return;
             }
             String action = intent.getAction();
-            handleAction(action);
+            if ( null != action ) {
+                handleAction(action);
+            }
         }
     }
 
@@ -288,12 +315,12 @@ public class WidgetService extends Service {
 
         @Override
         public void onConnected() {
-            mService.get().notifyDisconnected();
+
         }
 
         @Override
         public void onDisconnected() {
-
+            mService.get().notifyDisconnected();
         }
     }
 
@@ -306,12 +333,14 @@ public class WidgetService extends Service {
 
         @Override
         protected void onNewStatusReady(MPDCurrentStatus status) {
+            mService.get().mLastStatus = status;
             mService.get().notifyNewStatus(status);
         }
 
         @Override
         protected void onNewTrackReady(MPDFile track) {
             mService.get().notifyNewTrack(track);
+            mService.get().mLastTrack = track;
         }
     }
 }

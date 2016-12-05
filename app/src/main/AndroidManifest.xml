@@ -75,6 +75,18 @@
             android:name=".application.widget.WidgetService"
             android:exported="false"
             android:process=":widgetService" />
+        <receiver android:name=".application.widget.WidgetProvider">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.gateshipone.malp.widget.status_changed" />
+                <action android:name="org.gateshipone.malp.widget.track_changed" />
+                <action android:name="org.gateshipone.malp.widget.server_disconnected"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_big_info" />
+        </receiver>
     </application>
 
 </manifest>
