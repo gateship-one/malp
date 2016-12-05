@@ -127,8 +127,10 @@ public class WidgetService extends Service {
     public void onCreate() {
         super.onCreate();
 
+        /* Create the broadcast receiver to react on incoming Intent */
         mBroadcastReceiver = new WidgetBroadcastReceiver();
 
+        /* Only react to certain Actions defined in this service */
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_PLAY);
         filter.addAction(ACTION_PAUSE);
@@ -139,9 +141,10 @@ public class WidgetService extends Service {
         filter.addAction(ACTION_DISCONNECT);
         filter.addAction(ACTION_PROFILE_CHANGED);
 
-
+        // Register the receiver with the system
         registerReceiver(mBroadcastReceiver, filter);
 
+        // Create MPD callbacks
         mServerStatusListener = new WidgetMPDStatusHandler(this);
         mServerConnectionStateListener = new WidgetMPDConnectionStateListener(this);
 
@@ -150,8 +153,9 @@ public class WidgetService extends Service {
         MPDStateMonitoringHandler.setRefreshInterval(60 * 1000);
         MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
 
-
+        // Initialize an ProfileManager to get the default profile.
         mProfileManager = new MPDProfileManager(this);
+        // Disable automatic reconnect after connection loss for the widget server
         ConnectionManager.setAutoconnect(false);
     }
 
@@ -160,6 +164,7 @@ public class WidgetService extends Service {
         super.onDestroy();
         unregisterReceiver(mBroadcastReceiver);
 
+        // Notify the widgets that the service is disconected now
         notifyDisconnected();
 
         /* Unregister MPD service handlers */
@@ -171,6 +176,7 @@ public class WidgetService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
+            // Something wrong here.
             return START_NOT_STICKY;
         }
         String action = intent.getAction();
@@ -215,6 +221,9 @@ public class WidgetService extends Service {
         ConnectionManager.disconnectFromServer();
     }
 
+    /**
+     * Disconnects from the current server and rereads the default profile.
+     */
     private void onProfileChanged() {
         MPDCommandHandler.disconnectFromMPDServer();
         ConnectionManager.disconnectFromServer();
@@ -222,6 +231,9 @@ public class WidgetService extends Service {
         ConnectionManager.setParameters(profile, this);
     }
 
+    /**
+     * Notifies the widgets that the server is disconnected now.
+     */
     private void notifyDisconnected() {
         Log.v(TAG,"Disconnected from server");
         Intent intent = new Intent();
@@ -231,6 +243,10 @@ public class WidgetService extends Service {
         stopSelf();
     }
 
+    /**
+     * Sends the new {@link MPDFile} to listening broadcast receivers
+     * @param track Track to broadcast
+     */
     private void notifyNewTrack(MPDFile track) {
         Intent intent = new Intent();
         intent.setAction(ACTION_TRACK_CHANGED);
@@ -238,6 +254,10 @@ public class WidgetService extends Service {
         sendBroadcast(intent);
     }
 
+    /**
+     * Sends the new {@link MPDCurrentStatus} to listening broadcast receivers.
+     * @param status Status to broadcast
+     */
     private void notifyNewStatus(MPDCurrentStatus status) {
         Intent intent = new Intent();
         intent.setAction(ACTION_STATUS_CHANGED);
