@@ -33,6 +33,7 @@
         android:src="@drawable/icon_outline_24dp" />
 
     <LinearLayout
+        android:id="@+id/widget_control_layout"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_alignParentBottom="true"
@@ -107,5 +108,38 @@
                 android:src="@drawable/ic_skip_next_48dp"
                 android:tint="@android:color/primary_text_dark" />
         </LinearLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/widget_disconnected_layout"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="4dp"
+        android:layout_toEndOf="@+id/widget_big_cover"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-regular"
+            android:text="@string/widget_disconnected"
+            android:textColor="@android:color/primary_text_dark"
+            android:textAlignment="center"
+            android:textSize="@dimen/material_font_style_size_headline" />
+
+        <Button
+            android:id="@+id/widget_connect_button"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/widget_connect"
+            android:textAlignment="center"
+            android:textColor="@color/colorAccent_deepOrange"
+            android:textSize="@dimen/material_font_style_size_subheading" />
     </LinearLayout>
 </RelativeLayout>

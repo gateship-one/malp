@@ -54,6 +54,8 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
      */
     private static final int INTERPOLATE_INTERVAL = 1 * 1000;
 
+    private int mRefreshInterval = INTERPOLATE_INTERVAL;
+
 
     private static HandlerThread mHandlerThread = null;
     private static MPDStateMonitoringHandler mHandlerSingleton = null;
@@ -243,7 +245,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
                 }
                 mInterpolateTimer = new Timer();
 
-                mInterpolateTimer.schedule(new InterpolateTask(), 0, INTERPOLATE_INTERVAL);
+                mInterpolateTimer.schedule(new InterpolateTask(), 0, mRefreshInterval);
             }
 
             if (null != mResyncTimer) {
@@ -334,6 +336,11 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     public void onNonIdle() {
         // Server idle is over (reason unclear), resync the state
         resyncState();
+    }
+
+    public static void setRefreshInterval(int interval) {
+        getHandler().mRefreshInterval = interval;
+        getHandler().resyncState();
     }
 
 

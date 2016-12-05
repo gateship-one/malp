@@ -147,7 +147,9 @@ public class WidgetService extends Service {
 
         /* Register callback handlers to MPD service handlers */
         MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
+        MPDStateMonitoringHandler.setRefreshInterval(60 * 1000);
         MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
+
 
         mProfileManager = new MPDProfileManager(this);
         ConnectionManager.setAutoconnect(false);

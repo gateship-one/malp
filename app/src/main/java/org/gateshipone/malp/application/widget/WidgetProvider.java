@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import org.gateshipone.malp.R;
@@ -59,19 +60,16 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
+        mPackageName = context.getPackageName();
         // Perform this loop procedure for each App Widget that belongs to this
         // provider
-        for (int appWidgetId : appWidgetIds) {
-            updateWidget(context);
-        }
-        mPackageName = context.getPackageName();
-        mLastStatus = null;
-        mLastTrack = null;
+
+        updateWidget(context);
+
     }
 
     public void onDeleted(Context context, int[] appWidgetIds) {
         super.onDeleted(context, appWidgetIds);
-
         mLastTrack = null;
         mLastStatus = null;
     }
@@ -85,15 +83,15 @@ public class WidgetProvider extends AppWidgetProvider {
     private void updateWidget(Context context) {
         boolean nowPlaying = false;
 
+        // Create a new RemoteViews object containing the default widget layout
+        mViews = new RemoteViews(mPackageName, R.layout.widget_malp_big);
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
-            // Create a new RemoteViews object containing the default widget layout
-            mViews = new RemoteViews(mPackageName, R.layout.widget_malp_big);
 
             mViews.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
             mViews.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
 
-            if ( mLastCover != null ) {
+            if (mLastCover != null) {
                 // Use the saved image
                 mViews.setImageViewBitmap(R.id.widget_big_cover, mLastCover);
             } else {
@@ -149,27 +147,20 @@ public class WidgetProvider extends AppWidgetProvider {
             nextIntent.setAction(WidgetService.ACTION_NEXT);
             PendingIntent nextPendingIntent = PendingIntent.getService(context, INTENT_NEXT, nextIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             mViews.setOnClickPendingIntent(R.id.widget_big_next, nextPendingIntent);
-
+            mViews.setViewVisibility(R.id.widget_control_layout, View.VISIBLE);
+            mViews.setViewVisibility(R.id.widget_disconnected_layout, View.GONE);
         } else {
-            mViews = new RemoteViews(mPackageName, R.layout.widget_malp_disconnected);
-            
-            Intent mainIntent = new Intent(context, SplashActivity.class);
-            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            if (nowPlaying) {
-                // add intent only if playing is active
-                //mainIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, OdysseyMainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
-            }
-            PendingIntent mainPendingIntent = PendingIntent.getActivity(context, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_icon, mainPendingIntent);
-
-            // Create a new RemoteViews object containing the default widget layout
-
+            // connect action
             Intent connectIntent = new Intent(context, WidgetService.class);
             connectIntent.setAction(WidgetService.ACTION_CONNECT);
             PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             mViews.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
+
+            mViews.setViewVisibility(R.id.widget_control_layout, View.GONE);
+            mViews.setViewVisibility(R.id.widget_disconnected_layout, View.VISIBLE);
         }
-        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, WidgetProvider.class), mViews);
+
+        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context,WidgetProvider.class), mViews);
     }
 
     /**
@@ -182,7 +173,6 @@ public class WidgetProvider extends AppWidgetProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
 
-
         // Type checks
         if (intent.getAction().equals(WidgetService.ACTION_STATUS_CHANGED)) {
 
@@ -193,36 +183,36 @@ public class WidgetProvider extends AppWidgetProvider {
             if (null != status) {
                 // Save the information for later usage (when the asynchronous bitmap loader finishes)
                 mLastStatus = status;
-
-                // Refresh the widget with the new information
-                updateWidget(context);
             }
-        }else if (intent.getAction().equals(WidgetService.ACTION_TRACK_CHANGED)) {
+        } else if (intent.getAction().equals(WidgetService.ACTION_TRACK_CHANGED)) {
 
             // Extract the payload from the intent
             MPDFile track = intent.getParcelableExtra(WidgetService.INTENT_EXTRA_TRACK);
 
             // Check if a payload was sent
             if (null != track) {
+                boolean newImage = false;
                 // Check if new album is played and remove image if it is.
-                if ( mLastTrack == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum()) || !track.getTrackAlbumMBID().equals(mLastTrack.getTrackAlbumMBID())) {
+                if (mLastTrack == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum()) || !track.getTrackAlbumMBID().equals(mLastTrack.getTrackAlbumMBID())) {
                     mLastCover = null;
+                    newImage = true;
 
-                    CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
-                    coverLoader.getImage(track);
                 }
 
                 // Save the information for later usage (when the asynchronous bitmap loader finishes)
                 mLastTrack = track;
 
-                // Refresh the widget with the new information
-                updateWidget(context);
+                if (newImage) {
+                    CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
+                    coverLoader.getImage(track);
+                }
             }
         } else if (intent.getAction().equals(WidgetService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
-            updateWidget(context);
         }
+        // Refresh the widget with the new information
+        updateWidget(context);
     }
 
     private class CoverReceiver implements CoverBitmapLoader.CoverBitmapListener {

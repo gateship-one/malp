@@ -21,5 +21,5 @@
     android:minWidth="250dp"
     android:minHeight="40dp"
     android:previewImage="@drawable/icon_512"
-    android:initialLayout="@layout/widget_malp_disconnected">
+    android:initialLayout="@layout/widget_malp_big">
 </appwidget-provider>
