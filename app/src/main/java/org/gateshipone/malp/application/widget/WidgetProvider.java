@@ -156,6 +156,9 @@ public class WidgetProvider extends AppWidgetProvider {
             PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             mViews.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
 
+            // Set application icon outline as a image again
+            mViews.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
+
             mViews.setViewVisibility(R.id.widget_control_layout, View.GONE);
             mViews.setViewVisibility(R.id.widget_disconnected_layout, View.VISIBLE);
         }
