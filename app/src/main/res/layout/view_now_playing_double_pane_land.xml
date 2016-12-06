@@ -286,7 +286,7 @@
                 <View
                     android:layout_width="@dimen/list_divider_size"
                     android:layout_height="match_parent"
-                    android:background="@color/colorDivider" />
+                    android:background="?attr/malp_color_background_selected" />
 
                 <org.gateshipone.malp.application.views.CurrentPlaylistView
                     android:id="@+id/now_playing_playlist"
