@@ -156,6 +156,12 @@ public class WidgetProvider extends AppWidgetProvider {
             PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             mViews.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
 
+            // Main action
+            Intent mainIntent = new Intent(context, SplashActivity.class);
+            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            PendingIntent mainPendingIntent = PendingIntent.getActivity(context, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            mViews.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
+
             // Set application icon outline as a image again
             mViews.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
 
