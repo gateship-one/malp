@@ -140,9 +140,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         mAdapterView.setOnItemClickListener(this);
 
 
-        if (!mUseList) {
-            mAdapterView.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mAdapterView));
-        }
+        mAdapterView.setOnScrollListener(new ScrollSpeedListener(mAlbumsAdapter, mAdapterView));
+
         // register for context menu
         registerForContextMenu(mAdapterView);
 
@@ -357,8 +356,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
 
-        if ( mArtist != null) {
-            if( !mArtist.getArtistName().equals(album.getArtistName()) ) {
+        if (mArtist != null) {
+            if (!mArtist.getArtistName().equals(album.getArtistName())) {
                 album.setArtistName(mArtist.getArtistName());
             }
         }
