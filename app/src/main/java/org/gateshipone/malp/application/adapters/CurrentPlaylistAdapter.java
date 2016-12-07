@@ -274,6 +274,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
 
             // Create new ViewItem
             VIEW_TYPES type = VIEW_TYPES.values()[getItemViewType(position)];
+            // Normal track item type
             if (type == VIEW_TYPES.TYPE_TRACK_ITEM) {
                 if ( convertView == null ) {
                     // If not create a new Listitem
@@ -283,7 +284,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
                     tracksListViewItem.setTrack(track, mContext);
                     tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
-            } else if (type == VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) {
+            } else if (type == VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) { // Section track type.
                 if ( convertView == null ) {
                     // If not create a new Listitem
                     convertView = new FileListItem(mContext, track, position + 1, false, trackAlbum, this);

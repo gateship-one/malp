@@ -57,7 +57,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
     private static final int NOTIFICATION_ID = 42;
 
-    private static final String ACTION_CANCEL = "org.gateshipone.malp.cancel_download";
+    public static final String ACTION_CANCEL = "org.gateshipone.malp.cancel_download";
     public static final String ACTION_START_BULKDOWNLOAD = "org.gateshipone.malp.start_download";
 
     public static final String BUNDLE_KEY_ARTIST_PROVIDER = "org.gateshipone.malp.artist_provider";
@@ -244,7 +244,9 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         stopForeground(true);
         MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
         stopSelf();
-        mWakelock.release();
+        if ( mWakelock.isHeld() ) {
+            mWakelock.release();
+        }
     }
 
     private void updateNotification() {

@@ -88,13 +88,13 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     private ArtworkManager(Context context) {
 
-        mDBManager = ArtworkDatabaseManager.getInstance(context);
+        mDBManager = ArtworkDatabaseManager.getInstance(context.getApplicationContext());
 
         mArtistListeners = new ArrayList<>();
         mAlbumListeners = new ArrayList<>();
 
 
-        mContext = context;
+        mContext = context.getApplicationContext();
 
         ConnectionStateReceiver receiver = new ConnectionStateReceiver();
         IntentFilter filter = new IntentFilter();
@@ -132,6 +132,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         mWifiOnly = wifiOnly;
     }
 
+    /**
+     * Returns an artist image for the given artist.
+     * @param artist {@link MPDArtist} to get the image for-
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getArtistImage(final MPDArtist artist) throws ImageNotFoundException {
         if (null == artist) {
             return null;
@@ -159,14 +165,18 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         return null;
     }
 
+    /**
+     * Returns an album image for the given album.
+     * @param mbid MusicBrainzID for the given album.
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getAlbumImageFromMBID(final String mbid) throws ImageNotFoundException {
         if (null == mbid) {
             return null;
         }
 
-
         byte[] image;
-
 
         image = mDBManager.getAlbumImageFromMBID(mbid);
 
@@ -179,6 +189,13 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         return null;
     }
 
+    /**
+     * Returns an album image for the given album name and artist name.
+     * @param albumName Name of the album to look for
+     * @param artistName Name of the albums artists
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getAlbumImageFromAlbumNameArtistName(final String albumName, final String artistName) throws ImageNotFoundException {
         if (null == albumName || null == artistName) {
             return null;
@@ -199,6 +216,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         return null;
     }
 
+    /**
+     * Returns an album image for the given album name.
+     * @param albumName Name of the album to look for
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getAlbumImageFromName(final String albumName) throws ImageNotFoundException {
         if (null == albumName) {
             return null;
@@ -219,6 +242,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         return null;
     }
 
+    /**
+     * Returns an album image for the given track.
+     * @param track {@link MPDFile} to get the album image for.
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getAlbumImageForTrack(final MPDFile track) throws ImageNotFoundException {
         if (null == track) {
             return null;
@@ -263,6 +292,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     }
 
+    /**
+     * Returns an album image for the given {@link MPDAlbum}
+     * @param album {@link MPDAlbum} to get the image for.
+     * @return The image if found or null if it is not available and has been tried to download before.
+     * @throws ImageNotFoundException If the image is not found and was not searched before.
+     */
     public Bitmap getAlbumImage(final MPDAlbum album) throws ImageNotFoundException {
         if (null == album) {
             return null;
@@ -438,6 +473,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         new InsertAlbumImageTask().execute(imageResponse);
     }
 
+    /**
+     * Called if a volley error occurs during internet communication.
+     * @param album {@link MPDAlbum} the error occured for.
+     * @param error {@link VolleyError} that was emitted
+     */
     public void fetchVolleyError(MPDAlbum album, VolleyError error) {
         Log.e(TAG, "VolleyError for album: " + album.getName() + "-" + album.getArtistName());
 
@@ -482,6 +522,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         new InsertArtistImageTask().execute(imageResponse);
     }
 
+    /**
+     * Called if a volley error occurs during internet communication.
+     * @param artist {@link MPDArtist} the error occured for.
+     * @param error {@link VolleyError} that was emitted
+     */
     public void fetchVolleyError(MPDArtist artist, VolleyError error) {
         Log.e(TAG, "VolleyError fetching: " + artist.getArtistName());
 
@@ -626,6 +671,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     }
 
+    /**
+     * Asynchronous task that is called as a callback for the list of albums.
+     * Clears the old list and starts to download album images.
+     */
     private class ParseMPDAlbumListTask extends AsyncTask<List<MPDAlbum>, Object, Object> {
 
         @Override
@@ -644,6 +693,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
     }
 
+    /**
+     * Asynchronous task that is called as a callback for the list of artists.
+     * Clears the old list and starts to download artist images.
+     */
     private class ParseMPDArtistListTask extends AsyncTask<List<MPDArtist>, Object, Object> {
 
         @Override
@@ -661,6 +714,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
     }
 
+    /**
+     * Entrance point to start downloading all images for the complete database of the current
+     * default MPD server.
+     * @param progressCallback Used callback interface to be notified about the download progress.
+     */
     public void bulkLoadImages(BulkLoadingProgressCallback progressCallback) {
         if (progressCallback == null) {
             return;
@@ -688,6 +746,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
     }
 
+    /**
+     * Iterates over the list of albums and downloads images for them.
+     */
     private void fetchNextBulkAlbum() {
         boolean isEmpty;
         synchronized (mAlbumList) {
@@ -722,6 +783,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     }
 
+    /**
+     * Iterates over the list of artists and downloads images for them.
+     */
     private void fetchNextBulkArtist() {
         boolean isEmpty;
         synchronized (mArtistList) {
@@ -771,6 +835,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         void newAlbumImage(MPDAlbum album);
     }
 
+    /**
+     * Called if the connection state of the device is changing. This ensures no data is downloaded
+     * if it is not intended (mobile data connection).
+     */
     private class ConnectionStateReceiver extends BroadcastReceiver {
 
         @Override
@@ -820,6 +888,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
     }
 
+    /**
+     * Interface used for BulkLoading processes. (S. {@link BulkDownloadService} )
+     */
     public interface BulkLoadingProgressCallback {
         void startAlbumLoading(int albumCount);
 

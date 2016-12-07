@@ -166,8 +166,25 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_album_provider_key))|| key.equals(getString(R.string.pref_artist_provider_key))) {
-            ArtworkManager.getInstance(getContext().getApplicationContext()).cancelAllRequests();
+        String albumProviderKey = getString(R.string.pref_album_provider_key);
+        String artistProviderKey = getString(R.string.pref_artist_provider_key);
+        String downloadWifiOnlyKey = getString(R.string.pref_download_wifi_only_key);
+
+        if (key.equals(albumProviderKey) || key.equals(artistProviderKey) || key.equals(downloadWifiOnlyKey)) {
+            Intent nextIntent = new Intent(BulkDownloadService.ACTION_CANCEL);
+            getActivity().getApplicationContext().sendBroadcast(nextIntent);
+
+            ArtworkManager artworkManager = ArtworkManager.getInstance(getContext().getApplicationContext());
+
+            artworkManager.cancelAllRequests();
+
+            if (key.equals(albumProviderKey)) {
+                artworkManager.setAlbumProvider(sharedPreferences.getString(albumProviderKey, getString(R.string.pref_artwork_provider_album_default)));
+            } else if(key.equals(artistProviderKey)) {
+                artworkManager.setArtistProvider(sharedPreferences.getString(artistProviderKey, getString(R.string.pref_artwork_provider_artist_default)));
+            } else if (key.equals(downloadWifiOnlyKey)) {
+                artworkManager.setWifiOnly(sharedPreferences.getBoolean(downloadWifiOnlyKey, getResources().getBoolean(R.bool.pref_download_wifi_default)));
+            }
         }
     }
 

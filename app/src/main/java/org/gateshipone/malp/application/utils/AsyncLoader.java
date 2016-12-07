@@ -56,6 +56,11 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
         public ScrollSpeedAdapter mAdapter;
     }
 
+    /**
+     * Asynchronous task in parallel to the GUI thread.
+     * @param params Input parameter containing all the necessary informaton to fetch the image.
+     * @return Bitmap loaded from the database.
+     */
     @Override
     protected Bitmap doInBackground(CoverViewHolder... params) {
         // Save the time when loading started for later duration calculation
@@ -96,6 +101,10 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
     }
 
 
+    /**
+     * Called when the asynchronous task finishes. This is called inside the GUI context.
+     * @param result Bitmap that was loaded.
+     */
     @Override
     protected void onPostExecute(Bitmap result) {
         super.onPostExecute(result);
@@ -106,6 +115,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             if ( mCover.mAdapter != null) {
                 mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
             }
+
+            // Set the newly loaded image to the view.
             mCover.coverLoadable.setImage(result);
         }
     }

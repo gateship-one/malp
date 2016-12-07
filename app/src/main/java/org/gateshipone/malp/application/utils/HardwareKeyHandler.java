@@ -29,12 +29,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class HardwareKeyHandler {
+    /**
+     * Interval for repeating the volume events in ms.
+     */
     private final static int VOLUME_CONTROL_REPEAT_PERIOD = 175;
 
     private static HardwareKeyHandler mInstance;
 
     private Timer mRepeatTimer;
 
+    /**
+     * Singleton pattern
+     * @return The singleton instance for this handler.
+     */
     public static HardwareKeyHandler getInstance() {
         if (mInstance == null) {
             // Create singleton instance
@@ -43,17 +50,25 @@ public class HardwareKeyHandler {
         return mInstance;
     }
 
+    /**
+     * Can be called from the {@link android.app.Activity}s. that catches the key event.
+     * This method ensures consistent behavior for button handling in all {@link android.app.Activity}s.
+     * @param event
+     * @return
+     */
     public boolean handleKeyEvent(KeyEvent event) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
                 if (action == KeyEvent.ACTION_DOWN) {
+                    // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
                         mRepeatTimer.scheduleAtFixedRate(new IncreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
+                    // Key is released. Stop running timmer.
                     if (null != mRepeatTimer) {
                         mRepeatTimer.cancel();
                         mRepeatTimer.purge();
@@ -63,11 +78,13 @@ public class HardwareKeyHandler {
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if (action == KeyEvent.ACTION_DOWN) {
+                    // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
                         mRepeatTimer.scheduleAtFixedRate(new DecreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
+                    // Key is released. Stop running timmer.
                     if (null != mRepeatTimer) {
                         mRepeatTimer.cancel();
                         mRepeatTimer.purge();
@@ -116,6 +133,9 @@ public class HardwareKeyHandler {
         }
     }
 
+    /**
+     * Simple class to repeatably increase the volume.
+     */
     private class IncreaseVolumeTask extends TimerTask {
 
         @Override
@@ -124,6 +144,10 @@ public class HardwareKeyHandler {
         }
     }
 
+
+    /**
+     * Simple class to repeatably decrease the volume.
+     */
     private class DecreaseVolumeTask extends TimerTask {
 
         @Override
