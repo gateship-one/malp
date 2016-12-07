@@ -193,4 +193,6 @@
     <string name="preference_volume_control_title">Lautstärkeregler wählen</string>
     <string name="preference_use_album_artists_text">Verwende das \"AlbumArtist\"-Tag zur Erstellung der Interpretenliste</string>
     <string name="preference_use_album_artists_title">AlbumArtist-Tag verwenden</string>
+    <string name="widget_connect">Verbinden</string>
+    <string name="widget_disconnected">Nicht verbunden</string>
 </resources>
