@@ -340,7 +340,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     public static void setRefreshInterval(int interval) {
         getHandler().mRefreshInterval = interval;
-        getHandler().resyncState();
     }
 
 
