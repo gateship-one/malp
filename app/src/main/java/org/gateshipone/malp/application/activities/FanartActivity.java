@@ -32,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -75,6 +76,9 @@ public class FanartActivity extends Activity {
     private static final String STATE_ARTWORK_POINTER_NEXT = "artwork_pointer_next";
     private static final String STATE_LAST_TRACK = "last_track";
 
+    /**
+     * Time between two images of the slideshow
+     */
     private static final int FANART_SWITCH_TIME = 12 * 1000;
 
     private TextView mTrackTitle;
@@ -82,7 +86,6 @@ public class FanartActivity extends Activity {
     private TextView mTrackArtist;
 
     private MPDFile mLastTrack;
-    private MPDCurrentStatus mLastStatus;
 
 
     private ServerStatusListener mStateListener = null;
@@ -139,7 +142,7 @@ public class FanartActivity extends Activity {
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
-        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key),getResources().getBoolean(R.bool.pref_theme_dark_default));
+        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key), getResources().getBoolean(R.bool.pref_theme_dark_default));
         if (darkTheme) {
             if (themePref.equals(getString(R.string.pref_indigo_key))) {
                 setTheme(R.style.AppTheme_indigo);
@@ -182,9 +185,6 @@ public class FanartActivity extends Activity {
         }
         super.onCreate(savedInstanceState);
         mDecorView = getWindow().getDecorView();
-        // Hide the status bar.
-        // Remember that you should never show the action bar if the
-        // status bar is hidden, so hide that too if necessary.
 
 
         setContentView(R.layout.activity_artist_fanart);
@@ -277,7 +277,7 @@ public class FanartActivity extends Activity {
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
         /* Volume control buttons */
-        mVolumeIconButtons = (ImageView)findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
         mVolumeIconButtons.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -285,7 +285,7 @@ public class FanartActivity extends Activity {
             }
         });
 
-        mVolumeText = (TextView)findViewById(R.id.volume_button_text);
+        mVolumeText = (TextView) findViewById(R.id.volume_button_text);
 
         mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
 
@@ -315,8 +315,8 @@ public class FanartActivity extends Activity {
         mVolumePlus.setOnLongClickListener(plusListener);
         mVolumePlus.setOnTouchListener(plusListener);
 
-        mVolumeSeekbarLayout = (LinearLayout)findViewById(R.id.volume_seekbar_layout);
-        mVolumeButtonLayout = (LinearLayout)findViewById(R.id.volume_button_layout);
+        mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
 
         mFanartCache = new FanartCacheManager(getApplicationContext());
     }
@@ -390,8 +390,7 @@ public class FanartActivity extends Activity {
         if (mHardwareControls) {
             if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
                 return super.dispatchKeyEvent(event);
-            }
-            else return true;
+            } else return true;
         } else {
             return super.dispatchKeyEvent(event);
         }
@@ -415,13 +414,13 @@ public class FanartActivity extends Activity {
         int volume = status.getVolume();
         mVolumeSeekbar.setProgress(volume);
 
-        if ( volume >= 70 ) {
+        if (volume >= 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_high_black_48dp);
-        } else if ( volume >= 30 && volume < 70) {
+        } else if (volume >= 30 && volume < 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-        } else if ( volume > 0 && volume < 30 ) {
+        } else if (volume > 0 && volume < 30) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_low_black_48dp);
         } else {
@@ -436,10 +435,13 @@ public class FanartActivity extends Activity {
         // Update position seekbar & textviews
         mPositionSeekbar.setMax(status.getTrackLength());
         mPositionSeekbar.setProgress(status.getElapsedTime());
-
-        mLastStatus = status;
     }
 
+    /**
+     * Reacts to new MPD tracks. Shows new track name, album, artist and triggers the fetching
+     * of the Fanart.
+     * @param track New {@link MPDFile} that is playing
+     */
     private void updateMPDCurrentTrack(final MPDFile track) {
         mTrackTitle.setText(track.getTrackTitle());
         mTrackAlbum.setText(track.getTrackAlbum());
@@ -462,44 +464,66 @@ public class FanartActivity extends Activity {
             // FIXME refresh artwork shown
             mCurrentFanart = -1;
             mLastTrack = track;
-            if ((track.getTrackArtistMBID() == null || track.getTrackArtistMBID().isEmpty()) && downloadAllowed()) {
-                FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(track, new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        mLastTrack.setTrackArtistMBID(response);
-                        if (track == mLastTrack) {
-                            checkFanartAvailable();
-                        }
-                    }
-                }, new FanartFetchError() {
-                    @Override
-                    public void imageListFetchError() {
 
-                    }
 
-                    @Override
-                    public void fanartFetchError(MPDFile track) {
-
-                    }
-                });
-            } else {
-                checkFanartAvailable();
-            }
+            // Initiate the actual Fanart fetching
+            checkFanartAvailable();
         }
 
 
     }
 
+    /**
+     * Checks if the currently playing track already has a MBID or not. If not it tries to resolve
+     * one from the MusicBrainz database.
+     */
+    private void checkTracksMBID() {
+        // Check if this track has an MBID otherwise try to get one.
+        if ((mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) && downloadAllowed()) {
+            FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(mLastTrack, new Response.Listener<String>() {
+                @Override
+                public void onResponse(String response) {
+                    mLastTrack.setTrackArtistMBID(response);
+                    if (mLastTrack == mLastTrack) {
+                        checkFanartAvailable();
+                    }
+                }
+            }, new FanartFetchError() {
+                @Override
+                public void imageListFetchError() {
+                }
+
+                @Override
+                public void fanartFetchError(MPDFile track) {
+
+                }
+            });
+        }
+    }
+
+    /**
+     * Checks if fanart is already available for this artists MBIDs and shows the first image if.
+     * <p>
+     * After this it syncs fanart with the server (or downloads it if no fanart was available before).
+     */
     private void checkFanartAvailable() {
-        if (mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID()) == 0) {
-            syncFanart(mLastTrack);
-        } else {
+        // Make sure the track contain an MBID
+        checkTracksMBID();
+        if (mFanartCache.getFanartCount(mLastTrack.getTrackArtistMBID()) != 0) {
             mNextFanart = 0;
             updateFanartViews();
-            syncFanart(mLastTrack);
         }
+
+        // Sync/download fanart here.
+        syncFanart(mLastTrack);
     }
 
+    /**
+     * Checks if new fanart is available for the given artist. This ensures that the user
+     * gets new images from time to time if they have old images in cache.
+     *
+     * @param track Track to check for new fanart for.
+     */
     private void syncFanart(final MPDFile track) {
         // Get a list of fanart urls for the current artist
         if (!downloadAllowed()) {
@@ -508,11 +532,13 @@ public class FanartActivity extends Activity {
         FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), new Response.Listener<List<String>>() {
             @Override
             public void onResponse(List<String> response) {
-                // FIXME if already in cache
                 for (final String url : response) {
+                    // Check if the given image is in the cache already.
                     if (mFanartCache.inCache(track.getTrackArtistMBID(), String.valueOf(url.hashCode()))) {
                         continue;
                     }
+
+                    // If not try to download the image.
                     FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, new Response.Listener<FanartResponse>() {
                         @Override
                         public void onResponse(FanartResponse response) {
@@ -547,6 +573,9 @@ public class FanartActivity extends Activity {
         });
     }
 
+    /**
+     * Callback handler to react to changes in server status or a new playing track.
+     */
     private class ServerStatusListener extends MPDStatusChangeHandler {
 
         @Override
@@ -560,6 +589,9 @@ public class FanartActivity extends Activity {
         }
     }
 
+    /**
+     * Helper class to switch the views periodically. (Slideshow)
+     */
     private class ViewSwitchTask extends TimerTask {
 
         @Override
@@ -597,6 +629,9 @@ public class FanartActivity extends Activity {
     }
 
 
+    /**
+     * Shows the next image if available. Blank if not.
+     */
     private void updateFanartViews() {
         // Check if a track is available, cancel otherwise
         if (mLastTrack == null || mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) {
@@ -646,6 +681,9 @@ public class FanartActivity extends Activity {
         }
     }
 
+    /**
+     * Cancels the view switching task that alternates between images.
+     */
     private void cancelSwitching() {
         if (null != mSwitchTimer) {
             mSwitchTimer.cancel();
@@ -654,6 +692,10 @@ public class FanartActivity extends Activity {
         }
     }
 
+    /**
+     * Checks if downloading of images is allowed by the users policy.
+     * @return True if internet downloads are allowed. False otherwise.
+     */
     private boolean downloadAllowed() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         ConnectivityManager cm =
@@ -670,6 +712,9 @@ public class FanartActivity extends Activity {
         return (isWifi || !wifiOnly) && artistDownloadEnabled;
     }
 
+    /**
+     * Listener class for the volume seekbar.
+     */
     private class VolumeSeekBarListener implements SeekBar.OnSeekBarChangeListener {
         /**
          * Called if the user drags the seekbar to a new position or the seekbar is altered from
@@ -717,6 +762,9 @@ public class FanartActivity extends Activity {
         }
     }
 
+    /**
+     * Listener class for the position seekbar.
+     */
     private class PositionSeekbarListener implements SeekBar.OnSeekBarChangeListener {
         /**
          * Called if the user drags the seekbar to a new position or the seekbar is altered from
@@ -756,22 +804,28 @@ public class FanartActivity extends Activity {
         }
     }
 
+    /**
+     * Helper function to show the right volume control, requested by the user.
+     */
     private void setVolumeControlSetting() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String volumeControlView = sharedPref.getString(this.getString(R.string.pref_volume_controls_key), this.getString(R.string.pref_volume_control_view_default));
 
-        if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_off_key))) {
+        if (volumeControlView.equals(this.getString(R.string.pref_volume_control_view_off_key))) {
             mVolumeSeekbarLayout.setVisibility(View.GONE);
             mVolumeButtonLayout.setVisibility(View.GONE);
-        } else if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_seekbar_key))) {
+        } else if (volumeControlView.equals(this.getString(R.string.pref_volume_control_view_seekbar_key))) {
             mVolumeSeekbarLayout.setVisibility(View.VISIBLE);
             mVolumeButtonLayout.setVisibility(View.GONE);
-        } else if ( volumeControlView.equals(this.getString(R.string.pref_volume_control_view_buttons_key))) {
+        } else if (volumeControlView.equals(this.getString(R.string.pref_volume_control_view_buttons_key))) {
             mVolumeSeekbarLayout.setVisibility(View.GONE);
             mVolumeButtonLayout.setVisibility(View.VISIBLE);
         }
     }
 
+    /**
+     * Handles MPD server connects/disconnects.
+     */
     private class ServerConnectionHandler extends MPDConnectionStateChangeHandler {
         @Override
         public void onConnected() {
