@@ -48,6 +48,11 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
     private static final String TAG = LastFMManager.class.getSimpleName();
 
     private static final String LAST_FM_API_URL = "http://ws.audioscrobbler.com/2.0/?method=";
+
+    /**
+     * API-Key for used for last.fm
+     * THIS KEY IS ONLY INTENDED FOR THE USE BY GATESHIP-ONE APPLICATIONS. PLEASE RESPECT THIS.
+     */
     private static final String API_KEY = "8de46d96e49e78234f206fd9f21712de";
 
     private static final String LAST_FM_FORMAT_JSON = "&format=json";
