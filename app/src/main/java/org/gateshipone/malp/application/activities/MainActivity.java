@@ -721,6 +721,11 @@ public class MainActivity extends AppCompatActivity
         // Try connecting to the new profile
         ConnectionManager.setParameters(profile, this);
         ConnectionManager.reconnectLastServer(getApplicationContext());
+
+        // Notify the widget to also connect if possible
+        Intent connectIntent = new Intent(this, WidgetService.class);
+        connectIntent.setAction(WidgetService.ACTION_PROFILE_CHANGED);
+        startService(connectIntent);
     }
 
     @Override
