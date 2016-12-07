@@ -33,6 +33,7 @@ import android.view.View;
 import android.widget.RemoteViews;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -45,29 +46,45 @@ public class WidgetProvider extends AppWidgetProvider {
 
     private static String mPackageName;
 
+    /**
+     * Statically save the last track and status and image. This allows loading the cover image
+     * only if it really changed.
+     */
     private static MPDFile mLastTrack;
     private static MPDCurrentStatus mLastStatus;
     private static Bitmap mLastCover = null;
 
 
+    /**
+     * Intent IDs used for controlling action.
+     */
     private final static int INTENT_OPENGUI = 0;
     private final static int INTENT_PREVIOUS = 1;
     private final static int INTENT_PLAYPAUSE = 2;
     private final static int INTENT_STOP = 3;
     private final static int INTENT_NEXT = 4;
 
+    /**
+     * Update the widgets
+     * @param context Context for updateing
+     * @param appWidgetManager appWidgetManager to update the widgets
+     * @param appWidgetIds Widget IDs that need updating.
+     */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
 
         mPackageName = context.getPackageName();
-        // Perform this loop procedure for each App Widget that belongs to this
-        // provider
 
+        // Call the updateWidget method which will update all instances.
         updateWidget(context);
-
     }
 
+    /**
+     * Called when widgets are removed
+     * @param context context used for deletion
+     * @param appWidgetIds Widget ids that are being removed.
+     */
     public void onDeleted(Context context, int[] appWidgetIds) {
         super.onDeleted(context, appWidgetIds);
         mLastTrack = null;
@@ -78,7 +95,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * Updates the widget by creating a new RemoteViews object and setting all the intents for the
      * buttons and the TextViews correctly.
      *
-     * @param context
+     * @param context Context to use for updating the widgets contents
      */
     private void updateWidget(Context context) {
         boolean nowPlaying = false;
@@ -119,7 +136,7 @@ public class WidgetProvider extends AppWidgetProvider {
             mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             if (nowPlaying) {
                 // add intent only if playing is active
-                //mainIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, OdysseyMainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
+                mainIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
             }
             PendingIntent mainPendingIntent = PendingIntent.getActivity(context, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             mViews.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
