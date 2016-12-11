@@ -23,8 +23,10 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -132,7 +134,6 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
         setHasOptionsMenu(true);
 
-        mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_TRACK;
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -165,6 +166,26 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         if (null != mFABCallback) {
             mFABCallback.setupFAB(true, new FABOnClickListener());
             mFABCallback.setupToolbar(getResources().getString(R.string.action_search), false, true, false);
+        }
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String searchTypeSetting = sharedPref.getString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_default));
+
+        if (searchTypeSetting.equals(getString(R.string.pref_search_type_track_key))) {
+            mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_TRACK;
+            mSelectSpinner.setSelection(0);
+        } else if (searchTypeSetting.equals(getString(R.string.pref_search_type_album_key))) {
+            mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ALBUM;
+            mSelectSpinner.setSelection(1);
+        } else if (searchTypeSetting.equals(getString(R.string.pref_search_type_artist_key))) {
+            mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ARTIST;
+            mSelectSpinner.setSelection(2);
+        } else if (searchTypeSetting.equals(getString(R.string.pref_search_type_file_key))) {
+            mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_FILE;
+            mSelectSpinner.setSelection(3);
+        } else if (searchTypeSetting.equals(getString(R.string.pref_search_type_any_key))) {
+            mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ANY;
+            mSelectSpinner.setSelection(4);
         }
     }
 
@@ -325,24 +346,33 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
         @Override
         public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences.Editor prefEditor = sharedPref.edit();
             switch (position) {
                 case 0:
                     mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_TRACK;
+                    prefEditor.putString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_track_key));
                     break;
                 case 1:
                     mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ALBUM;
+                    prefEditor.putString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_album_key));
                     break;
                 case 2:
                     mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ARTIST;
+                    prefEditor.putString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_artist_key));
                     break;
                 case 3:
                     mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_FILE;
+                    prefEditor.putString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_file_key));
                     break;
                 case 4:
                     mSearchType = MPDCommands.MPD_SEARCH_TYPE.MPD_SEARCH_ANY;
+                    prefEditor.putString(getString(R.string.pref_search_type_key), getString(R.string.pref_search_type_any_key));
                     break;
             }
+
+            // Write settings values
+            prefEditor.apply();
 
             mSearchView.setActivated(true);
             mSearchView.requestFocus();

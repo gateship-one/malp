@@ -127,4 +127,14 @@
         <item>@string/pref_artwork_provider_lastfm_key</item>
         <item>@string/pref_artwork_provider_fanarttv_key</item>
     </string-array>
+
+    <!-- Search field values -->
+    <string name="pref_search_type_key" translatable="false">pref_search_type</string>
+    <string name="pref_search_type_default" translatable="false">@string/pref_search_type_track_key</string>
+
+    <string name="pref_search_type_track_key" translatable="false">search_track</string>
+    <string name="pref_search_type_album_key" translatable="false">search_album</string>
+    <string name="pref_search_type_artist_key" translatable="false">search_artist</string>
+    <string name="pref_search_type_file_key" translatable="false">search_file</string>
+    <string name="pref_search_type_any_key" translatable="false">search_any</string>
 </resources>
