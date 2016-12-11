@@ -29,6 +29,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -42,10 +43,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import java.lang.ref.WeakReference;
 
 public class WidgetProvider extends AppWidgetProvider {
-    private RemoteViews mViews;
-
-    private static String mPackageName;
-
+    private final static String TAG = WidgetProvider.class.getSimpleName();
     /**
      * Statically save the last track and status and image. This allows loading the cover image
      * only if it really changed.
@@ -73,8 +71,8 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+        Log.v(TAG,"onUpdate: " + context + ':' + appWidgetIds.toString());
 
-        mPackageName = context.getPackageName();
 
         // Call the updateWidget method which will update all instances.
         updateWidget(context);
@@ -83,13 +81,13 @@ public class WidgetProvider extends AppWidgetProvider {
     /**
      * Called when widgets are removed
      * @param context context used for deletion
-     * @param appWidgetIds Widget ids that are being removed.
      */
-    public void onDeleted(Context context, int[] appWidgetIds) {
-        super.onDeleted(context, appWidgetIds);
+    public void onDisabled(Context context) {
+        super.onDisabled(context);
         mLastTrack = null;
         mLastStatus = null;
     }
+
 
     /**
      * Updates the widget by creating a new RemoteViews object and setting all the intents for the
@@ -100,20 +98,19 @@ public class WidgetProvider extends AppWidgetProvider {
     private void updateWidget(Context context) {
         boolean nowPlaying = false;
 
-        // Create a new RemoteViews object containing the default widget layout
-        mViews = new RemoteViews(mPackageName, R.layout.widget_malp_big);
+        RemoteViews views = new RemoteViews(context.getPackageName(),R.layout.widget_malp_big);
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
 
-            mViews.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
-            mViews.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
+            views.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
+            views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
 
             if (mLastCover != null) {
                 // Use the saved image
-                mViews.setImageViewBitmap(R.id.widget_big_cover, mLastCover);
+                views.setImageViewBitmap(R.id.widget_big_cover, mLastCover);
             } else {
                 // Reuse the image from last calls if the album is the same
-                mViews.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
+                views.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
             }
 
 
@@ -123,10 +120,10 @@ public class WidgetProvider extends AppWidgetProvider {
             if (playState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 // Show pause icon
                 nowPlaying = true;
-                mViews.setImageViewResource(R.id.widget_big_play, R.drawable.ic_pause_48dp);
+                views.setImageViewResource(R.id.widget_big_play, R.drawable.ic_pause_48dp);
             } else {
                 // Show play icon
-                mViews.setImageViewResource(R.id.widget_big_play, R.drawable.ic_play_arrow_48dp);
+                views.setImageViewResource(R.id.widget_big_play, R.drawable.ic_play_arrow_48dp);
             }
 
 
@@ -139,54 +136,54 @@ public class WidgetProvider extends AppWidgetProvider {
                 mainIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
             }
             PendingIntent mainPendingIntent = PendingIntent.getActivity(context, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
 
             // Play/Pause action
             Intent playPauseIntent = new Intent(context, WidgetService.class);
             playPauseIntent.setAction(WidgetService.ACTION_PLAY);
             PendingIntent playPausePendingIntent = PendingIntent.getService(context, INTENT_PLAYPAUSE, playPauseIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_play, playPausePendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_big_play, playPausePendingIntent);
 
             // Stop action
             Intent stopIntent = new Intent(context, WidgetService.class);
             stopIntent.setAction(WidgetService.ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getService(context, INTENT_STOP, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_stop, stopPendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_big_stop, stopPendingIntent);
 
             // Previous song action
             Intent prevIntent = new Intent(context, WidgetService.class);
             prevIntent.setAction(WidgetService.ACTION_PREVIOUS);
             PendingIntent prevPendingIntent = PendingIntent.getService(context, INTENT_PREVIOUS, prevIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_previous, prevPendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_big_previous, prevPendingIntent);
 
             // Next song action
             Intent nextIntent = new Intent(context, WidgetService.class);
             nextIntent.setAction(WidgetService.ACTION_NEXT);
             PendingIntent nextPendingIntent = PendingIntent.getService(context, INTENT_NEXT, nextIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_next, nextPendingIntent);
-            mViews.setViewVisibility(R.id.widget_control_layout, View.VISIBLE);
-            mViews.setViewVisibility(R.id.widget_disconnected_layout, View.GONE);
+            views.setOnClickPendingIntent(R.id.widget_big_next, nextPendingIntent);
+            views.setViewVisibility(R.id.widget_control_layout, View.VISIBLE);
+            views.setViewVisibility(R.id.widget_disconnected_layout, View.GONE);
         } else {
             // connect action
             Intent connectIntent = new Intent(context, WidgetService.class);
             connectIntent.setAction(WidgetService.ACTION_CONNECT);
             PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
 
             // Main action
             Intent mainIntent = new Intent(context, SplashActivity.class);
             mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
             PendingIntent mainPendingIntent = PendingIntent.getActivity(context, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-            mViews.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
+            views.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
 
             // Set application icon outline as a image again
-            mViews.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
+            views.setImageViewResource(R.id.widget_big_cover, R.drawable.icon_outline_256dp);
 
-            mViews.setViewVisibility(R.id.widget_control_layout, View.GONE);
-            mViews.setViewVisibility(R.id.widget_disconnected_layout, View.VISIBLE);
+            views.setViewVisibility(R.id.widget_control_layout, View.GONE);
+            views.setViewVisibility(R.id.widget_disconnected_layout, View.VISIBLE);
         }
 
-        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context,WidgetProvider.class), mViews);
+        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context,WidgetProvider.class), views);
     }
 
     /**
@@ -198,6 +195,7 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
+        Log.v(TAG,"Received broadcast:" + intent.getAction());
 
         // Type checks
         if (intent.getAction().equals(WidgetService.ACTION_STATUS_CHANGED)) {
@@ -236,6 +234,7 @@ public class WidgetProvider extends AppWidgetProvider {
         } else if (intent.getAction().equals(WidgetService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
+            Log.v(TAG,"Disconnected");
         }
         // Refresh the widget with the new information
         updateWidget(context);

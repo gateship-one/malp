@@ -161,15 +161,15 @@ public class WidgetService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         unregisterReceiver(mBroadcastReceiver);
-
-        // Notify the widgets that the service is disconected now
-        notifyDisconnected();
 
         /* Unregister MPD service handlers */
         MPDCommandHandler.unregisterConnectionStateListener(mServerConnectionStateListener);
         MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusListener);
+        notifyDisconnected();
+
+        Log.v(TAG,"Widget service destroyed");
+        super.onDestroy();
     }
 
 
@@ -183,7 +183,26 @@ public class WidgetService extends Service {
         if ( null != action ) {
             handleAction(action);
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
+    }
+
+    @Override
+    public void onLowMemory () {
+        Log.v(TAG,"Widgetservice low on memory, stopping");
+        stopSelf();
+    }
+
+    public void onTaskRemoved(Intent rootIntent) {
+        Log.v(TAG,"On task removed");
+
+        // Disconnect from server gracefully
+        onMPDDisconnect();
+
+        // Notify the widgets that the service is disconnected now
+        notifyDisconnected();
+
+        //stop service
+        stopSelf();
     }
 
     private void onPlay() {
@@ -218,6 +237,7 @@ public class WidgetService extends Service {
     }
 
     private void onMPDDisconnect() {
+        MPDCommandHandler.disconnectFromMPDServer();
         ConnectionManager.disconnectFromServer();
     }
 
@@ -236,11 +256,10 @@ public class WidgetService extends Service {
      */
     private void notifyDisconnected() {
         Log.v(TAG,"Disconnected from server");
-        Intent intent = new Intent();
+        Intent intent = new Intent(getApplicationContext(), WidgetProvider.class);
         intent.setAction(ACTION_SERVER_DISCONNECTED);
         sendBroadcast(intent);
-
-        stopSelf();
+        Log.v(TAG,"Disconnected from server!");
     }
 
     /**
@@ -248,7 +267,7 @@ public class WidgetService extends Service {
      * @param track Track to broadcast
      */
     private void notifyNewTrack(MPDFile track) {
-        Intent intent = new Intent();
+        Intent intent = new Intent(getApplicationContext(), WidgetProvider.class);
         intent.setAction(ACTION_TRACK_CHANGED);
         intent.putExtra(INTENT_EXTRA_TRACK, track);
         sendBroadcast(intent);
@@ -259,7 +278,7 @@ public class WidgetService extends Service {
      * @param status Status to broadcast
      */
     private void notifyNewStatus(MPDCurrentStatus status) {
-        Intent intent = new Intent();
+        Intent intent = new Intent(getApplicationContext(), WidgetProvider.class);
         intent.setAction(ACTION_STATUS_CHANGED);
         intent.putExtra(INTENT_EXTRA_STATUS, status);
         sendBroadcast(intent);
