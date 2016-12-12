@@ -936,18 +936,12 @@ public class MainActivity extends AppCompatActivity
     private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
         @Override
         public void onConnected() {
-            Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_connected), Snackbar.LENGTH_SHORT);
-            TextView sbText = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
-            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this, R.attr.malp_color_text_accent));
-            sb.show();
+
         }
 
         @Override
         public void onDisconnected() {
-            Snackbar sb = Snackbar.make(findViewById(R.id.drawer_layout), getResources().getString(R.string.main_activity_disconnected), Snackbar.LENGTH_SHORT);
-            TextView sbText = (TextView) sb.getView().findViewById(android.support.design.R.id.snackbar_text);
-            sbText.setTextColor(ThemeUtils.getThemeColor(MainActivity.this, R.attr.malp_color_text_accent));
-            sb.show();
+
         }
     }
 

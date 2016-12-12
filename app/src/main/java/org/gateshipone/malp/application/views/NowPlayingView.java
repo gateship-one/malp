@@ -1298,6 +1298,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         @Override
         public void onDisconnected() {
             updateMPDStatus(new MPDCurrentStatus());
+            updateMPDCurrentTrack(new MPDFile(""));
         }
     }
 
