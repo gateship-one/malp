@@ -103,6 +103,15 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
      */
     private int pAlbumDiscCount;
 
+    /**
+     * Available for tracks in the current playlist
+     */
+    private int pSongPosition;
+
+    /**
+     * Available for tracks in the current playlist
+     */
+    private int pSongID;
 
     /**
      * Create empty MPDFile (track). Fill it with setter methods during
@@ -156,6 +165,9 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         pAlbumTrackCount = in.readInt();
         pDiscNumber = in.readInt();
         pAlbumDiscCount = in.readInt();
+
+        pSongPosition = in.readInt();
+        pSongID = in.readInt();
     }
 
     public String getTrackTitle() {
@@ -271,6 +283,22 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         pAlbumDiscCount = discCount;
     }
 
+    public int getSongPosition() {
+        return pSongPosition;
+    }
+
+    public void setSongPosition(int position) {
+        pSongPosition = position;
+    }
+
+    public int getSongID() {
+        return pSongID;
+    }
+
+    public void setSongID(int id) {
+        pSongID = id;
+    }
+
     /**
      * @return String that is used for section based scrolling
      */
@@ -343,6 +371,8 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         dest.writeInt(pAlbumTrackCount);
         dest.writeInt(pDiscNumber);
         dest.writeInt(pAlbumDiscCount);
+        dest.writeInt(pSongPosition);
+        dest.writeInt(pSongID);
     }
 
     public int indexCompare(MPDFile compFile) {

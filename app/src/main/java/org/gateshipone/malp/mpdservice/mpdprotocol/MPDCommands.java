@@ -241,4 +241,14 @@ public class MPDCommands {
     public static final String MPD_COMMAND_GET_COMMANDS = "commands";
 
     public static final String MPD_COMMAND_GET_TAGS = "tagtypes";
+
+    /**
+     * Searches the song of an given URL in the current playlist. MPD will respond by
+     * returning a track object if found or nothing else.
+     * @param url URL to search for.
+     * @return command string for MPD
+     */
+    public static String MPD_COMMAND_PLAYLIST_FIND_URI(String url) {
+        return "playlistfind file \"" + url + "\"";
+    }
 }

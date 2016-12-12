@@ -41,6 +41,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
@@ -352,9 +353,22 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
             String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
-            mMPDConnection.addSong(url);
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-            mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
+            /**
+             * Check if song is already enqueud in the current playlist. If it is get the position
+             * and just jump to the song position.
+             *
+             * Otherwise add it to the last playlist position and jump there.
+             */
+            List<MPDFileEntry> playlistFindTracks = mMPDConnection.getPlaylistFindTrack(url);
+            if ( playlistFindTracks.size() > 0 ) {
+                // Song already found in the playlist. Jump there.
+                mMPDConnection.playSongIndex(((MPDFile)playlistFindTracks.get(0)).getSongPosition());
+            } else {
+                // Not part of the current playlist. Add it at the end of the playlist and play it from there.
+                mMPDConnection.addSong(url);
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
+            }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
             mMPDConnection.clearPlaylist();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT) {

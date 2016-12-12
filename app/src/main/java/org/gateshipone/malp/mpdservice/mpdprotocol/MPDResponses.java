@@ -40,6 +40,9 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_ARTIST_MBID = "MUSICBRAINZ_ARTISTID: ";
     public static final String MPD_RESPONSE_TRACK_NUMBER = "Track: ";
     public static final String MPD_RESPONSE_DISC_NUMBER = "Disc: ";
+    public static final String MPD_RESPONSE_SONG_POS = "Pos: ";
+    public static final String MPD_RESPONSE_SONG_ID = "Id: ";
+
 
     public static final String MPD_RESPONSE_PLAYLIST = "playlist: ";
     public static final String MPD_RESPONSE_LAST_MODIFIED = "Last-Modified: ";

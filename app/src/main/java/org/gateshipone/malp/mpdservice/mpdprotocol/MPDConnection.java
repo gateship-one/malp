@@ -922,6 +922,10 @@ public class MPDConnection {
                 ((MPDFile) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME)) {
                 ((MPDFile) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_ID)) {
+                ((MPDFile) tempFileEntry).setSongID(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_ID.length())));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_POS)) {
+                ((MPDFile) tempFileEntry).setSongPosition(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_POS.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DISC_NUMBER)) {
                 /*
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
@@ -1283,6 +1287,22 @@ public class MPDConnection {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
         try {
         /* Parse the return */
+            return parseMPDTracks("", "");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Searches a URL in the current playlist. If available the track is part of the returned list.
+     * @param url URL to search in the current playlist.
+     * @return List with one entry or none.
+     */
+    public synchronized List<MPDFileEntry> getPlaylistFindTrack(String url) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_PLAYLIST_FIND_URI(url));
+        try {
+            /* Parse the return */
             return parseMPDTracks("", "");
         } catch (IOException e) {
             e.printStackTrace();
