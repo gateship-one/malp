@@ -96,6 +96,21 @@ public class WidgetService extends Service {
     public static final String INTENT_EXTRA_TRACK = "org.gateshipone.malp.widget.extra.track";
 
     /**
+     * Shows the notification
+     */
+    public static final String ACTION_SHOW_NOTIFICATION = "org.gateshipone.malp.notification.show";
+
+    /**
+     * Hides the notification if it is currently visible
+     */
+    public static final String ACTION_HIDE_NOTIFICATION = "org.gateshipone.malp.notification.hide";
+
+    /**
+     * Notifies the service that the user has dismissed the notification
+     */
+    public static final String ACTION_QUIT_NOTIFICATION = "org.gateshipone.malp.notification.quit";
+
+    /**
      * Extra attached to an {@link Intent} containing the current MPD server status
      */
     public static final String INTENT_EXTRA_STATUS = "org.gateshipone.malp.widget.extra.status";
@@ -110,6 +125,11 @@ public class WidgetService extends Service {
 
     private MPDCurrentStatus mLastStatus;
     private MPDFile mLastTrack;
+
+    /**
+     * Manager helper class to handle the notification.
+     */
+    private NotificationManager mNotificationManager;
 
     /**
      * No bindable service.
@@ -140,6 +160,9 @@ public class WidgetService extends Service {
         filter.addAction(ACTION_CONNECT);
         filter.addAction(ACTION_DISCONNECT);
         filter.addAction(ACTION_PROFILE_CHANGED);
+        filter.addAction(ACTION_SHOW_NOTIFICATION);
+        filter.addAction(ACTION_HIDE_NOTIFICATION);
+        filter.addAction(ACTION_QUIT_NOTIFICATION);
 
         // Register the receiver with the system
         registerReceiver(mBroadcastReceiver, filter);
@@ -152,6 +175,8 @@ public class WidgetService extends Service {
         MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
         MPDStateMonitoringHandler.setRefreshInterval(60 * 1000);
         MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
+
+        mNotificationManager = new NotificationManager(this);
 
         // Initialize an ProfileManager to get the default profile.
         mProfileManager = new MPDProfileManager(this);
@@ -260,6 +285,9 @@ public class WidgetService extends Service {
         intent.setAction(ACTION_SERVER_DISCONNECTED);
         sendBroadcast(intent);
         Log.v(TAG,"Disconnected from server!");
+
+        // Dismiss the notification on disconnects
+        mNotificationManager.hideNotification();
     }
 
     /**
@@ -326,6 +354,12 @@ public class WidgetService extends Service {
             onMPDDisconnect();
         } else if (action.equals(ACTION_PROFILE_CHANGED)) {
             onProfileChanged();
+        } else if (action.equals(ACTION_SHOW_NOTIFICATION)) {
+            mNotificationManager.showNotification();
+        } else if (action.equals(ACTION_HIDE_NOTIFICATION)) {
+            mNotificationManager.hideNotification();
+        } else if (action.equals(ACTION_QUIT_NOTIFICATION)) {
+            mNotificationManager.hideNotification();
         }
     }
 
@@ -362,6 +396,7 @@ public class WidgetService extends Service {
         @Override
         public void onDisconnected() {
             mService.get().notifyDisconnected();
+            mService.get().mNotificationManager.hideNotification();
         }
     }
 
@@ -376,12 +411,14 @@ public class WidgetService extends Service {
         protected void onNewStatusReady(MPDCurrentStatus status) {
             mService.get().mLastStatus = status;
             mService.get().notifyNewStatus(status);
+            mService.get().mNotificationManager.setMPDStatus(status);
         }
 
         @Override
         protected void onNewTrackReady(MPDFile track) {
             mService.get().notifyNewTrack(track);
             mService.get().mLastTrack = track;
+            mService.get().mNotificationManager.setMPDFile(track);
         }
     }
 }

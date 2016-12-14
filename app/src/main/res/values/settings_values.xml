@@ -137,4 +137,8 @@
     <string name="pref_search_type_artist_key" translatable="false">search_artist</string>
     <string name="pref_search_type_file_key" translatable="false">search_file</string>
     <string name="pref_search_type_any_key" translatable="false">search_any</string>
+
+    <!-- Notification setting -->
+    <string name="pref_show_notification_key" translatable="false">pref_show_notification</string>
+    <bool name="pref_show_notification_default">false</bool>
 </resources>

@@ -195,4 +195,6 @@
     <string name="preference_use_album_artists_title">AlbumArtist-Tag verwenden</string>
     <string name="widget_connect">Verbinden</string>
     <string name="widget_disconnected">Nicht verbunden</string>
+    <string name="preference_show_notification_title">Zeige Benachrichtigung</string>
+    <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird.</string>
 </resources>

@@ -62,6 +62,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
+import org.gateshipone.malp.application.widget.WidgetProvider;
 import org.gateshipone.malp.application.widget.WidgetService;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity
         // Read theme preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
-        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key),getResources().getBoolean(R.bool.pref_theme_dark_default));
+        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key), getResources().getBoolean(R.bool.pref_theme_dark_default));
         if (darkTheme) {
             if (themePref.equals(getString(R.string.pref_indigo_key))) {
                 setTheme(R.style.AppTheme_indigo);
@@ -228,13 +229,13 @@ public class MainActivity extends AppCompatActivity
         // the nav ressource id to mark the right item in the nav drawer
         int navId = R.id.nav_library;
 
-        if ( defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
+        if (defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
             defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
-        } else if ( defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
+        } else if (defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
             defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
-        } else if ( defaultView.equals(getString(R.string.pref_view_playlists_key))) {
+        } else if (defaultView.equals(getString(R.string.pref_view_playlists_key))) {
             navId = R.id.nav_saved_playlists;
-        } else if ( defaultView.equals(getString(R.string.pref_view_files_key))) {
+        } else if (defaultView.equals(getString(R.string.pref_view_files_key))) {
             navId = R.id.nav_files;
         }
 
@@ -518,6 +519,13 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+
+        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
+        if (showNotification) {
+            Intent showNotificationIntent = new Intent(this, WidgetService.class);
+            showNotificationIntent.setAction(WidgetService.ACTION_QUIT_NOTIFICATION);
+            startService(showNotificationIntent);
+        }
     }
 
     @Override
@@ -544,6 +552,13 @@ public class MainActivity extends AppCompatActivity
         Intent connectIntent = new Intent(this, WidgetService.class);
         connectIntent.setAction(WidgetService.ACTION_CONNECT);
         startService(connectIntent);
+
+        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
+        if (showNotification) {
+            Intent showNotificationIntent = new Intent(this, WidgetService.class);
+            showNotificationIntent.setAction(WidgetService.ACTION_SHOW_NOTIFICATION);
+            startService(showNotificationIntent);
+        }
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -668,8 +683,7 @@ public class MainActivity extends AppCompatActivity
         if (mHardwareControls) {
             if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
                 return super.dispatchKeyEvent(event);
-            }
-            else return true;
+            } else return true;
         } else {
             return super.dispatchKeyEvent(event);
         }

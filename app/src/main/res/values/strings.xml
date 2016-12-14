@@ -256,6 +256,9 @@
     <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
     <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>
 
+    <string name="preference_show_notification_title">Show notification</string>
+    <string name="preference_show_notification_text">Show a notification when leaving the main user interface.</string>
+
     <!-- artwork preferences -->
     <string name="preference_artwork_album_provider_title">Album image provider</string>
     <string name="preference_artwork_album_provider_summary">Select an provider for album cover images.</string>
