@@ -38,6 +38,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.requests.AlbumIm
 import org.gateshipone.malp.application.artworkdatabase.network.requests.MALPJsonObjectRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.json.JSONArray;
@@ -76,11 +77,6 @@ public class MusicBrainzManager implements AlbumImageProvider {
         return mInstance;
     }
 
-
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        mRequestQueue.add(req);
-    }
 
     /**
      * Fetch an image for an given {@link MPDArtist}. Make sure to provide response and error listener.
@@ -160,7 +156,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     /**
@@ -177,7 +173,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     /**
@@ -237,6 +233,14 @@ public class MusicBrainzManager implements AlbumImageProvider {
         });
     }
 
+    /**
+     * Parses the JSON response and searches the image URL
+     * @param album Album to check for an image
+     * @param releaseIndex Index of the requested release to check for an image
+     * @param response Response to check use to search for an image
+     * @param listener Callback to handle the response
+     * @param errorListener Callback to handle errors
+     */
     private void parseMusicBrainzReleaseJSON(final MPDAlbum album, final int releaseIndex, final JSONObject response, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
         if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT ) {
             errorListener.fetchVolleyError(album, null);
@@ -277,9 +281,9 @@ public class MusicBrainzManager implements AlbumImageProvider {
      */
     private void getAlbumMBID(MPDAlbum album, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String albumName = Uri.encode(album.getName());
-        albumName = albumName.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX, "\\$1");
+        albumName = FormatHelper.escapeSpecialCharsLucene(albumName);
         String artistName = Uri.encode(album.getArtistName());
-        artistName = artistName.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX, "\\$1");
+        artistName = FormatHelper.escapeSpecialCharsLucene(artistName);
         String url;
         if (!artistName.isEmpty()) {
             url = MUSICBRAINZ_API_URL + "/" + "release/?query=release:" + albumName + "%20AND%20artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
@@ -291,7 +295,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     /**
@@ -304,7 +308,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
     private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
         Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
         Log.v(TAG,"Get image: " + url + " for album: " + album.getName());
-        addToRequestQueue(byteResponse);
+        mRequestQueue.add(byteResponse);
     }
 
 

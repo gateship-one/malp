@@ -47,6 +47,9 @@ import org.json.JSONObject;
 public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
     private static final String TAG = LastFMManager.class.getSimpleName();
 
+    /**
+     * Last.fm API url used for requests
+     */
     private static final String LAST_FM_API_URL = "http://ws.audioscrobbler.com/2.0/?method=";
 
     /**

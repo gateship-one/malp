@@ -36,6 +36,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.requests.FanartI
 import org.gateshipone.malp.application.artworkdatabase.network.requests.MALPJsonObjectRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.json.JSONArray;
@@ -242,7 +243,8 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             return;
         }
 
-        String url = MUSICBRAINZ_API_URL + "/" + "artist/?query=artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
+        String queryArtist = FormatHelper.escapeSpecialCharsLucene(artistName);
+        String url = MUSICBRAINZ_API_URL + "/" + "artist/?query=artist:" + queryArtist + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
         mRequestQueue.add(jsonObjectRequest);
