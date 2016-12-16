@@ -55,13 +55,24 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
      */
     private static final String API_KEY = "8de46d96e49e78234f206fd9f21712de";
 
+    /**
+     * Constant to request JSON formatted responses
+     */
     private static final String LAST_FM_FORMAT_JSON = "&format=json";
 
+    /**
+     * Default image download size. Should be around 500px * 500px
+     */
     private static final String LAST_FM_REQUESTED_IMAGE_SIZE = "extralarge";
 
+    /**
+     * Private {@link RequestQueue} to use for internet requests.
+     */
     private RequestQueue mRequestQueue;
 
-
+    /**
+     * Singleton instance
+     */
     private static LastFMManager mInstance;
 
     private LastFMManager(Context context) {
@@ -76,11 +87,12 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
     }
 
 
-
-    public <T> void addToRequestQueue(Request<T> req) {
-        mRequestQueue.add(req);
-    }
-
+    /**
+     * Fetch an image for an given {@link MPDArtist}. Make sure to provide response and error listener.
+     * @param artist Artist to try to get an image for.
+     * @param listener ResponseListener that reacts on successful retrieval of an image.
+     * @param errorListener Error listener that is called when an error occurs.
+     */
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
 
 
@@ -123,6 +135,12 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
     }
 
 
+    /**
+     * Fetches the image URL for the raw image blob.
+     * @param artistName Artist name to look for an image
+     * @param listener Callback listener to handle the response
+     * @param errorListener Callback to handle a fetch error
+     */
     private void getArtistImageURL(String artistName, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 
 
@@ -131,18 +149,31 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
+    /**
+     * Raw download for an image
+     * @param url Final image URL to download
+     * @param artist Artist associated with the image to download
+     * @param listener Response listener to receive the image as a byte array
+     * @param errorListener Error listener
+     */
     private void getArtistImage(String url, MPDArtist artist, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(LastFMManager.class.getSimpleName(), url);
 
         Request<ArtistImageResponse> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
 
-        addToRequestQueue(byteResponse);
+        mRequestQueue.add(byteResponse);
     }
 
 
+    /**
+     * Public interface to get an image for an album.
+     * @param album Album to check for an image
+     * @param listener Callback to handle the fetched image
+     * @param errorListener Callback to handle errors
+     */
     @Override
     public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
         getAlbumImageURL(album, new Response.Listener<JSONObject>() {
@@ -181,6 +212,12 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
         });
     }
 
+    /**
+     * Fetches the image URL for the raw image blob.
+     * @param album Album to look for an image
+     * @param listener Callback listener to handle the response
+     * @param errorListener Callback to handle a fetch error
+     */
     private void getAlbumImageURL(MPDAlbum album, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String albumName = Uri.encode(album.getName());
         String artistName = Uri.encode(album.getArtistName());
@@ -190,14 +227,22 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
+
+    /**
+     * Raw download for an image
+     * @param url Final image URL to download
+     * @param album Album associated with the image to download
+     * @param listener Response listener to receive the image as a byte array
+     * @param errorListener Error listener
+     */
     private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(LastFMManager.class.getSimpleName(), url);
 
         Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
 
-        addToRequestQueue(byteResponse);
+        mRequestQueue.add(byteResponse);
     }
 }

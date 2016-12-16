@@ -24,9 +24,7 @@ package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
-import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -46,7 +44,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvider {
+/**
+ * FIXME:
+ * ArtistImageProvider currently NOT IMPLEMENTED!!!
+ */
+public class MusicBrainzManager implements AlbumImageProvider {
     private static final String TAG = MusicBrainzManager.class.getSimpleName();
 
     private static final String LUCENE_SPECIAL_CHARACTERS_REGEX = "([+\\-\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\?\\:\\\\\\/])";
@@ -80,6 +82,12 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         mRequestQueue.add(req);
     }
 
+    /**
+     * Fetch an image for an given {@link MPDArtist}. Make sure to provide response and error listener.
+     * @param artist Artist to try to get an image for.
+     * @param listener ResponseListener that reacts on successful retrieval of an image.
+     * @param errorListener Error listener that is called when an error occurs.
+     */
     public void fetchArtistImage(final MPDArtist artist, final Response.Listener<ArtistImageResponse> listener, final ArtistFetchError errorListener) {
 
         String artistURLName = Uri.encode(artist.getArtistName());
@@ -138,6 +146,12 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         });
     }
 
+    /**
+     * Searches for the artist with the given artist name and tries to manually get an MBID
+     * @param artistName Artist name to search for
+     * @param listener Callback to handle the response
+     * @param errorListener Callback to handle errors
+     */
     private void getArtists(String artistName, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 
         Log.v(MusicBrainzManager.class.getSimpleName(), artistName);
@@ -149,6 +163,12 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
+    /**
+     * Fetches the image URL for the raw image blob.
+     * @param artistMBID Artist mbid to look for an image
+     * @param listener Callback listener to handle the response
+     * @param errorListener Callback to handle a fetch error
+     */
     private void getArtistImageURL(String artistMBID, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
 
         Log.v(MusicBrainzManager.class.getSimpleName(), artistMBID);
@@ -160,6 +180,12 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
+    /**
+     * Raw download for an image
+     * @param url Final image URL to download
+     * @param listener Response listener to receive the image as a byte array
+     * @param errorListener Error listener
+     */
     private void getArtistImage(String url, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Log.v(MusicBrainzManager.class.getSimpleName(), url);
 
@@ -168,18 +194,22 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
 //        addToRequestQueue(byteResponse);
     }
 
+    /**
+     * Public interface to get an image for an album.
+     * @param album Album to check for an image
+     * @param listener Callback to handle the fetched image
+     * @param errorListener Callback to handle errors
+     */
     @Override
     public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
 
         if ( album.getMBID().isEmpty()) {
             resolveAlbumMBID(album, listener, errorListener);
         } else {
-            Log.v(TAG,"Directly using MPDs MBID");
             String url = COVERART_ARCHIVE_API_URL + "/" + "release/" + album.getMBID() + "/front-500";
             getAlbumImage(url, album, listener, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.v(TAG,"No image found for: " + album.getName() + " with direct MBID use");
                     // Try without MBID from MPD
                     resolveAlbumMBID(album, listener, errorListener);
                 }
@@ -187,8 +217,13 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         }
     }
 
+    /**
+     * Wrapper to manually get an MBID for an {@link MPDAlbum} without an MBID already set
+     * @param album Album to search
+     * @param listener Callback listener to handle the response
+     * @param errorListener Callback to handle lookup errors
+     */
     private void resolveAlbumMBID( final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener ) {
-        Log.v(TAG,"Manually resolving MBID");
         getAlbumMBID(album, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -203,9 +238,7 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
     }
 
     private void parseMusicBrainzReleaseJSON(final MPDAlbum album, final int releaseIndex, final JSONObject response, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
-        Log.v(TAG,"Try release index:" + releaseIndex + " for album: " + album.getName());
         if (releaseIndex >= MUSICBRAINZ_LIMIT_RESULT_COUNT ) {
-            Log.e(TAG,"No more releases found for album: " + album.getName());
             errorListener.fetchVolleyError(album, null);
             return;
         }
@@ -220,12 +253,9 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
                 getAlbumImage(url, album, listener, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        Log.v(TAG,"No image found for: " + album.getName() + " with release index: " + releaseIndex);
                         if ( releaseIndex + 1 < releases.length()) {
-                            Log.v(TAG,"Try next release for album: " + album.getName());
                             parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
                         } else {
-                            Log.v(TAG,"All releases exhausted for album: " + album.getName());
                             errorListener.fetchVolleyError(album, error);
                         }
                     }
@@ -239,7 +269,12 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
 
     }
 
-
+    /**
+     * Wrapper to get an MBID out of an {@link MPDAlbum}.
+     * @param album Album to get the MBID for
+     * @param listener Response listener
+     * @param errorListener Error listener
+     */
     private void getAlbumMBID(MPDAlbum album, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String albumName = Uri.encode(album.getName());
         albumName = albumName.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX, "\\$1");
@@ -259,6 +294,13 @@ public class MusicBrainzManager implements ArtistImageProvider, AlbumImageProvid
         addToRequestQueue(jsonObjectRequest);
     }
 
+    /**
+     * Raw download for an image
+     * @param url Final image URL to download
+     * @param album Album associated with the image to download
+     * @param listener Response listener to receive the image as a byte array
+     * @param errorListener Error listener
+     */
     private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
         Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
         Log.v(TAG,"Get image: " + url + " for album: " + album.getName());

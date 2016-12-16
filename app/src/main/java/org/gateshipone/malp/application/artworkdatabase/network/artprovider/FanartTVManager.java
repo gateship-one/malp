@@ -109,11 +109,6 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         return mInstance;
     }
 
-
-    private <T> void addToRequestQueue(Request<T> req) {
-        mRequestQueue.add(req);
-    }
-
     /**
      * Fetch an image for an given {@link MPDArtist}. Make sure to provide response and error listener.
      * @param artist Artist to try to get an image for.
@@ -250,7 +245,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         String url = MUSICBRAINZ_API_URL + "/" + "artist/?query=artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     /**
@@ -265,7 +260,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
 
         MALPJsonObjectRequest jsonObjectRequest = new MALPJsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
 
-        addToRequestQueue(jsonObjectRequest);
+        mRequestQueue.add(jsonObjectRequest);
     }
 
     /**
@@ -278,7 +273,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     private void getArtistImage(String url, MPDArtist artist, Response.Listener<ArtistImageResponse> listener, Response.ErrorListener errorListener) {
         Request<ArtistImageResponse> byteResponse = new ArtistImageByteRequest(url, artist, listener, errorListener);
 
-        addToRequestQueue(byteResponse);
+        mRequestQueue.add(byteResponse);
     }
 
     /**
@@ -374,7 +369,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     public void getFanartImage(MPDFile track, String url, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
         Request<FanartResponse> byteResponse = new FanartImageRequest(url, track, listener, errorListener);
 
-        addToRequestQueue(byteResponse);
+        mRequestQueue.add(byteResponse);
     }
 
 
