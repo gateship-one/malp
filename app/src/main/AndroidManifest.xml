@@ -72,11 +72,11 @@
             android:process=":downloadProcess" />
 
         <service
-            android:name=".application.widget.WidgetService"
+            android:name=".application.background.BackgroundService"
             android:exported="false"
             android:stopWithTask="false"
             android:process=":widgetService" />
-        <receiver android:name=".application.widget.WidgetProvider">
+        <receiver android:name=".application.background.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="org.gateshipone.malp.widget.status_changed" />

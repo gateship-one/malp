@@ -31,13 +31,10 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.OnApplyWindowInsetsListener;
 import android.support.v4.view.ViewCompat;
-import android.support.v4.view.WindowInsetsCompat;
 import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
 import android.util.Log;
@@ -55,15 +52,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
-import org.gateshipone.malp.application.widget.WidgetProvider;
-import org.gateshipone.malp.application.widget.WidgetService;
+import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
@@ -86,7 +81,6 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
-import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -522,8 +516,8 @@ public class MainActivity extends AppCompatActivity
 
         boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
         if (showNotification) {
-            Intent showNotificationIntent = new Intent(this, WidgetService.class);
-            showNotificationIntent.setAction(WidgetService.ACTION_QUIT_NOTIFICATION);
+            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
+            showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_NOTIFICATION);
             startService(showNotificationIntent);
         }
     }
@@ -549,14 +543,14 @@ public class MainActivity extends AppCompatActivity
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
         // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, WidgetService.class);
-        connectIntent.setAction(WidgetService.ACTION_CONNECT);
+        Intent connectIntent = new Intent(this, BackgroundService.class);
+        connectIntent.setAction(BackgroundService.ACTION_CONNECT);
         startService(connectIntent);
 
         boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
         if (showNotification && MPDStateMonitoringHandler.getLastStatus().getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-            Intent showNotificationIntent = new Intent(this, WidgetService.class);
-            showNotificationIntent.setAction(WidgetService.ACTION_SHOW_NOTIFICATION);
+            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
+            showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
             startService(showNotificationIntent);
         }
     }
@@ -723,8 +717,8 @@ public class MainActivity extends AppCompatActivity
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
         // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, WidgetService.class);
-        connectIntent.setAction(WidgetService.ACTION_PROFILE_CHANGED);
+        Intent connectIntent = new Intent(this, BackgroundService.class);
+        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
         startService(connectIntent);
     }
 
@@ -737,8 +731,8 @@ public class MainActivity extends AppCompatActivity
         ConnectionManager.reconnectLastServer(getApplicationContext());
 
         // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, WidgetService.class);
-        connectIntent.setAction(WidgetService.ACTION_PROFILE_CHANGED);
+        Intent connectIntent = new Intent(this, BackgroundService.class);
+        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
         startService(connectIntent);
     }
 

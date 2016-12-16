@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application.widget;
+package org.gateshipone.malp.application.background;
 
 
 import android.app.PendingIntent;
@@ -139,34 +139,34 @@ public class WidgetProvider extends AppWidgetProvider {
             views.setOnClickPendingIntent(R.id.widget_big_cover, mainPendingIntent);
 
             // Play/Pause action
-            Intent playPauseIntent = new Intent(context, WidgetService.class);
-            playPauseIntent.setAction(WidgetService.ACTION_PLAY);
+            Intent playPauseIntent = new Intent(context, BackgroundService.class);
+            playPauseIntent.setAction(BackgroundService.ACTION_PLAY);
             PendingIntent playPausePendingIntent = PendingIntent.getService(context, INTENT_PLAYPAUSE, playPauseIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_big_play, playPausePendingIntent);
 
             // Stop action
-            Intent stopIntent = new Intent(context, WidgetService.class);
-            stopIntent.setAction(WidgetService.ACTION_STOP);
+            Intent stopIntent = new Intent(context, BackgroundService.class);
+            stopIntent.setAction(BackgroundService.ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getService(context, INTENT_STOP, stopIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_big_stop, stopPendingIntent);
 
             // Previous song action
-            Intent prevIntent = new Intent(context, WidgetService.class);
-            prevIntent.setAction(WidgetService.ACTION_PREVIOUS);
+            Intent prevIntent = new Intent(context, BackgroundService.class);
+            prevIntent.setAction(BackgroundService.ACTION_PREVIOUS);
             PendingIntent prevPendingIntent = PendingIntent.getService(context, INTENT_PREVIOUS, prevIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_big_previous, prevPendingIntent);
 
             // Next song action
-            Intent nextIntent = new Intent(context, WidgetService.class);
-            nextIntent.setAction(WidgetService.ACTION_NEXT);
+            Intent nextIntent = new Intent(context, BackgroundService.class);
+            nextIntent.setAction(BackgroundService.ACTION_NEXT);
             PendingIntent nextPendingIntent = PendingIntent.getService(context, INTENT_NEXT, nextIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_big_next, nextPendingIntent);
             views.setViewVisibility(R.id.widget_control_layout, View.VISIBLE);
             views.setViewVisibility(R.id.widget_disconnected_layout, View.GONE);
         } else {
             // connect action
-            Intent connectIntent = new Intent(context, WidgetService.class);
-            connectIntent.setAction(WidgetService.ACTION_CONNECT);
+            Intent connectIntent = new Intent(context, BackgroundService.class);
+            connectIntent.setAction(BackgroundService.ACTION_CONNECT);
             PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             views.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
 
@@ -198,20 +198,20 @@ public class WidgetProvider extends AppWidgetProvider {
         Log.v(TAG,"Received broadcast:" + intent.getAction());
 
         // Type checks
-        if (intent.getAction().equals(WidgetService.ACTION_STATUS_CHANGED)) {
+        if (intent.getAction().equals(BackgroundService.ACTION_STATUS_CHANGED)) {
 
             // Extract the payload from the intent
-            MPDCurrentStatus status = intent.getParcelableExtra(WidgetService.INTENT_EXTRA_STATUS);
+            MPDCurrentStatus status = intent.getParcelableExtra(BackgroundService.INTENT_EXTRA_STATUS);
 
             // Check if a payload was sent
             if (null != status) {
                 // Save the information for later usage (when the asynchronous bitmap loader finishes)
                 mLastStatus = status;
             }
-        } else if (intent.getAction().equals(WidgetService.ACTION_TRACK_CHANGED)) {
+        } else if (intent.getAction().equals(BackgroundService.ACTION_TRACK_CHANGED)) {
 
             // Extract the payload from the intent
-            MPDFile track = intent.getParcelableExtra(WidgetService.INTENT_EXTRA_TRACK);
+            MPDFile track = intent.getParcelableExtra(BackgroundService.INTENT_EXTRA_TRACK);
 
             // Check if a payload was sent
             if (null != track) {
@@ -231,7 +231,7 @@ public class WidgetProvider extends AppWidgetProvider {
                     coverLoader.getImage(track);
                 }
             }
-        } else if (intent.getAction().equals(WidgetService.ACTION_SERVER_DISCONNECTED)) {
+        } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
             Log.v(TAG,"Disconnected");

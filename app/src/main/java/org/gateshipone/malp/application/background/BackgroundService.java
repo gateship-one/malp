@@ -19,7 +19,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application.widget;
+package org.gateshipone.malp.application.background;
 
 
 import android.app.Service;
@@ -44,8 +44,8 @@ import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 import java.lang.ref.WeakReference;
 
-public class WidgetService extends Service {
-    private static final String TAG = WidgetService.class.getSimpleName();
+public class BackgroundService extends Service {
+    private static final String TAG = BackgroundService.class.getSimpleName();
     /**
      * Control actions for the MPD service
      */
@@ -382,10 +382,10 @@ public class WidgetService extends Service {
     }
 
     private static class WidgetMPDConnectionStateListener extends MPDConnectionStateChangeHandler {
-        WeakReference<WidgetService> mService;
+        WeakReference<BackgroundService> mService;
 
-        WidgetMPDConnectionStateListener(WidgetService service) {
-            mService = new WeakReference<WidgetService>(service);
+        WidgetMPDConnectionStateListener(BackgroundService service) {
+            mService = new WeakReference<BackgroundService>(service);
         }
 
         @Override
@@ -401,10 +401,10 @@ public class WidgetService extends Service {
     }
 
     private static class WidgetMPDStatusHandler extends MPDStatusChangeHandler {
-        WeakReference<WidgetService> mService;
+        WeakReference<BackgroundService> mService;
 
-        WidgetMPDStatusHandler(WidgetService service) {
-            mService = new WeakReference<WidgetService>(service);
+        WidgetMPDStatusHandler(BackgroundService service) {
+            mService = new WeakReference<BackgroundService>(service);
         }
 
         @Override

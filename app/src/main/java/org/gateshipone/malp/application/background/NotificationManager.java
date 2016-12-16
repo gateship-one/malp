@@ -19,16 +19,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.gateshipone.malp.application.widget;
+package org.gateshipone.malp.application.background;
 
 
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.NotificationCompat;
 
 import org.gateshipone.malp.R;
@@ -40,7 +38,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener {
     private static final int NOTIFICATION_ID = 0;
 
-    private WidgetService mService;
+    private BackgroundService mService;
 
     /**
      * Intent IDs used for controlling action.
@@ -71,7 +69,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     private CoverBitmapLoader mCoverLoader;
 
 
-    public NotificationManager(WidgetService service) {
+    public NotificationManager(BackgroundService service) {
         mService = service;
         mNotificationManager = (android.app.NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
         mLastStatus = new MPDCurrentStatus();
@@ -125,7 +123,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             // Set pendingintents
             // Previous song action
-            Intent prevIntent = new Intent(WidgetService.ACTION_PREVIOUS);
+            Intent prevIntent = new Intent(BackgroundService.ACTION_PREVIOUS);
             PendingIntent prevPendingIntent = PendingIntent.getBroadcast(mService, INTENT_PREVIOUS, prevIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Action prevAction = new NotificationCompat.Action.Builder(R.drawable.ic_skip_previous_48dp, "Previous", prevPendingIntent).build();
 
@@ -133,28 +131,28 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             PendingIntent playPauseIntent;
             int playPauseIcon;
             if (state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                Intent pauseIntent = new Intent(WidgetService.ACTION_PAUSE);
+                Intent pauseIntent = new Intent(BackgroundService.ACTION_PAUSE);
                 playPauseIntent = PendingIntent.getBroadcast(mService, INTENT_PLAYPAUSE, pauseIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 playPauseIcon = R.drawable.ic_pause_48dp;
             } else {
-                Intent playIntent = new Intent(WidgetService.ACTION_PLAY);
+                Intent playIntent = new Intent(BackgroundService.ACTION_PLAY);
                 playPauseIntent = PendingIntent.getBroadcast(mService, INTENT_PLAYPAUSE, playIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 playPauseIcon = R.drawable.ic_play_arrow_48dp;
             }
             NotificationCompat.Action playPauseAction = new NotificationCompat.Action.Builder(playPauseIcon, "PlayPause", playPauseIntent).build();
 
             // Stop action
-            Intent stopIntent = new Intent(WidgetService.ACTION_STOP);
+            Intent stopIntent = new Intent(BackgroundService.ACTION_STOP);
             PendingIntent stopPendingIntent = PendingIntent.getBroadcast(mService, INTENT_STOP, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Action stopActon = new NotificationCompat.Action.Builder(R.drawable.ic_stop_black_48dp, "Stop", stopPendingIntent).build();
 
             // Next song action
-            Intent nextIntent = new Intent(WidgetService.ACTION_NEXT);
+            Intent nextIntent = new Intent(BackgroundService.ACTION_NEXT);
             PendingIntent nextPendingIntent = PendingIntent.getBroadcast(mService, INTENT_NEXT, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationCompat.Action nextAction = new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_48dp, "Next", nextPendingIntent).build();
 
             // Quit action
-            Intent quitIntent = new Intent(WidgetService.ACTION_QUIT_NOTIFICATION);
+            Intent quitIntent = new Intent(BackgroundService.ACTION_QUIT_NOTIFICATION);
             PendingIntent quitPendingIntent = PendingIntent.getBroadcast(mService, INTENT_QUIT, quitIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             mNotificationBuilder.setDeleteIntent(quitPendingIntent);
 
