@@ -554,7 +554,7 @@ public class MainActivity extends AppCompatActivity
         startService(connectIntent);
 
         boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification) {
+        if (showNotification && MPDStateMonitoringHandler.getLastStatus().getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
             Intent showNotificationIntent = new Intent(this, WidgetService.class);
             showNotificationIntent.setAction(WidgetService.ACTION_SHOW_NOTIFICATION);
             startService(showNotificationIntent);
