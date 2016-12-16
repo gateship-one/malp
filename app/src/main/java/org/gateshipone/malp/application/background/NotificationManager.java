@@ -27,15 +27,21 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.VolumeProviderCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener {
+    private static final String TAG = NotificationManager.class.getSimpleName();
     private static final int NOTIFICATION_ID = 0;
 
     private BackgroundService mService;
@@ -61,12 +67,37 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     // Save last track and last image
     private Bitmap mLastBitmap = null;
 
+    /**
+     * Last state of the MPD server
+     */
     private MPDCurrentStatus mLastStatus = null;
+
+    /**
+     * Last played track of the MPD server. Used to check if track changed and a new cover is necessary.
+     */
     private MPDFile mLastTrack = null;
 
-    private boolean mShown;
+    /**
+     * State of the notification and the media session.
+     */
+    private boolean mSessionActive;
 
+    /**
+     * Loader to asynchronously load cover images.
+     */
     private CoverBitmapLoader mCoverLoader;
+
+
+    /**
+     * Mediasession to set the lockscreen picture as well
+     */
+    private MediaSessionCompat mMediaSession;
+
+    /**
+     * {@link VolumeProviderCompat} to react to volume changes over the hardware keys by the user.
+     * Only active as long as the notification is active.
+     */
+    private MALPVolumeControlProvider mVolumeControlProvider;
 
 
     public NotificationManager(BackgroundService service) {
@@ -85,24 +116,38 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * Shows the notification
      */
     public void showNotification() {
+        if ( mMediaSession == null) {
+            mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
+            mMediaSession.setCallback(new MALPMediaSessionCallback());
+            mVolumeControlProvider = new MALPVolumeControlProvider();
+            mMediaSession.setPlaybackToRemote(mVolumeControlProvider);
+            mMediaSession.setActive(true);
+        }
+
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
-        mShown = true;
+        mSessionActive = true;
     }
 
     /**
      * Hides the notification (if shown) and resets state variables.
      */
     public void hideNotification() {
-        if (!mShown) {
+        if (!mSessionActive) {
             return;
         }
+
+        if ( mMediaSession != null ) {
+            mMediaSession.setActive(false);
+            mMediaSession = null;
+        }
+
         if (mNotification != null) {
             mNotificationManager.cancel(NOTIFICATION_ID);
 
             mNotification = null;
             mNotificationBuilder = null;
         }
-        mShown = false;
+        mSessionActive = false;
     }
 
     /*
@@ -179,6 +224,8 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                 secondRow = "";
             }
 
+            // Set the media session metadata
+            updateMetadata(track,state);
 
             mNotificationBuilder.setContentText(secondRow);
 
@@ -207,12 +254,55 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     }
 
     /**
+     * Updates the Metadata from Androids MediaSession. This sets track/album and stuff
+     * for a lockscreen image for example.
+     *
+     * @param track         Current track.
+     * @param playbackState State of the PlaybackService.
+     */
+    private void updateMetadata(MPDFile track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
+        if (track != null) {
+            if (playbackState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+                        .setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT + PlaybackStateCompat.ACTION_PAUSE +
+                                PlaybackStateCompat.ACTION_PLAY + PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS +
+                                PlaybackStateCompat.ACTION_STOP + PlaybackStateCompat.ACTION_SEEK_TO).build());
+            } else {
+                mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().
+                        setState(PlaybackStateCompat.STATE_PAUSED, 0, 1.0f).setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT +
+                        PlaybackStateCompat.ACTION_PAUSE + PlaybackStateCompat.ACTION_PLAY +
+                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS + PlaybackStateCompat.ACTION_STOP +
+                        PlaybackStateCompat.ACTION_SEEK_TO).build());
+            }
+            // Try to get old metadata to save image retrieval.
+            MediaMetadataCompat oldData = mMediaSession.getController().getMetadata();
+            MediaMetadataCompat.Builder metaDataBuilder;
+            if (oldData == null) {
+                metaDataBuilder = new MediaMetadataCompat.Builder();
+            } else {
+                metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
+            }
+            metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.getTrackTitle());
+            metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM, track.getTrackAlbum());
+            metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.getTrackArtist());
+            metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, track.getTrackArtist());
+            metaDataBuilder.putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, track.getTrackTitle());
+            metaDataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER, track.getTrackNumber());
+            metaDataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, track.getLength());
+
+            mMediaSession.setMetadata(metaDataBuilder.build());
+        }
+    }
+
+    /**
      * Notifies about a change in MPDs status. If not shown this may be used later.
      * @param status New MPD status
      */
     public void setMPDStatus(MPDCurrentStatus status) {
-        if (mShown) {
+        if (mSessionActive) {
             updateNotification(mLastTrack, status.getPlaybackState());
+            // Notify the mediasession about the new volume
+            mVolumeControlProvider.setCurrentVolume(status.getVolume());
         }
         // Save for later usage
         mLastStatus = status;
@@ -223,7 +313,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * @param track New MPD track
      */
     public void setMPDFile(MPDFile track) {
-        if (mShown) {
+        if (mSessionActive) {
             updateNotification(track, mLastStatus.getPlaybackState());
         }
         // Save for later usage
@@ -243,6 +333,84 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.setLargeIcon(bm);
             mNotification = mNotificationBuilder.build();
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+
+            /* Set lockscreen picture and stuff */
+            if ( mMediaSession != null ) {
+                MediaMetadataCompat.Builder metaDataBuilder;
+                metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
+                metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
+                mMediaSession.setMetadata(metaDataBuilder.build());
+            }
         }
     }
+
+    /**
+     * Callback class for MediaControls controlled by android system like BT remotes, etc and
+     * Volume keys on some android versions.
+     */
+    private class MALPMediaSessionCallback extends MediaSessionCompat.Callback {
+
+        @Override
+        public void onPlay() {
+            super.onPlay();
+            MPDCommandHandler.togglePause();
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            MPDCommandHandler.togglePause();
+        }
+
+        @Override
+        public void onSkipToNext() {
+            super.onSkipToNext();
+            MPDCommandHandler.nextSong();
+        }
+
+        @Override
+        public void onSkipToPrevious() {
+            super.onSkipToPrevious();
+            MPDCommandHandler.previousSong();
+        }
+
+        @Override
+        public void onStop() {
+            super.onStop();
+            MPDCommandHandler.stop();
+        }
+
+        @Override
+        public void onSeekTo(long pos) {
+            super.onSeekTo(pos);
+            MPDCommandHandler.seekSeconds((int)pos);
+        }
+    }
+
+    /**
+     * Handles volume changes from mediasession callbacks. Will send user requested changes
+     * in volume back to the MPD server.
+     */
+    private class MALPVolumeControlProvider extends VolumeProviderCompat {
+
+        public MALPVolumeControlProvider() {
+            super(VOLUME_CONTROL_ABSOLUTE, 100, mLastStatus.getVolume());
+        }
+
+        @Override
+        public void onSetVolumeTo(int volume) {
+            MPDCommandHandler.setVolume(volume);
+            setCurrentVolume(volume);
+        }
+
+        @Override
+        public void onAdjustVolume(int direction) {
+            if ( direction == 1 ) {
+                MPDCommandHandler.increaseVolume();
+            } else if ( direction == -1 ) {
+                MPDCommandHandler.decreaseVolume();
+            }
+        }
+    }
+
 }
