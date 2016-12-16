@@ -166,7 +166,21 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             notificationStyle.setShowActionsInCompactView(1, 2);
             mNotificationBuilder.setStyle(notificationStyle);
             mNotificationBuilder.setContentTitle(track.getTrackTitle());
-            mNotificationBuilder.setContentText(track.getTrackAlbum());
+
+            String secondRow;
+
+            if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                secondRow = track.getTrackArtist() + mService.getString(R.string.track_item_separator) + track.getTrackAlbum();
+            } else if (track.getTrackArtist().isEmpty() ) {
+                 secondRow = track.getTrackAlbum();
+            } else if (track.getTrackAlbum().isEmpty()) {
+                secondRow = track.getTrackArtist();
+            } else {
+                secondRow = "";
+            }
+
+
+            mNotificationBuilder.setContentText(secondRow);
 
             // Remove unnecessary time info
             mNotificationBuilder.setWhen(0);
