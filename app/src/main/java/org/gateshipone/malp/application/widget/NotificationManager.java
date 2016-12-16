@@ -159,7 +159,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.setDeleteIntent(quitPendingIntent);
 
             mNotificationBuilder.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
-            mNotificationBuilder.setSmallIcon(R.drawable.icon_outline_24dp);
+            mNotificationBuilder.setSmallIcon(R.drawable.ic_notification_24dp);
             mNotificationBuilder.addAction(prevAction);
             mNotificationBuilder.addAction(playPauseAction);
             mNotificationBuilder.addAction(stopActon);

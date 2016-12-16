@@ -193,7 +193,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(getResources().getString(R.string.downloader_notification_remaining_images) + ' ' + String.valueOf(mSumImageDownloads - (mRemainingArtists + mRemainingAlbums)) + '/' + String.valueOf(mSumImageDownloads)))
                 .setProgress(mSumImageDownloads, mSumImageDownloads - (mRemainingArtists + mRemainingAlbums), false)
-                .setSmallIcon(R.drawable.icon_outline_24dp);
+                .setSmallIcon(R.drawable.ic_notification_24dp);
 
         mBuilder.setOngoing(true);
 
