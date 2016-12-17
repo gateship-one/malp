@@ -318,6 +318,9 @@
     <string name="welcome_dialog_title">No profiles found</string>
     <string name="welcome_dialog_text">This application is a remote control for MPD. If you don\'t know MPD this application is probably useless for you, sorry :).\n\nTo use this application add a new profile with a add button in the upper right corner.\n\nIf you would like an music player based on the same interface, try Odyssey (https://github.com/gateship-one/odyssey).</string>
 
+    <string name="bulk_download_notice_title">Image download</string>
+    <string name="bulk_download_notice_text">Downloading of large amount of images puts heavy load on the servers of the service you chose. It may occur that a server load prevents downloading of images. The downloader will then cancel its action if it detects overload.\n\nPlease consider donating to the artwork services.</string>
+
     <!-- About activity -->
     <string name="artwork_provided_by">Artwork provided by:</string>
     <string name="acknowledgement_text">Big thanks to Frederik Lütkes for his continuous pressure to develop Odyssey, a music player on which this GUI is based on.</string>

@@ -197,4 +197,6 @@
     <string name="widget_disconnected">Nicht verbunden</string>
     <string name="preference_show_notification_title">Zeige Benachrichtigung</string>
     <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird.</string>
+    <string name="bulk_download_notice_title">Bilder-Download</string>
+    <string name="bulk_download_notice_text">Das Runterladen von vielen Bilder sorgt für eine hohe Serverauslastung beim Bilderanbieter. Es kann vorkommen, dass die Serverauslastung zu groß wird. In diesem Fall wird der Downloader seine Aktion abbrechen.\\n\\nBitte überlegen sie dem Bilderanbieter eine Spende zu hinterlassen.</string>
 </resources>
