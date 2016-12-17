@@ -27,6 +27,14 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.DrawFilter;
+import android.graphics.Paint;
+import android.graphics.PaintFlagsDrawFilter;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
+import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -242,6 +250,32 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             // Only set image if an saved one is available
             if (mLastBitmap != null) {
                 mNotificationBuilder.setLargeIcon(mLastBitmap);
+            } else {
+                /**
+                 * Create a dummy placeholder image for versions greater android 7 because it
+                 * does not automatically show the application icon anymore in mediastyle notifications.
+                 */
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+                    Drawable icon = mService.getDrawable(R.drawable.notification_placeholder_256dp);
+
+                    Bitmap iconBitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                    Canvas canvas = new Canvas(iconBitmap);
+                    DrawFilter filter = new PaintFlagsDrawFilter(Paint.ANTI_ALIAS_FLAG, 1);
+
+                    canvas.setDrawFilter(filter);
+                    icon.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                    icon.setFilterBitmap(true);
+
+
+                    icon.draw(canvas);
+                    mNotificationBuilder.setLargeIcon(iconBitmap);
+                } else {
+                    /**
+                     * For older android versions set the null icon which will result in a dummy icon
+                     * generated from the application icon.
+                     */
+                    mNotificationBuilder.setLargeIcon(null);
+                }
             }
 
             // Build the notification
@@ -329,7 +363,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public synchronized void receiveBitmap(Bitmap bm) {
         // Check if notification exists and set picture
         mLastBitmap = bm;
-        if (mNotification != null) {
+        if (mNotification != null && bm != null) {
             mNotificationBuilder.setLargeIcon(bm);
             mNotification = mNotificationBuilder.build();
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
