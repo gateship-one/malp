@@ -21,6 +21,10 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
  - MBID filtering (multiple albums with same AlbumArtist, Title can be accessed separately) 
  - Server-based search
  - Local fast search
+ - Launcher widget
+ - Notification with background service (**optional, needs to be enabled in settings**)
+ - Volume control if application is in background (**only if notification is enabled & visible**)
+ - Mostly optimized for tablets
  - Basic playlist management (add songs to saved lists, remove songs from saved lists, remove lists, save lists)
  - Multiple server profiles
  - Server statistics **(here is also the update database button)**
