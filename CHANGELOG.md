@@ -7,6 +7,7 @@
  * Listviews for artists / albums now with images
  * Option to change volume slider to volume buttons or disable visible volume controls
  * Option to use AlbumArtist tag instead of artist tag for artists list
+ * Save last used search type in SearchFragment
  * Hardware buttons for volume control repeating
  * Stabilization of the Artwork downloading
  * Fixes for upcoming MPD version 0.20
