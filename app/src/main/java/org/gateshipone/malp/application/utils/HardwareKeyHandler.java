@@ -32,7 +32,7 @@ public class HardwareKeyHandler {
     /**
      * Interval for repeating the volume events in ms.
      */
-    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 175;
+    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 100;
 
     private static HardwareKeyHandler mInstance;
 

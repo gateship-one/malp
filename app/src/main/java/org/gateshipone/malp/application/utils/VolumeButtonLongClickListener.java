@@ -39,7 +39,7 @@ public class VolumeButtonLongClickListener implements View.OnLongClickListener, 
         VOLUME_DOWN
     }
 
-    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 175;
+    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 100;
     private LISTENER_ACTION mAction;
 
     private Timer mRepeater = null;
