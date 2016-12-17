@@ -86,6 +86,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     private boolean mWifiOnly;
 
+    private boolean mBulkLoadAlbumsReady;
+    private boolean mBulkLoadArtistsReady;
+
     private ArtworkManager(Context context) {
 
         mDBManager = ArtworkDatabaseManager.getInstance(context.getApplicationContext());
@@ -688,7 +691,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mAlbumList.clear();
                 mAlbumList.addAll(albumList);
             }
-            fetchNextBulkAlbum();
+            mBulkLoadAlbumsReady = true;
+            if ( mBulkLoadArtistsReady ) {
+                fetchNextBulkAlbum();
+                fetchNextBulkArtist();
+            }
             return null;
         }
     }
@@ -709,7 +716,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mArtistList.clear();
                 mArtistList.addAll(artistList);
             }
-            fetchNextBulkArtist();
+
+            mBulkLoadArtistsReady = true;
+            if ( mBulkLoadAlbumsReady ) {
+                fetchNextBulkAlbum();
+                fetchNextBulkArtist();
+            }
             return null;
         }
     }
@@ -726,6 +738,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         mBulkProgressCallback = progressCallback;
         mArtistList.clear();
         mAlbumList.clear();
+        mBulkLoadAlbumsReady = false;
+        mBulkLoadArtistsReady = false;
         Log.v(TAG, "Start bulk loading");
         if (!mAlbumProvider.equals(mContext.getString((R.string.pref_artwork_provider_none_key)))) {
             MPDQueryHandler.getAlbums(new MPDResponseAlbumList() {

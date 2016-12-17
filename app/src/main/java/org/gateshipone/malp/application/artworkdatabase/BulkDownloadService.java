@@ -172,7 +172,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             mWakelock.acquire();
             ConnectionManager.reconnectLastServer(this);
         }
-        return START_STICKY;
+        return START_NOT_STICKY;
 
     }
 
