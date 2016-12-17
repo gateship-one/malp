@@ -339,4 +339,7 @@
     <!-- Widget -->
     <string name="widget_disconnected">Disconnected</string>
     <string name="widget_connect">Connect</string>
+
+    <!-- Thirdparty Licenses dialog -->
+    <string name="thirdparty_licenses_dialog_title">Third Party Licenses</string>
 </resources>

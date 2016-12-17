@@ -32,6 +32,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.fragments.LicensesDialog;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 
 public class AboutActivity extends Activity {
@@ -121,6 +122,13 @@ public class AboutActivity extends Activity {
                 Intent urlIntent = new Intent(Intent.ACTION_VIEW);
                 urlIntent.setData(Uri.parse(getResources().getString(R.string.url_fanarttv)));
                 startActivity(urlIntent);
+            }
+        });
+
+        findViewById(R.id.thirdparty_licenses).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LicensesDialog.newInstance().show(getFragmentManager(), LicensesDialog.class.getSimpleName());
             }
         });
     }
