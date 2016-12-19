@@ -25,6 +25,7 @@ package org.gateshipone.malp.application.listviewitems;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -272,15 +273,21 @@ public class FileListItem extends AbsImageListViewItem {
 
         /* Extract the information from the track */
             mNumberView.setText(trackNumber);
-            // Get the preformatted duration of the track.
-            mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
 
+            int trackLength = track.getLength();
+            if (trackLength > 0) {
+                // Get the preformatted duration of the track.
+                mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
+                mDurationView.setVisibility(VISIBLE);
+            } else {
+                mDurationView.setVisibility(GONE);
+            }
             // Get track title
             String trackTitle = track.getTrackTitle();
 
             // If no trackname is available (e.g. streaming URLs) show path
             if (null == trackTitle || trackTitle.isEmpty()) {
-                trackTitle = track.getPath();
+                trackTitle = FormatHelper.getFilenameFromPath(track.getPath());
             }
             mTitleView.setText(trackTitle);
 
@@ -292,22 +299,24 @@ public class FileListItem extends AbsImageListViewItem {
             // Check which information is available and set the separator accordingly.
             if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
                 trackInformation = track.getTrackArtist() + context.getResources().getString(R.string.track_item_separator) + trackAlbum;
-            } else if (track.getTrackArtist().isEmpty()) {
+            } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
                 trackInformation = trackAlbum;
-            } else if (track.getTrackAlbum().isEmpty()) {
+            } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
                 trackInformation = track.getTrackArtist();
             } else {
-                trackInformation = "";
+                trackInformation = track.getPath();
             }
+
             mAdditionalInfoView.setText(trackInformation);
             mSeparator.setVisibility(VISIBLE);
-            mNumberView.setVisibility(VISIBLE);
             mAdditionalInfoView.setVisibility(VISIBLE);
+            mNumberView.setVisibility(VISIBLE);
         } else {
             /* Show loading text */
             mSeparator.setVisibility(GONE);
             mTitleView.setText(getResources().getText(R.string.track_item_loading));
             mNumberView.setVisibility(GONE);
+            mDurationView.setVisibility(GONE);
             mAdditionalInfoView.setVisibility(GONE);
         }
 

@@ -115,10 +115,12 @@ public class WidgetProvider extends AppWidgetProvider {
 
             if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
                 views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
-            } else if (mLastTrack.getTrackAlbum().isEmpty()) {
+            } else if (mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
                 views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist());
-            } else if (mLastTrack.getTrackArtist().isEmpty()) {
+            } else if (mLastTrack.getTrackArtist().isEmpty() && !mLastTrack.getTrackAlbum().isEmpty()) {
                 views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackAlbum());
+            } else {
+                views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getPath());
             }
 
             if (mLastCover != null) {

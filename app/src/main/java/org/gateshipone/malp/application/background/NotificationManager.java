@@ -42,6 +42,7 @@ import android.support.v7.app.NotificationCompat;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
@@ -216,18 +217,26 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             NotificationCompat.MediaStyle notificationStyle = new NotificationCompat.MediaStyle();
             notificationStyle.setShowActionsInCompactView(1, 2);
             mNotificationBuilder.setStyle(notificationStyle);
-            mNotificationBuilder.setContentTitle(track.getTrackTitle());
+
+            String title;
+            if (track.getTrackTitle().isEmpty()) {
+                title = FormatHelper.getFilenameFromPath(track.getPath());
+            } else {
+                title = track.getTrackTitle();
+            }
+
+            mNotificationBuilder.setContentTitle(title);
 
             String secondRow;
 
             if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
                 secondRow = track.getTrackArtist() + mService.getString(R.string.track_item_separator) + track.getTrackAlbum();
-            } else if (track.getTrackArtist().isEmpty() ) {
+            } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty() ) {
                  secondRow = track.getTrackAlbum();
-            } else if (track.getTrackAlbum().isEmpty()) {
+            } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
                 secondRow = track.getTrackArtist();
             } else {
-                secondRow = "";
+                secondRow = track.getPath();
             }
 
             // Set the media session metadata

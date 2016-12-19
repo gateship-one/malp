@@ -76,7 +76,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
-        SharedPreferences.OnSharedPreferenceChangeListener{
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final ViewDragHelper mDragHelper;
 
@@ -388,8 +388,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     }
                 });
                 Bundle textDialogArgs = new Bundle();
-                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TEXT,"http://...");
-                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TITLE,getResources().getString(R.string.action_add_url));
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TEXT, "http://...");
+                textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.action_add_url));
                 addURLDialog.setArguments(textDialogArgs);
                 addURLDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "AddURLDialog");
                 break;
@@ -409,7 +409,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     @Override
     public void newAlbumImage(MPDAlbum album) {
-        if ( mLastTrack.getTrackAlbum().equals(album.getName())) {
+        if (mLastTrack.getTrackAlbum().equals(album.getName())) {
             mCoverLoader.getImage(mLastTrack);
         }
     }
@@ -426,22 +426,22 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String volumeControlView = sharedPref.getString(getContext().getString(R.string.pref_volume_controls_key), getContext().getString(R.string.pref_volume_control_view_default));
 
-        LinearLayout volLayout = (LinearLayout)findViewById(R.id.volume_control_layout);
+        LinearLayout volLayout = (LinearLayout) findViewById(R.id.volume_control_layout);
 
-        if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_off_key))) {
-            if ( volLayout != null) {
+        if (volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_off_key))) {
+            if (volLayout != null) {
                 volLayout.setVisibility(GONE);
             }
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(GONE);
-        } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_seekbar_key))) {
-            if ( volLayout != null) {
+        } else if (volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_seekbar_key))) {
+            if (volLayout != null) {
                 volLayout.setVisibility(VISIBLE);
             }
             mVolumeSeekbarLayout.setVisibility(VISIBLE);
             mVolumeButtonLayout.setVisibility(GONE);
-        } else if ( volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_buttons_key))) {
-            if ( volLayout != null) {
+        } else if (volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_buttons_key))) {
+            if (volLayout != null) {
                 volLayout.setVisibility(VISIBLE);
             }
             mVolumeSeekbarLayout.setVisibility(GONE);
@@ -755,7 +755,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
-        mVolumeIcon = (ImageView)findViewById(R.id.volume_icon);
+        mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
         mVolumeIcon.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -767,7 +767,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
         /* Volume control buttons */
-        mVolumeIconButtons = (ImageView)findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
         mVolumeIconButtons.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -775,7 +775,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
         });
 
-        mVolumeText = (TextView)findViewById(R.id.volume_button_text);
+        mVolumeText = (TextView) findViewById(R.id.volume_button_text);
 
         mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
 
@@ -805,8 +805,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mVolumePlus.setOnLongClickListener(plusListener);
         mVolumePlus.setOnTouchListener(plusListener);
 
-        mVolumeSeekbarLayout = (LinearLayout)findViewById(R.id.volume_seekbar_layout);
-        mVolumeButtonLayout = (LinearLayout)findViewById(R.id.volume_button_layout);
+        mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
 
         // set dragging part default to bottom
         mDragOffset = 1.0f;
@@ -1093,13 +1093,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         int volume = status.getVolume();
         mVolumeSeekbar.setProgress(volume);
 
-        if ( volume >= 70 ) {
+        if (volume >= 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_high_black_48dp);
-        } else if ( volume >= 30 && volume < 70) {
+        } else if (volume >= 30 && volume < 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-        } else if ( volume > 0 && volume < 30 ) {
+        } else if (volume > 0 && volume < 30) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_low_black_48dp);
         } else {
@@ -1138,18 +1138,23 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     }
 
     private void updateMPDCurrentTrack(MPDFile track) {
-        mTrackName.setText(track.getTrackTitle());
-        if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-            mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());
-        } else if (track.getTrackArtist().isEmpty() ) {
-            mTrackAdditionalInfo.setText(track.getTrackAlbum());
-        } else if (track.getTrackAlbum().isEmpty()) {
-            mTrackAdditionalInfo.setText(track.getTrackArtist());
+        if ( track.getTrackTitle().isEmpty()) {
+            mTrackName.setText(FormatHelper.getFilenameFromPath(track.getPath()));
         } else {
-            mTrackAdditionalInfo.setText("");
+            mTrackName.setText(track.getTrackTitle());
         }
 
-        if ( null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
+        if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+            mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());
+        } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+            mTrackAdditionalInfo.setText(track.getTrackAlbum());
+        } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
+            mTrackAdditionalInfo.setText(track.getTrackArtist());
+        } else {
+            mTrackAdditionalInfo.setText(track.getPath());
+        }
+
+        if (null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
             // get tint color
             int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_background_primary);
 
@@ -1355,11 +1360,11 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             if (fromUser) {
                 MPDCommandHandler.setVolume(progress);
 
-                if ( progress >= 70 ) {
+                if (progress >= 70) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
-                } else if ( progress >= 30 && progress < 70) {
+                } else if (progress >= 30 && progress < 70) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_medium_black_48dp);
-                } else if ( progress > 0 && progress < 30 ) {
+                } else if (progress > 0 && progress < 30) {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_low_black_48dp);
                 } else {
                     mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
@@ -1418,7 +1423,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
         }
     }
-
 
 
 }
