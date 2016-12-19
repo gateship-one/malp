@@ -27,6 +27,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -55,8 +56,10 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
     @Override
     public void onPause() {
         super.onPause();
-        getLoaderManager().destroyLoader(0);
-        MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
+        synchronized (this) {
+            getLoaderManager().destroyLoader(0);
+            MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
+        }
     }
 
 
@@ -75,23 +78,25 @@ public abstract class GenericMPDFragment<T extends Object> extends Fragment impl
     }
 
 
-    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
-        private GenericMPDFragment pFragment;
+    private static class ConnectionStateListener extends MPDConnectionStateChangeHandler {
+        private WeakReference<GenericMPDFragment> pFragment;
 
         public ConnectionStateListener(GenericMPDFragment fragment) {
-            pFragment = fragment;
+            pFragment = new WeakReference<GenericMPDFragment>(fragment);
         }
 
         @Override
         public void onConnected() {
-            refreshContent();
+            pFragment.get().refreshContent();
         }
 
         @Override
         public void onDisconnected() {
-            if ( !isDetached() ) {
-                getLoaderManager().destroyLoader(0);
-                finishedLoading();
+            synchronized (pFragment.get()) {
+                if (!pFragment.get().isDetached()) {
+                    pFragment.get().getLoaderManager().destroyLoader(0);
+                    pFragment.get().finishedLoading();
+                }
             }
         }
     }
