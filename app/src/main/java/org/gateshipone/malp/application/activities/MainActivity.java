@@ -534,6 +534,7 @@ public class MainActivity extends AppCompatActivity
             nowPlayingView.onPause();
         }
 
+        MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
         if (!isChangingConfigurations()) {
             // Disconnect from MPD server
             ConnectionManager.disconnectFromServer();
@@ -548,7 +549,7 @@ public class MainActivity extends AppCompatActivity
         startService(connectIntent);
 
         boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification && MPDStateMonitoringHandler.getLastStatus().getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+        if (showNotification && status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
             Intent showNotificationIntent = new Intent(this, BackgroundService.class);
             showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
             startService(showNotificationIntent);

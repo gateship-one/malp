@@ -116,6 +116,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public static void disconnectFromServer() {
+        MPDCommandHandler.disconnectFromMPDServer();
         mConnectionManager.mDisconnectRequested = true;
     }
 

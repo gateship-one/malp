@@ -134,6 +134,8 @@ public class BackgroundService extends Service {
      */
     private NotificationManager mNotificationManager;
 
+    private boolean mConnecting;
+
     /**
      * No bindable service.
      *
@@ -293,15 +295,13 @@ public class BackgroundService extends Service {
      */
     private void onMPDDisconnect() {
         MPDCommandHandler.disconnectFromMPDServer();
-        ConnectionManager.disconnectFromServer();
     }
 
     /**
      * Disconnects from the current server and rereads the default profile.
      */
     private void onProfileChanged() {
-        MPDCommandHandler.disconnectFromMPDServer();
-        ConnectionManager.disconnectFromServer();
+        onMPDDisconnect();
         MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
         ConnectionManager.setParameters(profile, this);
     }
@@ -344,7 +344,7 @@ public class BackgroundService extends Service {
      * Ensures an MPD server is connected before performing an action.
      */
     private void checkMPDConnection() {
-        if (!MPDConnection.getInstance().isConnected()) {
+        if (!MPDConnection.getInstance().isConnected() && !mConnecting) {
             mLastTrack = new MPDFile("");
             mLastStatus = new MPDCurrentStatus();
             connectMPDServer();
@@ -357,8 +357,8 @@ public class BackgroundService extends Service {
      * should be able to see changes to the profile database instantaneously.
      */
     private void connectMPDServer() {
-        /* Set the connection parameters */
-        ConnectionManager.disconnectFromServer();
+        mConnecting = true;
+
         MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
         ConnectionManager.setParameters(profile, this);
 
@@ -371,6 +371,7 @@ public class BackgroundService extends Service {
      * @param action Action received via an {@link Intent}
      */
     private void handleAction(String action) {
+        Log.v(TAG,"Action: " + action);
         if (action.equals(ACTION_PLAY)) {
             onPlay();
         } else if (action.equals(ACTION_PAUSE)) {
@@ -388,6 +389,7 @@ public class BackgroundService extends Service {
         } else if (action.equals(ACTION_PROFILE_CHANGED)) {
             onProfileChanged();
         } else if (action.equals(ACTION_SHOW_NOTIFICATION)) {
+            checkMPDConnection();
             mNotificationManager.showNotification();
         } else if (action.equals(ACTION_HIDE_NOTIFICATION)) {
             mNotificationManager.hideNotification();
@@ -428,7 +430,7 @@ public class BackgroundService extends Service {
 
         @Override
         public void onConnected() {
-
+            mService.get().mConnecting = false;
         }
 
         /**
@@ -436,6 +438,8 @@ public class BackgroundService extends Service {
          */
         @Override
         public void onDisconnected() {
+            Log.v(TAG,"Disconnected");
+            mService.get().mConnecting = false;
             mService.get().notifyDisconnected();
             mService.get().mNotificationManager.hideNotification();
             mService.get().stopSelf();
