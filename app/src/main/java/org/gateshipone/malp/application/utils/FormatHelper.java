@@ -112,6 +112,20 @@ public class FormatHelper {
         return new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(date);
     }
 
+
+    /**
+     * Returns the last part of the complete filename URl
+     * @param url URL to separate
+     * @return Filename (last part behind a /)
+     */
+    public static final String getFilenameFromPath(String url) {
+        String[] splitPath = url.split("/");
+        if ( splitPath.length > 0 ) {
+            return splitPath[splitPath.length - 1];
+        }
+        return url;
+    }
+
     /**
      * Escapes Apache lucene special characters (e.g. used by MusicBrainz) for URLs.
      * See:

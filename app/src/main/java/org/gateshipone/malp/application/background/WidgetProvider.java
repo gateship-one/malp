@@ -37,6 +37,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 
@@ -64,14 +65,15 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /**
      * Update the widgets
-     * @param context Context for updateing
+     *
+     * @param context          Context for updateing
      * @param appWidgetManager appWidgetManager to update the widgets
-     * @param appWidgetIds Widget IDs that need updating.
+     * @param appWidgetIds     Widget IDs that need updating.
      */
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-        Log.v(TAG,"onUpdate: " + context + ':' + appWidgetIds.toString());
+        Log.v(TAG, "onUpdate: " + context + ':' + appWidgetIds.toString());
 
 
         // Call the updateWidget method which will update all instances.
@@ -80,6 +82,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
     /**
      * Called when widgets are removed
+     *
      * @param context context used for deletion
      */
     public void onDisabled(Context context) {
@@ -98,12 +101,25 @@ public class WidgetProvider extends AppWidgetProvider {
     private void updateWidget(Context context) {
         boolean nowPlaying = false;
 
-        RemoteViews views = new RemoteViews(context.getPackageName(),R.layout.widget_malp_big);
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_malp_big);
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
 
-            views.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
-            views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
+            if (!mLastTrack.getTrackTitle().isEmpty()) {
+                views.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
+            } else if (mLastTrack.getTrackTitle().isEmpty() && !mLastTrack.getPath().isEmpty()) {
+                views.setTextViewText(R.id.widget_big_trackName, FormatHelper.getFilenameFromPath(mLastTrack.getTrackTitle()));
+            } else {
+                views.setTextViewText(R.id.widget_big_trackName, context.getString(R.string.track_item_loading));
+            }
+
+            if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
+                views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
+            } else if (mLastTrack.getTrackAlbum().isEmpty()) {
+                views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist());
+            } else if (mLastTrack.getTrackArtist().isEmpty()) {
+                views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackAlbum());
+            }
 
             if (mLastCover != null) {
                 // Use the saved image
@@ -183,7 +199,7 @@ public class WidgetProvider extends AppWidgetProvider {
             views.setViewVisibility(R.id.widget_disconnected_layout, View.VISIBLE);
         }
 
-        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context,WidgetProvider.class), views);
+        AppWidgetManager.getInstance(context).updateAppWidget(new ComponentName(context, WidgetProvider.class), views);
     }
 
     /**
@@ -195,7 +211,7 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.v(TAG,"Received broadcast:" + intent.getAction());
+        Log.v(TAG, "Received broadcast:" + intent.getAction());
 
         // Type checks
         if (intent.getAction().equals(BackgroundService.ACTION_STATUS_CHANGED)) {
@@ -234,7 +250,7 @@ public class WidgetProvider extends AppWidgetProvider {
         } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
-            Log.v(TAG,"Disconnected");
+            Log.v(TAG, "Disconnected");
         }
         // Refresh the widget with the new information
         updateWidget(context);

@@ -517,7 +517,7 @@ public class MainActivity extends AppCompatActivity
         boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
         if (showNotification) {
             Intent showNotificationIntent = new Intent(this, BackgroundService.class);
-            showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_NOTIFICATION);
+            showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_BACKGROUND_SERVICE);
             startService(showNotificationIntent);
         }
     }

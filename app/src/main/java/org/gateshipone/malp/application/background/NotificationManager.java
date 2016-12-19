@@ -27,13 +27,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.DrawFilter;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.VectorDrawable;
 import android.os.Build;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.VolumeProviderCompat;
@@ -205,7 +203,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             NotificationCompat.Action nextAction = new NotificationCompat.Action.Builder(R.drawable.ic_skip_next_48dp, "Next", nextPendingIntent).build();
 
             // Quit action
-            Intent quitIntent = new Intent(BackgroundService.ACTION_QUIT_NOTIFICATION);
+            Intent quitIntent = new Intent(BackgroundService.ACTION_QUIT_BACKGROUND_SERVICE);
             PendingIntent quitPendingIntent = PendingIntent.getBroadcast(mService, INTENT_QUIT, quitIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             mNotificationBuilder.setDeleteIntent(quitPendingIntent);
 
