@@ -81,12 +81,23 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         return pArtistName;
     }
 
-    public boolean equals(MPDArtist artist) {
-        if ((pArtistName.equals(artist.pArtistName)) &&
-                (pMBIDs.equals(artist.pMBIDs))) {
-            return true;
+    @Override
+    public boolean equals(Object object) {
+        if ( !(object instanceof MPDArtist)) {
+            return false;
         }
-        return false;
+
+        MPDArtist artist = (MPDArtist)object;
+        if ( !artist.pArtistName.equals(pArtistName) || artist.pMBIDs.size() !=  pMBIDs.size()) {
+            return false;
+        }
+
+        for ( int i = 0; i < pMBIDs.size(); i++) {
+            if ( !pMBIDs.get(i).equals(artist.pMBIDs.get(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
