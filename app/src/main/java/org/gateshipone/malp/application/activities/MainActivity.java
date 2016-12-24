@@ -90,6 +90,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
@@ -422,7 +424,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         // clear backstack
-        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
         Fragment fragment = null;
         String fragmentTag = "";
@@ -457,6 +459,7 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
 
 
         // Do the actual fragment transaction
