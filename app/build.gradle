@@ -22,14 +22,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.3"
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "org.gateshipone.malp"
         minSdkVersion 21
-        targetSdkVersion 24
+        targetSdkVersion 25
         versionCode 8
-        versionName "1.0.8"
+        versionName "1.1.0"
     }
     buildTypes {
         release {
@@ -47,9 +47,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:24.+'
-    compile 'com.android.support:support-v4:24.+'
-    compile 'com.android.support:design:24.+'
-    compile 'com.android.support:preference-v14:24.+'
+    compile 'com.android.support:appcompat-v7:25.+'
+    compile 'com.android.support:support-v4:25.+'
+    compile 'com.android.support:design:25.+'
+    compile 'com.android.support:preference-v14:25.+'
     compile 'com.android.volley:volley:1.0.0'
 }

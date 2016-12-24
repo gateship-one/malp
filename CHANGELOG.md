@@ -1,6 +1,6 @@
-### Version: 1.1.0 Tag: release-XX (20XX-XX-XX) ###
- * Add launcher widget
- * Add optional notification if main activity is hidden
+### Version: 1.1.0 Tag: release-9 (2016-12-24) ###
+ * Launcher widget
+ * Optional notification if main activity is hidden
  * Volume control from outside the application (**only if notification is enabled!**)
  * Tablet optimized nowplaying screen
  * Album images in playlist view as sections
