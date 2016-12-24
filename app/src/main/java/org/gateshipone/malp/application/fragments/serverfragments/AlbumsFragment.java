@@ -177,7 +177,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 if (mArtist != null) {
-                    mBitmapLoader.getArtistImage(mArtist);
+                    mBitmapLoader.getArtistImage(mArtist, true);
                 }
             } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
                 String lastPath = mAlbumsPath;

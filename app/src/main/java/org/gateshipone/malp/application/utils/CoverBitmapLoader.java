@@ -45,36 +45,42 @@ public class CoverBitmapLoader {
     /**
      * Load the image for the given track from the mediastore.
      */
-    public void getImage(MPDFile track) {
+    public void getImage(MPDFile track, boolean fetchImage) {
         if (track != null) {
             mTrack = track;
             // start the loader thread to load the image async
-            Thread loaderThread = new Thread(new ImageRunner());
+            Thread loaderThread = new Thread(new ImageRunner(fetchImage));
             loaderThread.start();
         }
     }
 
-    public void getArtistImage(MPDArtist artist) {
+    public void getArtistImage(MPDArtist artist, boolean fetchImage) {
         if ( artist == null) {
             return;
         }
 
         // start the loader thread to load the image async
-        Thread loaderThread = new Thread(new ArtistImageRunner(artist));
+        Thread loaderThread = new Thread(new ArtistImageRunner(artist, fetchImage));
         loaderThread.start();
     }
 
-    public void getAlbumImage(MPDAlbum album) {
+    public void getAlbumImage(MPDAlbum album, boolean fetchImage) {
         if ( album == null) {
             return;
         }
 
         // start the loader thread to load the image async
-        Thread loaderThread = new Thread(new AlbumImageRunner(album));
+        Thread loaderThread = new Thread(new AlbumImageRunner(album, fetchImage));
         loaderThread.start();
     }
 
     private class ImageRunner implements Runnable {
+
+        private boolean mFetchImage;
+
+        public ImageRunner(boolean fetchImage) {
+            mFetchImage = fetchImage;
+        }
 
         /**
          * Load the image for the given track from the mediastore.
@@ -85,7 +91,9 @@ public class CoverBitmapLoader {
                 Bitmap albumImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImageForTrack(mTrack);
                 mListener.receiveBitmap(albumImage);
             } catch (ImageNotFoundException e) {
-                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mTrack);
+                if (mFetchImage) {
+                    ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mTrack);
+                }
             }
         }
     }
@@ -93,9 +101,11 @@ public class CoverBitmapLoader {
     private class ArtistImageRunner implements Runnable {
 
         private MPDArtist mArtist;
+        private boolean mFetchImage;
 
-        public ArtistImageRunner(MPDArtist artist) {
+        public ArtistImageRunner(MPDArtist artist, boolean fetchImage) {
             mArtist = artist;
+            mFetchImage = fetchImage;
         }
 
         /**
@@ -107,7 +117,9 @@ public class CoverBitmapLoader {
                 Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getArtistImage(mArtist);
                 mListener.receiveBitmap(artistImage);
             } catch (ImageNotFoundException e) {
-                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchArtistImage(mArtist);
+                if (mFetchImage) {
+                    ArtworkManager.getInstance(mContext.getApplicationContext()).fetchArtistImage(mArtist);
+                }
             }
         }
     }
@@ -115,9 +127,11 @@ public class CoverBitmapLoader {
     private class AlbumImageRunner implements Runnable {
 
         private MPDAlbum mAlbum;
+        private boolean mFetchImage;
 
-        public AlbumImageRunner(MPDAlbum album) {
+        public AlbumImageRunner(MPDAlbum album, boolean fetchImage) {
             mAlbum = album;
+            mFetchImage = fetchImage;
         }
 
         /**
@@ -130,8 +144,9 @@ public class CoverBitmapLoader {
                 mListener.receiveBitmap(artistImage);
                 Log.v(TAG,"Image found");
             } catch (ImageNotFoundException e) {
-                Log.v(TAG,"Image notfound");
-                ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mAlbum);
+                if (mFetchImage) {
+                    ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mAlbum);
+                }
             }
         }
     }

@@ -246,7 +246,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 if (newImage) {
                     CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
-                    coverLoader.getImage(track);
+                    coverLoader.getImage(track, false);
                 }
             }
         } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {

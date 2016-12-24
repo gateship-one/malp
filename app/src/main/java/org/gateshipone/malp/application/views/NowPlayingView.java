@@ -410,7 +410,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     public void newAlbumImage(MPDAlbum album) {
         if (mLastTrack.getTrackAlbum().equals(album.getName())) {
-            mCoverLoader.getImage(mLastTrack);
+            mCoverLoader.getImage(mLastTrack, true);
         }
     }
 
@@ -1175,7 +1175,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             // The same for the small header image
             mTopCoverImage.setImageDrawable(drawable);
             // Start the cover loader
-            mCoverLoader.getImage(track);
+            mCoverLoader.getImage(track, true);
         }
 
         // Calculate the margin to avoid cut off textviews

@@ -144,7 +144,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         }
 
         if (mAlbum != null) {
-            mBitmapLoader.getAlbumImage(mAlbum);
+            mBitmapLoader.getAlbumImage(mAlbum,false);
         }
     }
 

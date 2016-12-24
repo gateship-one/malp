@@ -251,7 +251,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             if (mNotification == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
                 mLastTrack = track;
                 mLastBitmap = null;
-                mCoverLoader.getImage(mLastTrack);
+                mCoverLoader.getImage(mLastTrack,false);
             }
 
             // Only set image if an saved one is available
