@@ -90,7 +90,7 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
      * @param modelItem ModelItem to get the image for (MPDAlbum/MPDArtist)
      */
     public void prepareArtworkFetching(ArtworkManager artworkManager, MPDGenericItem modelItem) {
-        if (!modelItem.equals(mHolder.modelItem) || !mCoverDone) {
+        if (!modelItem.equals(mHolder.modelItem)) {
             setImage(null);
         }
         mHolder.artworkManager = artworkManager;
