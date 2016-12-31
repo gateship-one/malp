@@ -80,7 +80,6 @@ import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDia
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -90,14 +89,13 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends GenericActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, FilesFragment.FilesCallback,
-        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback
+        {
 
 
     private static final String TAG = "MainActivity";
@@ -121,9 +119,6 @@ public class MainActivity extends AppCompatActivity
 
     private FloatingActionButton mFAB;
 
-    private ConnectionStateListener mConnectionStateListener;
-
-    private boolean mHardwareControls;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,50 +130,6 @@ public class MainActivity extends AppCompatActivity
             mSavedNowPlayingViewSwitcherStatus = VIEW_SWITCHER_STATUS.values()[savedInstanceState.getInt(MAINACTIVITY_SAVED_INSTANCE_NOW_PLAYING_VIEW_SWITCHER_CURRENT_VIEW)];
         }
 
-        // Read theme preference
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
-        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key), getResources().getBoolean(R.bool.pref_theme_dark_default));
-        if (darkTheme) {
-            if (themePref.equals(getString(R.string.pref_indigo_key))) {
-                setTheme(R.style.AppTheme_indigo);
-            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
-                setTheme(R.style.AppTheme_orange);
-            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
-                setTheme(R.style.AppTheme_deepOrange);
-            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
-                setTheme(R.style.AppTheme_blue);
-            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
-                setTheme(R.style.AppTheme_darkGrey);
-            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
-                setTheme(R.style.AppTheme_brown);
-            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
-                setTheme(R.style.AppTheme_lightGreen);
-            } else if (themePref.equals(getString(R.string.pref_red_key))) {
-                setTheme(R.style.AppTheme_red);
-            }
-        } else {
-            if (themePref.equals(getString(R.string.pref_indigo_key))) {
-                setTheme(R.style.AppTheme_indigo_light);
-            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
-                setTheme(R.style.AppTheme_orange_light);
-            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
-                setTheme(R.style.AppTheme_deepOrange_light);
-            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
-                setTheme(R.style.AppTheme_blue_light);
-            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
-                setTheme(R.style.AppTheme_darkGrey_light);
-            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
-                setTheme(R.style.AppTheme_brown_light);
-            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
-                setTheme(R.style.AppTheme_lightGreen_light);
-            } else if (themePref.equals(getString(R.string.pref_red_key))) {
-                setTheme(R.style.AppTheme_red_light);
-            }
-        }
-        if (themePref.equals(getString(R.string.pref_oleddark_key))) {
-            setTheme(R.style.AppTheme_oledDark);
-        }
 
         setContentView(R.layout.activity_main);
 
@@ -217,6 +168,7 @@ public class MainActivity extends AppCompatActivity
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         // Read default view preference
         String defaultView = sharedPref.getString(getString(R.string.pref_start_view_key), getString(R.string.pref_view_default));
 
@@ -277,8 +229,6 @@ public class MainActivity extends AppCompatActivity
             transaction.replace(R.id.fragment_container, fragment);
             transaction.commit();
         }
-        mConnectionStateListener = new ConnectionStateListener();
-
 
     }
 
@@ -507,22 +457,6 @@ public class MainActivity extends AppCompatActivity
             }
             nowPlayingView.onResume();
         }
-        ConnectionManager.reconnectLastServer(getApplicationContext());
-
-
-        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
-
-        // Check if hardware key control is enabled by the user
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPref.registerOnSharedPreferenceChangeListener(this);
-        mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
-
-        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification) {
-            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
-            showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_BACKGROUND_SERVICE);
-            startService(showNotificationIntent);
-        }
     }
 
     @Override
@@ -537,26 +471,7 @@ public class MainActivity extends AppCompatActivity
             nowPlayingView.onPause();
         }
 
-        MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
-        if (!isChangingConfigurations()) {
-            // Disconnect from MPD server
-            ConnectionManager.disconnectFromServer();
-        }
-        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
-        // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, BackgroundService.class);
-        connectIntent.setAction(BackgroundService.ACTION_CONNECT);
-        startService(connectIntent);
-
-        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification && status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
-            showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
-            startService(showNotificationIntent);
-        }
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -670,22 +585,7 @@ public class MainActivity extends AppCompatActivity
         coordinatorLayout.setVisibility(View.VISIBLE);
     }
 
-    /**
-     * Handles the volume keys of the device to control MPDs volume.
-     *
-     * @param event KeyEvent that was pressed by the user.
-     * @return True if handled by MALP
-     */
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (mHardwareControls) {
-            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
-                return super.dispatchKeyEvent(event);
-            } else return true;
-        } else {
-            return super.dispatchKeyEvent(event);
-        }
-    }
+
 
     @Override
     public void editProfile(MPDServerProfile profile) {
@@ -938,24 +838,7 @@ public class MainActivity extends AppCompatActivity
         transaction.commit();
     }
 
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.pref_hardware_controls_key))) {
-            mHardwareControls = sharedPreferences.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
-        }
-    }
 
-    private class ConnectionStateListener extends MPDConnectionStateChangeHandler {
-        @Override
-        public void onConnected() {
-
-        }
-
-        @Override
-        public void onDisconnected() {
-
-        }
-    }
 
 
 }

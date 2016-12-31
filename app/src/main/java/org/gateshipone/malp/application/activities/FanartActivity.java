@@ -69,7 +69,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class FanartActivity extends Activity {
+public class FanartActivity extends GenericActivity {
     private static final String TAG = FanartActivity.class.getSimpleName();
 
     private static final String STATE_ARTWORK_POINTER = "artwork_pointer";
@@ -133,56 +133,11 @@ public class FanartActivity extends Activity {
 
     private FanartCacheManager mFanartCache;
 
-    private boolean mHardwareControls;
 
     View mDecorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Read theme preference
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        String themePref = sharedPref.getString(getString(R.string.pref_theme_key), getString(R.string.pref_theme_default));
-        boolean darkTheme = sharedPref.getBoolean(getString(R.string.pref_dark_theme_key), getResources().getBoolean(R.bool.pref_theme_dark_default));
-        if (darkTheme) {
-            if (themePref.equals(getString(R.string.pref_indigo_key))) {
-                setTheme(R.style.AppTheme_indigo);
-            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
-                setTheme(R.style.AppTheme_orange);
-            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
-                setTheme(R.style.AppTheme_deepOrange);
-            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
-                setTheme(R.style.AppTheme_blue);
-            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
-                setTheme(R.style.AppTheme_darkGrey);
-            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
-                setTheme(R.style.AppTheme_brown);
-            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
-                setTheme(R.style.AppTheme_lightGreen);
-            } else if (themePref.equals(getString(R.string.pref_red_key))) {
-                setTheme(R.style.AppTheme_red);
-            }
-        } else {
-            if (themePref.equals(getString(R.string.pref_indigo_key))) {
-                setTheme(R.style.AppTheme_indigo_light);
-            } else if (themePref.equals(getString(R.string.pref_orange_key))) {
-                setTheme(R.style.AppTheme_orange_light);
-            } else if (themePref.equals(getString(R.string.pref_deeporange_key))) {
-                setTheme(R.style.AppTheme_deepOrange_light);
-            } else if (themePref.equals(getString(R.string.pref_blue_key))) {
-                setTheme(R.style.AppTheme_blue_light);
-            } else if (themePref.equals(getString(R.string.pref_darkgrey_key))) {
-                setTheme(R.style.AppTheme_darkGrey_light);
-            } else if (themePref.equals(getString(R.string.pref_brown_key))) {
-                setTheme(R.style.AppTheme_brown_light);
-            } else if (themePref.equals(getString(R.string.pref_lightgreen_key))) {
-                setTheme(R.style.AppTheme_lightGreen_light);
-            } else if (themePref.equals(getString(R.string.pref_red_key))) {
-                setTheme(R.style.AppTheme_red_light);
-            }
-        }
-        if (themePref.equals(getString(R.string.pref_oleddark_key))) {
-            setTheme(R.style.AppTheme_oledDark);
-        }
         super.onCreate(savedInstanceState);
         mDecorView = getWindow().getDecorView();
 
@@ -324,7 +279,6 @@ public class FanartActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        ConnectionManager.reconnectLastServer(getApplicationContext());
 
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
@@ -338,10 +292,6 @@ public class FanartActivity extends Activity {
 
         hideSystemUI();
 
-        // Check if hardware key control is enabled by the user
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
-
         setVolumeControlSetting();
     }
 
@@ -352,12 +302,7 @@ public class FanartActivity extends Activity {
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
         cancelSwitching();
-
-        if (!isChangingConfigurations()) {
-            // Disconnect from MPD server
-            ConnectionManager.disconnectFromServer();
-        }
-    }
+            }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -379,22 +324,6 @@ public class FanartActivity extends Activity {
         mLastTrack = savedInstanceState.getParcelable(STATE_LAST_TRACK);
     }
 
-    /**
-     * Handles the volume keys of the device to control MPDs volume.
-     *
-     * @param event KeyEvent that was pressed by the user.
-     * @return True if handled by MALP
-     */
-    @Override
-    public boolean dispatchKeyEvent(KeyEvent event) {
-        if (mHardwareControls) {
-            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
-                return super.dispatchKeyEvent(event);
-            } else return true;
-        } else {
-            return super.dispatchKeyEvent(event);
-        }
-    }
 
     private void updateMPDStatus(MPDCurrentStatus status) {
         MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
