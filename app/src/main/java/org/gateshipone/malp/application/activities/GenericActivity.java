@@ -94,43 +94,25 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     @Override
     protected void onResume() {
         super.onResume();
-        ConnectionManager.reconnectLastServer(getApplicationContext());
+        ConnectionManager.registerMPDUse(getApplicationContext());
 
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
-
-        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification) {
-            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
-            showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_BACKGROUND_SERVICE);
-            startService(showNotificationIntent);
-        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         if (!isChangingConfigurations()) {
             // Disconnect from MPD server
-            ConnectionManager.disconnectFromServer();
+            ConnectionManager.unregisterMPDUse(getApplicationContext());
         }
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
-
-        // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, BackgroundService.class);
-        connectIntent.setAction(BackgroundService.ACTION_CONNECT);
-        startService(connectIntent);
-
-        boolean showNotification = sharedPref.getBoolean(getString(R.string.pref_show_notification_key), getResources().getBoolean(R.bool.pref_show_notification_default));
-        if (showNotification && status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
-            Intent showNotificationIntent = new Intent(this, BackgroundService.class);
-            showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
-            startService(showNotificationIntent);
-        }
     }
 
 
