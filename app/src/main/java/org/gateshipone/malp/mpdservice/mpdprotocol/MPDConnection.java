@@ -188,7 +188,7 @@ public class MPDConnection {
      * Private function to handle read error. Try to disconnect and remove old sockets.
      * Clear up connection state variables.
      */
-    private void handleSocketError() {
+    private synchronized void handleSocketError() {
         printDebug("Read error exception. Disconnecting and cleaning up");
 
         try {

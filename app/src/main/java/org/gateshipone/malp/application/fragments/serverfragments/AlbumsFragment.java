@@ -133,7 +133,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             mArtist = args.getParcelable(BUNDLE_STRING_EXTRA_ARTIST);
         } else {
             mAlbumsPath = "";
-            mArtist = null;
+            // Create dummy album
+            mArtist = new MPDArtist("");
         }
 
         mAdapterView.setAdapter(mAlbumsAdapter);

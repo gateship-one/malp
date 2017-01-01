@@ -29,30 +29,47 @@ import java.util.List;
 
 public class MPDSortHelper {
 
+    /**
+     * Sorts a list of {@link MPDFileEntry} objects in the right order of their index (if
+     * the objects are from type {@link MPDFile}. All other elements are located at the end of the list.
+     * @param inList List of objects to sort.
+     */
     public static void sortFileListNumeric(List<MPDFileEntry> inList) {
-        ArrayList<MPDFile> resList = new ArrayList<>();
+        ArrayList<MPDFileEntry> resList = new ArrayList<>();
 
         if ( inList.size() == 0) {
             return;
         }
 
-        MPDFile insElement = (MPDFile)inList.remove(0);
-        resList.add(0, insElement);
-        while ( inList.size() != 0 ) {
-            insElement = (MPDFile)inList.remove(0);
+        MPDFileEntry tmpElement = inList.remove(0);
+        MPDFile trackElement;
 
-            for( int i = 0; i < resList.size(); i++ ) {
-                // Check if the element in result list is "bigger" then add the element here.
-                if ( resList.get(i).indexCompare(insElement) == 1 ) {
-                    resList.add(i, insElement);
-                    insElement = null;
-                    break;
+        resList.add(0, tmpElement);
+        while ( inList.size() != 0 ) {
+            tmpElement = inList.remove(0);
+            if ( tmpElement instanceof MPDFile) {
+                trackElement = (MPDFile)tmpElement;
+
+                for( int i = 0; i < resList.size(); i++ ) {
+                    MPDFileEntry compareItem = resList.get(i);
+                    // Check if the element in result list is "bigger" then add the element here.
+                    if ( (compareItem instanceof MPDFile) && ((MPDFile)compareItem).indexCompare(trackElement) == 1 ) {
+                        resList.add(i, tmpElement);
+                        tmpElement = null;
+                        break;
+                    } else if ( !(compareItem instanceof MPDFile) ) {
+                        resList.add(i,tmpElement);
+                        tmpElement = null;
+                        break;
+                    }
                 }
             }
+
+
             // If the element to add was the biggest add at the end
-            if ( null != insElement ) {
+            if ( null != tmpElement ) {
                 // Add at the end
-                resList.add(insElement);
+                resList.add(tmpElement);
             }
         }
         inList.addAll(resList);
