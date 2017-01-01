@@ -78,12 +78,23 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
      * Save the last position here. Gets reused when the user returns to this view after selecting sme
      * albums.
      */
-    private int mLastPosition;
+    private int mLastPosition = -1;
 
     /**
      * Adapter used by the ListView
      */
     private FileAdapter mAdapter;
+
+    /**
+     * Saved search string when user rotates devices
+     */
+    private String mSearchString;
+
+    /**
+     * Constant for state saving
+     */
+    public final static String FILESFRAGMENT_SAVED_INSTANCE_SEARCH_STRING = "FilesFragment.SearchString";
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -122,6 +133,11 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 refreshContent();
             }
         });
+
+        // try to resume the saved search string
+        if (savedInstanceState != null) {
+            mSearchString = savedInstanceState.getString(FILESFRAGMENT_SAVED_INSTANCE_SEARCH_STRING);
+        }
 
         setHasOptionsMenu(true);
 
@@ -181,6 +197,14 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         } catch (ClassCastException e) {
             mFABCallback = null;
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save the already typed search string (or null if nothing is entered)
+        outState.putString(FILESFRAGMENT_SAVED_INSTANCE_SEARCH_STRING, mSearchString);
     }
 
     /**
@@ -288,6 +312,18 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         }
 
         SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        // Check if a search string is saved from before
+        if (mSearchString != null) {
+            // Expand the view
+            searchView.setIconified(false);
+            menu.findItem(R.id.action_search).expandActionView();
+            // Set the query string
+            searchView.setQuery(mSearchString, false);
+
+            // Notify the adapter
+            applyFilter(mSearchString);
+        }
 
         searchView.setOnQueryTextListener(new SearchTextObserver());
 
@@ -403,8 +439,10 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         @Override
         public boolean onQueryTextSubmit(String query) {
             if (!query.isEmpty()) {
+                mSearchString = query;
                 applyFilter(query);
             } else {
+                mSearchString = null;
                 removeFilter();
             }
             return false;
@@ -413,8 +451,10 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         @Override
         public boolean onQueryTextChange(String newText) {
             if (!newText.isEmpty()) {
+                mSearchString = newText;
                 applyFilter(newText);
             } else {
+                mSearchString = null;
                 removeFilter();
             }
 

@@ -63,6 +63,17 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
     private Menu mOptionMenu;
 
+    /**
+     * Saved search string when user rotates devices
+     */
+    private String mSearchString;
+
+    /**
+     * Constant for state saving
+     */
+    public final static String MYMUSICFRAGMENT_SAVED_INSTANCE_SEARCH_STRING = "MyMusicFragment.SearchString";
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -103,19 +114,22 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
         DEFAULTTAB tab = DEFAULTTAB.ALBUMS;
 
-        if (args != null) {
+        if (args != null && savedInstanceState == null) {
             tab = DEFAULTTAB.values()[args.getInt(MY_MUSIC_REQUESTED_TAB)];
+            switch (tab) {
+                case ARTISTS:
+                    mViewPager.setCurrentItem(0);
+                    break;
+                case ALBUMS:
+                    mViewPager.setCurrentItem(1);
+                    break;
+            }
         }
 
-        switch (tab) {
-            case ARTISTS:
-                mViewPager.setCurrentItem(0);
-                break;
-            case ALBUMS:
-                mViewPager.setCurrentItem(1);
-                break;
+        // try to resume the saved search string
+        if (savedInstanceState != null) {
+            mSearchString = savedInstanceState.getString(MYMUSICFRAGMENT_SAVED_INSTANCE_SEARCH_STRING);
         }
-
 
         setHasOptionsMenu(true);
         return rootView;
@@ -128,7 +142,6 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         if (view != null ) {
             // dismiss searchview
             if (mSearchView != null && mOptionMenu != null && !mSearchView.isIconified()) {
-                Log.v(TAG,"Deiconfy");
                 mSearchView.setIconified(true);
                 mOptionMenu.findItem(R.id.action_search).collapseActionView();
             }
@@ -166,6 +179,14 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        // save the already typed search string (or null if nothing is entered)
+        outState.putString(MYMUSICFRAGMENT_SAVED_INSTANCE_SEARCH_STRING, mSearchString);
+    }
+
     /**
      * Initialize the options menu.
      * Be sure to call {@link #setHasOptionsMenu} before.
@@ -189,6 +210,19 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         menu.findItem(R.id.action_search).setIcon(drawable);
 
         mSearchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+
+        // Check if a search string is saved from before
+        if (mSearchString != null) {
+            // Expand the view
+            mSearchView.setIconified(false);
+            menu.findItem(R.id.action_search).expandActionView();
+            // Set the query string
+            mSearchView.setQuery(mSearchString, false);
+
+            GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
+            // Notify the adapter
+            fragment.applyFilter(mSearchString);
+        }
 
         mSearchView.setOnQueryTextListener(new SearchTextObserver());
 
@@ -278,8 +312,10 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         private void applyFilter(String filter) {
             GenericMPDFragment fragment = mMyMusicPagerAdapter.getRegisteredFragment(mViewPager.getCurrentItem());
             if (filter.isEmpty()) {
+                mSearchString = null;
                 fragment.removeFilter();
             } else {
+                mSearchString = filter;
                 fragment.applyFilter(filter);
             }
         }

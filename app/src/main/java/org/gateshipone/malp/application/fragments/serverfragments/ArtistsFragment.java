@@ -69,7 +69,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
      * Save the last position here. Gets reused when the user returns to this view after selecting sme
      * albums.
      */
-    private int mLastPosition;
+    private int mLastPosition = -1;
 
 
     private ArtistSelectedCallback mSelectedCallback;

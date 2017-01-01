@@ -84,7 +84,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      * Save the last position here. Gets reused when the user returns to this view after selecting sme
      * albums.
      */
-    private int mLastPosition;
+    private int mLastPosition = -1;
 
     private String mAlbumsPath;
 
