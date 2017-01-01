@@ -21,7 +21,6 @@
 
 package org.gateshipone.malp.application.activities;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,17 +28,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
+
+import java.lang.ref.WeakReference;
 
 
 public abstract class GenericActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private boolean mHardwareControls;
 
+    private MPDConnectionStateCallbackHandler mConnectionCallback;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,11 +90,15 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         if (themePref.equals(getString(R.string.pref_oleddark_key))) {
             setTheme(R.style.AppTheme_oledDark);
         }
+        mConnectionCallback = new MPDConnectionStateCallbackHandler(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
+
         ConnectionManager.registerMPDUse(getApplicationContext());
 
         // Check if hardware key control is enabled by the user
@@ -113,6 +118,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         }
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
+
+        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
     }
 
 
@@ -137,6 +144,37 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
             } else return true;
         } else {
             return super.dispatchKeyEvent(event);
+        }
+    }
+
+    protected abstract void onConnected();
+    protected abstract void onDisconnected();
+
+    private static class MPDConnectionStateCallbackHandler extends MPDConnectionStateChangeHandler {
+        private WeakReference<GenericActivity> mActivity;
+
+        MPDConnectionStateCallbackHandler(GenericActivity activity) {
+            mActivity = new WeakReference<GenericActivity>(activity);
+        }
+
+        @Override
+        public void onConnected() {
+            mActivity.get().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivity.get().onConnected();
+                }
+            });
+        }
+
+        @Override
+        public void onDisconnected() {
+            mActivity.get().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mActivity.get().onDisconnected();
+                }
+            });
         }
     }
 }

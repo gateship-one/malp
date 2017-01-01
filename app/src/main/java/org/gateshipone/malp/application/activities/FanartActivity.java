@@ -90,8 +90,6 @@ public class FanartActivity extends GenericActivity {
 
     private ServerStatusListener mStateListener = null;
 
-    private ServerConnectionHandler mConnectionListener;
-
     private ViewSwitcher mSwitcher;
     private Timer mSwitchTimer;
 
@@ -195,9 +193,6 @@ public class FanartActivity extends GenericActivity {
             mStateListener = new ServerStatusListener();
         }
 
-        if (null == mConnectionListener) {
-            mConnectionListener = new ServerConnectionHandler();
-        }
 
         mInfoLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -281,7 +276,6 @@ public class FanartActivity extends GenericActivity {
         super.onResume();
 
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
-        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
         cancelSwitching();
         mSwitchTimer = new Timer();
         mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
@@ -300,9 +294,19 @@ public class FanartActivity extends GenericActivity {
         super.onPause();
 
         MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
-        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
         cancelSwitching();
-            }
+    }
+
+    @Override
+    protected void onConnected() {
+        updateMPDStatus(MPDStateMonitoringHandler.getLastStatus());
+    }
+
+    @Override
+    protected void onDisconnected() {
+        updateMPDStatus(new MPDCurrentStatus());
+        updateMPDCurrentTrack(new MPDFile(""));
+    }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -369,6 +373,7 @@ public class FanartActivity extends GenericActivity {
     /**
      * Reacts to new MPD tracks. Shows new track name, album, artist and triggers the fetching
      * of the Fanart.
+     *
      * @param track New {@link MPDFile} that is playing
      */
     private void updateMPDCurrentTrack(final MPDFile track) {
@@ -623,6 +628,7 @@ public class FanartActivity extends GenericActivity {
 
     /**
      * Checks if downloading of images is allowed by the users policy.
+     *
      * @return True if internet downloads are allowed. False otherwise.
      */
     private boolean downloadAllowed() {
@@ -752,18 +758,4 @@ public class FanartActivity extends GenericActivity {
         }
     }
 
-    /**
-     * Handles MPD server connects/disconnects.
-     */
-    private class ServerConnectionHandler extends MPDConnectionStateChangeHandler {
-        @Override
-        public void onConnected() {
-            updateMPDStatus(MPDStateMonitoringHandler.getLastStatus());
-        }
-
-        @Override
-        public void onDisconnected() {
-            updateMPDStatus(new MPDCurrentStatus());
-        }
-    }
 }

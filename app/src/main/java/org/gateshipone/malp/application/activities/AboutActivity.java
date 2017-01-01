@@ -88,4 +88,14 @@ public class AboutActivity extends GenericActivity {
             }
         });
     }
+
+    @Override
+    protected void onConnected() {
+
+    }
+
+    @Override
+    protected void onDisconnected() {
+
+    }
 }

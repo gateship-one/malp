@@ -52,6 +52,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 
 import org.gateshipone.malp.R;
@@ -80,6 +81,7 @@ import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDia
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -94,8 +96,7 @@ public class MainActivity extends GenericActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
         ProfileManageCallbacks, PlaylistCallback,
         NowPlayingView.NowPlayingDragStatusReceiver, FilesFragment.FilesCallback,
-        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback
-        {
+        FABFragmentCallback, SettingsFragment.OnArtworkSettingsRequestedCallback {
 
 
     private static final String TAG = "MainActivity";
@@ -411,7 +412,6 @@ public class MainActivity extends GenericActivity
         drawer.closeDrawer(GravityCompat.START);
 
 
-
         // Do the actual fragment transaction
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment_container, fragment, fragmentTag);
@@ -472,6 +472,16 @@ public class MainActivity extends GenericActivity
         }
 
 
+    }
+
+    @Override
+    protected void onConnected() {
+        setNavbarHeader(ConnectionManager.getProfileName());
+    }
+
+    @Override
+    protected void onDisconnected() {
+        setNavbarHeader(getString(R.string.app_name_nice));
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
@@ -584,7 +594,6 @@ public class MainActivity extends GenericActivity
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
     }
-
 
 
     @Override
@@ -818,6 +827,11 @@ public class MainActivity extends GenericActivity
         transaction.commit();
     }
 
+    public void setNavbarHeader(String text) {
+        TextView header = (TextView) findViewById(R.id.navdrawer_header_text);
+        header.setText(text);
+    }
+
     @Override
     public void openArtworkSettings() {
         // Create fragment and give it an argument for the selected directory
@@ -837,8 +851,5 @@ public class MainActivity extends GenericActivity
         // Commit the transaction
         transaction.commit();
     }
-
-
-
 
 }

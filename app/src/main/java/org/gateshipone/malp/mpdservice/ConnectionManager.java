@@ -82,6 +82,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     private int mUseCounter;
 
+    private MPDServerProfile mServerProfile;
+
     private ConnectionManager() {
         MPDStateMonitoringHandler.registerConnectionStateListener(this);
         MPDQueryHandler.registerConnectionStateListener(this);
@@ -115,6 +117,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         String hostname = getInstance().mHostname;
         String password = getInstance().mPassword;
         int port = getInstance().mPort;
+        mConnectionManager.mServerProfile = profile;
 
         MPDConnection.getInstance().setServerParameters(hostname, password, port);
     }
@@ -141,7 +144,9 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     public static void autoConnect(Context context) {
         MPDProfileManager profileManager = new MPDProfileManager(context.getApplicationContext());
 
-        setParameters(profileManager.getAutoconnectProfile(),context);
+        mConnectionManager.mServerProfile = profileManager.getAutoconnectProfile();
+
+        setParameters(mConnectionManager.mServerProfile,context);
     }
 
     private synchronized void increaseMPDUse(Context context) {
@@ -275,5 +280,9 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
             disconnectFromServer();
         }
+    }
+
+    public static String getProfileName() {
+        return mConnectionManager.mServerProfile.getProfileName();
     }
 }
