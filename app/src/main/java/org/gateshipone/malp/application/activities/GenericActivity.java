@@ -159,22 +159,28 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         @Override
         public void onConnected() {
-            mActivity.get().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mActivity.get().onConnected();
-                }
-            });
+            final GenericActivity activity = mActivity.get();
+            if ( null != activity ) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.onConnected();
+                    }
+                });
+            }
         }
 
         @Override
         public void onDisconnected() {
-            mActivity.get().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mActivity.get().onDisconnected();
-                }
-            });
+            final GenericActivity activity = mActivity.get();
+            if ( null != activity ) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        activity.onDisconnected();
+                    }
+                });
+            }
         }
     }
 }
