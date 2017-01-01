@@ -61,7 +61,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
      * Time to wait until the disconnect is initiated. This will also start the background service
      * to feed the widget & show the notification (if enabled in shared preferences)
      */
-    private static final int DISCONNECT_DELAY_TIME = 1 * 1000;
+    private static final int DISCONNECT_DELAY_TIME = 500;
 
     private static final int SHORT_RECONNECT_TRIES = 5;
 
