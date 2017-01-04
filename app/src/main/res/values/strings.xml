@@ -68,6 +68,8 @@
     <string name="action_remove_from_list">Remove from playlist</string>
 
     <string name="action_jump_to_current">Jump to current song</string>
+    <string name="action_toggle_single_mode">Single playback</string>
+    <string name="action_toggle_consume_mode">Consume track</string>
     <string name="action_open_fanart">Go to fullscreen mode</string>
 
     <string name="action_enqueue">Add to playlist</string>

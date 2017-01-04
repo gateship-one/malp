@@ -23,32 +23,45 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/action_toggle_single_mode"
+        android:title="@string/action_toggle_single_mode"
+        android:checkable="true"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/action_toggle_consume_mode"
+        android:title="@string/action_toggle_consume_mode"
+        android:checkable="true"
+        android:orderInCategory="1"
+        app:showAsAction="never"/>
+    <group
+        android:id="@+id/group_playlist_actions">
+    <item
         android:id="@+id/action_save_playlist"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         android:title="@string/action_save_playlist"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_clear_playlist"
-        android:orderInCategory="100"
+        android:orderInCategory="3"
         android:title="@string/action_clear_playlist"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_add_url"
-        android:orderInCategory="100"
+        android:orderInCategory="4"
         android:title="@string/action_add_url"
         app:showAsAction="never" />
-
     <item
         android:id="@+id/action_jump_to_current"
-        android:orderInCategory="100"
+        android:orderInCategory="5"
         android:title="@string/action_jump_to_current"
         app:showAsAction="never" />
-
+    </group>
     <item
         android:id="@+id/action_open_fanart"
-        android:orderInCategory="100"
+        android:orderInCategory="6"
         android:icon="@drawable/ic_fullscreen_24dp"
         android:title="@string/action_open_fanart"
         app:showAsAction="never" />

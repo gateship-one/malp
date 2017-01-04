@@ -396,6 +396,24 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             case R.id.action_jump_to_current:
                 mPlaylistView.jumpToCurrentSong();
                 break;
+            case R.id.action_toggle_single_mode:
+                if (null != mLastStatus) {
+                    if (mLastStatus.getSinglePlayback() == 0) {
+                        MPDCommandHandler.setSingle(true);
+                    } else {
+                        MPDCommandHandler.setSingle(false);
+                    }
+                }
+                break;
+            case R.id.action_toggle_consume_mode:
+                if (null != mLastStatus) {
+                    if (mLastStatus.getConsume() == 0) {
+                        MPDCommandHandler.setConsume(true);
+                    } else {
+                        MPDCommandHandler.setConsume(false);
+                    }
+                }
+                break;
             case R.id.action_open_fanart:
                 Intent intent = new Intent(getContext(), FanartActivity.class);
                 getContext().startActivity(intent);
@@ -946,6 +964,21 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         menu.inflate(R.menu.popup_menu_nowplaying);
         // Set the main NowPlayingView as a listener (directly implements callback)
         menu.setOnMenuItemClickListener(this);
+
+        // Set the checked menu item state if a MPDCurrentStatus is available
+        if ( null != mLastStatus ) {
+            MenuItem singlePlaybackItem = menu.getMenu().findItem(R.id.action_toggle_single_mode);
+            singlePlaybackItem.setChecked(mLastStatus.getSinglePlayback() == 1);
+
+            MenuItem consumeItem = menu.getMenu().findItem(R.id.action_toggle_consume_mode);
+            consumeItem.setChecked(mLastStatus.getConsume() == 1);
+        }
+
+        // Check if the current view is the cover or the playlist. If it is the playlist hide its actions.
+        if (mViewSwitcher.getDisplayedChild() == 0 ) {
+            menu.getMenu().setGroupEnabled(R.id.group_playlist_actions, false);
+            menu.getMenu().setGroupVisible(R.id.group_playlist_actions, false);
+        }
         // Open the menu itself
         menu.show();
     }

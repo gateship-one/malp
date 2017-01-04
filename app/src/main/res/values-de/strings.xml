@@ -200,4 +200,6 @@
     <string name="bulk_download_notice_title">Bilder-Download</string>
     <string name="bulk_download_notice_text">Das Herunterladen von vielen Bildern sorgt für eine hohe Serverauslastung beim Bilderanbieter. Es kann vorkommen, dass die Serverauslastung zu groß wird. In diesem Fall wird der Downloader seine Aktion abbrechen.\n\nBitte ziehen Sie eine Spende an die ausgewählten Bilderanbieter in Betracht.</string>
     <string name="thirdparty_licenses_dialog_title">Drittanbieterlizenzen</string>
+    <string name="action_toggle_consume_mode">Verbrauche Lied</string>
+    <string name="action_toggle_single_mode">Einzelwiedergabe</string>
 </resources>
