@@ -155,10 +155,12 @@ public class MainActivity extends GenericActivity
             mDrawerToggle.syncState();
         }
 
+        int navId = getDefaultViewID();
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
-            navigationView.setCheckedItem(R.id.nav_library);
+            navigationView.setCheckedItem(navId);
         }
 
 
@@ -168,25 +170,6 @@ public class MainActivity extends GenericActivity
         mProfileManager = new MPDProfileManager(getApplicationContext());
 
         registerForContextMenu(findViewById(R.id.main_listview));
-
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        // Read default view preference
-        String defaultView = sharedPref.getString(getString(R.string.pref_start_view_key), getString(R.string.pref_view_default));
-
-        // the default tab for mymusic
-        MyMusicTabsFragment.DEFAULTTAB defaultTab = null;
-        // the nav ressource id to mark the right item in the nav drawer
-        int navId = R.id.nav_library;
-
-        if (defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
-            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
-        } else if (defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
-            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
-        } else if (defaultView.equals(getString(R.string.pref_view_playlists_key))) {
-            navId = R.id.nav_saved_playlists;
-        } else if (defaultView.equals(getString(R.string.pref_view_files_key))) {
-            navId = R.id.nav_files;
-        }
 
 
         if (mProfileManager.getProfiles().size() == 0) {
@@ -205,16 +188,18 @@ public class MainActivity extends GenericActivity
             dialog.show();
         }
 
-        navigationView.setCheckedItem(navId);
-
-        if ((findViewById(R.id.fragment_container) != null) && (savedInstanceState == null)) {
-
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState != null) {
+                return;
+            }
+            
             Fragment fragment = null;
 
             if (navId == R.id.nav_library) {
                 fragment = new MyMusicTabsFragment();
-
+                MyMusicTabsFragment.DEFAULTTAB defaultTab = getDefaultTab();
                 Bundle args = new Bundle();
+                Log.v(TAG,"Default tab: " + defaultTab.ordinal());
                 args.putInt(MyMusicTabsFragment.MY_MUSIC_REQUESTED_TAB, defaultTab.ordinal());
 
                 fragment.setArguments(args);
@@ -852,4 +837,41 @@ public class MainActivity extends GenericActivity
         transaction.commit();
     }
 
+    private MyMusicTabsFragment.DEFAULTTAB getDefaultTab() {
+        // Read default view preference
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String defaultView = sharedPref.getString(getString(R.string.pref_start_view_key), getString(R.string.pref_view_default));
+
+        // the default tab for mymusic
+        MyMusicTabsFragment.DEFAULTTAB defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
+
+        if (defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
+            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ARTISTS;
+        } else if (defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
+            defaultTab = MyMusicTabsFragment.DEFAULTTAB.ALBUMS;
+        }
+
+        return defaultTab;
+    }
+
+    private int getDefaultViewID() {
+        // Read default view preference
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        String defaultView = sharedPref.getString(getString(R.string.pref_start_view_key), getString(R.string.pref_view_default));
+
+        // the nav resource id to mark the right item in the nav drawer
+        int navId = -1;
+
+        if (defaultView.equals(getString(R.string.pref_view_my_music_artists_key))) {
+            navId = R.id.nav_library;
+        } else if (defaultView.equals(getString(R.string.pref_view_my_music_albums_key))) {
+            navId = R.id.nav_library;
+        } else if (defaultView.equals(getString(R.string.pref_view_playlists_key))) {
+            navId = R.id.nav_saved_playlists;
+        } else if (defaultView.equals(getString(R.string.pref_view_files_key))) {
+            navId = R.id.nav_files;
+        }
+
+        return navId;
+    }
 }
