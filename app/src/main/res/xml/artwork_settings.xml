@@ -21,6 +21,8 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:title="@string/preference_category_artwork_settings">
     <ListPreference
         android:defaultValue="musicbrainz"
         android:dialogTitle="@string/preference_artwork_album_provider_title"
@@ -46,6 +48,9 @@
         android:defaultValue="@bool/pref_download_wifi_default"
         android:key="@string/pref_download_wifi_only_key"
         />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preference_category_artwork_database_cleanup">
     <Preference
         android:key="@string/pref_clear_album_key"
         android:title="@string/preference_artwork_clear_album"
@@ -62,11 +67,12 @@
         android:key="@string/pref_clear_blocked_artist_key"
         android:title="@string/preference_artwork_clear_blocked_artist"
         android:summary="@string/preference_artwork_clear_blocked_artist_summary"/>
-
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/preference_category_artwork_other_actions">
     <Preference
         android:key="@string/pref_bulk_load_key"
         android:title="@string/preference_artwork_bulk_load"
         android:summary="@string/preference_artwork_bulk_load_summary"/>
-
-
+    </PreferenceCategory>
 </PreferenceScreen>

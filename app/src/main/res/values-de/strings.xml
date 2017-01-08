@@ -202,4 +202,11 @@
     <string name="thirdparty_licenses_dialog_title">Drittanbieterlizenzen</string>
     <string name="action_toggle_consume_mode">Verbrauche Lied</string>
     <string name="action_toggle_single_mode">Einzelwiedergabe</string>
+    <string name="preference_category_artwork_database_cleanup">Datenbankbereinigung</string>
+    <string name="preference_category_artwork_other_actions">Andere Aktionen</string>
+    <string name="preference_category_artwork_settings">Bildereinstellungen</string>
+    <string name="preference_category_controls">Steuerung</string>
+    <string name="preference_category_design">Design</string>
+    <string name="preference_category_library">Bibliothek</string>
+    <string name="preference_category_other">Andere</string>
 </resources>

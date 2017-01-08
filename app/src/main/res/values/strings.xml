@@ -261,6 +261,11 @@
     <string name="preference_show_notification_title">Show notification</string>
     <string name="preference_show_notification_text">Show a notification when leaving the main user interface.</string>
 
+    <string name="preference_category_design">Design</string>
+    <string name="preference_category_library">Library</string>
+    <string name="preference_category_controls">Controls</string>
+    <string name="preference_category_other">Other</string>
+
     <!-- artwork preferences -->
     <string name="preference_artwork_album_provider_title">Album image provider</string>
     <string name="preference_artwork_album_provider_summary">Select an provider for album cover images.</string>
@@ -302,6 +307,11 @@
 
     <string name="preference_artwork_wifi_only_title">Only use WIFI for downloading</string>
     <string name="preference_artwork_wifi_only_text">Artwork downloading will only take place if the device is connected via WIFI.</string>
+
+    <string name="preference_category_artwork_settings">Artwork settings</string>
+    <string name="preference_category_artwork_database_cleanup">Database cleanup</string>
+    <string name="preference_category_artwork_other_actions">Other actions</string>
+
 
     <string name="search_choice_track">Track</string>
     <string name="search_choice_album">Album</string>
