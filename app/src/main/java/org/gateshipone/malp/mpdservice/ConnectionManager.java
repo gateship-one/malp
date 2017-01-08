@@ -157,6 +157,11 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
                 mDisconnectTimer.purge();
                 mDisconnectTimer = null;
             }
+
+            /**
+             * Make sure that the {@link BackgroundService} is stopped because there is no need for it
+             * if the application is shown.
+             */
             Intent showNotificationIntent = new Intent(context, BackgroundService.class);
             showNotificationIntent.setAction(BackgroundService.ACTION_QUIT_BACKGROUND_SERVICE);
             context.startService(showNotificationIntent);
