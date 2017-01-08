@@ -975,7 +975,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         // Check if the current view is the cover or the playlist. If it is the playlist hide its actions.
-        if (mViewSwitcher.getDisplayedChild() == 0 ) {
+        // If the viewswitcher only has one child the dual pane layout is used
+        if (mViewSwitcher.getDisplayedChild() == 0 && (mViewSwitcher.getChildCount() > 1) ) {
             menu.getMenu().setGroupEnabled(R.id.group_playlist_actions, false);
             menu.getMenu().setGroupVisible(R.id.group_playlist_actions, false);
         }
