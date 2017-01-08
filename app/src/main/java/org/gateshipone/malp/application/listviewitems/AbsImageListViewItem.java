@@ -133,6 +133,7 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
                 mLoaderTask.cancel(true);
             }
             mLoaderTask = null;
+            mHolder.modelItem = null;
 
             mCoverDone = false;
             mSwitcher.setOutAnimation(null);
