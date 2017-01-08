@@ -139,17 +139,13 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * Hides the notification (if shown) and resets state variables.
      */
     public void hideNotification() {
-        if (!mSessionActive) {
-            return;
-        }
-
         if ( mMediaSession != null ) {
             mMediaSession.setActive(false);
             mMediaSession = null;
         }
 
+        mNotificationManager.cancel(NOTIFICATION_ID);
         if (mNotification != null) {
-            mNotificationManager.cancel(NOTIFICATION_ID);
 
             mNotification = null;
             mNotificationBuilder = null;
