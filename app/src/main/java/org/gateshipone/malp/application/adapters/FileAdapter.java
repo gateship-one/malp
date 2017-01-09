@@ -56,6 +56,9 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
         mShowIcons = showIcons;
         mContext = context;
         mShowTrackNumbers = showTrackNumbers;
+
+        // Disable sections as they cause troubles for directories,files,playlists order and repeating starting letters
+        enableSections(false);
     }
 
     /**

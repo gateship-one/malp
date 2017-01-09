@@ -52,7 +52,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
     private String mFilterString;
 
-
+    private boolean mSectionsEnabled;
     /**
      * Task used to do the filtering of the list asynchronously
      */
@@ -70,6 +70,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
         mFilteredModelData = new ArrayList<>();
         mFilterString = "";
+
+        mSectionsEnabled = true;
     }
 
     /**
@@ -92,9 +94,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
         }
         setScrollSpeed(0);
 
-        if ( mFilterString.isEmpty()) {
+        if (mFilterString.isEmpty()) {
             // create sectionlist for fastscrolling
-            createSections();
+            if (mSectionsEnabled) {
+                createSections();
+            }
 
             notifyDataSetChanged();
         } else {
@@ -115,7 +119,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     @Override
     public int getPositionForSection(int sectionIndex) {
-        return mSectionPositions.get(sectionIndex);
+        if (mSectionsEnabled) {
+            return mSectionPositions.get(sectionIndex);
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -126,19 +134,21 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     @Override
     public int getSectionForPosition(int pos) {
+        if (mSectionsEnabled) {
+            String sectionTitle = ((MPDGenericItem) getItem(pos)).getSectionTitle();
 
-        String sectionTitle = ((MPDGenericItem)getItem(pos)).getSectionTitle();
+            char itemSection;
+            if (sectionTitle.length() > 0) {
+                itemSection = sectionTitle.toUpperCase().charAt(0);
+            } else {
+                itemSection = ' ';
+            }
 
-        char itemSection;
-        if (sectionTitle.length() > 0) {
-            itemSection = sectionTitle.toUpperCase().charAt(0);
-        } else {
-            itemSection = ' ';
-        }
-
-        if (mPositionSectionMap.containsKey(itemSection)) {
-            int sectionIndex = mPositionSectionMap.get(itemSection);
-            return sectionIndex;
+            if (mPositionSectionMap.containsKey(itemSection)) {
+                int sectionIndex = mPositionSectionMap.get(itemSection);
+                return sectionIndex;
+            }
+            return 0;
         }
         return 0;
     }
@@ -148,7 +158,10 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     @Override
     public Object[] getSections() {
-        return mSectionList.toArray();
+        if (mSectionsEnabled) {
+            return mSectionList.toArray();
+        }
+        return null;
     }
 
     /**
@@ -257,7 +270,9 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
             mFilterString = "";
 
-            createSections();
+            if (mSectionsEnabled) {
+                createSections();
+            }
 
         }
     }
@@ -293,9 +308,28 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
                     mFilteredModelData.addAll(result.first);
                 }
                 setScrollSpeed(0);
-                createSections();
+                if (mSectionsEnabled) {
+                    createSections();
+                }
             }
         }
 
+    }
+
+    /**
+     * Allows to enable/disable the support for sections of this adapter.
+     * In case of enabling it creates the sections.
+     * In case of disabling it will clear the data.
+     * @param enabled
+     */
+    public void enableSections(boolean enabled) {
+        mSectionsEnabled = enabled;
+        if (mSectionsEnabled) {
+            createSections();
+        } else {
+            mSectionList.clear();
+            mSectionPositions.clear();
+            mPositionSectionMap.clear();
+        }
     }
 }
