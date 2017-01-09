@@ -218,7 +218,12 @@ public class BackgroundService extends Service {
 
     @Override
     public void onLowMemory () {
-        Log.v(TAG,"Widgetservice low on memory, stopping");
+        // Disconnect from server gracefully
+        onMPDDisconnect();
+
+        // Notify the widgets that the service is disconnected now
+        notifyDisconnected();
+
         stopSelf();
     }
 
@@ -286,8 +291,8 @@ public class BackgroundService extends Service {
         checkMPDConnection();
 
         // Notify about new dummy tracks
-        notifyNewTrack(mLastTrack);
         notifyNewStatus(mLastStatus);
+        notifyNewTrack(mLastTrack);
     }
 
     /**

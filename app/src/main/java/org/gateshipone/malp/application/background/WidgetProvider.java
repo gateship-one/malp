@@ -73,7 +73,6 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         super.onUpdate(context, appWidgetManager, appWidgetIds);
-        Log.v(TAG, "onUpdate: " + context + ':' + appWidgetIds.toString());
 
 
         // Call the updateWidget method which will update all instances.
@@ -110,7 +109,7 @@ public class WidgetProvider extends AppWidgetProvider {
             } else if (mLastTrack.getTrackTitle().isEmpty() && !mLastTrack.getPath().isEmpty()) {
                 views.setTextViewText(R.id.widget_big_trackName, FormatHelper.getFilenameFromPath(mLastTrack.getTrackTitle()));
             } else {
-                views.setTextViewText(R.id.widget_big_trackName, context.getString(R.string.track_item_loading));
+                views.setTextViewText(R.id.widget_big_trackName, "");
             }
 
             if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
@@ -213,7 +212,6 @@ public class WidgetProvider extends AppWidgetProvider {
     @Override
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
-        Log.v(TAG, "Received broadcast:" + intent.getAction());
 
         // Type checks
         if (intent.getAction().equals(BackgroundService.ACTION_STATUS_CHANGED)) {
@@ -252,7 +250,6 @@ public class WidgetProvider extends AppWidgetProvider {
         } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
-            Log.v(TAG, "Disconnected");
         }
         // Refresh the widget with the new information
         updateWidget(context);
