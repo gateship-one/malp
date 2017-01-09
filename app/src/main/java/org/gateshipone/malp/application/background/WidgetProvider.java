@@ -29,7 +29,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -39,7 +38,7 @@ import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.lang.ref.WeakReference;
 
@@ -49,7 +48,7 @@ public class WidgetProvider extends AppWidgetProvider {
      * Statically save the last track and status and image. This allows loading the cover image
      * only if it really changed.
      */
-    private static MPDFile mLastTrack;
+    private static MPDTrack mLastTrack;
     private static MPDCurrentStatus mLastStatus;
     private static Bitmap mLastCover = null;
 
@@ -227,7 +226,7 @@ public class WidgetProvider extends AppWidgetProvider {
         } else if (intent.getAction().equals(BackgroundService.ACTION_TRACK_CHANGED)) {
 
             // Extract the payload from the intent
-            MPDFile track = intent.getParcelableExtra(BackgroundService.INTENT_EXTRA_TRACK);
+            MPDTrack track = intent.getParcelableExtra(BackgroundService.INTENT_EXTRA_TRACK);
 
             // Check if a payload was sent
             if (null != track) {

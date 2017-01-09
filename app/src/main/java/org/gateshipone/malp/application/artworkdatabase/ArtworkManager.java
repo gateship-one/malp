@@ -54,7 +54,7 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtis
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
@@ -247,11 +247,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given track.
-     * @param track {@link MPDFile} to get the album image for.
+     * @param track {@link MPDTrack} to get the album image for.
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImageForTrack(final MPDFile track) throws ImageNotFoundException {
+    public Bitmap getAlbumImageForTrack(final MPDTrack track) throws ImageNotFoundException {
         if (null == track) {
             return null;
         }
@@ -398,7 +398,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      *
      * @param track Track to be used for image fetching
      */
-    public void fetchAlbumImage(final MPDFile track) {
+    public void fetchAlbumImage(final MPDTrack track) {
         // Create a dummy album
         MPDAlbum album = new MPDAlbum(track.getTrackAlbum());
         album.setMBID(track.getTrackAlbumMBID());

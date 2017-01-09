@@ -26,16 +26,16 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class FanartImageRequest extends MALPRequest<FanartResponse> {
 
     private final Response.Listener<FanartResponse> mListener;
 
     private String mURL;
-    private MPDFile mTrack;
+    private MPDTrack mTrack;
 
-    public FanartImageRequest(String url, MPDFile track, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
+    public FanartImageRequest(String url, MPDTrack track, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
         super(Request.Method.GET, url, errorListener);
 
         mListener= listener;

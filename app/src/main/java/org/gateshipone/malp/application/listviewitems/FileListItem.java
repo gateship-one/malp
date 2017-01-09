@@ -25,7 +25,6 @@ package org.gateshipone.malp.application.listviewitems;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -35,7 +34,7 @@ import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
@@ -143,7 +142,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      * @param sectionTitle Title of the section (album title for example)
      */
-    public FileListItem(Context context, MPDFile track, int trackNo, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
+    public FileListItem(Context context, MPDTrack track, int trackNo, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
         this(context, sectionTitle, false, adapter);
         setTrack(track, context);
         mNumberView.setText(String.valueOf(trackNo));
@@ -170,7 +169,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      * @param sectionTitle Title of the section (album title for example)
      */
-    public FileListItem(Context context, MPDFile track, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
+    public FileListItem(Context context, MPDTrack track, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
         this(context, sectionTitle, false, adapter);
         setTrack(track, context);
 
@@ -196,7 +195,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param file Track that is used for this view
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      */
-    public FileListItem(Context context, MPDFile file, boolean showIcon) {
+    public FileListItem(Context context, MPDTrack file, boolean showIcon) {
         this(context,showIcon);
         setTrack(file, context);
 
@@ -224,7 +223,7 @@ public class FileListItem extends AbsImageListViewItem {
      * @param trackNo Overridden track number
      * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
      */
-    public FileListItem(Context context, MPDFile track, int trackNo, boolean showIcon) {
+    public FileListItem(Context context, MPDTrack track, int trackNo, boolean showIcon) {
         this(context, track, showIcon);
         mNumberView.setText(String.valueOf(trackNo));
     }
@@ -286,11 +285,11 @@ public class FileListItem extends AbsImageListViewItem {
     }
 
     /**
-     * Extracts the information from a MPDFile.
+     * Extracts the information from a MPDTrack.
      * @param track Track to show the view for.
      * @param context Context used for String extraction
      */
-    public void setTrack(MPDFile track, Context context) {
+    public void setTrack(MPDTrack track, Context context) {
         if ( track != null ) {
             String trackNumber;
 

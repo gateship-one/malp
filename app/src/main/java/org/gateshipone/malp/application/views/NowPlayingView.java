@@ -37,7 +37,6 @@ import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -70,10 +69,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
-
-import java.util.Timer;
-import java.util.TimerTask;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -200,7 +196,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
     private MPDCurrentStatus mLastStatus;
-    private MPDFile mLastTrack;
+    private MPDTrack mLastTrack;
 
     public NowPlayingView(Context context) {
         this(context, null, 0);
@@ -216,7 +212,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mStateListener = new ServerStatusListener();
         mConnectionStateListener = new ServerConnectionListener();
         mLastStatus = new MPDCurrentStatus();
-        mLastTrack = new MPDFile("");
+        mLastTrack = new MPDTrack("");
     }
 
     /**
@@ -1171,7 +1167,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mAudioProperties.setText(properties);
     }
 
-    private void updateMPDCurrentTrack(MPDFile track) {
+    private void updateMPDCurrentTrack(MPDTrack track) {
         if ( track.getTrackTitle().isEmpty()) {
             mTrackName.setText(FormatHelper.getFilenameFromPath(track.getPath()));
         } else {
@@ -1322,7 +1318,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         @Override
-        protected void onNewTrackReady(MPDFile track) {
+        protected void onNewTrackReady(MPDTrack track) {
             updateMPDCurrentTrack(track);
         }
     }
@@ -1337,7 +1333,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         @Override
         public void onDisconnected() {
             updateMPDStatus(new MPDCurrentStatus());
-            updateMPDCurrentTrack(new MPDFile(""));
+            updateMPDCurrentTrack(new MPDTrack(""));
         }
     }
 

@@ -26,12 +26,12 @@ import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.util.List;
 
 public interface FanartProvider {
-    void getTrackArtistMBID(final MPDFile track, final Response.Listener<String> listener, final FanartFetchError errorListener);
+    void getTrackArtistMBID(final MPDTrack track, final Response.Listener<String> listener, final FanartFetchError errorListener);
     void getArtistFanartURLs(final String mbid, final Response.Listener<List<String>> listener, final FanartFetchError errorListener);
-    void getFanartImage(final MPDFile track, final String url, final Response.Listener<FanartResponse> listener, final  Response.ErrorListener errorListener);
+    void getFanartImage(final MPDTrack track, final String url, final Response.Listener<FanartResponse> listener, final  Response.ErrorListener errorListener);
 }

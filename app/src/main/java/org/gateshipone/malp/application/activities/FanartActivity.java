@@ -22,7 +22,6 @@
 package org.gateshipone.malp.application.activities;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -32,8 +31,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -53,16 +50,13 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.Fanart
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
-import org.gateshipone.malp.application.utils.HardwareKeyHandler;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
-import org.gateshipone.malp.mpdservice.ConnectionManager;
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.io.File;
 import java.util.List;
@@ -85,7 +79,7 @@ public class FanartActivity extends GenericActivity {
     private TextView mTrackAlbum;
     private TextView mTrackArtist;
 
-    private MPDFile mLastTrack;
+    private MPDTrack mLastTrack;
 
 
     private ServerStatusListener mStateListener = null;
@@ -305,7 +299,7 @@ public class FanartActivity extends GenericActivity {
     @Override
     protected void onDisconnected() {
         updateMPDStatus(new MPDCurrentStatus());
-        updateMPDCurrentTrack(new MPDFile(""));
+        updateMPDCurrentTrack(new MPDTrack(""));
     }
 
     @Override
@@ -374,9 +368,9 @@ public class FanartActivity extends GenericActivity {
      * Reacts to new MPD tracks. Shows new track name, album, artist and triggers the fetching
      * of the Fanart.
      *
-     * @param track New {@link MPDFile} that is playing
+     * @param track New {@link MPDTrack} that is playing
      */
-    private void updateMPDCurrentTrack(final MPDFile track) {
+    private void updateMPDCurrentTrack(final MPDTrack track) {
         mTrackTitle.setText(track.getTrackTitle());
         mTrackAlbum.setText(track.getTrackAlbum());
         mTrackArtist.setText(track.getTrackArtist());
@@ -428,7 +422,7 @@ public class FanartActivity extends GenericActivity {
                 }
 
                 @Override
-                public void fanartFetchError(MPDFile track) {
+                public void fanartFetchError(MPDTrack track) {
 
                 }
             });
@@ -458,7 +452,7 @@ public class FanartActivity extends GenericActivity {
      *
      * @param track Track to check for new fanart for.
      */
-    private void syncFanart(final MPDFile track) {
+    private void syncFanart(final MPDTrack track) {
         // Get a list of fanart urls for the current artist
         if (!downloadAllowed()) {
             return;
@@ -501,7 +495,7 @@ public class FanartActivity extends GenericActivity {
             }
 
             @Override
-            public void fanartFetchError(MPDFile track) {
+            public void fanartFetchError(MPDTrack track) {
 
             }
         });
@@ -518,7 +512,7 @@ public class FanartActivity extends GenericActivity {
         }
 
         @Override
-        protected void onNewTrackReady(MPDFile track) {
+        protected void onNewTrackReady(MPDTrack track) {
             updateMPDCurrentTrack(track);
         }
     }

@@ -32,14 +32,14 @@ import android.widget.TextView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class SongDetailsDialog extends DialogFragment {
 
     public static final String EXTRA_FILE = "file";
 
 
-    private MPDFile mFile;
+    private MPDTrack mFile;
 
     private TextView mTrackTitle;
     private TextView mTrackAlbum;

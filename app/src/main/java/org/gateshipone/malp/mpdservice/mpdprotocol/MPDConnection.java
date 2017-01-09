@@ -27,7 +27,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
@@ -871,7 +871,7 @@ public class MPDConnection {
      * for MPD file, directory and playlist responses. This allows the GUI to develop
      * one adapter for all three types. Also MPD mixes them when requesting directory listings.
      * <p/>
-     * It will return a list of MPDFileEntry objects which is a parent class for (MPDFile, MPDPlaylist,
+     * It will return a list of MPDFileEntry objects which is a parent class for (MPDTrack, MPDPlaylist,
      * MPDDirectory) you can use instanceof to check which type you got.
      *
      * @param filterArtist    Artist used for filtering against the Artist AND AlbumArtist tag. Non matching tracks
@@ -899,8 +899,8 @@ public class MPDConnection {
             if (response.startsWith(MPDResponses.MPD_RESPONSE_FILE)) {
                 if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
-                    if (tempFileEntry instanceof MPDFile) {
-                        MPDFile file = (MPDFile) tempFileEntry;
+                    if (tempFileEntry instanceof MPDTrack) {
+                        MPDTrack file = (MPDTrack) tempFileEntry;
                         if ((filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
                                 && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))) {
                             trackList.add(tempFileEntry);
@@ -909,31 +909,31 @@ public class MPDConnection {
                         trackList.add(tempFileEntry);
                     }
                 }
-                tempFileEntry = new MPDFile(response.substring(MPDResponses.MPD_RESPONSE_FILE.length()));
+                tempFileEntry = new MPDTrack(response.substring(MPDResponses.MPD_RESPONSE_FILE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TITLE)) {
-                ((MPDFile) tempFileEntry).setTrackTitle(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TITLE.length()));
+                ((MPDTrack) tempFileEntry).setTrackTitle(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TITLE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME)) {
-                ((MPDFile) tempFileEntry).setTrackArtist(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length()));
+                ((MPDTrack) tempFileEntry).setTrackArtist(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME)) {
-                ((MPDFile) tempFileEntry).setTrackAlbumArtist(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
+                ((MPDTrack) tempFileEntry).setTrackAlbumArtist(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_NAME)) {
-                ((MPDFile) tempFileEntry).setTrackAlbum(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length()));
+                ((MPDTrack) tempFileEntry).setTrackAlbum(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_NAME.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DATE)) {
-                ((MPDFile) tempFileEntry).setDate(response.substring(MPDResponses.MPD_RESPONSE_DATE.length()));
+                ((MPDTrack) tempFileEntry).setDate(response.substring(MPDResponses.MPD_RESPONSE_DATE.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_MBID)) {
-                ((MPDFile) tempFileEntry).setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
+                ((MPDTrack) tempFileEntry).setTrackAlbumMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_MBID)) {
-                ((MPDFile) tempFileEntry).setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
+                ((MPDTrack) tempFileEntry).setTrackArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ARTIST_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_MBID)) {
-                ((MPDFile) tempFileEntry).setTrackAlbumArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_MBID.length()));
+                ((MPDTrack) tempFileEntry).setTrackAlbumArtistMBID(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_MBID)) {
-                ((MPDFile) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
+                ((MPDTrack) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME)) {
-                ((MPDFile) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+                ((MPDTrack) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_ID)) {
-                ((MPDFile) tempFileEntry).setSongID(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_ID.length())));
+                ((MPDTrack) tempFileEntry).setSongID(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_ID.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_POS)) {
-                ((MPDFile) tempFileEntry).setSongPosition(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_POS.length())));
+                ((MPDTrack) tempFileEntry).setSongPosition(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_POS.length())));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DISC_NUMBER)) {
                 /*
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
@@ -943,19 +943,19 @@ public class MPDConnection {
                 String[] discNumberSep = discNumber.split("/");
                 if (discNumberSep.length > 0) {
                     try {
-                        ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
+                        ((MPDTrack) tempFileEntry).setDiscNumber(Integer.valueOf(discNumberSep[0]));
                     } catch (NumberFormatException e) {
                     }
 
                     if (discNumberSep.length > 1) {
                         try {
-                            ((MPDFile) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
+                            ((MPDTrack) tempFileEntry).psetAlbumDiscCount(Integer.valueOf(discNumberSep[1]));
                         } catch (NumberFormatException e) {
                         }
                     }
                 } else {
                     try {
-                        ((MPDFile) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
+                        ((MPDTrack) tempFileEntry).setDiscNumber(Integer.valueOf(discNumber));
                     } catch (NumberFormatException e) {
                     }
                 }
@@ -968,18 +968,18 @@ public class MPDConnection {
                 String[] trackNumbersSep = trackNumber.split("/");
                 if (trackNumbersSep.length > 0) {
                     try {
-                        ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
+                        ((MPDTrack) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumbersSep[0]));
                     } catch (NumberFormatException e) {
                     }
                     if (trackNumbersSep.length > 1) {
                         try {
-                            ((MPDFile) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
+                            ((MPDTrack) tempFileEntry).setAlbumTrackCount(Integer.valueOf(trackNumbersSep[1]));
                         } catch (NumberFormatException e) {
                         }
                     }
                 } else {
                     try {
-                        ((MPDFile) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
+                        ((MPDTrack) tempFileEntry).setTrackNumber(Integer.valueOf(trackNumber));
                     } catch (NumberFormatException e) {
                     }
                 }
@@ -988,8 +988,8 @@ public class MPDConnection {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST)) {
                 if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
-                    if (tempFileEntry instanceof MPDFile) {
-                        MPDFile file = (MPDFile) tempFileEntry;
+                    if (tempFileEntry instanceof MPDTrack) {
+                        MPDTrack file = (MPDTrack) tempFileEntry;
                         if ((filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
                                 && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))) {
                             trackList.add(tempFileEntry);
@@ -1002,8 +1002,8 @@ public class MPDConnection {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DIRECTORY)) {
                 if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
-                    if (tempFileEntry instanceof MPDFile) {
-                        MPDFile file = (MPDFile) tempFileEntry;
+                    if (tempFileEntry instanceof MPDTrack) {
+                        MPDTrack file = (MPDTrack) tempFileEntry;
                         if ((filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
                                 && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))) {
                             trackList.add(tempFileEntry);
@@ -1023,8 +1023,8 @@ public class MPDConnection {
         /* Add last remaining track to list. */
         if (null != tempFileEntry) {
                     /* Check the artist filter criteria here */
-            if (tempFileEntry instanceof MPDFile) {
-                MPDFile file = (MPDFile) tempFileEntry;
+            if (tempFileEntry instanceof MPDTrack) {
+                MPDTrack file = (MPDTrack) tempFileEntry;
                 if ((filterArtist.isEmpty() || filterArtist.equals(file.getTrackAlbumArtist()) || filterArtist.equals(file.getTrackArtist()))
                         && (filterAlbumMBID.isEmpty() || filterAlbumMBID.equals(file.getTrackAlbumMBID()))) {
                     trackList.add(tempFileEntry);
@@ -1163,7 +1163,7 @@ public class MPDConnection {
     /**
      * Gets all tracks from MPD server. This could take a long time to process. Be warned.
      *
-     * @return A list of all tracks in MPDFile objects
+     * @return A list of all tracks in MPDTrack objects
      */
     public synchronized List<MPDFileEntry> getAllTracks() {
         Log.w(TAG, "This command should not be used");
@@ -1181,7 +1181,7 @@ public class MPDConnection {
      * Returns the list of tracks that are part of albumName
      *
      * @param albumName Album to get tracks from
-     * @return List of MPDFile track objects
+     * @return List of MPDTrack track objects
      */
     public synchronized List<MPDFileEntry> getAlbumTracks(String albumName, String mbid) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
@@ -1202,7 +1202,7 @@ public class MPDConnection {
      * @param artistName Artist to filter with. This is checked with Artist AND AlbumArtist tag.
      * @param mbid       MusicBrainzID of the album to get tracks from. Necessary if one item with the
      *                   same name exists multiple times.
-     * @return List of MPDFile track objects
+     * @return List of MPDTrack track objects
      */
     public synchronized List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
@@ -1221,7 +1221,7 @@ public class MPDConnection {
     /**
      * Requests the current playlist of the server
      *
-     * @return List of MPDFile items with all tracks of the current playlist
+     * @return List of MPDTrack items with all tracks of the current playlist
      */
     public synchronized List<MPDFileEntry> getCurrentPlaylist() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
@@ -1237,7 +1237,7 @@ public class MPDConnection {
     /**
      * Requests the current playlist of the server with a window
      *
-     * @return List of MPDFile items with all tracks of the current playlist
+     * @return List of MPDTrack items with all tracks of the current playlist
      */
     public synchronized List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
@@ -1253,7 +1253,7 @@ public class MPDConnection {
     /**
      * Requests the current playlist of the server
      *
-     * @return List of MPDFile items with all tracks of the current playlist
+     * @return List of MPDTrack items with all tracks of the current playlist
      */
     public synchronized List<MPDFileEntry> getSavedPlaylist(String playlistName) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
@@ -1269,7 +1269,7 @@ public class MPDConnection {
     /**
      * Requests the files for a specific path with info
      *
-     * @return List of MPDFile items with all tracks of the current playlist
+     * @return List of MPDTrack items with all tracks of the current playlist
      */
     public synchronized List<MPDFileEntry> getFiles(String path) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
@@ -1289,7 +1289,7 @@ public class MPDConnection {
      *
      * @param term The search term to use
      * @param type The type of items to search
-     * @return List of MPDFile items with all tracks matching the search
+     * @return List of MPDTrack items with all tracks matching the search
      */
     public synchronized List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
@@ -1464,9 +1464,9 @@ public class MPDConnection {
     /**
      * This will query the current song playing on the mpd server.
      *
-     * @return MPDFile entry for the song playing.
+     * @return MPDTrack entry for the song playing.
      */
-    public synchronized MPDFile getCurrentSong() {
+    public synchronized MPDTrack getCurrentSong() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
 
         // Reuse the parsing function for tracks here.
@@ -1480,7 +1480,7 @@ public class MPDConnection {
         if (retList.size() == 1) {
             // If one element is in the list it is safe to assume that this element is
             // the current song. So casting is no problem.
-            return (MPDFile) retList.get(0);
+            return (MPDTrack) retList.get(0);
         } else {
             return null;
         }
@@ -1711,7 +1711,7 @@ public class MPDConnection {
         startCommandList();
 
         for (MPDFileEntry track : tracks) {
-            if (track instanceof MPDFile) {
+            if (track instanceof MPDTrack) {
                 sendMPDRAWCommand(MPDCommands.MPD_COMMAND_ADD_FILE(track.getPath()));
             }
         }

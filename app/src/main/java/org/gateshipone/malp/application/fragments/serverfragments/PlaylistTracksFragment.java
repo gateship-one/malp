@@ -50,7 +50,7 @@ import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
@@ -289,20 +289,20 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
     }
 
     private void enqueueTrack(int index) {
-        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(index);
 
         MPDQueryHandler.addPath(track.getPath());
     }
 
     private void play(int index) {
-        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(index);
 
         MPDQueryHandler.playSong(track.getPath());
     }
 
 
     private void playNext(int index) {
-        MPDFile track = (MPDFile) mFileAdapter.getItem(index);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(index);
 
         MPDQueryHandler.playSongNext(track.getPath());
     }
@@ -320,7 +320,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         // Open song details dialog
         SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
         Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
         songDetailsDialog.setArguments(args);
         songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }

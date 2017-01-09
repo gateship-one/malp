@@ -29,13 +29,13 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class CoverBitmapLoader {
     private static final String TAG = CoverBitmapLoader.class.getSimpleName();
     private final CoverBitmapListener mListener;
     private final Context mContext;
-    private MPDFile mTrack;
+    private MPDTrack mTrack;
 
     public CoverBitmapLoader(Context context, CoverBitmapListener listener) {
         mContext = context;
@@ -45,7 +45,7 @@ public class CoverBitmapLoader {
     /**
      * Load the image for the given track from the mediastore.
      */
-    public void getImage(MPDFile track, boolean fetchImage) {
+    public void getImage(MPDTrack track, boolean fetchImage) {
         if (track != null) {
             mTrack = track;
             // start the loader thread to load the image async

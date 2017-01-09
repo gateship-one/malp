@@ -27,7 +27,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -37,7 +36,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
     private static final String THREAD_NAME = "MPDStatusHandler";
@@ -81,7 +80,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     /**
      * Used to check if a new file is playing
      */
-    private MPDFile mLastFile;
+    private MPDTrack mLastFile;
 
     private MPDCurrentStatus mLastStatus;
 
@@ -269,7 +268,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         }
     }
 
-    private void distributeNewTrack(MPDFile track) {
+    private void distributeNewTrack(MPDTrack track) {
         for (MPDStatusChangeHandler handler : mStatusListeners) {
             handler.newMPDTrackReady(track);
         }
@@ -279,7 +278,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     public void onConnected() {
         super.onConnected();
         mLastStatus = new MPDCurrentStatus();
-        mLastFile = new MPDFile("");
+        mLastFile = new MPDTrack("");
         distributeNewStatus(mLastStatus);
         distributeNewTrack(mLastFile);
         resyncState();

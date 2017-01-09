@@ -26,11 +26,11 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * This class represents an MPDFile. This is the same type for tracks and files.
+ * This class represents an MPDTrack. This is the same type for tracks and files.
  * This is used for tracks in playlist, album, search results,... and for music files when
  * retrieving an directory listing from the mpd server.
  */
-public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable {
+public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable {
 
 
     /**
@@ -114,12 +114,12 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     private int pSongID;
 
     /**
-     * Create empty MPDFile (track). Fill it with setter methods during
+     * Create empty MPDTrack (track). Fill it with setter methods during
      * parsing of mpds output.
      *
      * @param path The path of the file. This should never change.
      */
-    public MPDFile(String path) {
+    public MPDTrack(String path) {
         super(path);
         pTrackTitle = "";
 
@@ -138,11 +138,11 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     }
 
     /**
-     * Create a MPDFile from a parcel
+     * Create a MPDTrack from a parcel
      *
      * @param in Parcel to deserialize
      */
-    protected MPDFile(Parcel in) {
+    protected MPDTrack(Parcel in) {
         super(in.readString());
 
         /**
@@ -319,32 +319,32 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
     }
 
     /**
-     * Static creator class to create MPDFile objects from parcels.
+     * Static creator class to create MPDTrack objects from parcels.
      */
-    public static final Creator<MPDFile> CREATOR = new Creator<MPDFile>() {
+    public static final Creator<MPDTrack> CREATOR = new Creator<MPDTrack>() {
         /**
-         * Create a new MPDFile with parcel creator.
-         * @param in Parcel to use for creating the MPDFile object
-         * @return The deserialized MPDFile object
+         * Create a new MPDTrack with parcel creator.
+         * @param in Parcel to use for creating the MPDTrack object
+         * @return The deserialized MPDTrack object
          */
         @Override
-        public MPDFile createFromParcel(Parcel in) {
-            return new MPDFile(in);
+        public MPDTrack createFromParcel(Parcel in) {
+            return new MPDTrack(in);
         }
 
         /**
-         * Used to create an array of MPDFile objects
+         * Used to create an array of MPDTrack objects
          * @param size Size of the array to create
          * @return The created array
          */
         @Override
-        public MPDFile[] newArray(int size) {
-            return new MPDFile[size];
+        public MPDTrack[] newArray(int size) {
+            return new MPDTrack[size];
         }
     };
 
     /**
-     * Serialized the MPDFile object to a parcel. Check that this method is equivalent with the
+     * Serialized the MPDTrack object to a parcel. Check that this method is equivalent with the
      * deserializing creator above.
      *
      * @param dest  Parcel to write the properties to
@@ -352,7 +352,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
      */
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        // Serialize MPDFile properties
+        // Serialize MPDTrack properties
         dest.writeString(mPath);
         dest.writeString(pTrackTitle);
         dest.writeString(pTrackAlbum);
@@ -375,7 +375,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         dest.writeInt(pSongID);
     }
 
-    public int indexCompare(MPDFile compFile) {
+    public int indexCompare(MPDTrack compFile) {
         if ( !pTrackAlbumMBID.equals(compFile.pTrackAlbumMBID)) {
             return pTrackAlbumMBID.compareTo(compFile.pTrackAlbumMBID);
         }
@@ -396,7 +396,7 @@ public class MPDFile extends MPDFileEntry implements MPDGenericItem, Parcelable 
         }
     }
 
-    public int compareTo(MPDFile another) {
+    public int compareTo(MPDTrack another) {
         if ( another == null ) {
             return -1;
         }

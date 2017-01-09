@@ -25,7 +25,6 @@ package org.gateshipone.malp.application.adapters;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
@@ -37,7 +36,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 import java.util.List;
@@ -216,13 +215,13 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
      */
     @Override
     public int getItemViewType(int position) {
-        // Get MPDFile at the given index used for this item.
-        MPDFile track = getTrack(position);
+        // Get MPDTrack at the given index used for this item.
+        MPDTrack track = getTrack(position);
         boolean newAlbum = false;
 
         // Check if the track was available in local data set already (or is currently fetching)
         if (track != null) {
-            MPDFile previousTrack;
+            MPDTrack previousTrack;
             if (position > 0) {
                 previousTrack = getTrack(position - 1);
                 if (previousTrack != null) {
@@ -265,8 +264,8 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Get MPDFile at the given index used for this item.
-        MPDFile track = getTrack(position);
+        // Get MPDTrack at the given index used for this item.
+        MPDTrack track = getTrack(position);
 
         // Check if the track was available in local data set already (or is currently fetching)
         if (track != null) {
@@ -396,7 +395,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
          *
          * @param track
          */
-        protected void onNewTrackReady(MPDFile track) {
+        protected void onNewTrackReady(MPDTrack track) {
 
         }
     }
@@ -410,7 +409,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
         /**
          * Called when a list of songs is ready.
          *
-         * @param trackList List of MPDFile objects containing a list of mpds tracks.
+         * @param trackList List of MPDTrack objects containing a list of mpds tracks.
          * @param start     If a range was given to the request initially this contains the start of the window
          * @param end       If a range was given to the request initially this contains the end of the window
          */
@@ -596,16 +595,16 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
     }
 
     /**
-     * This will return the MPDFile entry for a given position. This could be null (e.g. block is still fetching).
+     * This will return the MPDTrack entry for a given position. This could be null (e.g. block is still fetching).
      *
      * @param position Position of the track to get
-     * @return the MPDFile at position or null if not ready.
+     * @return the MPDTrack at position or null if not ready.
      */
-    private MPDFile getTrack(int position) {
+    private MPDTrack getTrack(int position) {
         if (!mWindowEnabled) {
             // Check if list is long enough, can be that the new list is not ready yet.
             if (null != mPlaylist && mPlaylist.size() > position) {
-                return (MPDFile) mPlaylist.get(position);
+                return (MPDTrack) mPlaylist.get(position);
             } else {
                 return null;
             }
@@ -618,11 +617,11 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter {
                 // Save that the list index was the last accessed one
                 mLastAccessedList = listIndex;
 
-                // Calculate the position of the MPDFile within the list block
+                // Calculate the position of the MPDTrack within the list block
                 int listPosition = position % WINDOW_SIZE;
                 if (listPosition < mWindowedPlaylists[listIndex].size()) {
-                    // Return the MPDFile from the list block.
-                    return (MPDFile) mWindowedPlaylists[listIndex].get(position % WINDOW_SIZE);
+                    // Return the MPDTrack from the list block.
+                    return (MPDTrack) mWindowedPlaylists[listIndex].get(position % WINDOW_SIZE);
                 }
             } else if (mWindowedListStates[position / WINDOW_SIZE] == LIST_STATE.LIST_EMPTY) {
                 // If the list is not yet available, request it with the method fetchWindow and set the state

@@ -25,7 +25,7 @@ import android.os.Handler;
 import android.os.Message;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 /**
  * Class to handle status updates handled by the MPDStateMonitoringHandler
@@ -45,8 +45,8 @@ public abstract class MPDStatusChangeHandler extends Handler {
         super.handleMessage(msg);
         if ( msg.obj instanceof MPDCurrentStatus ) {
             onNewStatusReady((MPDCurrentStatus)msg.obj);
-        } else if ( msg.obj instanceof  MPDFile ) {
-            onNewTrackReady((MPDFile) msg.obj);
+        } else if ( msg.obj instanceof MPDTrack) {
+            onNewTrackReady((MPDTrack) msg.obj);
         }
 
 
@@ -59,7 +59,7 @@ public abstract class MPDStatusChangeHandler extends Handler {
         this.sendMessage(msg);
     }
 
-    public void newMPDTrackReady(MPDFile track) {
+    public void newMPDTrackReady(MPDTrack track) {
         Message msg = this.obtainMessage();
         msg.obj = track;
 
@@ -67,5 +67,5 @@ public abstract class MPDStatusChangeHandler extends Handler {
     }
 
     abstract protected void onNewStatusReady(MPDCurrentStatus status);
-    abstract protected void onNewTrackReady(MPDFile track);
+    abstract protected void onNewTrackReady(MPDTrack track);
 }

@@ -38,7 +38,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -279,13 +279,13 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
     }
 
     /**
-     * Wrapper to get an artist out of an {@link MPDFile}.
+     * Wrapper to get an artist out of an {@link MPDTrack}.
      * @param track Track to get artist information for
      * @param listener Response listener
      * @param errorListener Error listener
      */
     @Override
-    public void getTrackArtistMBID(final MPDFile track, final Response.Listener<String> listener, final FanartFetchError errorListener) {
+    public void getTrackArtistMBID(final MPDTrack track, final Response.Listener<String> listener, final FanartFetchError errorListener) {
         // Create a dummy artist
         final MPDArtist artist;
         if (!track.getTrackAlbumArtist().isEmpty()) {
@@ -368,7 +368,7 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
      * @param errorListener Error listener
      */
     @Override
-    public void getFanartImage(MPDFile track, String url, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
+    public void getFanartImage(MPDTrack track, String url, Response.Listener<FanartResponse> listener, Response.ErrorListener errorListener) {
         Request<FanartResponse> byteResponse = new FanartImageRequest(url, track, listener, errorListener);
 
         mRequestQueue.add(byteResponse);

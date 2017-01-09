@@ -37,16 +37,14 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutpu
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -362,7 +360,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             List<MPDFileEntry> playlistFindTracks = mMPDConnection.getPlaylistFindTrack(url);
             if ( playlistFindTracks.size() > 0 ) {
                 // Song already found in the playlist. Jump there.
-                mMPDConnection.playSongIndex(((MPDFile)playlistFindTracks.get(0)).getSongPosition());
+                mMPDConnection.playSongIndex(((MPDTrack)playlistFindTracks.get(0)).getSongPosition());
             } else {
                 // Not part of the current playlist. Add it at the end of the playlist and play it from there.
                 mMPDConnection.addSong(url);

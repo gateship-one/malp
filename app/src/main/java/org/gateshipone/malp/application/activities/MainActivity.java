@@ -40,14 +40,12 @@ import android.transition.Slide;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
@@ -58,7 +56,6 @@ import android.widget.TextView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
-import org.gateshipone.malp.application.utils.HardwareKeyHandler;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
@@ -81,13 +78,12 @@ import org.gateshipone.malp.application.fragments.serverfragments.SongDetailsDia
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -299,7 +295,7 @@ public class MainActivity extends GenericActivity
 
         if (currentPlaylistView != null && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
 
-            MPDFile track = (MPDFile) currentPlaylistView.getItem(info.position);
+            MPDTrack track = (MPDTrack) currentPlaylistView.getItem(info.position);
 
             switch (item.getItemId()) {
 
@@ -335,7 +331,7 @@ public class MainActivity extends GenericActivity
                     // Open song details dialog
                     SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
                     Bundle songArgs = new Bundle();
-                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) track);
+                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) track);
                     songDetailsDialog.setArguments(songArgs);
                     songDetailsDialog.show(getSupportFragmentManager(), "SongDetails");
                     return true;

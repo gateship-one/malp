@@ -23,7 +23,6 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -31,7 +30,7 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.FileListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
@@ -93,27 +92,27 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
     /**
      * Returns the type (section track or normal track) of the item at the given position.
-     * If preceding {@link MPDFileEntry} is not a {@link MPDFile} it will generate a secion entry.
-     * Else it will check if the preceding {@link MPDFile} is another album.
+     * If preceding {@link MPDFileEntry} is not a {@link MPDTrack} it will generate a secion entry.
+     * Else it will check if the preceding {@link MPDTrack} is another album.
      *
      * @param position Position of the item in question
      * @return the int value of the enum {@link CurrentPlaylistAdapter.VIEW_TYPES}
      */
     @Override
     public int getItemViewType(int position) {
-        // Get MPDFile at the given index used for this item.
+        // Get MPDTrack at the given index used for this item.
         MPDFileEntry file = (MPDFileEntry) getItem(position);
-        if (file instanceof MPDFile) {
+        if (file instanceof MPDTrack) {
             boolean newAlbum = false;
-            MPDFile track = (MPDFile) file;
+            MPDTrack track = (MPDTrack) file;
             if (file != null) {
                 MPDFileEntry previousFile;
 
                 if (position > 0) {
                     previousFile = (MPDFileEntry) getItem(position - 1);
                     if (previousFile != null) {
-                        if (previousFile instanceof MPDFile) {
-                            MPDFile previousTrack = (MPDFile) previousFile;
+                        if (previousFile instanceof MPDTrack) {
+                            MPDTrack previousTrack = (MPDTrack) previousFile;
                             newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
                         }
                     }
@@ -145,17 +144,17 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
      */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // Get MPDFile at the given index used for this item.
+        // Get MPDTrack at the given index used for this item.
         MPDFileEntry file = (MPDFileEntry) getItem(position);
 
         /**
-         * Check which type of {@link MPDFileEntry} is necessary to draw ({@link MPDFile}, {@link MPDDirectory}, {@link MPDPlaylist})
+         * Check which type of {@link MPDFileEntry} is necessary to draw ({@link MPDTrack}, {@link MPDDirectory}, {@link MPDPlaylist})
          *
-         * For {@link MPDFile} objects it optionally checks if a new album is started and shows the album cover and name.
+         * For {@link MPDTrack} objects it optionally checks if a new album is started and shows the album cover and name.
          */
 
-        if (file instanceof MPDFile) {
-            MPDFile track = (MPDFile) file;
+        if (file instanceof MPDTrack) {
+            MPDTrack track = (MPDTrack) file;
             if (!mShowSectionItems || (VIEW_TYPES.values()[getItemViewType(position)] == VIEW_TYPES.TYPE_FILE_ITEM)) {
                 if (null != convertView) {
                     ((FileListItem) convertView).setTrack(track, mContext);

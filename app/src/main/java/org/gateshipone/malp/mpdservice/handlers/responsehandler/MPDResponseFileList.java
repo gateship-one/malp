@@ -40,7 +40,7 @@ public abstract class MPDResponseFileList extends MPDResponseHandler {
     /**
      * Handle function for the track list. This only calls the abstract method
      * which needs to get implemented by the user of this class.
-     * @param msg Message object containing a list of MPDFile items.
+     * @param msg Message object containing a list of MPDTrack items.
      */
     @Override
     public void handleMessage(Message msg) {
@@ -59,7 +59,7 @@ public abstract class MPDResponseFileList extends MPDResponseHandler {
      * Abstract method to be implemented by the user of the MPD implementation.
      * This should be a callback for the UI thread and run in the UI thread.
      * This can be used for updating lists of adapters and views.
-     * @param trackList List of MPDFile objects containing a list of mpds tracks response.
+     * @param trackList List of MPDTrack objects containing a list of mpds tracks response.
      */
     abstract public void handleTracks(List<MPDFileEntry> fileList, int windowstart, int windowend);
 }

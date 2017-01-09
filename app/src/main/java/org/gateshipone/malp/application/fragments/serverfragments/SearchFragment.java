@@ -55,7 +55,7 @@ import org.gateshipone.malp.application.loaders.SearchResultLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
@@ -237,7 +237,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         }
 
 
-        MPDFile track = (MPDFile) mFileAdapter.getItem(info.position);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(info.position);
 
         mListView.requestFocus();
 
@@ -323,7 +323,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         // Open song details dialog
         SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
         Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile) mFileAdapter.getItem(position));
+        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
         songDetailsDialog.setArguments(args);
         songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
     }

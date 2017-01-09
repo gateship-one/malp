@@ -38,7 +38,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -91,7 +91,7 @@ public class BackgroundService extends Service {
     public static final String ACTION_SERVER_DISCONNECTED = "org.gateshipone.malp.widget.server_disconnected";
 
     /**
-     * Extra attached to an {@link Intent} containing the {@link MPDFile} that is playing on the server
+     * Extra attached to an {@link Intent} containing the {@link MPDTrack} that is playing on the server
      */
     public static final String INTENT_EXTRA_TRACK = "org.gateshipone.malp.widget.extra.track";
 
@@ -127,7 +127,7 @@ public class BackgroundService extends Service {
     private BackgroundMPDStatusChangeListener mServerStatusListener;
 
     private MPDCurrentStatus mLastStatus;
-    private MPDFile mLastTrack;
+    private MPDTrack mLastTrack;
 
     /**
      * Manager helper class to handle the notification.
@@ -324,10 +324,10 @@ public class BackgroundService extends Service {
     }
 
     /**
-     * Sends the new {@link MPDFile} to listening broadcast receivers
+     * Sends the new {@link MPDTrack} to listening broadcast receivers
      * @param track Track to broadcast
      */
-    private void notifyNewTrack(MPDFile track) {
+    private void notifyNewTrack(MPDTrack track) {
         Intent intent = new Intent(getApplicationContext(), WidgetProvider.class);
         intent.setAction(ACTION_TRACK_CHANGED);
         intent.putExtra(INTENT_EXTRA_TRACK, track);
@@ -350,7 +350,7 @@ public class BackgroundService extends Service {
      */
     private void checkMPDConnection() {
         if (!MPDConnection.getInstance().isConnected() && !mConnecting) {
-            mLastTrack = new MPDFile("");
+            mLastTrack = new MPDTrack("");
             mLastStatus = new MPDCurrentStatus();
             connectMPDServer();
         }
@@ -469,7 +469,7 @@ public class BackgroundService extends Service {
         }
 
         @Override
-        protected void onNewTrackReady(MPDFile track) {
+        protected void onNewTrackReady(MPDTrack track) {
             mService.get().notifyNewTrack(track);
             mService.get().mLastTrack = track;
             mService.get().mNotificationManager.setMPDFile(track);

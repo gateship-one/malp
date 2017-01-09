@@ -21,7 +21,7 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 import java.util.ArrayList;
@@ -31,7 +31,7 @@ public class MPDSortHelper {
 
     /**
      * Sorts a list of {@link MPDFileEntry} objects in the right order of their index (if
-     * the objects are from type {@link MPDFile}. All other elements are located at the end of the list.
+     * the objects are from type {@link MPDTrack}. All other elements are located at the end of the list.
      * @param inList List of objects to sort.
      */
     public static void sortFileListNumeric(List<MPDFileEntry> inList) {
@@ -42,22 +42,22 @@ public class MPDSortHelper {
         }
 
         MPDFileEntry tmpElement = inList.remove(0);
-        MPDFile trackElement;
+        MPDTrack trackElement;
 
         resList.add(0, tmpElement);
         while ( inList.size() != 0 ) {
             tmpElement = inList.remove(0);
-            if ( tmpElement instanceof MPDFile) {
-                trackElement = (MPDFile)tmpElement;
+            if ( tmpElement instanceof MPDTrack) {
+                trackElement = (MPDTrack)tmpElement;
 
                 for( int i = 0; i < resList.size(); i++ ) {
                     MPDFileEntry compareItem = resList.get(i);
                     // Check if the element in result list is "bigger" then add the element here.
-                    if ( (compareItem instanceof MPDFile) && ((MPDFile)compareItem).indexCompare(trackElement) == 1 ) {
+                    if ( (compareItem instanceof MPDTrack) && ((MPDTrack)compareItem).indexCompare(trackElement) == 1 ) {
                         resList.add(i, tmpElement);
                         tmpElement = null;
                         break;
-                    } else if ( !(compareItem instanceof MPDFile) ) {
+                    } else if ( !(compareItem instanceof MPDTrack) ) {
                         resList.add(i,tmpElement);
                         tmpElement = null;
                         break;

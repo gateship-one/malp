@@ -61,21 +61,21 @@ public abstract class MPDFileEntry implements MPDGenericItem,Comparable<MPDFileE
         if ( this instanceof MPDDirectory ) {
             if ( another instanceof MPDDirectory ) {
                 return ((MPDDirectory)this).compareTo((MPDDirectory)another);
-            } else if (another instanceof MPDPlaylist || another instanceof MPDFile) {
+            } else if (another instanceof MPDPlaylist || another instanceof MPDTrack) {
                 return -1;
             }
-        } else if ( this instanceof MPDFile ) {
+        } else if ( this instanceof MPDTrack) {
             if ( another instanceof MPDDirectory ) {
                 return 1;
             } else if (another instanceof MPDPlaylist) {
                 return -1;
-            } else if ( another instanceof MPDFile) {
-                return ((MPDFile)this).compareTo((MPDFile)another);
+            } else if ( another instanceof MPDTrack) {
+                return ((MPDTrack)this).compareTo((MPDTrack)another);
             }
         } else if ( this instanceof MPDPlaylist ) {
             if ( another instanceof MPDPlaylist) {
                 return ((MPDPlaylist)this).compareTo((MPDPlaylist)another);
-            } else if ( another instanceof MPDDirectory || another instanceof MPDFile) {
+            } else if ( another instanceof MPDDirectory || another instanceof MPDTrack) {
                 return 1;
             }
         }

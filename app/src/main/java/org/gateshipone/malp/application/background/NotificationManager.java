@@ -45,7 +45,7 @@ import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener {
     private static final String TAG = NotificationManager.class.getSimpleName();
@@ -82,7 +82,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     /**
      * Last played track of the MPD server. Used to check if track changed and a new cover is necessary.
      */
-    private MPDFile mLastTrack = null;
+    private MPDTrack mLastTrack = null;
 
     /**
      * State of the notification and the media session.
@@ -111,7 +111,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         mService = service;
         mNotificationManager = (android.app.NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
         mLastStatus = new MPDCurrentStatus();
-        mLastTrack = new MPDFile("");
+        mLastTrack = new MPDTrack("");
 
         /**
          * Create loader to asynchronously load cover images. This class is the callback (s. receiveBitmap)
@@ -158,7 +158,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     * for the normal layout and one for the big one. Sets the different
     * attributes of the remoteViews and starts a thread for Cover generation.
     */
-    public synchronized void updateNotification(MPDFile track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
+    public synchronized void updateNotification(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
         if (track != null) {
             mNotificationBuilder = new NotificationCompat.Builder(mService);
 
@@ -297,7 +297,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * @param track         Current track.
      * @param playbackState State of the PlaybackService.
      */
-    private void updateMetadata(MPDFile track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
+    private void updateMetadata(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
         if (track != null) {
             if (playbackState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
@@ -349,7 +349,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * Notifies about a change in MPDs track. If not shown this may be used later.
      * @param track New MPD track
      */
-    public void setMPDFile(MPDFile track) {
+    public void setMPDFile(MPDTrack track) {
         if (mSessionActive) {
             updateNotification(track, mLastStatus.getPlaybackState());
         }

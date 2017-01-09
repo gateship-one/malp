@@ -39,7 +39,7 @@ public abstract class MPDResponseOutputList extends MPDResponseHandler {
     /**
      * Handle function for the track list. This only calls the abstract method
      * which needs to get implemented by the user of this class.
-     * @param msg Message object containing a list of MPDFile items.
+     * @param msg Message object containing a list of MPDTrack items.
      */
     @Override
     public void handleMessage(Message msg) {

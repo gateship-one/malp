@@ -21,10 +21,10 @@
 
 package org.gateshipone.malp.application.artworkdatabase.network.responses;
 
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class FanartResponse {
-    public MPDFile track;
+    public MPDTrack track;
     public String url;
     public byte[] image;
 }

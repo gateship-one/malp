@@ -53,7 +53,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
@@ -219,7 +219,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
 
         MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(position);
 
-        if (file instanceof MPDFile) {
+        if (file instanceof MPDTrack) {
             inflater.inflate(R.menu.context_menu_track, menu);
         } else if (file instanceof MPDDirectory) {
             inflater.inflate(R.menu.context_menu_directory, menu);
@@ -401,11 +401,11 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             mCallback.openPath(file.getPath());
         } else if (file instanceof MPDPlaylist) {
             mPlaylistCallback.openPlaylist(file.getPath());
-        } else if (file instanceof MPDFile) {
+        } else if (file instanceof MPDTrack) {
             // Open song details dialog
             SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
             Bundle args = new Bundle();
-            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDFile)file);
+            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack)file);
             songDetailsDialog.setArguments(args);
             songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
         }
