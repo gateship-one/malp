@@ -170,7 +170,22 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/server_statistic_update_database" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-regular"
+                    android:paddingTop="@dimen/material_content_spacing"
+                    android:text="@string/server_statistic_malp_server_info"
+                    android:textColor="?attr/malp_color_text_background_secondary"
+                    android:textSize="@dimen/material_font_style_size_body_1" />
 
+                <TextView
+                    android:id="@+id/server_statistic_malp_server_information"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="?attr/malp_color_text_background_primary"
+                    android:textSize="@dimen/material_font_style_size_body_2" />
             </LinearLayout>
 
         </LinearLayout>

@@ -36,6 +36,7 @@ import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 public class ServerStatisticFragment extends Fragment {
@@ -50,6 +51,8 @@ public class ServerStatisticFragment extends Fragment {
     private TextView mLastUpdate;
     private TextView mDBLength;
 
+    private TextView mServerFeatures;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -63,6 +66,8 @@ public class ServerStatisticFragment extends Fragment {
         mPlaytime = (TextView)rootView.findViewById(R.id.server_statistic_server_playtime);
         mLastUpdate = (TextView)rootView.findViewById(R.id.server_statistic_db_update);
         mDBLength = (TextView)rootView.findViewById(R.id.server_statistic_db_playtime);
+
+        mServerFeatures = (TextView)rootView.findViewById(R.id.server_statistic_malp_server_information);
 
         ((Button)rootView.findViewById(R.id.server_statistic_update_db_btn)).setOnClickListener(new DBUpdateBtnListener());
 
@@ -93,6 +98,11 @@ public class ServerStatisticFragment extends Fragment {
             mPlaytime.setText(FormatHelper.formatTracktimeFromS(statistics.getPlayDuration()));
             mDBLength.setText(FormatHelper.formatTracktimeFromS(statistics.getAllSongDuration()));
             mLastUpdate.setText(FormatHelper.formatTimeStampToString(statistics.getLastDBUpdate()*1000));
+
+            MPDCapabilities capabilities = MPDQueryHandler.getServerCapabilities();
+            if (null != capabilities) {
+                mServerFeatures.setText(MPDQueryHandler.getServerCapabilities().getServerFeatures());
+            }
         }
     }
 

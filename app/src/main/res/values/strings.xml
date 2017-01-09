@@ -159,6 +159,7 @@
     <string name="server_statistic_db_playtime">Duration of whole database:</string>
     <string name="server_statistic_playtime">Recorded play time:</string>
     <string name="server_statistic_db_update">Last database update:</string>
+    <string name="server_statistic_malp_server_info">Server features:</string>
 
     <string name="server_statistic_update_database">Update server database</string>
 
