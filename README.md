@@ -35,7 +35,7 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
 
 ## Description ##
 
-This MPD client is tested with MPD 0.14 and MPD 0.19.
+This MPD client is tested with MPD 0.14, 0.19 and 0.20.
 
 As MPD 0.19 has some features that really improve the user experience I would recommend using at least 0.19.
 
