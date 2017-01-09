@@ -37,10 +37,12 @@ import java.lang.ref.WeakReference;
 
 
 public abstract class GenericActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private static final String TAG = GenericActivity.class.getSimpleName();
 
     private boolean mHardwareControls;
 
     private MPDConnectionStateCallbackHandler mConnectionCallback;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -101,6 +103,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         ConnectionManager.registerMPDUse(getApplicationContext());
 
+
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
@@ -112,10 +115,10 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         super.onPause();
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        if (!isChangingConfigurations()) {
-            // Disconnect from MPD server
-            ConnectionManager.unregisterMPDUse(getApplicationContext());
-        }
+
+        // Disconnect from MPD server
+        ConnectionManager.unregisterMPDUse(getApplicationContext());
+
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
@@ -148,6 +151,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     }
 
     protected abstract void onConnected();
+
     protected abstract void onDisconnected();
 
     private static class MPDConnectionStateCallbackHandler extends MPDConnectionStateChangeHandler {
@@ -160,7 +164,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         @Override
         public void onConnected() {
             final GenericActivity activity = mActivity.get();
-            if ( null != activity ) {
+            if (null != activity) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
@@ -173,7 +177,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         @Override
         public void onDisconnected() {
             final GenericActivity activity = mActivity.get();
-            if ( null != activity ) {
+            if (null != activity) {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
