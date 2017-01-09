@@ -37,17 +37,23 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
  */
 public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
-    Context mContext;
+    private Context mContext;
 
-    boolean mShowIcons;
+    /**
+     * Defines if items show an icon for their corresponding type
+     */
+    private boolean mShowIcons;
 
-    boolean mShowTrackNumbers;
+    /**
+     * Defines if tracks show their tracknumber or their position in the list
+     */
+    private boolean mShowTrackNumbers;
 
     /**
      * Standard constructor
      *
-     * @param context Context used for creating listview items
-     * @param showIcons If icons should be shown in view (e.g. for FileExplorer)
+     * @param context          Context used for creating listview items
+     * @param showIcons        If icons should be shown in view (e.g. for FileExplorer)
      * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
      */
     public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers) {
@@ -72,26 +78,33 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
-        MPDFileEntry file = (MPDFileEntry)getItem(position);
-        if ( file instanceof MPDFile) {
-            if ( null != convertView ) {
-                ((FileListItem)convertView).setTrack((MPDFile) file, mContext);
+        MPDFileEntry file = (MPDFileEntry) getItem(position);
+        if (file instanceof MPDFile) {
+            if (null != convertView) {
+                ((FileListItem) convertView).setTrack((MPDFile) file, mContext);
+                if ( !mShowTrackNumbers) {
+                    ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
+                }
                 return convertView;
             } else {
-                return new FileListItem(mContext, (MPDFile) file, mShowIcons);
+                if (mShowTrackNumbers) {
+                    return new FileListItem(mContext, (MPDFile) file, mShowIcons);
+                } else {
+                    return new FileListItem(mContext, (MPDFile) file, position + 1, mShowIcons);
+                }
             }
         } else if (file instanceof MPDDirectory) {
-            if ( null != convertView ) {
-                ((FileListItem)convertView).setDirectory((MPDDirectory) file, mContext);
+            if (null != convertView) {
+                ((FileListItem) convertView).setDirectory((MPDDirectory) file, mContext);
                 return convertView;
             } else {
                 return new FileListItem(mContext, (MPDDirectory) file, mShowIcons);
             }
-        } else if ( file instanceof MPDPlaylist ) {
-            if ( null != convertView ) {
-                ((FileListItem)convertView).setPlaylist((MPDPlaylist) file, mContext);
+        } else if (file instanceof MPDPlaylist) {
+            if (null != convertView) {
+                ((FileListItem) convertView).setPlaylist((MPDPlaylist) file, mContext);
                 return convertView;
-            }else {
+            } else {
                 return new FileListItem(mContext, (MPDPlaylist) file, mShowIcons);
             }
         }
