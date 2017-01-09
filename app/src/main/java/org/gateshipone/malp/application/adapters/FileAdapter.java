@@ -23,10 +23,13 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.FileListItem;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFile;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -36,7 +39,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
  * Adapter class that creates all the listitems for an album track view
  */
 public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
-
+    private static final String TAG = FileAdapter.class.getSimpleName();
     private Context mContext;
 
     /**
@@ -49,6 +52,14 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
      */
     private boolean mShowTrackNumbers;
 
+    private boolean mShowSectionItems;
+
+    private enum VIEW_TYPES {
+        TYPE_FILE_ITEM,
+        TYPE_SECTION_FILE_ITEM,
+        TYPE_COUNT
+    }
+
     /**
      * Standard constructor
      *
@@ -57,14 +68,71 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
      * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
      */
     public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers) {
+        this(context, showIcons, showTrackNumbers, false);
+    }
+
+    /**
+     * Standard constructor
+     *
+     * @param context          Context used for creating listview items
+     * @param showIcons        If icons should be shown in view (e.g. for FileExplorer)
+     * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
+     */
+    public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers, boolean showSectionItems) {
         super();
 
         mShowIcons = showIcons;
         mContext = context;
         mShowTrackNumbers = showTrackNumbers;
 
+        mShowSectionItems = showSectionItems;
+
         // Disable sections as they cause troubles for directories,files,playlists order and repeating starting letters
         enableSections(false);
+    }
+
+    /**
+     * Returns the type (section track or normal track) of the item at the given position.
+     * If preceding {@link MPDFileEntry} is not a {@link MPDFile} it will generate a secion entry.
+     * Else it will check if the preceding {@link MPDFile} is another album.
+     *
+     * @param position Position of the item in question
+     * @return the int value of the enum {@link CurrentPlaylistAdapter.VIEW_TYPES}
+     */
+    @Override
+    public int getItemViewType(int position) {
+        // Get MPDFile at the given index used for this item.
+        MPDFileEntry file = (MPDFileEntry) getItem(position);
+        if (file instanceof MPDFile) {
+            boolean newAlbum = false;
+            MPDFile track = (MPDFile) file;
+            if (file != null) {
+                MPDFileEntry previousFile;
+
+                if (position > 0) {
+                    previousFile = (MPDFileEntry) getItem(position - 1);
+                    if (previousFile != null) {
+                        if (previousFile instanceof MPDFile) {
+                            MPDFile previousTrack = (MPDFile) previousFile;
+                            newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
+                        }
+                    }
+                } else {
+                    return VIEW_TYPES.TYPE_SECTION_FILE_ITEM.ordinal();
+                }
+            }
+            return newAlbum ? VIEW_TYPES.TYPE_SECTION_FILE_ITEM.ordinal() : VIEW_TYPES.TYPE_FILE_ITEM.ordinal();
+        } else {
+            return VIEW_TYPES.TYPE_FILE_ITEM.ordinal();
+        }
+    }
+
+    /**
+     * @return The count of values in the enum {@link CurrentPlaylistAdapter.VIEW_TYPES}.
+     */
+    @Override
+    public int getViewTypeCount() {
+        return VIEW_TYPES.TYPE_COUNT.ordinal();
     }
 
     /**
@@ -79,19 +147,58 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
     public View getView(int position, View convertView, ViewGroup parent) {
         // Get MPDFile at the given index used for this item.
         MPDFileEntry file = (MPDFileEntry) getItem(position);
+
+        /**
+         * Check which type of {@link MPDFileEntry} is necessary to draw ({@link MPDFile}, {@link MPDDirectory}, {@link MPDPlaylist})
+         *
+         * For {@link MPDFile} objects it optionally checks if a new album is started and shows the album cover and name.
+         */
+
         if (file instanceof MPDFile) {
-            if (null != convertView) {
-                ((FileListItem) convertView).setTrack((MPDFile) file, mContext);
-                if ( !mShowTrackNumbers) {
-                    ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
+            MPDFile track = (MPDFile) file;
+            if (!mShowSectionItems || (VIEW_TYPES.values()[getItemViewType(position)] == VIEW_TYPES.TYPE_FILE_ITEM)) {
+                if (null != convertView) {
+                    ((FileListItem) convertView).setTrack(track, mContext);
+                    if (!mShowTrackNumbers) {
+                        ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
+                    }
+                    return convertView;
+                } else {
+                    if (mShowTrackNumbers) {
+                        return new FileListItem(mContext, track, mShowIcons);
+                    } else {
+                        return new FileListItem(mContext, track, position + 1, mShowIcons);
+                    }
+                }
+            } else {
+                if (convertView == null) {
+                    // If not create a new Listitem
+                    if ( !mShowTrackNumbers) {
+                        convertView = new FileListItem(mContext, track, position + 1, false, track.getTrackAlbum(), this);
+                    } else {
+                        convertView = new FileListItem(mContext, track, false, track.getTrackAlbum(), this);
+                    }
+                } else {
+                    FileListItem tracksListViewItem = (FileListItem) convertView;
+                    tracksListViewItem.setSectionHeader(track.getTrackAlbum());
+                    tracksListViewItem.setTrack(track, mContext);
+                    if (!mShowTrackNumbers) {
+                        tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+                    }
+                }
+                ((FileListItem) convertView).setImage(null);
+                // This will prepare the view for fetching the image from the internet if not already saved in local database.
+                // Dummy MPDAlbum
+                MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
+                tmpAlbum.setMBID(track.getTrackAlbumMBID());
+                ((FileListItem) convertView).prepareArtworkFetching(ArtworkManager.getInstance(mContext.getApplicationContext()), tmpAlbum);
+
+                // Start async image loading if not scrolling at the moment. Otherwise the ScrollSpeedListener
+                // starts the loading.
+                if (mScrollSpeed == 0) {
+                    ((FileListItem) convertView).startCoverImageTask();
                 }
                 return convertView;
-            } else {
-                if (mShowTrackNumbers) {
-                    return new FileListItem(mContext, (MPDFile) file, mShowIcons);
-                } else {
-                    return new FileListItem(mContext, (MPDFile) file, position + 1, mShowIcons);
-                }
             }
         } else if (file instanceof MPDDirectory) {
             if (null != convertView) {

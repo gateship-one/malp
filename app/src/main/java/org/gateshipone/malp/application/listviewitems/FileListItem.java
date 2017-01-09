@@ -43,6 +43,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
  * Class that can be used for all track type items (albumtracks, playlist tracks, playlists, directories, etc)
  */
 public class FileListItem extends AbsImageListViewItem {
+    private static final String TAG = FileListItem.class.getSimpleName();
+
     private final boolean mIsSectionHeader;
 
     protected TextView mTitleView;
@@ -145,6 +147,33 @@ public class FileListItem extends AbsImageListViewItem {
         this(context, sectionTitle, false, adapter);
         setTrack(track, context);
         mNumberView.setText(String.valueOf(trackNo));
+        if (showIcon) {
+            Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
+            if (icon != null) {
+                // get tint color
+                int tintColor = ThemeUtils.getThemeColor(context, android.R.attr.textColor);
+                // tint the icon
+                DrawableCompat.setTint(icon, tintColor);
+            }
+            mItemIcon.setImageDrawable(icon);
+        }
+    }
+
+    /**
+     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
+     *
+     * Constructor that shows a item for a track, overrides the track number (useful for playlists) and shows a section
+     * header.
+     *
+     * @param context Context used for creation of View
+     * @param track Track to show the view for
+     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
+     * @param sectionTitle Title of the section (album title for example)
+     */
+    public FileListItem(Context context, MPDFile track, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
+        this(context, sectionTitle, false, adapter);
+        setTrack(track, context);
+
         if (showIcon) {
             Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
             if (icon != null) {
