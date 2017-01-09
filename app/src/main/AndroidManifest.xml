@@ -65,6 +65,11 @@
                 <action android:name="android.intent.action.VIEW" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".application.activities.ContributorsActivity"
+            android:label="Contributors"
+            android:parentActivityName=".application.activities.MainActivity">
+        </activity>
 
         <service
             android:name=".application.artworkdatabase.BulkDownloadService"

@@ -209,4 +209,6 @@
     <string name="preference_category_design">Design</string>
     <string name="preference_category_library">Bibliothek</string>
     <string name="preference_category_other">Andere</string>
+    <string name="contributor_translator_japanese">Japanische Übersetzung</string>
+    <string name="contributors_title">Mitwirkende</string>
 </resources>

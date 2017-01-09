@@ -54,6 +54,15 @@ public class AboutActivity extends GenericActivity {
 
         ((TextView)findViewById(R.id.activity_about_version)).setText(versionName);
 
+        findViewById(R.id.button_contributors).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(AboutActivity.this, ContributorsActivity.class);
+
+                startActivity(myIntent);
+            }
+        });
+
         findViewById(R.id.logo_musicbrainz).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

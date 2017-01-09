@@ -21,5 +21,15 @@
   -->
 
 <resources>
+    <string-array name="contributors" translatable="false">
+        <item>Hendrik Borghorst</item>
+        <item>Frederik Lütkes</item>
+        <item>naofum</item>
+    </string-array>
 
+    <string-array name="contributors_type">
+        <item>@string/contributor_team</item>
+        <item>@string/contributor_team</item>
+        <item>@string/contributor_translator_japanese</item>
+    </string-array>
 </resources>
