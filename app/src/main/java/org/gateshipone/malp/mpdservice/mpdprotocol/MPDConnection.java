@@ -302,6 +302,14 @@ public class MPDConnection {
                     if (readString.startsWith("OK MPD ")) {
                         versionString = readString.substring(7);
 
+                        String[] versions = versionString.split("\\.");
+                        if (versions.length == 3) {
+                            // Check if server version changed and if, reread server capabilities later.
+                            if ( Integer.valueOf(versions[0]) != mServerCapabilities.getMajorVersion() ||
+                                    (Integer.valueOf(versions[0]) == mServerCapabilities.getMajorVersion() && Integer.valueOf(versions[1]) != mServerCapabilities.getMinorVersion())) {
+                                mCapabilitiesChanged = true;
+                            }
+                        }
                     }
                 }
             } catch (IOException e) {

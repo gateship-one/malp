@@ -29,9 +29,8 @@ import java.util.List;
 public class MPDCapabilities {
     private static final String TAG = MPDCapabilities.class.getSimpleName();
 
-    private String pVersionString;
-    private int pMajorVersion;
-    private int pMinorVersion;
+    private int mMajorVersion;
+    private int mMinorVersion;
 
     private boolean mHasIdle;
     private boolean mHasRangedCurrentPlaylist;
@@ -45,23 +44,23 @@ public class MPDCapabilities {
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
-            pMajorVersion = Integer.valueOf(versions[0]);
-            pMinorVersion = Integer.valueOf(versions[1]);
+            mMajorVersion = Integer.valueOf(versions[0]);
+            mMinorVersion = Integer.valueOf(versions[1]);
         }
 
         // Only MPD servers greater version 0.14 have ranged playlist fetching, this allows fallback
-        if ( pMinorVersion > 14 || pMajorVersion > 0) {
+        if (mMinorVersion > 14 || mMajorVersion > 0) {
             mHasRangedCurrentPlaylist = true;
         } else {
             mHasRangedCurrentPlaylist = false;
         }
 
-        if ( pMinorVersion >= 19 || pMajorVersion > 0 ) {
+        if (mMinorVersion >= 19 || mMajorVersion > 0) {
             mHasListGroup = true;
             mHasListFiltering = true;
         }
 
-        if ( null != commands ) {
+        if (null != commands) {
             if (commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
                 mHasIdle = true;
             } else {
@@ -78,12 +77,11 @@ public class MPDCapabilities {
         }
 
 
-
-        if ( null != tags ) {
-            for (String tag : tags ) {
-                if ( tag.contains("MUSICBRAINZ")) {
+        if (null != tags) {
+            for (String tag : tags) {
+                if (tag.contains("MUSICBRAINZ")) {
                     mHasMusicBrainzTags = true;
-                    Log.v(TAG,"Server has MusicBrainz support");
+                    Log.v(TAG, "Server has MusicBrainz support");
                     break;
                 }
             }
@@ -102,11 +100,33 @@ public class MPDCapabilities {
         return mHasSearchAdd;
     }
 
-    public boolean hasListGroup() { return mHasListGroup;}
+    public boolean hasListGroup() {
+        return mHasListGroup;
+    }
 
-    public boolean hasListFiltering() { return mHasListFiltering;}
+    public boolean hasListFiltering() {
+        return mHasListFiltering;
+    }
+
+    public int getMajorVersion() {
+        return mMajorVersion;
+    }
+
+    public int getMinorVersion() {
+        return mMinorVersion;
+    }
 
     public boolean hasMusicBrainzTags() {
         return mHasMusicBrainzTags;
+    }
+
+    public String getServerFeatures() {
+        return "MPD protocol version: " + mMajorVersion + '.' + mMinorVersion + '\n'
+                + "IDLE support: " + mHasIdle + '\n'
+                + "Windowed playlist: " + mHasRangedCurrentPlaylist + '\n'
+                + "Fast search add: " + mHasSearchAdd + '\n'
+                + "MUSICBRAINZ tag support: " + mHasMusicBrainzTags + '\n'
+                + "List grouping: " + mHasListGroup + '\n'
+                + "List filtering: " + mHasListFiltering + '\n';
     }
 }
