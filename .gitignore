@@ -1,11 +1,14 @@
+!/.idea/copyright/
 *.iml
 .gradle
 /local.properties
 /.idea/workspace.xml
 /.idea/libraries
-/.idea
+/.idea/*.xml
 .DS_Store
 /build
 /captures
 /keystore.properties
 /app/*apk
+/gradle
+/gradlew*
