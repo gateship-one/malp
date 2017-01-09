@@ -1,0 +1,329 @@
+<!--
+  ~ Copyright (C) 2016 Team Gateship-One
+  ~ (Hendrik Borghorst & Frederik Luetkes)
+  ~ (Japanese translation : naofum)
+  ~
+  ~ The AUTHORS.md file contains a detailed contributors list:
+  ~ <https://github.com/gateship-one/malp/blob/master/AUTHORS.md>
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<resources>
+
+    <string name="navigation_drawer_open">ナビゲーションドロワーを開く</string>
+    <string name="navigation_drawer_close">ナビゲーションドロワーを閉じる</string>
+
+    <!-- Actions -->
+    <string name="action_settings">設定</string>
+    <string name="action_edit_profile">プロフィールを編集</string>
+    <string name="action_connect_profile">プロフィールを接続</string>
+    <string name="action_remove_profile">プロフィールを除去</string>
+    <string name="action_add_profile">プロフィールを追加</string>
+
+    <string name="action_add">追加</string>
+    <string name="action_add_album">アルバムを追加</string>
+    <string name="action_play_album">アルバムを再生</string>
+    <string name="action_show_all_tracks">すべてのトラックを表示</string>
+
+    <string name="action_add_artist">アーティストを追加</string>
+    <string name="action_play_artist">アーティストを再生</string>
+
+    <string name="action_add_directory">ディレクトリーを追加</string>
+    <string name="action_play_directory">ディレクトリーを再生</string>
+
+    <string name="action_add_playlist">プレイリストを追加</string>
+    <string name="action_play_playlist">プレイリストを再生</string>
+    <string name="action_remove_playlist">プレイリストを除去</string>
+
+    <string name="action_overwrite_playlist">プレイリストを上書き</string>
+    <string name="action_delete_playlist">プレイリストを削除</string>
+
+    <string name="action_play_everything">すべて再生</string>
+
+    <string name="action_show_artist">アーティストを表示</string>
+    <string name="action_show_album">アルバムを表示</string>
+    <string name="action_show_details">詳細を表示</string>
+
+    <string name="action_search">検索</string>
+    <string name="action_add_search_result">検索結果を追加</string>
+
+    <string name="action_add_to_saved_playlist">保存したプレイリストに追加</string>
+    <string name="action_remove_from_list">プレイリストから除去</string>
+
+    <string name="action_jump_to_current">現在の曲に移動</string>
+    <string name="action_open_fanart">全画面モードに移動</string>
+
+    <string name="action_enqueue">プレイリストに追加</string>
+    <string name="action_enqueue_as_next">現在の曲の後に再生</string>
+    <string name="action_play_song">曲を再生</string>
+    <string name="action_play_albums">アルバムを再生</string>
+    <string name="action_remove_track">トラックを除去</string>
+
+    <string name="action_add_url">URL を追加</string>
+    <string name="action_show_albums_from_here">このディレクトリーのアルバムを表示</string>
+
+    <!-- Menu entries -->
+    <string name="menu_library">ライブラリー</string>
+    <string name="menu_settings">設定</string>
+    <string name="menu_server">サーバープロパティ</string>
+    <string name="menu_profiles">プロフィール</string>
+    <string name="menu_playlists">プレイリスト</string>
+    <string name="menu_outputs">出力</string>
+    <string name="menu_files">ファイル</string>
+    <string name="menu_statistic">統計</string>
+    <string name="menu_app_settings">アプリ設定</string>
+
+    <string name="menu_search">検索</string>
+
+    <string name="menu_albums">アルバム</string>
+    <string name="menu_artists">アーティスト</string>
+    <string name="artwork_settings">アートワーク設定</string>
+
+    <!-- seperator -->
+
+    <string name="track_item_loading">トラックの読み込み中</string>
+
+    <string name="main_activity_connected">MPD サーバーに接続しました</string>
+    <string name="main_activity_disconnected">MPD サーバーから切断しました</string>
+
+    <!-- No Tag texts -->
+    <string name="no_album_tag">アルバムタグはありません</string>
+    <string name="no_artist_tag">アーティストタグはありません</string>
+
+    <!-- popup menu titles -->
+    <string name="action_clear_playlist">プレイリストをクリア</string>
+    <string name="action_save_playlist">プレイリストを保存</string>
+
+    <!-- edit profile fragment strings -->
+    <string name="fragment_profile_title">プロフィールを編集</string>
+    <string name="fragment_profile_profilename">プロフィール名:</string>
+    <string name="fragment_profile_hostname">ホスト名:</string>
+    <string name="fragment_profile_password">パスワード:</string>
+    <string name="fragment_profile_port">ポート:</string>
+
+    <string name="fragment_profile_default_name">新しいプロフィール</string>
+
+    <!-- Now playing view text view values -->
+    <string name="song_track_no">トラック No.:</string>
+    <string name="song_playlist_no">プレイリスト No.:</string>
+    <string name="song_bitrate">ビットレート:</string>
+    <string name="song_audio_properties">オーディオプロパティ:</string>
+    <string name="song_uri">トラック URI:</string>
+    <string name="song_title">タイトル:</string>
+    <string name="song_album">アルバム:</string>
+    <string name="song_artist">アーティスト:</string>
+    <string name="song_album_artist">アルバムアーティスト:</string>
+
+    <string name="song_date">日付:</string>
+    <string name="song_disc">ディスク:</string>
+    <string name="song_duration">時間:</string>
+
+    <string name="song_title_mbid">MusicBrainz トラック ID:</string>
+    <string name="song_album_mbid">MusicBrainz アルバム ID:</string>
+    <string name="song_artist_mbid">MusicBrainz アーティスト ID:</string>
+    <string name="song_album_artist_mbid">MusicBrainz アルバムアーティスト ID:</string>
+
+    <string name="bitrate_unit_kilo_bits">kbps</string>
+    <string name="bitcount_unit">bits</string>
+    <string name="channel_count_unit">チャンネル</string>
+
+    <!-- Server statistics text view values -->
+    <string name="server_statistic_artists_count">アーティストの数:</string>
+    <string name="server_statistic_albums_count">アルバムの数:</string>
+    <string name="server_statistic_songs_count">曲の数:</string>
+
+    <string name="server_statistic_uptime">MPD サーバーの稼働時間:</string>
+    <string name="server_statistic_db_playtime">データベース全体の時間:</string>
+    <string name="server_statistic_playtime">記録された再生時間:</string>
+    <string name="server_statistic_db_update">最終データベース更新:</string>
+
+    <string name="server_statistic_update_database">サーバーデータベース更新</string>
+
+    <!-- dialog titles -->
+    <string name="dialog_save_playlist">プレイリストを保存</string>
+    <string name="dialog_action_cancel">キャンセル</string>
+    <string name="dialog_action_save">保存</string>
+    <string name="dialog_action_ok">OK</string>
+    <string name="dialog_action_yes">はい</string>
+    <string name="dialog_action_no">いいえ</string>
+    <string name="dialog_choose_playlist">プレイリストを選択</string>
+
+    <string name="dialog_message_overwrite_playlist">プレイリストを上書きしますか:</string>
+    <string name="dialog_message_delete_playlist">プレイリストを削除してもよろしいですか:</string>
+    <string name="dialog_message_delete_current_playlist">プレイリストを削除してもよろしいですか?</string>
+
+    <!-- dialog default names  -->
+    <string name="default_playlist_title">新しいプレイリスト</string>
+    <string name="create_new_playlist">新しいプレイリストを作成</string>
+
+    <string name="preference_launch_about">アプリについて</string>
+
+    <string name="preference_theme_title">テーマ</string>
+    <string name="preference_theme_summary">アプリケーションの別のデザインを選択します。</string>
+    <string name="preference_theme_message">テーマを選択</string>
+
+    <string name="preference_theme_item_indigo">インディゴ</string>
+    <string name="preference_theme_item_orange">オレンジ</string>
+    <string name="preference_theme_item_deep_orange">ディープオレンジ</string>
+    <string name="preference_theme_item_blue">青</string>
+    <string name="preference_theme_item_dark_grey">ダークグレー</string>
+    <string name="preference_theme_item_brown">茶</string>
+    <string name="preference_theme_item_light_green">ライトグリーン</string>
+    <string name="preference_theme_item_red">赤</string>
+    <string name="preference_theme_item_oled_dark">OLED ダーク</string>
+
+    <string-array name="preference_odyssey_styles">
+        <item>@string/preference_theme_item_indigo</item>
+        <item>@string/preference_theme_item_orange</item>
+        <item>@string/preference_theme_item_deep_orange</item>
+        <item>@string/preference_theme_item_blue</item>
+        <item>@string/preference_theme_item_dark_grey</item>
+        <item>@string/preference_theme_item_brown</item>
+        <item>@string/preference_theme_item_light_green</item>
+        <item>@string/preference_theme_item_red</item>
+        <item>@string/preference_theme_item_oled_dark</item>
+    </string-array>
+
+    <string name="preference_dark_theme_title">ダークテーマ</string>
+    <string name="preference_dark_theme_message">ダークテーマを使用する</string>
+
+    <string name="preference_default_view_title">デフォルトビュー</string>
+    <string name="preference_default_view_message">デフォルトビューを選択</string>
+    <string name="preference_default_view_summary">アプリケーションのデフォルトビューを選択します。</string>
+
+    <string name="preference_default_view_my_music_artists">アーティスト</string>
+    <string name="preference_default_view_my_music_albums">アルバム</string>
+    <string name="preference_default_view_my_music_playlists">プレイリスト</string>
+    <string name="preference_default_view_my_music_files">ファイル</string>
+
+    <string-array name="preference_default_views">
+        <item>@string/preference_default_view_my_music_artists</item>
+        <item>@string/preference_default_view_my_music_albums</item>
+        <item>@string/preference_default_view_my_music_playlists</item>
+        <item>@string/preference_default_view_my_music_files</item>
+    </string-array>
+
+    <string name="preference_library_view_title">ライブラリービューを選択</string>
+    <string name="preference_library_view_message">ライブラリービューを選択</string>
+    <string name="preference_library_view_summary">アルバムとアーティストで使用するビューの種類を選択します</string>
+
+    <string name="preference_library_view_list">リスト</string>
+    <string name="preference_library_view_grid">グリッド</string>
+
+    <string-array name="preference_library_view">
+        <item>@string/preference_library_view_list</item>
+        <item>@string/preference_library_view_grid</item>
+    </string-array>
+
+    <string name="preference_use_album_artists_title">アルバムアーティストタグを使用する</string>
+    <string name="preference_use_album_artists_text">アーティストのリストに "アルバムアーティスト" タグを使用します。</string>
+
+    <string name="preference_volume_control_title">ボリュームコントロールビューを選択</string>
+    <string name="preference_volume_control_message">ボリュームコントロールビューを選択</string>
+    <string name="preference_volume_control_summary">音楽再生のボリュームをコントロールするために使用するビューの種類を選択します</string>
+
+    <string name="preference_volume_control_off">オフ</string>
+    <string name="preference_volume_control_seekbar">スライダー</string>
+    <string name="preference_volume_control_buttons">ボタン</string>
+
+    <string-array name="preference_volume_control">
+        <item>@string/preference_volume_control_off</item>
+        <item>@string/preference_volume_control_seekbar</item>
+        <item>@string/preference_volume_control_buttons</item>
+    </string-array>
+
+    <string name="preference_generic_hardware_keys_title">ハードウェアボタンを使用する</string>
+    <string name="preference_generic_hardware_keys_text">デバイスのハードウェアボタンを使用して再生をコントロールします。</string>
+
+    <string name="preference_show_notification_title">通知を表示</string>
+    <string name="preference_show_notification_text">メインユーザーインターフェイスを離れたときに通知を表示します。</string>
+
+    <!-- artwork preferences -->
+    <string name="preference_artwork_album_provider_title">アルバム画像プロバイダー</string>
+    <string name="preference_artwork_album_provider_summary">アルバムカバー画像のプロバイダーを選択します。</string>
+    <string name="preference_artwork_album_provider_message">アルバムカバー画像のプロバイダーを選択します。</string>
+
+    <string name="provider_off">オフ</string>
+
+    <string-array name="preference_artwork_album_provider_entries">
+        <item>@string/provider_off</item>
+        <item>@string/musicbrainz</item>
+        <item>@string/last_fm</item>
+    </string-array>
+
+    <string name="preference_artwork_artist_provider_title">アーティスト画像プロバイダー</string>
+    <string name="preference_artwork_artist_provider_summary">アーティストカバー画像のプロバイダーを選択します。</string>
+    <string name="preference_artwork_artist_provider_message">アーティストカバー画像のプロバイダーを選択します。</string>
+
+    <string-array name="preference_artwork_artist_provider_entries">
+        <item>@string/provider_off</item>
+        <item>@string/last_fm</item>
+        <item>@string/fanart_tv</item>
+    </string-array>
+
+    <string name="preference_artwork_clear_artist">アーティスト画像をクリア</string>
+    <string name="preference_artwork_clear_artist_summary">アーティストの保存した画像をすべて除去します。</string>
+    <string name="preference_artwork_clear_album">アルバム画像をクリア</string>
+    <string name="preference_artwork_clear_album_summary">アルバムの保存した画像をすべて除去します。</string>
+
+    <string name="preference_artwork_clear_blocked_artist">ブロックしたアーティスト画像をクリア</string>
+    <string name="preference_artwork_clear_blocked_artist_summary">検索しても見つからなかったアーティストのエントリをすべて除去します。</string>
+    <string name="preference_artwork_clear_blocked_album">ブロックしたアルバム画像をクリア</string>
+    <string name="preference_artwork_clear_blocked_album_summary">検索しても見つからなかったアルバムのエントリをすべて除去します。</string>
+
+    <string name="preference_artwork_bulk_load">データベースのすべての画像を読み込む</string>
+    <string name="preference_artwork_bulk_load_summary">これは多くの画像を読み込みます。 時間がかかることにご注意ください。 プロバイダーの一時的な制限が発生する可能性があります。</string>
+
+    <string name="preference_artwork_wifi_only_title">ダウンロードに WIFI のみ使用する</string>
+    <string name="preference_artwork_wifi_only_text">デバイスが WIFI に接続されている場合にのみ、アートワークのダウンロードを行います。</string>
+
+    <string name="search_choice_track">トラック</string>
+    <string name="search_choice_album">アルバム</string>
+    <string name="search_choice_artist">アーティスト</string>
+    <string name="search_choice_file">ファイル</string>
+    <string name="search_choice_everything">すべて</string>
+
+    <string-array name="server_search_choices">
+        <item>@string/search_choice_track</item>
+        <item>@string/search_choice_album</item>
+        <item>@string/search_choice_artist</item>
+        <item>@string/search_choice_file</item>
+        <item>@string/search_choice_everything</item>
+    </string-array>
+
+    <string name="welcome_dialog_title">プロフィールが見つかりません</string>
+    <string name="welcome_dialog_text">このアプリケーションは MPD のリモートコントロールです。 MPD をご存じない場合、このアプリケーションはおそらく役に立たないでしょう :).\n\nこのアプリケーションを使用するには、右上の追加ボタンで新しいプロフィールを追加してください。\n\n同じインターフェイスに基づく音楽プレーヤーをお好みの場合、Odyssey (https://github.com/gateship-one/odyssey) をお試しください。</string>
+
+    <string name="bulk_download_notice_title">画像ダウンロード</string>
+    <string name="bulk_download_notice_text">大量の画像をダウンロードすると、選択したサービスのサーバーに負荷がかかります。 サーバーの負荷により画像のダウンロードを妨げることがあります。 ダウンローダーが過負荷を検出した場合、その操作をキャンセルします。\n\nアートワークサービスへの寄付をご検討ください。</string>
+
+    <!-- About activity -->
+    <string name="artwork_provided_by">アートワークの提供:</string>
+    <string name="acknowledgement_text">この GUI が基づく音楽プレーヤーの Odyssey を開発するという継続的な努力に対して Frederik Lütkes に大変感謝します。</string>
+    <string name="license_text">このアプリケーションは GPLv3 ライセンスに基づいてライセンスされます。\nマテリアルアイコンは Google により CC-BY ライセンスに基づいてライセンスされます。</string>
+    <string name="sources_text">ソースコードは GitHub で利用できます:\nhttps://github.com/gateship-one/malp</string>
+    <string name="activity_about_version">バージョン: </string>
+
+    <!-- Bulk downloader service -->
+    <string name="downloader_notification_title">一括ダウンロードの実行中</string>
+    <string name="downloader_notification_remaining_images">ダウンロードした画像:</string>
+
+    <!-- Widget -->
+    <string name="widget_disconnected">切断しました</string>
+    <string name="widget_connect">接続</string>
+
+    <!-- Thirdparty Licenses dialog -->
+    <string name="thirdparty_licenses_dialog_title">サードパーティーライセンス</string>
+</resources>
