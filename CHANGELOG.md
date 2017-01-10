@@ -1,4 +1,4 @@
-### Version: 1.1.1 Tag: release-10 (20xx-xx-xx) ###
+### Version: 1.1.1 Tag: release-10 (2017-01-10) ###
  * Profile name shown in navigation drawer
  * Bugfixes for notification not shown after rotation
  * Delayed disconnect on Activity changes
