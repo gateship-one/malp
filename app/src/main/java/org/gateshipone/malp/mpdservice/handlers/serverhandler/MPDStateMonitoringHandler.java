@@ -161,6 +161,9 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         MPDStateMonitoringHandler.getHandler().sendMessage(msg);
     }
 
+    public static void updateStatus() {
+        getHandler().resyncState();
+    }
 
     private void resyncState() {
         synchronized (this) {

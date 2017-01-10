@@ -180,6 +180,7 @@ public class MPDCommandHandler extends MPDGenericHandler {
                 targetVolume = 100;
             }
             mMPDConnection.setVolume(targetVolume);
+            MPDStateMonitoringHandler.updateStatus();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME) {
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
@@ -189,6 +190,7 @@ public class MPDCommandHandler extends MPDGenericHandler {
                 targetVolume = 0;
             }
             mMPDConnection.setVolume(targetVolume);
+            MPDStateMonitoringHandler.updateStatus();
         }
     }
 
