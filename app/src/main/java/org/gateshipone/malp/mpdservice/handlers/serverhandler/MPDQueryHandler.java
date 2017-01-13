@@ -439,8 +439,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
+            MPDCapabilities caps = mMPDConnection.getServerCapabilities();
+
             // Check if server has the add search result capability
-            if (mMPDConnection.getServerCapabilities().hasSearchAdd()) {
+            if (null != caps && caps.hasSearchAdd()) {
                 mMPDConnection.addSearchedFiles(term, type);
             } else {
                 // Fetch search results and add them
