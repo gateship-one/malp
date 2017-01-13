@@ -247,7 +247,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
             }
         }
-        notifyDataSetChanged();
     }
 
     public void applyFilter(String filterString) {
@@ -273,7 +272,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             if (mSectionsEnabled) {
                 createSections();
             }
-
+            notifyDataSetChanged();
         }
     }
 
@@ -311,6 +310,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
                 if (mSectionsEnabled) {
                     createSections();
                 }
+                notifyDataSetChanged();
             }
         }
 
@@ -331,5 +331,6 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             mSectionPositions.clear();
             mPositionSectionMap.clear();
         }
+        notifyDataSetChanged();
     }
 }
