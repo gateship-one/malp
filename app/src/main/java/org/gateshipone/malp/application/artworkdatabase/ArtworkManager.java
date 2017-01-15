@@ -65,30 +65,94 @@ import java.util.List;
 public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     private static final String TAG = ArtworkManager.class.getSimpleName();
 
+    /**
+     * Maximmum size for either x or y of an image
+     */
+    private static final int MAXIMUM_IMAGE_SIZE = 500;
+
+    /**
+     * Compression level if images are rescaled
+     */
+    private static final int IMAGE_COMPRESSION_SETTING = 80;
+
+    /**
+     * Manager for the SQLite database handling
+     */
     private ArtworkDatabaseManager mDBManager;
+
+    /**
+     * List of observers that needs updating if a new ArtistImage is downloaded.
+     */
     private final ArrayList<onNewArtistImageListener> mArtistListeners;
 
+    /**
+     * List of observers that needs updating if a new AlbumImage is downloaded.
+     */
     private final ArrayList<onNewAlbumImageListener> mAlbumListeners;
 
+    /**
+     * Private static singleton instance that can be used by other classes via the
+     * getInstance method.
+     */
     private static ArtworkManager mInstance;
+
+    /**
+     * Private {@link Context} used for all kinds of things like Broadcasts.
+     * It is using the ApplicationContext so it should be safe against
+     * memory leaks.
+     */
     private Context mContext;
 
+    /**
+     * Lists of {@link MPDAlbum} objects used for bulk downloading.
+     */
     private final List<MPDAlbum> mAlbumList = new ArrayList<>();
+
+    /**
+     * Lists of {@link MPDArtist} objects used for bulk downloading.
+     */
     private final List<MPDArtist> mArtistList = new ArrayList<>();
 
+    /**
+     * Current {@link MPDAlbum} handled by the bulk downloading
+     */
     private MPDAlbum mCurrentBulkAlbum = null;
+
+    /**
+     * Current {@link MPDArtist} handled by the bulk downloading
+     */
     private MPDArtist mCurrentBulkArtist = null;
 
+    /**
+     * Callback for the bulkdownload observer (s. {@link BulkDownloadService})
+     */
     private BulkLoadingProgressCallback mBulkProgressCallback;
 
+    /**
+     * Settings string which artist download provider to use
+     */
     private String mArtistProvider;
 
+    /**
+     * Settings string which album download provider to use
+     */
     private String mAlbumProvider;
 
+    /**
+     * Settings value if artwork download is only allowed via wifi/wired connection.
+     */
     private boolean mWifiOnly;
 
+    /**
+     * Set when the list of albums for the bulk loading is ready to be processed
+     */
     private boolean mBulkLoadAlbumsReady;
+
+    /**
+     * Set when the list of artists for the bulk loading is ready to be processed
+     */
     private boolean mBulkLoadArtistsReady;
+
 
     /*
      * Broadcast constants
@@ -607,12 +671,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
-            if ((options.outHeight > 500 || options.outWidth > 500)) {
+            if ((options.outHeight > MAXIMUM_IMAGE_SIZE || options.outWidth > MAXIMUM_IMAGE_SIZE)) {
                 Log.v(TAG, "Image to big, rescaling");
                 options.inJustDecodeBounds = false;
                 Bitmap bm = BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
+                bm.createScaledBitmap(bm, MAXIMUM_IMAGE_SIZE, MAXIMUM_IMAGE_SIZE, true).compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
                 mDBManager.insertArtistImage(response.artist, byteStream.toByteArray());
             } else {
                 mDBManager.insertArtistImage(response.artist, response.image);
@@ -666,12 +730,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
-            if ((options.outHeight > 500 || options.outWidth > 500)) {
+            if ((options.outHeight > MAXIMUM_IMAGE_SIZE || options.outWidth > MAXIMUM_IMAGE_SIZE)) {
                 Log.v(TAG, "Image to big, rescaling");
                 options.inJustDecodeBounds = false;
                 Bitmap bm = BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                bm.createScaledBitmap(bm, 500, 500, true).compress(Bitmap.CompressFormat.JPEG, 80, byteStream);
+                bm.createScaledBitmap(bm, MAXIMUM_IMAGE_SIZE, MAXIMUM_IMAGE_SIZE, true).compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
                 mDBManager.insertAlbumImage(response.album, byteStream.toByteArray());
             } else {
                 mDBManager.insertAlbumImage(response.album, response.image);
