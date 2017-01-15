@@ -1,4 +1,4 @@
-![Logo](https://raw.githubusercontent.com/gateship-one/malp/master/app/src/main/res/drawable/icon_512.png)
+![Logo](https://raw.githubusercontent.com/gateship-one/malp/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 # M.A.L.P. #
 
 
@@ -10,7 +10,7 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
 
 [Screenshots](https://github.com/gateship-one/malp/wiki/Screenshots)
 
-**Mopidy (2.1) is currently only supported with a workaround until the ([Issue](https://github.com/mopidy/mopidy/issues/1315)) is resolved.**
+**Mopidy (2.1, 2.0) is currently only supported with a workaround until the [Issue](https://github.com/mopidy/mopidy/issues/1315) is resolved. Problems might occur. Consider using the real MPD server ([Homepage](https://www.musicpd.org)).**
 
 ## Requirements: ##
  - Android 5.0
