@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (C) 2016 Team Gateship-One
   ~ (Hendrik Borghorst & Frederik Luetkes)
   ~
@@ -21,86 +20,85 @@
   -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:title="@string/preference_category_design">
-    <ListPreference
-        android:defaultValue="@string/pref_theme_default"
-        android:dialogTitle="@string/preference_theme_title"
-        android:entries="@array/preference_odyssey_styles"
-        android:entryValues="@array/preference_style_values"
-        android:key="@string/pref_theme_key"
-        android:persistent="true"
-        android:summary="@string/preference_theme_summary"
-        android:title="@string/preference_theme_title" />
-    <CheckBoxPreference
-        android:defaultValue="@bool/pref_theme_dark_default"
-        android:key="@string/pref_dark_theme_key"
-        android:summary="@string/preference_dark_theme_message"
-        android:title="@string/preference_dark_theme_title" />
+    <PreferenceCategory android:title="@string/preference_category_design">
+        <ListPreference
+            android:defaultValue="@string/pref_theme_default"
+            android:dialogTitle="@string/preference_theme_title"
+            android:entries="@array/preference_odyssey_styles"
+            android:entryValues="@array/preference_style_values"
+            android:key="@string/pref_theme_key"
+            android:persistent="true"
+            android:summary="@string/preference_theme_summary"
+            android:title="@string/preference_theme_title" />
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_theme_dark_default"
+            android:key="@string/pref_dark_theme_key"
+            android:summary="@string/preference_dark_theme_message"
+            android:title="@string/preference_dark_theme_title" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/preference_category_library">
-    <ListPreference
-        android:defaultValue="@string/pref_view_default"
-        android:dialogTitle="@string/preference_default_view_message"
-        android:entries="@array/preference_default_views"
-        android:entryValues="@array/preference_default_view_values"
-        android:key="@string/pref_start_view_key"
-        android:persistent="true"
-        android:summary="@string/preference_default_view_summary"
-        android:title="@string/preference_default_view_title" />
+    <PreferenceCategory android:title="@string/preference_category_library">
+        <ListPreference
+            android:defaultValue="@string/pref_view_default"
+            android:dialogTitle="@string/preference_default_view_message"
+            android:entries="@array/preference_default_views"
+            android:entryValues="@array/preference_default_view_values"
+            android:key="@string/pref_start_view_key"
+            android:persistent="true"
+            android:summary="@string/preference_default_view_summary"
+            android:title="@string/preference_default_view_title" />
 
-    <ListPreference
-        android:defaultValue="@string/pref_library_view_default"
-        android:dialogTitle="@string/preference_library_view_message"
-        android:entries="@array/preference_library_view"
-        android:entryValues="@array/preference_library_view_values"
-        android:key="@string/pref_library_view_key"
-        android:persistent="true"
-        android:summary="@string/preference_library_view_summary"
-        android:title="@string/preference_library_view_title" />
-    <CheckBoxPreference
-        android:title="@string/preference_use_album_artists_title"
-        android:summary="@string/preference_use_album_artists_text"
-        android:persistent="true"
-        android:defaultValue="@bool/pref_use_album_artists_default"
-        android:key="@string/pref_use_album_artists_key"
-        />
+        <ListPreference
+            android:defaultValue="@string/pref_library_view_default"
+            android:dialogTitle="@string/preference_library_view_message"
+            android:entries="@array/preference_library_view"
+            android:entryValues="@array/preference_library_view_values"
+            android:key="@string/pref_library_view_key"
+            android:persistent="true"
+            android:summary="@string/preference_library_view_summary"
+            android:title="@string/preference_library_view_title" />
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_use_album_artists_default"
+            android:key="@string/pref_use_album_artists_key"
+            android:persistent="true"
+            android:summary="@string/preference_use_album_artists_text"
+            android:title="@string/preference_use_album_artists_title" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/preference_category_controls">
-    <CheckBoxPreference
-        android:defaultValue="@bool/pref_show_notification_default"
-        android:key="@string/pref_show_notification_key"
-        android:summary="@string/preference_show_notification_text"
-        android:title="@string/preference_show_notification_title" />
-    <ListPreference
-        android:defaultValue="@string/pref_volume_control_view_default"
-        android:dialogTitle="@string/preference_volume_control_message"
-        android:entries="@array/preference_volume_control"
-        android:entryValues="@array/preference_volume_control_values"
-        android:key="@string/pref_volume_controls_key"
-        android:persistent="true"
-        android:summary="@string/preference_volume_control_summary"
-        android:title="@string/preference_volume_control_title" />
-    <CheckBoxPreference
-        android:title="@string/preference_generic_hardware_keys_title"
-        android:summary="@string/preference_generic_hardware_keys_text"
-        android:persistent="true"
-        android:defaultValue="@bool/pref_hardware_controls_default"
-        android:key="@string/pref_hardware_controls_key"
-        />
+    <PreferenceCategory android:title="@string/preference_category_controls">
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_show_notification_default"
+            android:key="@string/pref_show_notification_key"
+            android:summary="@string/preference_show_notification_text"
+            android:title="@string/preference_show_notification_title" />
+        <ListPreference
+            android:defaultValue="@string/pref_volume_control_view_default"
+            android:dialogTitle="@string/preference_volume_control_message"
+            android:entries="@array/preference_volume_control"
+            android:entryValues="@array/preference_volume_control_values"
+            android:key="@string/pref_volume_controls_key"
+            android:persistent="true"
+            android:summary="@string/preference_volume_control_summary"
+            android:title="@string/preference_volume_control_title" />
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_hardware_controls_default"
+            android:key="@string/pref_hardware_controls_key"
+            android:persistent="true"
+            android:summary="@string/preference_generic_hardware_keys_text"
+            android:title="@string/preference_generic_hardware_keys_title" />
     </PreferenceCategory>
-    <PreferenceCategory
-        android:title="@string/preference_category_other">
-    <Preference
-        android:key="@string/pref_artwork_settings_key"
-        android:title="@string/artwork_settings" />
-    <Preference android:title="@string/preference_launch_about">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:targetClass="org.gateshipone.malp.application.activities.AboutActivity"
-            android:targetPackage="org.gateshipone.malp" />
-    </Preference>
+    <PreferenceCategory android:title="@string/preference_category_other">
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_use_english_wikipedia_default"
+            android:key="@string/pref_use_english_wikipedia_key"
+            android:summary="@string/preference_use_english_wikipedia_text"
+            android:title="@string/preference_use_english_wikipedia_title" />
+        <Preference
+            android:key="@string/pref_artwork_settings_key"
+            android:title="@string/artwork_settings" />
+        <Preference android:title="@string/preference_launch_about">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:targetClass="org.gateshipone.malp.application.activities.AboutActivity"
+                android:targetPackage="org.gateshipone.malp" />
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -34,6 +34,8 @@
     <string name="pref_use_album_artists_key" translatable="false">pref_use_album_artists_key</string>
     <bool name="pref_use_album_artists_default" translatable="false">false</bool>
 
+    <string name="pref_use_english_wikipedia_key" translatable="false">pref_use_english_wikipedia_key</string>
+    <bool name="pref_use_english_wikipedia_default" translatable="false">false</bool>
 
     <string name="pref_indigo_key" translatable="false">indigo</string>
     <string name="pref_orange_key" translatable="false">orange</string>

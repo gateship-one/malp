@@ -201,6 +201,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private MPDCurrentStatus mLastStatus;
     private MPDTrack mLastTrack;
 
+    private boolean mUseEnglishWikipedia;
+
     public NowPlayingView(Context context) {
         this(context, null, 0);
     }
@@ -420,13 +422,21 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             case R.id.action_wikipedia_album:
                 Intent albumIntent = new Intent(Intent.ACTION_VIEW);
                 //albumIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/index.php?search=" + mLastTrack.getTrackAlbum() + "&title=Special:Search&go=Go"));
-                albumIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbum()));
+                if (mUseEnglishWikipedia) {
+                    albumIntent.setData(Uri.parse("https://en.wikipedia.org/wiki/" + mLastTrack.getTrackAlbum()));
+                } else {
+                    albumIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbum()));
+                }
                 getContext().startActivity(albumIntent);
                 return true;
             case R.id.action_wikipedia_artist:
                 Intent artistIntent = new Intent(Intent.ACTION_VIEW);
                 //artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/index.php?search=" + mLastTrack.getTrackAlbumArtist() + "&title=Special:Search&go=Go"));
-                artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbumArtist()));
+                if (mUseEnglishWikipedia) {
+                    artistIntent.setData(Uri.parse("https://en.wikipedia.org/wiki/" + mLastTrack.getTrackAlbumArtist()));
+                } else {
+                    artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbumArtist()));
+                }
                 getContext().startActivity(artistIntent);
                 return true;
             default:
@@ -447,6 +457,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getContext().getString(R.string.pref_volume_controls_key))) {
             setVolumeControlSetting();
+        } else if (key.equals(getContext().getString(R.string.pref_use_english_wikipedia_key))) {
+            mUseEnglishWikipedia = sharedPreferences.getBoolean(key, getContext().getResources().getBoolean(R.bool.pref_use_english_wikipedia_default));
         }
     }
 
@@ -977,7 +989,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         menu.setOnMenuItemClickListener(this);
 
         // Set the checked menu item state if a MPDCurrentStatus is available
-        if ( null != mLastStatus ) {
+        if (null != mLastStatus) {
             MenuItem singlePlaybackItem = menu.getMenu().findItem(R.id.action_toggle_single_mode);
             singlePlaybackItem.setChecked(mLastStatus.getSinglePlayback() == 1);
 
@@ -987,7 +999,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Check if the current view is the cover or the playlist. If it is the playlist hide its actions.
         // If the viewswitcher only has one child the dual pane layout is used
-        if (mViewSwitcher.getDisplayedChild() == 0 && (mViewSwitcher.getChildCount() > 1) ) {
+        if (mViewSwitcher.getDisplayedChild() == 0 && (mViewSwitcher.getChildCount() > 1)) {
             menu.getMenu().setGroupEnabled(R.id.group_playlist_actions, false);
             menu.getMenu().setGroupVisible(R.id.group_playlist_actions, false);
         }
@@ -1081,6 +1093,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         sharedPref.registerOnSharedPreferenceChangeListener(this);
 
         setVolumeControlSetting();
+
+        mUseEnglishWikipedia = sharedPref.getBoolean(getContext().getString(R.string.pref_use_english_wikipedia_key), getContext().getResources().getBoolean(R.bool.pref_use_english_wikipedia_default));
     }
 
 
@@ -1183,7 +1197,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     }
 
     private void updateMPDCurrentTrack(MPDTrack track) {
-        if ( track.getTrackTitle().isEmpty()) {
+        if (track.getTrackTitle().isEmpty()) {
             mTrackName.setText(FormatHelper.getFilenameFromPath(track.getPath()));
         } else {
             mTrackName.setText(track.getTrackTitle());
