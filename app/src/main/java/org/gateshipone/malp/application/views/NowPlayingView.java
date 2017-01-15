@@ -433,7 +433,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 Intent artistIntent = new Intent(Intent.ACTION_VIEW);
                 //artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/index.php?search=" + mLastTrack.getTrackAlbumArtist() + "&title=Special:Search&go=Go"));
                 if (mUseEnglishWikipedia) {
-                    artistIntent.setData(Uri.parse("https://en.wikipedia.org/wiki/" + mLastTrack.getTrackAlbumArtist()));
+                    artistIntent.setData(Uri.parse("https://en.wikipedia.org/wiki/" + mLastTrack.getTrackArtist()));
                 } else {
                     artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackArtist()));
                 }
