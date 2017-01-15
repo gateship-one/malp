@@ -81,6 +81,10 @@
     <string name="action_add_url">Add URL</string>
     <string name="action_show_albums_from_here">Show albums in this directory</string>
 
+    <string name="action_wikipedia" translatable="false">Wikipedia</string>
+    <string name="action_wikipedia_album">Open album</string>
+    <string name="action_wikipedia_artist">Open artist</string>
+
     <!-- Menu entries -->
     <string name="menu_library">Library</string>
     <string name="menu_settings">Settings</string>

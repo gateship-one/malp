@@ -212,4 +212,6 @@
     <string name="contributor_translator_japanese">Japanische Übersetzung</string>
     <string name="contributors_title">Mitwirkende</string>
     <string name="server_statistic_malp_server_info">Serverfunktionen:</string>
+    <string name="action_wikipedia_album">Öffne Album</string>
+    <string name="action_wikipedia_artist">Öffne Interpreten</string>
 </resources>

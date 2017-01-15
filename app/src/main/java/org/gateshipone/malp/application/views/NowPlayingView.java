@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -70,6 +71,8 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoring
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
+
+import java.util.Locale;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
@@ -413,6 +416,18 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             case R.id.action_open_fanart:
                 Intent intent = new Intent(getContext(), FanartActivity.class);
                 getContext().startActivity(intent);
+                return true;
+            case R.id.action_wikipedia_album:
+                Intent albumIntent = new Intent(Intent.ACTION_VIEW);
+                //albumIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/index.php?search=" + mLastTrack.getTrackAlbum() + "&title=Special:Search&go=Go"));
+                albumIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbum()));
+                getContext().startActivity(albumIntent);
+                return true;
+            case R.id.action_wikipedia_artist:
+                Intent artistIntent = new Intent(Intent.ACTION_VIEW);
+                //artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/index.php?search=" + mLastTrack.getTrackAlbumArtist() + "&title=Special:Search&go=Go"));
+                artistIntent.setData(Uri.parse("https://" + Locale.getDefault().getLanguage() + ".wikipedia.org/wiki/" + mLastTrack.getTrackAlbumArtist()));
+                getContext().startActivity(artistIntent);
                 return true;
             default:
                 return false;
