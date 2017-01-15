@@ -1,3 +1,12 @@
+### Version: 1.1.2 Tag: release-11 (2017-01-15) ###
+ * Crash fix in SearchFragment if "Add" button is clicked but no server connection was established
+ * Crash fix in FanartCache 
+ * Filtering in SavedPlaylists working again
+ * Workaround for Mopidy's MPD protocol insufficiencies
+ * Notification enabled by default from now (can be disabled in the settings)
+ * Artwork is fetched also from the background service
+ * Small fixes
+
 ### Version: 1.1.1 Tag: release-10 (2017-01-10) ###
  * Profile name shown in navigation drawer
  * Bugfixes for notification not shown after rotation
