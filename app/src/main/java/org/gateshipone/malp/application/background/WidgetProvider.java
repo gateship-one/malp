@@ -35,6 +35,7 @@ import android.widget.RemoteViews;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.activities.SplashActivity;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -249,6 +250,14 @@ public class WidgetProvider extends AppWidgetProvider {
         } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {
             mLastStatus = null;
             mLastTrack = null;
+        } else if ( intent.getAction().equals(ArtworkManager.ACTION_NEW_ARTWORK_READY)) {
+            // Check if the new artwork matches the currently playing track. If so reload artwork
+            if ( mLastTrack != null && mLastTrack.getTrackAlbum().equals(intent.getStringExtra(ArtworkManager.INTENT_EXTRA_KEY_ALBUM_NAME))) {
+                // Got new artwork
+                mLastCover = null;
+                CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
+                coverLoader.getImage(mLastTrack, false);
+            }
         }
         // Refresh the widget with the new information
         updateWidget(context);

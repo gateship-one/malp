@@ -41,13 +41,15 @@ import android.support.v7.app.NotificationCompat;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
-public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener {
+public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = NotificationManager.class.getSimpleName();
     private static final int NOTIFICATION_ID = 0;
 
@@ -117,13 +119,15 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
          * Create loader to asynchronously load cover images. This class is the callback (s. receiveBitmap)
          */
         mCoverLoader = new CoverBitmapLoader(mService, this);
+
+        ArtworkManager.getInstance(service).registerOnNewAlbumImageListener(this);
     }
 
     /**
      * Shows the notification
      */
     public void showNotification() {
-        if ( mMediaSession == null) {
+        if (mMediaSession == null) {
             mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
             mMediaSession.setCallback(new MALPMediaSessionCallback());
             mVolumeControlProvider = new MALPVolumeControlProvider();
@@ -139,7 +143,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * Hides the notification (if shown) and resets state variables.
      */
     public void hideNotification() {
-        if ( mMediaSession != null ) {
+        if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession = null;
         }
@@ -225,10 +229,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             String secondRow;
 
-            if ( !track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+            if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
                 secondRow = track.getTrackArtist() + mService.getString(R.string.track_item_separator) + track.getTrackAlbum();
-            } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty() ) {
-                 secondRow = track.getTrackAlbum();
+            } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                secondRow = track.getTrackAlbum();
             } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
                 secondRow = track.getTrackArtist();
             } else {
@@ -236,7 +240,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             }
 
             // Set the media session metadata
-            updateMetadata(track,state);
+            updateMetadata(track, state);
 
             mNotificationBuilder.setContentText(secondRow);
 
@@ -247,7 +251,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             if (mNotification == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
                 mLastTrack = track;
                 mLastBitmap = null;
-                mCoverLoader.getImage(mLastTrack,false);
+                mCoverLoader.getImage(mLastTrack, true);
             }
 
             // Only set image if an saved one is available
@@ -258,7 +262,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                  * Create a dummy placeholder image for versions greater android 7 because it
                  * does not automatically show the application icon anymore in mediastyle notifications.
                  */
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                     Drawable icon = mService.getDrawable(R.drawable.notification_placeholder_256dp);
 
                     Bitmap iconBitmap = Bitmap.createBitmap(icon.getIntrinsicWidth(), icon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
@@ -333,6 +337,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
     /**
      * Notifies about a change in MPDs status. If not shown this may be used later.
+     *
      * @param status New MPD status
      */
     public void setMPDStatus(MPDCurrentStatus status) {
@@ -347,6 +352,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
     /**
      * Notifies about a change in MPDs track. If not shown this may be used later.
+     *
      * @param track New MPD track
      */
     public void setMPDFile(MPDTrack track) {
@@ -372,12 +378,19 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
 
             /* Set lockscreen picture and stuff */
-            if ( mMediaSession != null ) {
+            if (mMediaSession != null) {
                 MediaMetadataCompat.Builder metaDataBuilder;
                 metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
                 metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
                 mMediaSession.setMetadata(metaDataBuilder.build());
             }
+        }
+    }
+
+    @Override
+    public void newAlbumImage(MPDAlbum album) {
+        if (mLastTrack.getTrackAlbum().equals(album.getName())) {
+            mCoverLoader.getImage(mLastTrack, true);
         }
     }
 
@@ -420,7 +433,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         @Override
         public void onSeekTo(long pos) {
             super.onSeekTo(pos);
-            MPDCommandHandler.seekSeconds((int)pos);
+            MPDCommandHandler.seekSeconds((int) pos);
         }
     }
 
@@ -442,9 +455,9 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
         @Override
         public void onAdjustVolume(int direction) {
-            if ( direction == 1 ) {
+            if (direction == 1) {
                 MPDCommandHandler.increaseVolume();
-            } else if ( direction == -1 ) {
+            } else if (direction == -1) {
                 MPDCommandHandler.decreaseVolume();
             }
         }

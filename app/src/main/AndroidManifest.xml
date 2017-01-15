@@ -84,6 +84,7 @@
         <receiver android:name=".application.background.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="org.gateshipone.malp.action_new_artwork_ready" />
                 <action android:name="org.gateshipone.malp.widget.status_changed" />
                 <action android:name="org.gateshipone.malp.widget.track_changed" />
                 <action android:name="org.gateshipone.malp.widget.server_disconnected"/>

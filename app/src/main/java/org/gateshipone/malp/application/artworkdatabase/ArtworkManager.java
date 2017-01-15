@@ -89,6 +89,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     private boolean mBulkLoadAlbumsReady;
     private boolean mBulkLoadArtistsReady;
 
+    /*
+     * Broadcast constants
+     */
+    public static final String ACTION_NEW_ARTWORK_READY = "org.gateshipone.malp.action_new_artwork_ready";
+
+    public static final String INTENT_EXTRA_KEY_ARTIST_MBID = "org.gateshipone.malp.extra.artist_mbid";
+    public static final String INTENT_EXTRA_KEY_ARTIST_NAME = "org.gateshipone.malp.extra.artist_name";
+
+    public static final String INTENT_EXTRA_KEY_ALBUM_MBID = "org.gateshipone.malp.extra.album_mbid";
+    public static final String INTENT_EXTRA_KEY_ALBUM_NAME = "org.gateshipone.malp.extra.album_name";
+
     private ArtworkManager(Context context) {
 
         mDBManager = ArtworkDatabaseManager.getInstance(context.getApplicationContext());
@@ -137,6 +148,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an artist image for the given artist.
+     *
      * @param artist {@link MPDArtist} to get the image for-
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -170,6 +182,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given album.
+     *
      * @param mbid MusicBrainzID for the given album.
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -194,7 +207,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given album name and artist name.
-     * @param albumName Name of the album to look for
+     *
+     * @param albumName  Name of the album to look for
      * @param artistName Name of the albums artists
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -221,6 +235,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given album name.
+     *
      * @param albumName Name of the album to look for
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -247,6 +262,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given track.
+     *
      * @param track {@link MPDTrack} to get the album image for.
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -297,6 +313,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Returns an album image for the given {@link MPDAlbum}
+     *
      * @param album {@link MPDAlbum} to get the image for.
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
@@ -461,7 +478,6 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     }
 
 
-
     /**
      * Interface implementation to handle errors during fetching of album images
      *
@@ -478,6 +494,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Called if a volley error occurs during internet communication.
+     *
      * @param album {@link MPDAlbum} the error occured for.
      * @param error {@link VolleyError} that was emitted
      */
@@ -527,8 +544,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Called if a volley error occurs during internet communication.
+     *
      * @param artist {@link MPDArtist} the error occured for.
-     * @param error {@link VolleyError} that was emitted
+     * @param error  {@link VolleyError} that was emitted
      */
     public void fetchVolleyError(MPDArtist artist, VolleyError error) {
         Log.e(TAG, "VolleyError fetching: " + artist.getArtistName());
@@ -599,6 +617,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mDBManager.insertArtistImage(response.artist, response.image);
             }
 
+            broadcastNewArtistImageInfo(response, mContext);
+
             return response.artist;
         }
 
@@ -656,6 +676,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mDBManager.insertAlbumImage(response.album, response.image);
             }
 
+            broadcastNewAlbumImageInfo(response, mContext);
+
             return response.album;
         }
 
@@ -672,6 +694,36 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             }
         }
 
+    }
+
+    /**
+     * Used to broadcast information about new available artwork to {@link BroadcastReceiver} like
+     * the {@link org.gateshipone.malp.application.background.WidgetProvider} to reload its artwork.
+     * @param artistImage Image response containing the artist that an image was inserted for.
+     * @param context Context used for broadcasting
+     */
+    private void broadcastNewArtistImageInfo(ArtistImageResponse artistImage, Context context) {
+        Intent newImageIntent = new Intent(ACTION_NEW_ARTWORK_READY);
+
+        newImageIntent.putExtra(INTENT_EXTRA_KEY_ARTIST_MBID, artistImage.artist.getMBIDCount() > 0 ? artistImage.artist.getMBID(0): "");
+        newImageIntent.putExtra(INTENT_EXTRA_KEY_ARTIST_NAME, artistImage.artist.getArtistName());
+
+        context.sendBroadcast(newImageIntent);
+    }
+
+    /**
+     * Used to broadcast information about new available artwork to {@link BroadcastReceiver} like
+     * the {@link org.gateshipone.malp.application.background.WidgetProvider} to reload its artwork.
+     * @param albumImage Image response containing the album that an image was inserted for.
+     * @param context Context used for broadcasting
+     */
+    private void broadcastNewAlbumImageInfo(AlbumImageResponse albumImage, Context context) {
+        Intent newImageIntent = new Intent(ACTION_NEW_ARTWORK_READY);
+
+        newImageIntent.putExtra(INTENT_EXTRA_KEY_ALBUM_MBID, albumImage.album.getMBID());
+        newImageIntent.putExtra(INTENT_EXTRA_KEY_ALBUM_NAME, albumImage.album.getName());
+
+        context.sendBroadcast(newImageIntent);
     }
 
     /**
@@ -692,7 +744,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 mAlbumList.addAll(albumList);
             }
             mBulkLoadAlbumsReady = true;
-            if ( mBulkLoadArtistsReady ) {
+            if (mBulkLoadArtistsReady) {
                 fetchNextBulkAlbum();
                 fetchNextBulkArtist();
             }
@@ -718,7 +770,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             }
 
             mBulkLoadArtistsReady = true;
-            if ( mBulkLoadAlbumsReady ) {
+            if (mBulkLoadAlbumsReady) {
                 fetchNextBulkAlbum();
                 fetchNextBulkArtist();
             }
@@ -729,6 +781,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     /**
      * Entrance point to start downloading all images for the complete database of the current
      * default MPD server.
+     *
      * @param progressCallback Used callback interface to be notified about the download progress.
      */
     public void bulkLoadImages(BulkLoadingProgressCallback progressCallback) {
@@ -791,7 +844,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 isEmpty = mAlbumList.isEmpty();
             }
         }
-        if ( mArtistList.isEmpty() ) {
+        if (mArtistList.isEmpty()) {
             mBulkProgressCallback.finishedLoading();
         }
 
@@ -829,7 +882,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             }
         }
 
-        if ( mAlbumList.isEmpty() ) {
+        if (mAlbumList.isEmpty()) {
             mBulkProgressCallback.finishedLoading();
         }
 
@@ -881,7 +934,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * it is important to cancel all requests when changing the provider in settings.
      */
     public void cancelAllRequests() {
-        Log.v(TAG,"Cancel all download requests");
+        Log.v(TAG, "Cancel all download requests");
         MALPRequestQueue.getInstance(mContext).cancelAll(new RequestQueue.RequestFilter() {
             @Override
             public boolean apply(Request<?> request) {
@@ -897,7 +950,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             mArtistList.clear();
         }
 
-        if ( null != mBulkProgressCallback ) {
+        if (null != mBulkProgressCallback) {
             mBulkProgressCallback.finishedLoading();
         }
     }
