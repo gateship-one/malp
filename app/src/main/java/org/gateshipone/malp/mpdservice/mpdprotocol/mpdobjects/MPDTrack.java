@@ -114,6 +114,12 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     private int pSongID;
 
     /**
+     * Used for {@link org.gateshipone.malp.application.adapters.CurrentPlaylistAdapter} to save if an
+     * image is already being fetchted from the internet for this item
+     */
+    private boolean pImageFetching;
+
+    /**
      * Create empty MPDTrack (track). Fill it with setter methods during
      * parsing of mpds output.
      *
@@ -135,6 +141,8 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pTrackAlbumArtistMBID = "";
 
         pLength = 0;
+
+        pImageFetching = false;
     }
 
     /**
@@ -168,6 +176,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
 
         pSongPosition = in.readInt();
         pSongID = in.readInt();
+        pImageFetching = in.readInt() == 1;
     }
 
     public String getTrackTitle() {
@@ -299,6 +308,14 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pSongID = id;
     }
 
+    public boolean getFetching() {
+        return pImageFetching;
+    }
+
+    public void setFetching(boolean fetching) {
+        pImageFetching = fetching;
+    }
+
     /**
      * @return String that is used for section based scrolling
      */
@@ -373,10 +390,11 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         dest.writeInt(pAlbumDiscCount);
         dest.writeInt(pSongPosition);
         dest.writeInt(pSongID);
+        dest.writeInt(pImageFetching ? 1 : 0);
     }
 
     public int indexCompare(MPDTrack compFile) {
-        if ( !pTrackAlbumMBID.equals(compFile.pTrackAlbumMBID)) {
+        if (!pTrackAlbumMBID.equals(compFile.pTrackAlbumMBID)) {
             return pTrackAlbumMBID.compareTo(compFile.pTrackAlbumMBID);
         }
         // Compare disc numbers first
@@ -397,20 +415,20 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     }
 
     public int compareTo(MPDTrack another) {
-        if ( another == null ) {
+        if (another == null) {
             return -1;
         }
 
         String title = mPath;
         String[] pathSplit = title.split("/");
-        if ( pathSplit.length > 0 ) {
+        if (pathSplit.length > 0) {
             title = pathSplit[pathSplit.length - 1];
         }
 
 
         String titleAnother = mPath;
         String[] pathSplitAnother = title.split("/");
-        if ( pathSplit.length > 0 ) {
+        if (pathSplit.length > 0) {
             titleAnother = pathSplit[pathSplit.length - 1];
         }
         return title.toLowerCase().compareTo(titleAnother.toLowerCase());

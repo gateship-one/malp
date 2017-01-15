@@ -25,7 +25,6 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 
 
-import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.ImageNotFoundException;
@@ -33,6 +32,7 @@ import org.gateshipone.malp.application.listviewitems.CoverLoadable;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 /*
  * Loaderclass for covers
@@ -94,6 +94,20 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
                     // If not set it as ongoing and request the image fetch.
                     mCover.artworkManager.fetchAlbumImage(album);
                     album.setFetching(true);
+                }
+            }
+        } else if (mCover.modelItem instanceof MPDTrack) {
+            MPDTrack track = (MPDTrack)mCover.modelItem;
+            try {
+                // Check if image is available. If it is not yet fetched it will throw an exception.
+                // If it was already searched for and not found, this will be null.
+                image = mCover.artworkManager.getAlbumImageForTrack(track);
+            } catch (ImageNotFoundException e) {
+                // Check if fetching for this item is already ongoing
+                if (!track.getFetching()) {
+                    // If not set it as ongoing and request the image fetch.
+                    mCover.artworkManager.fetchAlbumImage(track);
+                    track.setFetching(true);
                 }
             }
         }
