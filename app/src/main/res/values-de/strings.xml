@@ -146,7 +146,7 @@
     <string name="no_artist_tag">Kein Interpreten-Tag</string>
     <string name="dialog_action_ok">OK</string>
     <string name="welcome_dialog_title">Keine Profile gefunden</string>
-    <string name="welcome_dialog_text">Diese Anwendung ist eine Fernsteuerung für MPD. Falls Sie MPD nicht kennen, ist diese Anwendung höchstwahrscheinlich für Sie nutzlos, entschuldigung :).\n\nUm diese Anwendung zu nutzen, erstellen Sie ein neues Profil mit dem Hinzufügen-Knopf in der rechten oberen Ecke.\n\nFalls Sie einen Musikspieler mit der gleichen Oberfläche nutzen möchten, versuchen Sie doch mal Odyssey (https://github.com/gateship-one/odyssey).</string>
+    <string name="welcome_dialog_text">Diese Anwendung ist eine Fernsteuerung für MPD. Falls Sie MPD nicht kennen, ist diese Anwendung höchstwahrscheinlich für Sie nutzlos, Entschuldigung :).\n\nUm diese Anwendung zu nutzen, erstellen Sie ein neues Profil mit dem Hinzufügen-Knopf in der rechten oberen Ecke.\nDie Anwendung funktioniert evtl. mit Mopidy oder auch nicht. Keine Garantie für Support von Mopidy.\n\nFalls Sie einen Musikspieler mit der gleichen Oberfläche nutzen möchten, versuchen Sie doch mal Odyssey (https://github.com/gateship-one/odyssey).</string>
     <string name="preference_artwork_album_provider_message">Wählen Sie einen Anbieter für die Albenbilder</string>
     <string name="preference_artwork_album_provider_summary">Wählen Sie einen Anbieter für die Albenbilder</string>
     <string name="preference_artwork_artist_provider_message">Wählen Sie einen Anbieter für die Interpretenbilder</string>
