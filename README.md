@@ -10,7 +10,7 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
 
 [Screenshots](https://github.com/gateship-one/malp/wiki/Screenshots)
 
-**Mopidy (2.0.1) is currently not supported, because it tells clients that it is implementing MPD protocol version 0.19 but is not correctly following the MPD protocol specification ([Issue](https://github.com/mopidy/mopidy/issues/1315)).**
+**Mopidy (2.1) is currently only supported with a workaround until the ([Issue](https://github.com/mopidy/mopidy/issues/1315)) is resolved.**
 
 ## Requirements: ##
  - Android 5.0
