@@ -763,6 +763,10 @@ public class MPDConnection {
             }
             response = readLine();
         }
+        if ( response.startsWith("ACK") && response.contains("not able to parse args") ) {
+            Log.e(TAG,"Error parsing artists: " + response);
+            enableMopidyWorkaround();
+        }
 
         /* Because of the loop structure the last album has to be added because no
         "ALBUM:" is sent anymore.
@@ -827,6 +831,10 @@ public class MPDConnection {
                 break;
             }
             response = readLine();
+        }
+        if ( response.startsWith("ACK") && response.contains("not able to parse args") ) {
+            Log.e(TAG,"Error parsing artists: " + response);
+            enableMopidyWorkaround();
         }
 
         // Add last artist
@@ -2384,5 +2392,20 @@ public class MPDConnection {
         for (StackTraceElement el : st) {
             printDebug(el.toString());
         }
+    }
+
+    /**
+     * This is called if an parse list args error occurs during the parsing
+     * of {@link MPDAlbum} or {@link MPDArtist} objects. This probably indicates
+     * that this client is connected to Mopidy so we enable a workaround and reconnect
+     * to force the GUI to reload the contents.
+     */
+    private void enableMopidyWorkaround() {
+        // Enable the workaround in the capabilities object
+        mServerCapabilities.enableMopidyWorkaround();
+
+        // Reconnect to server
+        disconnectFromServer();
+        connectToServer();
     }
 }

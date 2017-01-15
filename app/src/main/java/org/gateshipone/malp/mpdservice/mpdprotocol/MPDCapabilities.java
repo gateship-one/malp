@@ -129,4 +129,10 @@ public class MPDCapabilities {
                 + "List grouping: " + mHasListGroup + '\n'
                 + "List filtering: " + mHasListFiltering + '\n';
     }
+
+    public void enableMopidyWorkaround() {
+        Log.w(TAG, "Enabling workarounds for detected Mopidy server");
+        mHasListGroup = false;
+        mHasListFiltering = false;
+    }
 }
