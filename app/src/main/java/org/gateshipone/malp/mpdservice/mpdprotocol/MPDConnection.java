@@ -763,7 +763,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if ( response.startsWith("ACK") && response.contains("not able to parse args") ) {
+        if ( response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR) ) {
             Log.e(TAG,"Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
@@ -832,7 +832,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if ( response.startsWith("ACK") && response.contains("not able to parse args") ) {
+        if ( response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR) ) {
             Log.e(TAG,"Error parsing artists: " + response);
             enableMopidyWorkaround();
         }

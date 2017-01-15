@@ -41,6 +41,8 @@ public class MPDCapabilities {
 
     private boolean mHasListFiltering;
 
+    private boolean mMopidyDetected;
+
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
@@ -127,12 +129,14 @@ public class MPDCapabilities {
                 + "Fast search add: " + mHasSearchAdd + '\n'
                 + "MUSICBRAINZ tag support: " + mHasMusicBrainzTags + '\n'
                 + "List grouping: " + mHasListGroup + '\n'
-                + "List filtering: " + mHasListFiltering + '\n';
+                + "List filtering: " + mHasListFiltering
+                + (mMopidyDetected ? "\nMopidy detected, consider using the real MPD server (www.musicpd.org)!" : "");
     }
 
     public void enableMopidyWorkaround() {
         Log.w(TAG, "Enabling workarounds for detected Mopidy server");
         mHasListGroup = false;
         mHasListFiltering = false;
+        mMopidyDetected = true;
     }
 }

@@ -86,4 +86,6 @@ public class MPDResponses {
 
     public static final String MPD_COMMAND = "command: ";
     public static final String MPD_TAGTYPE = "tagtype: ";
+
+    public static final String MPD_PARSE_ARGS_LIST_ERROR = "not able to parse args";
 }
