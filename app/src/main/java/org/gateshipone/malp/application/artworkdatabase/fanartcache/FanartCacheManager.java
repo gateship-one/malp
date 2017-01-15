@@ -38,10 +38,7 @@ import java.util.List;
 
 public class FanartCacheManager {
     private static final String TAG = FanartCacheManager.class.getSimpleName();
-    private static final int MAX_ARTISTS_CACHED = 10;
     private static final String FANART_CACHE_SUFFIX = "/fanart";
-
-    private static final String IMAGE_FILENAME_PREFIX = "image_";
 
     private static final int SESSION_LRU_MAX = 10;
 
@@ -98,14 +95,10 @@ public class FanartCacheManager {
         File[] subFiles = artistDir.listFiles(new FileFilter() {
             @Override
             public boolean accept(File file) {
-                if ( file.isFile()) {
-                    return true;
-                }
-                return false;
+                return file.isFile();
             }
         });
-        File retFile = subFiles[index];
-        return retFile;
+        return subFiles[index];
     }
 
     /**
@@ -115,42 +108,46 @@ public class FanartCacheManager {
      * @param mbid
      * @param image
      */
-    public synchronized void addFanart(String mbid, String name,byte[] image) {
+    public synchronized void addFanart(String mbid, String name, byte[] image) {
         int newIndex = getFanartCount(mbid);
-        Log.v(TAG,"Add fanart: " + newIndex + "for mbid: " + mbid);
+        Log.v(TAG, "Add fanart: " + newIndex + "for mbid: " + mbid);
 
         File outputDir = new File(mCacheBasePath + "/" + mbid);
         if (!outputDir.exists()) {
-            outputDir.mkdirs();
+            if (!outputDir.mkdirs()) {
+                Log.e(TAG, "Fanart cache directory could be created");
+                return;
+            }
         }
 
         File outputFile = new File(mCacheBasePath + "/" + mbid + "/" + name);
-        if(!outputFile.exists()) {
+        if (!outputFile.exists()) {
             FileOutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(outputFile);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Output file could not be created: " + mbid + ":" + name);
+                return;
             }
 
             try {
                 outputStream.write(image);
                 outputStream.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.e(TAG, "Error during write of fanart image to cache: " + mbid + ":" + name);
             }
         }
 
         mLastAccessedMBIDs.add(mbid);
         long cacheSize = getCacheSize();
         Log.v(TAG, "Cache is now " + cacheSize / (1024 * 1024) + "MB in size");
-        if ( cacheSize > MAX_CACHE_SIZE ) {
+        if (cacheSize > MAX_CACHE_SIZE) {
             trimCache();
         }
     }
 
     public synchronized boolean inCache(String mbid, String name) {
-        Log.v(TAG,"Check if exists: " + mCacheBasePath + "/" + mbid + "/" + name );
+        Log.v(TAG, "Check if exists: " + mCacheBasePath + "/" + mbid + "/" + name);
         File checkFile = new File(mCacheBasePath + "/" + mbid + "/" + name);
         return checkFile.exists();
     }
@@ -162,7 +159,7 @@ public class FanartCacheManager {
         List<String> lruEntries = new ArrayList<>();
         for (int i = 0; i < SESSION_LRU_MAX && i < mLastAccessedMBIDs.size(); i++) {
             lruEntries.add(mLastAccessedMBIDs.get(i));
-            Log.v(TAG,"Entry : " + mLastAccessedMBIDs.get(i) + "Should not be removed");
+            Log.v(TAG, "Entry : " + mLastAccessedMBIDs.get(i) + "Should not be removed");
         }
 
         mLastAccessedMBIDs.clear();
@@ -170,7 +167,7 @@ public class FanartCacheManager {
 
         File cacheDir = new File(mCacheBasePath);
         for (File subFile : cacheDir.listFiles()) {
-            Log.v(TAG,"Check entry: " + subFile.getName());
+            Log.v(TAG, "Check entry: " + subFile.getName());
             if (!lruEntries.contains(subFile.getName())) {
                 Log.v(TAG, "Removing cache entry for: " + subFile.getName());
                 deleteDirectory(subFile);
