@@ -152,10 +152,12 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private synchronized void increaseMPDUse(Context context) {
         // First Activity to use MPD, connect
         if ( mUseCounter == 0) {
+            mUseCounter++;
             if ( null != mDisconnectTimer) {
                 mDisconnectTimer.cancel();
                 mDisconnectTimer.purge();
                 mDisconnectTimer = null;
+                return;
             }
 
             /**
@@ -168,7 +170,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
             reconnectLastServer(context);
         }
-        mUseCounter++;
+
     }
 
     private synchronized void decreaseMPDUse(Context context) {
@@ -284,6 +286,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
             }
 
             disconnectFromServer();
+            mDisconnectTimer = null;
         }
     }
 
