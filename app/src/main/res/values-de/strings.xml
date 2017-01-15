@@ -61,7 +61,7 @@
     <string name="dialog_action_save">Speichern</string>
     <string name="dialog_choose_playlist">Wähle Liste</string>
     <string name="dialog_save_playlist">Liste speichern</string>
-    <string name="fragment_profile_hostname">Hostname:</string>
+    <string name="fragment_profile_hostname">Hostname oder IP:</string>
     <string name="fragment_profile_password">Passwort:</string>
     <string name="fragment_profile_port">Port:</string>
     <string name="fragment_profile_profilename">Profilname:</string>
