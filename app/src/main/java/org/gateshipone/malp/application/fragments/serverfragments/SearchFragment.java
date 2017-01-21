@@ -59,7 +59,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener {
+public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener, View.OnFocusChangeListener {
     public static final String TAG = SearchFragment.class.getSimpleName();
 
     /**
@@ -117,6 +117,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
         mSearchView = (SearchView) rootView.findViewById(R.id.search_text);
         mSearchView.setOnQueryTextListener(new SearchViewQueryListener());
+        mSearchView.setOnFocusChangeListener(this);
 
 
         // get swipe layout
@@ -222,6 +223,15 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         inflater.inflate(R.menu.context_menu_search_track, menu);
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = getView();
+        if (null != view) {
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
+    }
 
     /**
      * Hook called when an menu item in the context menu is selected.
@@ -332,6 +342,14 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
     private void showFAB(boolean active) {
         if (null != mFABCallback) {
             mFABCallback.setupFAB(active, active ? new FABOnClickListener() : null);
+        }
+    }
+
+    @Override
+    public void onFocusChange(View v, boolean hasFocus) {
+        if (v.equals(mSearchView) && !hasFocus) {
+            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
         }
     }
 
