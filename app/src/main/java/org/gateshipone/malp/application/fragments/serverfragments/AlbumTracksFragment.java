@@ -43,6 +43,7 @@ import android.widget.ListView;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.FileAdapter;
+import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
@@ -56,7 +57,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 import java.util.List;
 
-public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener {
+public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     public final static String TAG = AlbumTracksFragment.class.getSimpleName();
     /**
      * Parameters for bundled extra arguments for this fragment. Necessary to define which album to
@@ -95,8 +96,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         Bundle args = getArguments();
         if (null != args) {
             mAlbum = args.getParcelable(BUNDLE_STRING_EXTRA_ALBUM);
-            if ( null != mAlbum) {
-                Log.v(TAG,"Album:" + mAlbum.getName() + ":" + mAlbum.getArtistName());
+            if (null != mAlbum) {
+                Log.v(TAG, "Album:" + mAlbum.getName() + ":" + mAlbum.getArtistName());
             }
         }
 
@@ -145,8 +146,19 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         }
 
         if (mAlbum != null) {
-            mBitmapLoader.getAlbumImage(mAlbum,false);
+            mBitmapLoader.getAlbumImage(mAlbum, false);
         }
+
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(this);
+    }
+
+    /**
+     * Called when the fragment is hidden. This unregisters the listener for a new album image
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener(this);
     }
 
     /**
@@ -292,6 +304,12 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_reset_artwork:
+                if (null != mFABCallback) {
+                    mFABCallback.setupToolbar(mAlbum.getName(), false, false, false);
+                }
+                ArtworkManager.getInstance(getContext()).resetAlbumImage(mAlbum);
+                return true;
             case R.id.action_add_album:
                 enqueueAlbum();
                 return true;
@@ -340,6 +358,13 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                     mFABCallback.setupToolbarImage(bm);
                 }
             });
+        }
+    }
+
+    @Override
+    public void newAlbumImage(MPDAlbum album) {
+        if (album.equals(mAlbum)) {
+            mBitmapLoader.getAlbumImage(mAlbum, false);
         }
     }
 

@@ -211,6 +211,40 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         mWifiOnly = wifiOnly;
     }
 
+
+    /**
+     * Removes the image for the album and tries to reload it from the internet
+     * @param album {@link MPDAlbum} to reload the image for
+     */
+    public void resetAlbumImage(final MPDAlbum album) {
+        if (null == album) {
+            return;
+        }
+
+        // Clear the old image
+        mDBManager.removeAlbumImage(album);
+
+        // Reload the image from the internet
+        fetchAlbumImage(album);
+    }
+
+
+    /**
+     * Removes the image for the artist and tries to reload it from the internet
+     * @param artist {@link MPDAlbum} to reload the image for
+     */
+    public void resetArtistImage(final MPDArtist artist) {
+        if (null == artist) {
+            return;
+        }
+
+        // Clear the old image
+        mDBManager.removeArtistImage(artist);
+
+        // Reload the image from the internet
+        fetchArtistImage(artist);
+    }
+
     /**
      * Returns an artist image for the given artist.
      *
@@ -764,13 +798,14 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     /**
      * Used to broadcast information about new available artwork to {@link BroadcastReceiver} like
      * the {@link org.gateshipone.malp.application.background.WidgetProvider} to reload its artwork.
+     *
      * @param artistImage Image response containing the artist that an image was inserted for.
-     * @param context Context used for broadcasting
+     * @param context     Context used for broadcasting
      */
     private void broadcastNewArtistImageInfo(ArtistImageResponse artistImage, Context context) {
         Intent newImageIntent = new Intent(ACTION_NEW_ARTWORK_READY);
 
-        newImageIntent.putExtra(INTENT_EXTRA_KEY_ARTIST_MBID, artistImage.artist.getMBIDCount() > 0 ? artistImage.artist.getMBID(0): "");
+        newImageIntent.putExtra(INTENT_EXTRA_KEY_ARTIST_MBID, artistImage.artist.getMBIDCount() > 0 ? artistImage.artist.getMBID(0) : "");
         newImageIntent.putExtra(INTENT_EXTRA_KEY_ARTIST_NAME, artistImage.artist.getArtistName());
 
         context.sendBroadcast(newImageIntent);
@@ -779,8 +814,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
     /**
      * Used to broadcast information about new available artwork to {@link BroadcastReceiver} like
      * the {@link org.gateshipone.malp.application.background.WidgetProvider} to reload its artwork.
+     *
      * @param albumImage Image response containing the album that an image was inserted for.
-     * @param context Context used for broadcasting
+     * @param context    Context used for broadcasting
      */
     private void broadcastNewAlbumImageInfo(AlbumImageResponse albumImage, Context context) {
         Intent newImageIntent = new Intent(ACTION_NEW_ARTWORK_READY);

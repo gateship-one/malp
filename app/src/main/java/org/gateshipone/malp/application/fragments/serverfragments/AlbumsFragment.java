@@ -59,7 +59,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 import java.util.List;
 
-public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener {
+public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implements AdapterView.OnItemClickListener, CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewArtistImageListener {
     public final static String TAG = AlbumsFragment.class.getSimpleName();
 
     /**
@@ -174,29 +174,11 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public void onResume() {
         super.onResume();
 
-        if (null != mFABCallback) {
-            if (null != mArtist && !mArtist.getArtistName().equals("")) {
-                mFABCallback.setupFAB(true, new FABOnClickListener());
-                mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
-                if (mArtist != null) {
-                    mBitmapLoader.getArtistImage(mArtist, true);
-                }
-            } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
-                String lastPath = mAlbumsPath;
-                String pathSplit[] = mAlbumsPath.split("/");
-                if (pathSplit.length > 0) {
-                    lastPath = pathSplit[pathSplit.length - 1];
-                }
-                mFABCallback.setupFAB(true, new FABOnClickListener());
-                mFABCallback.setupToolbar(lastPath, false, false, false);
-            } else {
-                mFABCallback.setupFAB(false, null);
-                mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
+        setupToolbarAndStuff();
 
-            }
-        }
 
-        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).registerOnNewArtistImageListener(this);
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
     /**
@@ -228,7 +210,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).unregisterOnNewArtistImageListener(this);
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
     }
 
 
@@ -288,6 +271,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             drawable = DrawableCompat.wrap(drawable);
             DrawableCompat.setTint(drawable, tintColor);
             menu.findItem(R.id.action_add_artist).setIcon(drawable);
+
+            menu.findItem(R.id.action_reset_artwork).setVisible(true);
         }
         super.onCreateOptionsMenu(menu, menuInflater);
     }
@@ -301,6 +286,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_reset_artwork:
+                if (null != mArtist && !mArtist.getArtistName().equals("")) {
+                    mFABCallback.setupFAB(true, new FABOnClickListener());
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
+                }
+                ArtworkManager.getInstance(getContext()).resetArtistImage(mArtist);
+                return true;
             case R.id.action_add_artist:
                 enqueueArtist();
                 return true;
@@ -378,6 +370,37 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                     mFABCallback.setupToolbarImage(bm);
                 }
             });
+        }
+    }
+
+    private void setupToolbarAndStuff() {
+        if (null != mFABCallback) {
+            if (null != mArtist && !mArtist.getArtistName().equals("")) {
+                mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
+                if (mArtist != null) {
+                    mBitmapLoader.getArtistImage(mArtist, true);
+                }
+            } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
+                String lastPath = mAlbumsPath;
+                String pathSplit[] = mAlbumsPath.split("/");
+                if (pathSplit.length > 0) {
+                    lastPath = pathSplit[pathSplit.length - 1];
+                }
+                mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupToolbar(lastPath, false, false, false);
+            } else {
+                mFABCallback.setupFAB(false, null);
+                mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
+
+            }
+        }
+    }
+
+    @Override
+    public void newArtistImage(MPDArtist artist) {
+        if (artist.equals(mArtist)) {
+            setupToolbarAndStuff();
         }
     }
 

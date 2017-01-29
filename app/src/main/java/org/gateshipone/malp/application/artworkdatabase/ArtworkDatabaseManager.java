@@ -137,7 +137,7 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         String selection = ArtistArtTable.COLUMN_ARTIST_MBID + "=?";
 
         String mbids = "";
-        for ( int i = 0; i < artist.getMBIDCount(); i++ ) {
+        for (int i = 0; i < artist.getMBIDCount(); i++) {
             mbids += artist.getMBID(i);
         }
 
@@ -209,11 +209,10 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         SQLiteDatabase database = getWritableDatabase();
 
 
-
         ContentValues values = new ContentValues();
 
         String mbids = "";
-        for ( int i = 0; i < artist.getMBIDCount(); i++ ) {
+        for (int i = 0; i < artist.getMBIDCount(); i++) {
             mbids += artist.getMBID(i);
         }
 
@@ -279,7 +278,7 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
 
 
         Cursor requestCursor = database.query(AlbumArtTable.TABLE_NAME, new String[]{AlbumArtTable.COLUMN_ALBUM_NAME, AlbumArtTable.COLUMN_IMAGE_DATA, AlbumArtTable.COLUMN_IMAGE_NOT_FOUND},
-                selection, new String[]{albumName,artistName}, null, null, null);
+                selection, new String[]{albumName, artistName}, null, null, null);
 
         // Check if an image was found
         if (requestCursor.moveToFirst()) {
@@ -363,6 +362,28 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
 
         String where = AlbumArtTable.COLUMN_IMAGE_NOT_FOUND + "=?";
         String whereArgs[] = {"1"};
+
+        database.delete(AlbumArtTable.TABLE_NAME, where, whereArgs);
+
+        database.close();
+    }
+
+    public synchronized void removeArtistImage(MPDArtist artist) {
+        SQLiteDatabase database = getWritableDatabase();
+
+        String where = ArtistArtTable.COLUMN_ARTIST_MBID + "=? OR " + ArtistArtTable.COLUMN_ARTIST_NAME + "=?";
+        String whereArgs[] = {artist.getMBIDCount() > 0 ? artist.getMBID(0) : "", artist.getArtistName()};
+
+        database.delete(ArtistArtTable.TABLE_NAME, where, whereArgs);
+
+        database.close();
+    }
+
+    public synchronized void removeAlbumImage(MPDAlbum album) {
+        SQLiteDatabase database = getWritableDatabase();
+
+        String where = AlbumArtTable.COLUMN_ALBUM_MBID + "=? OR (" + AlbumArtTable.COLUMN_ALBUM_NAME + "=? AND " + AlbumArtTable.COLUMN_ARTIST_NAME + "=? ) ";
+        String whereArgs[] = {album.getMBID(), album.getName(), album.getArtistName()};
 
         database.delete(AlbumArtTable.TABLE_NAME, where, whereArgs);
 

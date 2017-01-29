@@ -62,6 +62,8 @@
     <string name="action_show_album">Show album</string>
     <string name="action_show_details">Show details</string>
 
+    <string name="action_reset_artwork">Reset artwork</string>
+
     <string name="action_search">Search</string>
     <string name="action_add_search_result">Add search result</string>
 
