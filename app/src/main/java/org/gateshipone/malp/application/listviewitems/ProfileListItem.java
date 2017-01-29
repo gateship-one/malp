@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.listviewitems;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.LinearLayout;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
@@ -35,7 +36,9 @@ public class ProfileListItem extends LinearLayout {
     TextView mHostnameView;
     TextView mPortView;
 
-    public ProfileListItem(Context context, String profilename, String hostname, String port) {
+    RadioButton mRadioButton;
+
+    public ProfileListItem(Context context, String profilename, String hostname, String port, boolean checked) {
         super(context);
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -49,6 +52,9 @@ public class ProfileListItem extends LinearLayout {
 
         mPortView = (TextView) findViewById(R.id.item_profile_port);
         mPortView.setText(port);
+
+        mRadioButton = (RadioButton)findViewById(R.id.item_profile_radiobtn);
+        mRadioButton.setChecked(checked);
     }
 
     public void setProfileName(String profilename) {
@@ -61,5 +67,9 @@ public class ProfileListItem extends LinearLayout {
 
     public void setPort(String port) {
         mPortView.setText(port);
+    }
+
+    public void setChecked(boolean checked) {
+        mRadioButton.setChecked(checked);
     }
 }

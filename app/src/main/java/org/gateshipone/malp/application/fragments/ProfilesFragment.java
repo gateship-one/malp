@@ -250,6 +250,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if ( null != mCallback ) {
             mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(position));
+            mAdapter.setActive(position, true);
         }
     }
 }
