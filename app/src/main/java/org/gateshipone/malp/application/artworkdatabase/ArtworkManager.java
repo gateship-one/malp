@@ -231,7 +231,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Removes the image for the artist and tries to reload it from the internet
-     * @param artist {@link MPDAlbum} to reload the image for
+     * @param artist {@link MPDArtist} to reload the image for
      */
     public void resetArtistImage(final MPDArtist artist) {
         if (null == artist) {
