@@ -70,12 +70,13 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.util.Locale;
 
-public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener,
+public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener, ArtworkManager.onNewArtistImageListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final ViewDragHelper mDragHelper;
@@ -114,9 +115,14 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private int mDragRange;
 
     /**
+     * Flag whether the views switches between album cover and artist image
+     */
+    private boolean mShowArtistImage = false;
+
+    /**
      * Main cover imageview
      */
-    private ImageView mCoverImage;
+    private AlbumArtistView mCoverImage;
 
     /**
      * Small cover image, part of the draggable header
@@ -460,6 +466,16 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             setVolumeControlSetting();
         } else if (key.equals(getContext().getString(R.string.pref_use_english_wikipedia_key))) {
             mUseEnglishWikipedia = sharedPreferences.getBoolean(key, getContext().getResources().getBoolean(R.bool.pref_use_english_wikipedia_default));
+        } else if (key.equals(getContext().getString(R.string.pref_show_npv_artist_image_key))) {
+            mShowArtistImage = sharedPreferences.getBoolean(key, getContext().getResources().getBoolean(R.bool.pref_show_npv_artist_image_default));
+
+            // Show artist image if artwork is requested
+            if (mShowArtistImage) {
+                mCoverLoader.getArtistImage(mLastTrack, true);
+            } else {
+                // Hide artist image
+                mCoverImage.clearArtistImage();
+            }
         }
     }
 
@@ -488,6 +504,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(VISIBLE);
+        }
+    }
+
+    @Override
+    public void newArtistImage(MPDArtist artist) {
+        if (mShowArtistImage && mLastTrack.getTrackArtist().equals(artist.getArtistName())) {
+            mCoverLoader.getArtistImage(artist, false);
         }
     }
 
@@ -757,7 +780,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mBottomRandomButton = (ImageButton) findViewById(R.id.now_playing_bottomRandomButton);
 
         // Main cover image
-        mCoverImage = (ImageView) findViewById(R.id.now_playing_cover);
+        mCoverImage = (AlbumArtistView) findViewById(R.id.now_playing_cover);
         // Small header cover image
         mTopCoverImage = (ImageView) findViewById(R.id.now_playing_topCover);
 
@@ -1096,6 +1119,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         setVolumeControlSetting();
 
         mUseEnglishWikipedia = sharedPref.getBoolean(getContext().getString(R.string.pref_use_english_wikipedia_key), getContext().getResources().getBoolean(R.bool.pref_use_english_wikipedia_default));
+
+        mShowArtistImage = sharedPref.getBoolean(getContext().getString(R.string.pref_show_npv_artist_image_key), getContext().getResources().getBoolean(R.bool.pref_show_npv_artist_image_default));
     }
 
 
@@ -1223,7 +1248,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             DrawableCompat.setTint(drawable, tintColor);
 
             // Show the placeholder image until the cover fetch process finishes
-            mCoverImage.setImageDrawable(drawable);
+            mCoverImage.clearAlbumImage();
 
             tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
 
@@ -1236,6 +1261,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mTopCoverImage.setImageDrawable(drawable);
             // Start the cover loader
             mCoverLoader.getImage(track, true);
+        }
+
+        if (mShowArtistImage && (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist()))) {
+            mCoverImage.clearArtistImage();
+
+            mCoverLoader.getArtistImage(track, true);
         }
 
         // Calculate the margin to avoid cut off textviews
@@ -1464,7 +1495,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @param bm Bitmap ready for use in the UI
          */
         @Override
-        public void receiveBitmap(final Bitmap bm) {
+        public void receiveBitmap(final Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
             if (bm != null) {
                 Activity activity = (Activity) getContext();
                 if (activity != null) {
@@ -1473,10 +1504,14 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
                         @Override
                         public void run() {
-                            // Set the main cover image
-                            mCoverImage.setImageBitmap(bm);
-                            // Set the small header image
-                            mTopCoverImage.setImageBitmap(bm);
+                            if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE) {
+                                // Set the main cover image
+                                mCoverImage.setAlbumImage(bm);
+                                // Set the small header image
+                                mTopCoverImage.setImageBitmap(bm);
+                            } else if (type == CoverBitmapLoader.IMAGE_TYPE.ARTIST_IMAGE) {
+                                mCoverImage.setArtistImage(bm);
+                            }
                         }
                     });
                 }

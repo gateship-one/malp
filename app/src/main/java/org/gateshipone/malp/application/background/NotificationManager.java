@@ -370,10 +370,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * notification has changed
      */
     @Override
-    public synchronized void receiveBitmap(Bitmap bm) {
+    public synchronized void receiveBitmap(Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
         // Check if notification exists and set picture
         mLastBitmap = bm;
-        if (mNotification != null && bm != null) {
+        if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && mNotification != null && bm != null) {
             mNotificationBuilder.setLargeIcon(bm);
             mNotification = mNotificationBuilder.build();
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);

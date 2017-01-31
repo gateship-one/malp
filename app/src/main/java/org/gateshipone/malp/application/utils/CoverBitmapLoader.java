@@ -44,6 +44,14 @@ public class CoverBitmapLoader {
     }
 
     /**
+     * Enum to define the type of the image that was retrieved
+     */
+    public enum IMAGE_TYPE {
+        ALBUM_IMAGE,
+        ARTIST_IMAGE,
+    }
+
+    /**
      * Load the image for the given track from the mediastore.
      */
     public void getImage(MPDTrack track, boolean fetchImage) {
@@ -56,7 +64,7 @@ public class CoverBitmapLoader {
     }
 
     public void getArtistImage(MPDArtist artist, boolean fetchImage) {
-        if ( artist == null) {
+        if (artist == null) {
             return;
         }
 
@@ -65,8 +73,18 @@ public class CoverBitmapLoader {
         loaderThread.start();
     }
 
+    public void getArtistImage(MPDTrack track, boolean fetchImage) {
+        if (track == null) {
+            return;
+        }
+
+        // start the loader thread to load the image async
+        Thread loaderThread = new Thread(new TrackArtistImageRunner(track, fetchImage));
+        loaderThread.start();
+    }
+
     public void getAlbumImage(MPDAlbum album, boolean fetchImage) {
-        if ( album == null) {
+        if (album == null) {
             return;
         }
 
@@ -90,7 +108,7 @@ public class CoverBitmapLoader {
         public void run() {
             try {
                 Bitmap albumImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImageForTrack(mTrack);
-                mListener.receiveBitmap(albumImage);
+                mListener.receiveBitmap(albumImage, IMAGE_TYPE.ALBUM_IMAGE);
             } catch (ImageNotFoundException e) {
                 if (mFetchImage) {
                     ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mTrack);
@@ -116,7 +134,34 @@ public class CoverBitmapLoader {
         public void run() {
             try {
                 Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getArtistImage(mArtist);
-                mListener.receiveBitmap(artistImage);
+                mListener.receiveBitmap(artistImage, IMAGE_TYPE.ARTIST_IMAGE);
+            } catch (ImageNotFoundException e) {
+                if (mFetchImage) {
+                    ArtworkManager.getInstance(mContext.getApplicationContext()).fetchArtistImage(mArtist);
+                }
+            }
+        }
+    }
+
+    private class TrackArtistImageRunner implements Runnable {
+
+        private MPDArtist mArtist;
+        private boolean mFetchImage;
+
+        public TrackArtistImageRunner(MPDTrack track, boolean fetchImage) {
+            mArtist = new MPDArtist(track.getTrackArtist());
+            mArtist.addMBID(track.getTrackArtistMBID());
+            mFetchImage = fetchImage;
+        }
+
+        /**
+         * Load the image for the given track from the mediastore.
+         */
+        @Override
+        public void run() {
+            try {
+                Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getArtistImage(mArtist);
+                mListener.receiveBitmap(artistImage, IMAGE_TYPE.ARTIST_IMAGE);
             } catch (ImageNotFoundException e) {
                 if (mFetchImage) {
                     ArtworkManager.getInstance(mContext.getApplicationContext()).fetchArtistImage(mArtist);
@@ -142,8 +187,7 @@ public class CoverBitmapLoader {
         public void run() {
             try {
                 Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImage(mAlbum);
-                mListener.receiveBitmap(artistImage);
-                Log.v(TAG,"Image found");
+                mListener.receiveBitmap(artistImage, IMAGE_TYPE.ARTIST_IMAGE);
             } catch (ImageNotFoundException e) {
                 if (mFetchImage) {
                     ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mAlbum);
@@ -157,6 +201,6 @@ public class CoverBitmapLoader {
      * Callback if image was loaded.
      */
     public interface CoverBitmapListener {
-        void receiveBitmap(Bitmap bm);
+        void receiveBitmap(Bitmap bm, IMAGE_TYPE type);
     }
 }

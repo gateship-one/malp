@@ -349,8 +349,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     }
 
     @Override
-    public void receiveBitmap(final Bitmap bm) {
-        if (null != mFABCallback && bm != null) {
+    public void receiveBitmap(final Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
+        if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && null != mFABCallback && bm != null) {
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {

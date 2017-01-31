@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~  Copyright (C) 2017 Team Gateship-One
   ~  (Hendrik Borghorst & Frederik Luetkes)
   ~
@@ -37,6 +36,9 @@
 
     <string name="pref_use_english_wikipedia_key" translatable="false">pref_use_english_wikipedia_key</string>
     <bool name="pref_use_english_wikipedia_default" translatable="false">false</bool>
+
+    <string name="pref_show_npv_artist_image_key" translatable="false">pref_show_npv_artist_image</string>
+    <bool name="pref_show_npv_artist_image_default" translatable="false">false</bool>
 
     <string name="pref_indigo_key" translatable="false">indigo</string>
     <string name="pref_orange_key" translatable="false">orange</string>

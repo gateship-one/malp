@@ -219,6 +219,9 @@
     <string name="preference_dark_theme_title">Dark theme</string>
     <string name="preference_dark_theme_message">Use a dark theme</string>
 
+    <string name="preference_show_artist_image_title">Show artist image</string>
+    <string name="preference_show_artist_image_text">Alternate between the album cover and an image of the artist in the view for the currently playing song</string>
+
     <string name="preference_default_view_title">Default view</string>
     <string name="preference_default_view_message">Select default view</string>
     <string name="preference_default_view_summary">Select the default view of the application.</string>
