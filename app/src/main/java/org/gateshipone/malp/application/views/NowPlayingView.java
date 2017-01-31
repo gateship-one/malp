@@ -1082,6 +1082,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mPlaylistView.onPause();
 
         ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener(this);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener(this);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
@@ -1111,6 +1112,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         mPlaylistView.onResume();
         ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener(this);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener(this);
 
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
