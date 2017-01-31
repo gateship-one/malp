@@ -173,6 +173,16 @@
                     android:layout_height="wrap_content"
                     android:text="@string/server_statistic_update_database" />
                 <TextView
+                    android:id="@+id/server_statistic_updateing_db"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:visibility="gone"
+                    android:fontFamily="sans-serif-medium"
+                    android:textColor="#ff4444"
+                    android:textSize="@dimen/material_font_style_size_body_2"
+                    android:text="@string/server_statistic_updateing_database"
+                    />
+                <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="sans-serif-regular"

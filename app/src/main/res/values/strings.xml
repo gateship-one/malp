@@ -169,6 +169,7 @@
     <string name="server_statistic_malp_server_info">Server features:</string>
 
     <string name="server_statistic_update_database">Update server database</string>
+    <string name="server_statistic_updateing_database">Server is updating its database, please wait!</string>
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>

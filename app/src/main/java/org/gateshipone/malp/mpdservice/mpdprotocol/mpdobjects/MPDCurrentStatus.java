@@ -158,7 +158,7 @@ public class MPDCurrentStatus implements Parcelable{
         pBitrate = 0;
         pElapsedTime = 0;
         pTrackLength = 0;
-        pUpdateDBJob = 0;
+        pUpdateDBJob = -1;
         pPlaybackState = MPD_PLAYBACK_STATE.MPD_STOPPED;
     }
 
