@@ -22,7 +22,25 @@
 
 apply plugin: 'com.android.application'
 
+
 android {
+    File keystorePropertiesFile = rootProject.file("keystore.properties")
+
+
+    signingConfigs {
+        config {
+            if (keystorePropertiesFile.exists()) {
+                // load keystore file
+                def Properties keystoreProperties = new Properties()
+                keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+                keyAlias keystoreProperties['keyAlias']
+                keyPassword keystoreProperties['keyPassword']
+                storeFile file(keystoreProperties['storeFile'])
+                storePassword keystoreProperties['storePassword']
+            }
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
@@ -31,16 +49,21 @@ android {
         targetSdkVersion 25
         versionCode 11
         versionName "1.1.2"
+        signingConfig signingConfigs.config
     }
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.config
+            }
         }
         debug {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.config
+            }
         }
-    }
-    productFlavors {
     }
     lintOptions {
         abortOnError false
