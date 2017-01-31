@@ -111,7 +111,7 @@ public class MPDCurrentStatus implements Parcelable{
     private int pTrackLength;
 
     /**
-     * If an updateing job of the database is running, the id gets saved here.
+     * If an updating job of the database is running, the id gets saved here.
      * Also the update commands sends back the id of the corresponding update job.
      */
     private int pUpdateDBJob;
