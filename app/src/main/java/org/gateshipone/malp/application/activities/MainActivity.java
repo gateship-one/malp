@@ -478,6 +478,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void onAlbumSelected(MPDAlbum album) {
+
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
@@ -504,6 +505,9 @@ public class MainActivity extends GenericActivity
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setCheckedItem(R.id.nav_library);
+
         // Commit the transaction
         transaction.commit();
     }
@@ -518,6 +522,7 @@ public class MainActivity extends GenericActivity
                 nowPlayingView.minimize();
             }
         }
+
         // Create fragment and give it an argument for the selected article
         AlbumsFragment newFragment = new AlbumsFragment();
         Bundle args = new Bundle();
