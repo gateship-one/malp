@@ -2,6 +2,8 @@
  * Crash fix on number conversion in MPD connection
  * Show artist image in now playing
  * Fix multiple profiles created on device rotation
+ * Option to reload album / artist image in the corresponing fragments
+
 
 ### Version: 1.1.2 Tag: release-11 (2017-01-15) ###
  * Crash fix in SearchFragment if "Add" button is clicked but no server connection was established
