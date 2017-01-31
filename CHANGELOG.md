@@ -1,3 +1,8 @@
+### Version: 1.1.3 Tag: release-12 (2017-xx-yy) ###
+ * Crash fix on number conversion in MPD connection
+ * Show artist image in now playing
+ * Fix multiple profiles created on device rotation
+
 ### Version: 1.1.2 Tag: release-11 (2017-01-15) ###
  * Crash fix in SearchFragment if "Add" button is clicked but no server connection was established
  * Crash fix in FanartCache 
