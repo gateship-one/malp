@@ -88,6 +88,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
+import java.util.List;
+
 
 public class MainActivity extends GenericActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
@@ -585,6 +587,11 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void editProfile(MPDServerProfile profile) {
+        if (null == profile) {
+            profile = new MPDServerProfile(getString(R.string.fragment_profile_default_name), true);
+            addProfile(profile);
+        }
+
         // Create fragment and give it an argument for the selected article
         EditProfileFragment newFragment = new EditProfileFragment();
         Bundle args = new Bundle();

@@ -44,8 +44,8 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     /**
      * Server parameters.
      */
-    private String mHostname;
-    private String mPassword;
+    private String mHostname = "";
+    private String mPassword = "";
     private int mPort;
 
     private long mCreated;
@@ -68,7 +68,6 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
 
         /* Just set the default mpd port here */
         mPort = 6600;
-
         mCreated = creationDate;
     }
 

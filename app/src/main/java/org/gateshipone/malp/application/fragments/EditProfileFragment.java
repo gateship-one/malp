@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 
@@ -93,7 +94,7 @@ public class EditProfileFragment extends Fragment {
                 mHostname = "";
                 mProfilename = "";
                 mPassword = "";
-                mPort = 6600;
+                mPort = 66012;
 
                 mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
             }
@@ -168,6 +169,12 @@ public class EditProfileFragment extends Fragment {
             mCallback.addProfile(mOldProfile);
         }
 
+        // Hide keyboard
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = getView();
+        if (null != view) {
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
     }
 
 

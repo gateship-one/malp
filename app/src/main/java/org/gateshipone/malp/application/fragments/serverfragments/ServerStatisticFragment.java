@@ -23,6 +23,7 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -103,14 +104,18 @@ public class ServerStatisticFragment extends Fragment {
     }
 
     @Override
-    public void onPause() {
+    public synchronized void onPause() {
         super.onPause();
 
         MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusHandler);
     }
 
-    private void showDatabaseUpdating(final boolean show) {
-        getActivity().runOnUiThread(new Runnable() {
+    private synchronized void showDatabaseUpdating(final boolean show) {
+        Activity activity = getActivity();
+        if (null == activity) {
+            return;
+        }
+        activity.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (show) {
