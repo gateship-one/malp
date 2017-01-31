@@ -166,7 +166,7 @@ public class MPDConnection {
     private static MPDConnection mInstance;
 
     public static synchronized MPDConnection getInstance() {
-        if ( null == mInstance) {
+        if (null == mInstance) {
             mInstance = new MPDConnection("global");
         }
         return mInstance;
@@ -306,7 +306,7 @@ public class MPDConnection {
                         String[] versions = versionString.split("\\.");
                         if (versions.length == 3) {
                             // Check if server version changed and if, reread server capabilities later.
-                            if ( Integer.valueOf(versions[0]) != mServerCapabilities.getMajorVersion() ||
+                            if (Integer.valueOf(versions[0]) != mServerCapabilities.getMajorVersion() ||
                                     (Integer.valueOf(versions[0]) == mServerCapabilities.getMajorVersion() && Integer.valueOf(versions[1]) != mServerCapabilities.getMinorVersion())) {
                                 mCapabilitiesChanged = true;
                             }
@@ -650,7 +650,7 @@ public class MPDConnection {
         pIdleThread.start();
 
 
-        for ( MPDConnectionIdleChangeListener listener: pIdleListeners) {
+        for (MPDConnectionIdleChangeListener listener : pIdleListeners) {
             listener.onIdle();
         }
     }
@@ -764,8 +764,8 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if ( response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR) ) {
-            Log.e(TAG,"Error parsing artists: " + response);
+        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+            Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
 
@@ -833,8 +833,8 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if ( response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR) ) {
-            Log.e(TAG,"Error parsing artists: " + response);
+        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+            Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
 
@@ -1313,6 +1313,7 @@ public class MPDConnection {
 
     /**
      * Searches a URL in the current playlist. If available the track is part of the returned list.
+     *
      * @param url URL to search in the current playlist.
      * @return List with one entry or none.
      */
@@ -1352,19 +1353,40 @@ public class MPDConnection {
 
         while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
             if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
-                status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
+                try {
+                    status.setVolume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_VOLUME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_REPEAT)) {
-                status.setRepeat(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_REPEAT.length())));
+                try {
+                    status.setRepeat(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_REPEAT.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_RANDOM)) {
-                status.setRandom(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_RANDOM.length())));
+                try {
+                    status.setRandom(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_RANDOM.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SINGLE)) {
-                status.setSinglePlayback(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SINGLE.length())));
+                try {
+                    status.setSinglePlayback(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SINGLE.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CONSUME)) {
-                status.setConsume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CONSUME.length())));
+                try {
+                    status.setConsume(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CONSUME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION)) {
-                status.setPlaylistVersion(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION.length())));
+                try {
+                    status.setPlaylistVersion(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_VERSION.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH)) {
-                status.setPlaylistLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH.length())));
+                try {
+                    status.setPlaylistLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_PLAYLIST_LENGTH.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE)) {
                 String state = response.substring(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE.length());
 
@@ -1388,11 +1410,20 @@ public class MPDConnection {
                     status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME)) {
-                status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
+                try {
+                    status.setElapsedTime(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_ELAPSED_TIME.length()))));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DURATION)) {
-                status.setTrackLength(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length()))));
+                try {
+                    status.setTrackLength(Math.round(Float.valueOf(response.substring(MPDResponses.MPD_RESPONSE_DURATION.length()))));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_BITRATE)) {
-                status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
+                try {
+                    status.setBitrate(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_BITRATE.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION)) {
                 String audioInfo = response.substring(MPDResponses.MPD_RESPONSE_AUDIO_INFORMATION.length());
 
@@ -1410,7 +1441,10 @@ public class MPDConnection {
                     }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_UPDATING_DB)) {
-                status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
+                try {
+                    status.setUpdateDBJob(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_UPDATING_DB.length())));
+                } catch (NumberFormatException e) {
+                }
             }
 
             response = readLine();
@@ -1418,6 +1452,7 @@ public class MPDConnection {
         }
 
         startIdleWait();
+
         return status;
     }
 
@@ -2147,7 +2182,7 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is now ready to be used.
      */
     private void notifyConnected() {
-        for ( MPDConnectionStateChangeListener listener: pStateListeners ) {
+        for (MPDConnectionStateChangeListener listener : pStateListeners) {
             listener.onConnected();
         }
     }
@@ -2156,7 +2191,7 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is disconnect and not ready for use.
      */
     private void notifyDisconnect() {
-        for ( MPDConnectionStateChangeListener listener: pStateListeners ) {
+        for (MPDConnectionStateChangeListener listener : pStateListeners) {
             listener.onDisconnected();
         }
     }
@@ -2290,7 +2325,7 @@ public class MPDConnection {
             mIdleWaitLock.release();
 
             // Notify a possible listener for deidling.
-            for ( MPDConnectionIdleChangeListener listener: pIdleListeners) {
+            for (MPDConnectionIdleChangeListener listener : pIdleListeners) {
                 listener.onNonIdle();
             }
             printDebug("Idling over");
@@ -2344,6 +2379,7 @@ public class MPDConnection {
         public void run() {
             startIdleing();
         }
+
     }
 
     public void setID(String id) {
@@ -2352,6 +2388,7 @@ public class MPDConnection {
 
     /**
      * Central method to read a line from the sockets reader
+     *
      * @return The read string. null if no data is available.
      */
     private String readLine() {
@@ -2370,6 +2407,7 @@ public class MPDConnection {
     /**
      * Central method to write a line to the sockets writer. Socket will be flushed afterwards
      * to ensure that the string is sent.
+     *
      * @param line String to write to the socket.
      */
     private void writeLine(String line) {
