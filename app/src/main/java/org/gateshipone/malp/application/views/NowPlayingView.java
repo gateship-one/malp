@@ -295,6 +295,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             // top
             mDraggedDownButtons.setVisibility(INVISIBLE);
             mDraggedUpButtons.setVisibility(VISIBLE);
+            mCoverImage.setVisibility(VISIBLE);
             if (mDragStatusReceiver != null) {
                 mDragStatusReceiver.onStatusChanged(NowPlayingDragStatusReceiver.DRAG_STATUS.DRAGGED_UP);
             }
@@ -302,6 +303,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             // bottom
             mDraggedDownButtons.setVisibility(VISIBLE);
             mDraggedUpButtons.setVisibility(INVISIBLE);
+            mCoverImage.setVisibility(INVISIBLE);
             if (mDragStatusReceiver != null) {
                 mDragStatusReceiver.onStatusChanged(NowPlayingDragStatusReceiver.DRAG_STATUS.DRAGGED_DOWN);
             }
@@ -644,6 +646,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     // Called when dragged down
                     mDraggedDownButtons.setVisibility(VISIBLE);
                     mDraggedUpButtons.setVisibility(INVISIBLE);
+                    mCoverImage.setVisibility(INVISIBLE);
                     if (mDragStatusReceiver != null) {
                         mDragStatusReceiver.onStatusChanged(NowPlayingDragStatusReceiver.DRAG_STATUS.DRAGGED_DOWN);
                     }
@@ -656,6 +659,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                  */
                 mDraggedDownButtons.setVisibility(VISIBLE);
                 mDraggedUpButtons.setVisibility(VISIBLE);
+                mCoverImage.setVisibility(VISIBLE);
                 // report the change of the view
                 if (mDragStatusReceiver != null) {
                     // Disable scrolling of the text views
@@ -996,6 +1000,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 getContext().startActivity(intent);
             }
         });
+        mCoverImage.setVisibility(INVISIBLE);
 
         mCoverLoader = new CoverBitmapLoader(getContext(), new CoverReceiverClass());
     }

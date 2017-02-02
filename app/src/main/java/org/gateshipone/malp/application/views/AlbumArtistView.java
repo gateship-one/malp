@@ -27,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.ViewSwitcher;
@@ -61,6 +62,8 @@ public class AlbumArtistView extends ViewSwitcher {
     public AlbumArtistView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        setMeasureAllChildren(true);
+
         // Set animation for a smooth image transition
         setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
         setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
@@ -88,6 +91,27 @@ public class AlbumArtistView extends ViewSwitcher {
      * @param visibility Visibilty value of the view View.VISIBLE, ...
      */
     @Override
+    public void onVisibilityChanged(View changedView, int visibility) {
+        if (visibility == VISIBLE) {
+            // Start the switching
+            imagesChanged();
+        } else {
+            // Window hidden, stop switching
+            if (mSwitchTimer != null) {
+                mSwitchTimer.cancel();
+                mSwitchTimer.purge();
+                mSwitchTimer = null;
+            }
+        }
+
+    }
+
+    /**
+     * Stops the image switching if the window is not visible to the user anymore.
+     *
+     * @param visibility Visibilty value of the view View.VISIBLE, ...
+     */
+    @Override
     public void onWindowVisibilityChanged(int visibility) {
         if (visibility == VISIBLE) {
             // Start the switching
@@ -101,6 +125,17 @@ public class AlbumArtistView extends ViewSwitcher {
             }
         }
 
+    }
+
+    /**
+     * Adjust Dimensions to create a square image view that matches the parents width.
+     */
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+
+        mAlbumImage.measure(widthMeasureSpec,heightMeasureSpec);
+        mArtistImage.measure(widthMeasureSpec,heightMeasureSpec);
     }
 
     /**
@@ -125,6 +160,7 @@ public class AlbumArtistView extends ViewSwitcher {
         mArtistImage.setImageBitmap(image);
 
         mArtistImageAvailable = true;
+
         imagesChanged();
     }
 
@@ -150,6 +186,7 @@ public class AlbumArtistView extends ViewSwitcher {
     public void clearArtistImage() {
         mArtistImage.setImageBitmap(null);
         mArtistImageAvailable = false;
+
         imagesChanged();
     }
 
@@ -192,6 +229,7 @@ public class AlbumArtistView extends ViewSwitcher {
                 mSwitchTimer = null;
             }
         }
+        postInvalidate();
     }
 
     /**
