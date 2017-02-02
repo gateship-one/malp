@@ -150,7 +150,9 @@ public class CoverBitmapLoader {
 
         public TrackArtistImageRunner(MPDTrack track, boolean fetchImage) {
             mArtist = new MPDArtist(track.getTrackArtist());
-            mArtist.addMBID(track.getTrackArtistMBID());
+            if ( !track.getTrackArtistMBID().isEmpty()) {
+                mArtist.addMBID(track.getTrackArtistMBID());
+            }
             mFetchImage = fetchImage;
         }
 
