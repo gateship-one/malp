@@ -258,7 +258,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
 
-        byte[] image;
+        byte[] image = null;
 
         /**
          * If no artist id is set for the album (possible with data set of Odyssey) check
@@ -266,7 +266,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
          */
         if (artist.getMBIDCount() != 0) {
             image = mDBManager.getArtistImage(artist);
-        } else {
+        } else if (!artist.getArtistName().isEmpty()){
             image = mDBManager.getArtistImage(artist.getArtistName());
         }
 
