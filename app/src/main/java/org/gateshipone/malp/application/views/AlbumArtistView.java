@@ -25,6 +25,7 @@ package org.gateshipone.malp.application.views;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.View;
@@ -88,10 +89,10 @@ public class AlbumArtistView extends ViewSwitcher {
     /**
      * Stops the image switching if the window is not visible to the user anymore.
      *
-     * @param visibility Visibilty value of the view View.VISIBLE, ...
+     * @param visibility Visibility value of the view View.VISIBLE, ...
      */
     @Override
-    public void onVisibilityChanged(View changedView, int visibility) {
+    public void onVisibilityChanged(@NonNull View changedView, int visibility) {
         if (visibility == VISIBLE) {
             // Start the switching
             imagesChanged();
@@ -103,13 +104,12 @@ public class AlbumArtistView extends ViewSwitcher {
                 mSwitchTimer = null;
             }
         }
-
     }
 
     /**
      * Stops the image switching if the window is not visible to the user anymore.
      *
-     * @param visibility Visibilty value of the view View.VISIBLE, ...
+     * @param visibility Visibility value of the view View.VISIBLE, ...
      */
     @Override
     public void onWindowVisibilityChanged(int visibility) {
