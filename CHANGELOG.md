@@ -2,7 +2,9 @@
  * Crash fix on number conversion in MPD connection
  * Show artist image in now playing
  * Fix multiple profiles created on device rotation
+ * Reset artwork for one album/artist in their fragment
  * Option to reload album / artist image in the corresponing fragments
+ * Remove visible album sections from current playlist
 
 
 ### Version: 1.1.2 Tag: release-11 (2017-01-15) ###
