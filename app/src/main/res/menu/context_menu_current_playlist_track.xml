@@ -36,6 +36,12 @@
         app:showAsAction="never"
         android:title="@string/action_remove_track"/>
     <item
+        android:id="@+id/action_remove_album"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:visible="false"
+        android:title="@string/action_remove_album"/>
+    <item
         android:id="@+id/action_show_artist"
         android:orderInCategory="100"
         app:showAsAction="never"

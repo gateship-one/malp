@@ -149,6 +149,10 @@ public class MPDCommands {
         return "delete " + String.valueOf(index);
     }
 
+    public static String MPD_COMMAND_REMOVE_RANGE_FROM_CURRENT_PLAYLIST(int start, int end) {
+        return "delete " + String.valueOf(start) + ':' + String.valueOf(end);
+    }
+
     public static String MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(int from, int to) {
         return "move " + String.valueOf(from) + ' ' + String.valueOf(to);
     }

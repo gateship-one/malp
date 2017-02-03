@@ -86,6 +86,14 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         return null;
     }
 
+    public CurrentPlaylistAdapter.VIEW_TYPES getItemViewType(int position) {
+        return CurrentPlaylistAdapter.VIEW_TYPES.values()[mPlaylistAdapter.getItemViewType(position)];
+    }
+
+    public void removeAlbumFrom(int position) {
+        mPlaylistAdapter.removeAlbumFrom(position);
+    }
+
     /**
      * Triggers a jump to the currently playing song. Not animated.
      */

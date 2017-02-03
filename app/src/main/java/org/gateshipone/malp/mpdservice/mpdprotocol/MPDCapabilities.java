@@ -42,6 +42,8 @@ public class MPDCapabilities {
 
     private boolean mHasListFiltering;
 
+    private boolean mHasCurrentPlaylistRemoveRange;
+
     private boolean mMopidyDetected;
 
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
@@ -61,6 +63,10 @@ public class MPDCapabilities {
         if (mMinorVersion >= 19 || mMajorVersion > 0) {
             mHasListGroup = true;
             mHasListFiltering = true;
+        }
+
+        if (mMinorVersion>=16|| mMajorVersion > 0) {
+            mHasCurrentPlaylistRemoveRange = true;
         }
 
         if (null != commands) {
@@ -123,6 +129,10 @@ public class MPDCapabilities {
         return mHasMusicBrainzTags;
     }
 
+    public boolean hasCurrentPlaylistRemoveRange() {
+        return mHasCurrentPlaylistRemoveRange;
+    }
+
     public String getServerFeatures() {
         return "MPD protocol version: " + mMajorVersion + '.' + mMinorVersion + '\n'
                 + "IDLE support: " + mHasIdle + '\n'
@@ -130,7 +140,8 @@ public class MPDCapabilities {
                 + "Fast search add: " + mHasSearchAdd + '\n'
                 + "MUSICBRAINZ tag support: " + mHasMusicBrainzTags + '\n'
                 + "List grouping: " + mHasListGroup + '\n'
-                + "List filtering: " + mHasListFiltering
+                + "List filtering: " + mHasListFiltering + '\n'
+                + "Fast ranged currentplaylist delete: " + mHasCurrentPlaylistRemoveRange
                 + (mMopidyDetected ? "\nMopidy detected, consider using the real MPD server (www.musicpd.org)!" : "");
     }
 

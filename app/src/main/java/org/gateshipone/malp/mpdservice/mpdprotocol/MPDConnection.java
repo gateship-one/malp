@@ -1898,6 +1898,36 @@ public class MPDConnection {
     }
 
     /**
+     * Instructs the mpd server to remove an range of songs from current playlist.
+     *
+     * @param start Start of songs to remoge
+     * @param end End of the range
+     * @return True if server responed with ok
+     */
+    public synchronized boolean removeRange(int start, int end) {
+        // Check capabilities if removal with one command is possible
+        if (mServerCapabilities.hasCurrentPlaylistRemoveRange() ) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_RANGE_FROM_CURRENT_PLAYLIST(start,end + 1));
+        } else {
+            // Create commandlist instead
+            startCommandList();
+            for (int i = start; i <= end; i++) {
+                sendMPDRAWCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(start));
+            }
+            endCommandList();
+        }
+
+
+    /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
      * Moves one item from an index in the current playlist to an new index. This allows to move
      * tracks for example after the current to priotize songs.
      *

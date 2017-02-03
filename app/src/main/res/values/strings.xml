@@ -80,6 +80,7 @@
     <string name="action_play_song">Play song</string>
     <string name="action_play_albums">Play albums</string>
     <string name="action_remove_track">Remove track</string>
+    <string name="action_remove_album">Remove album</string>
 
     <string name="action_add_url">Add URL</string>
     <string name="action_show_albums_from_here">Show albums in this directory</string>
@@ -220,7 +221,7 @@
     <string name="preference_dark_theme_message">Use a dark theme</string>
 
     <string name="preference_show_artist_image_title">Show artist image</string>
-    <string name="preference_show_artist_image_text">Alternate between the album cover and an image of the artist in the view for the currently playing song</string>
+    <string name="preference_show_artist_image_text">Alternate between the album cover and an image of the artist in the view for the currently playing song</string>#
 
     <string name="preference_default_view_title">Default view</string>
     <string name="preference_default_view_message">Select default view</string>

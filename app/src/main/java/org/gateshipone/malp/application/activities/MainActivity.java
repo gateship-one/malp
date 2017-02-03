@@ -55,6 +55,7 @@ import android.widget.TextView;
 
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.adapters.CurrentPlaylistAdapter;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.application.background.BackgroundService;
@@ -274,13 +275,20 @@ public class MainActivity extends GenericActivity
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
         if (v.getId() == R.id.main_listview && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            int position = ((AdapterView.AdapterContextMenuInfo) menuInfo).position;
             MenuInflater inflater = getMenuInflater();
             inflater.inflate(R.menu.context_menu_current_playlist_track, menu);
 
             // Check if the menu is created for the currently playing song. If this is the case, do not show play as next item.
             MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
-            if (status != null && ((AdapterView.AdapterContextMenuInfo) menuInfo).position == status.getCurrentSongIndex()) {
+            if (status != null && position == status.getCurrentSongIndex()) {
                 menu.findItem(R.id.action_song_play_next).setVisible(false);
+            }
+
+
+            CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
+            if (currentPlaylistView.getItemViewType(position) == CurrentPlaylistAdapter.VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) {
+                menu.findItem(R.id.action_remove_album).setVisible(true);
             }
         }
     }
@@ -316,6 +324,9 @@ public class MainActivity extends GenericActivity
                     return true;
                 case R.id.action_remove_song:
                     MPDQueryHandler.removeSongFromCurrentPlaylist(info.position);
+                    return true;
+                case R.id.action_remove_album:
+                    currentPlaylistView.removeAlbumFrom(info.position);
                     return true;
                 case R.id.action_show_artist:
                     onArtistSelected(new MPDArtist(track.getTrackArtist()));

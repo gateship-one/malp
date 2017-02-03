@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
@@ -67,7 +68,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         LIST_READY
     }
 
-    private enum VIEW_TYPES {
+    public enum VIEW_TYPES {
         TYPE_TRACK_ITEM,
         TYPE_SECTION_TRACK_ITEM,
         TYPE_COUNT
@@ -631,6 +632,16 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             }
         }
         return null;
+    }
+
+    public void removeAlbumFrom(int position) {
+        int rangeEnd = position;
+
+        while ( rangeEnd < getCount() && getItemViewType(rangeEnd + 1) != VIEW_TYPES.TYPE_SECTION_TRACK_ITEM.ordinal()) {
+            rangeEnd++;
+        }
+        Log.v(TAG,"Remove range from: " + position + " to: " + rangeEnd);
+        MPDQueryHandler.removeSongRangeFromCurrentPlaylist(position, rangeEnd);
     }
 
     /**

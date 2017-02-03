@@ -382,6 +382,11 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
             int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
             mMPDConnection.removeIndex(index);
+        }  else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_RANGE_FROM_CURRENT_PLAYLIST) {
+            int start = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START);
+            int end = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END);
+
+            mMPDConnection.removeRange(start,end);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
@@ -936,6 +941,19 @@ public class MPDQueryHandler extends MPDGenericHandler {
         MPDQueryHandler.getHandler().sendMessage(msg);
     }
 
+    public static void removeSongRangeFromCurrentPlaylist(int start, int end) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_RANGE_FROM_CURRENT_PLAYLIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        msg.obj = action;
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START, start);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END, end);
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
     public static void playIndexAsNext(int index) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT);
         Message msg = Message.obtain();
@@ -1018,6 +1036,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         msg.obj = action;
 
         MPDQueryHandler.getHandler().sendMessage(msg);
+
     }
 
     public static void playPlaylist(String name) {
