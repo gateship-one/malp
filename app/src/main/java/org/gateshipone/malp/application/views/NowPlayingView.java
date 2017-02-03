@@ -740,9 +740,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        ViewGroup.LayoutParams imageParams = mCoverImage.getLayoutParams();
-        imageParams.height = mViewSwitcher.getMeasuredHeight();
-        mCoverImage.setLayoutParams(imageParams);
 
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
@@ -751,6 +748,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         setMeasuredDimension(resolveSizeAndState(maxWidth, widthMeasureSpec, 0),
                 resolveSizeAndState(maxHeight, heightMeasureSpec, 0));
+
+        ViewGroup.LayoutParams imageParams = mCoverImage.getLayoutParams();
+        imageParams.height = mViewSwitcher.getHeight();
+        mCoverImage.setLayoutParams(imageParams);
+        mCoverImage.requestLayout();
+
 
         // Calculate the margin to smoothly resize text field
         LayoutParams layoutParams = (LayoutParams) mHeaderTextLayout.getLayoutParams();

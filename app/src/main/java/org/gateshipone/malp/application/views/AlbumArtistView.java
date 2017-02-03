@@ -87,7 +87,7 @@ public class AlbumArtistView extends ViewSwitcher {
     }
 
     /**
-     * Stops the image switching if the window is not visible to the user anymore.
+     * Stops the image switching if the window is nota visible to the user anymore.
      *
      * @param visibility Visibility value of the view View.VISIBLE, ...
      */
@@ -229,7 +229,6 @@ public class AlbumArtistView extends ViewSwitcher {
                 mSwitchTimer = null;
             }
         }
-        postInvalidate();
     }
 
     /**
