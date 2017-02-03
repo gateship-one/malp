@@ -739,6 +739,11 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        ViewGroup.LayoutParams imageParams = mCoverImage.getLayoutParams();
+        imageParams.height = mViewSwitcher.getMeasuredHeight();
+        mCoverImage.setLayoutParams(imageParams);
+
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
@@ -751,12 +756,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         LayoutParams layoutParams = (LayoutParams) mHeaderTextLayout.getLayoutParams();
         layoutParams.setMarginEnd((int) (mTopPlaylistButton.getMeasuredHeight() * (1.0 - mDragOffset)));
         mHeaderTextLayout.setLayoutParams(layoutParams);
-
-
-        ViewGroup.LayoutParams imageParams = mCoverImage.getLayoutParams();
-        imageParams.height = mViewSwitcher.getMeasuredHeight();
-        mCoverImage.setLayoutParams(imageParams);
     }
+
 
     /**
      * Called after the layout inflater is finished.
@@ -1072,8 +1073,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 newTop + mHeaderView.getMeasuredHeight(),
                 r,
                 newTop + b);
-
-
     }
 
     /**
