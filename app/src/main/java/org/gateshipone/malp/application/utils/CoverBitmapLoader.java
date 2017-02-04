@@ -188,8 +188,8 @@ public class CoverBitmapLoader {
         @Override
         public void run() {
             try {
-                Bitmap artistImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImage(mAlbum);
-                mListener.receiveBitmap(artistImage, IMAGE_TYPE.ARTIST_IMAGE);
+                Bitmap albumImage = ArtworkManager.getInstance(mContext.getApplicationContext()).getAlbumImage(mAlbum);
+                mListener.receiveBitmap(albumImage, IMAGE_TYPE.ALBUM_IMAGE);
             } catch (ImageNotFoundException e) {
                 if (mFetchImage) {
                     ArtworkManager.getInstance(mContext.getApplicationContext()).fetchAlbumImage(mAlbum);
