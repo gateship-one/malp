@@ -69,6 +69,7 @@ public class AlbumArtistView extends ViewSwitcher {
         setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
         setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
 
+        // Ensure that the childs follow the size of the parent
         LayoutParams paramsAlbum = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         LayoutParams paramsArtist = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
@@ -80,8 +81,12 @@ public class AlbumArtistView extends ViewSwitcher {
         addView(mAlbumImage);
         addView(mArtistImage);
 
+        // Set layout parameters
         mAlbumImage.setLayoutParams(paramsAlbum);
         mArtistImage.setLayoutParams(paramsArtist);
+
+        // Set the placeholder image
+        clearAlbumImage();
 
         mSwitchTimer = null;
     }
