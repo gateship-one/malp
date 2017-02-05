@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1061,7 +1062,18 @@ public class MPDConnection {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
-            return parseMPDAlbums();
+            // Remove empty albums at beginning of the list
+            List<MPDAlbum> albums = parseMPDAlbums();
+            ListIterator<MPDAlbum> albumIterator = albums.listIterator();
+            while (albumIterator.hasNext() ) {
+                MPDAlbum album = albumIterator.next();
+                if ( album.getName().isEmpty() ) {
+                    albumIterator.remove();
+                } else {
+                    break;
+                }
+            }
+            return albums;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -1077,7 +1089,18 @@ public class MPDConnection {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
-            return parseMPDAlbums();
+            // Remove empty albums at beginning of the list
+            List<MPDAlbum> albums = parseMPDAlbums();
+            ListIterator<MPDAlbum> albumIterator = albums.listIterator();
+            while (albumIterator.hasNext() ) {
+                MPDAlbum album = albumIterator.next();
+                if ( album.getName().isEmpty() ) {
+                    albumIterator.remove();
+                } else {
+                    break;
+                }
+            }
+            return albums;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -1129,7 +1152,13 @@ public class MPDConnection {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
-            return parseMPDArtists();
+            // Remove first empty artist
+            List<MPDArtist> artists = parseMPDArtists();
+            if(artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
+                artists.remove(0);
+            }
+
+            return artists;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -1145,7 +1174,12 @@ public class MPDConnection {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
-            return parseMPDArtists();
+            List<MPDArtist> artists = parseMPDArtists();
+            if(artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
+                artists.remove(0);
+            }
+
+            return artists;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -1216,7 +1250,7 @@ public class MPDConnection {
     public synchronized List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
         try {
-        /* Filter tracks with artistName */
+            /* Filter tracks with artistName */
             List<MPDFileEntry> result = parseMPDTracks(artistName, mbid);
             // Sort with disc & track number
             MPDSortHelper.sortFileListNumeric(result);
