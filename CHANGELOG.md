@@ -1,11 +1,10 @@
-### Version: 1.1.3 Tag: release-12 (2017-xx-yy) ###
+### Version: 1.1.3 Tag: release-12 (2017-02-05) ###
  * Crash fix on number conversion in MPD connection
  * Show artist image in now playing
  * Fix multiple profiles created on device rotation
  * Reset artwork for one album/artist in their fragment
  * Option to reload album / artist image in the corresponing fragments
  * Remove visible album sections from current playlist
-
 
 ### Version: 1.1.2 Tag: release-11 (2017-01-15) ###
  * Crash fix in SearchFragment if "Add" button is clicked but no server connection was established
