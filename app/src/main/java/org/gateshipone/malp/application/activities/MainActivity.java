@@ -370,7 +370,7 @@ public class MainActivity extends GenericActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         // clear backstack
-        fragmentManager.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        fragmentManager.popBackStackImmediate("", FragmentManager.POP_BACK_STACK_INCLUSIVE);
 
         Fragment fragment = null;
         String fragmentTag = "";
