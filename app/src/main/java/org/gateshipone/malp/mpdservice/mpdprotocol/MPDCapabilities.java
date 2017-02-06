@@ -46,6 +46,8 @@ public class MPDCapabilities {
 
     private boolean mMopidyDetected;
 
+    private boolean mTagAlbumArtist;
+
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
@@ -92,6 +94,8 @@ public class MPDCapabilities {
                     mHasMusicBrainzTags = true;
                     Log.v(TAG, "Server has MusicBrainz support");
                     break;
+                } else if ( tag.toLowerCase().equals("albumartist")) {
+                    mTagAlbumArtist = true;
                 }
             }
         }
@@ -131,6 +135,10 @@ public class MPDCapabilities {
 
     public boolean hasCurrentPlaylistRemoveRange() {
         return mHasCurrentPlaylistRemoveRange;
+    }
+
+    public boolean hasTagAlbumArtist() {
+        return mTagAlbumArtist;
     }
 
     public String getServerFeatures() {

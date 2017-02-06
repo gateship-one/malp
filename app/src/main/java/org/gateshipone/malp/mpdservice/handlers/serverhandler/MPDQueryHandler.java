@@ -194,8 +194,15 @@ public class MPDQueryHandler extends MPDGenericHandler {
             if (!(responseHandler instanceof MPDResponseArtistList)) {
                 return;
             }
-
-            List<MPDArtist> artistList = mMPDConnection.getAlbumArtists();
+            MPDCapabilities caps = mMPDConnection.getServerCapabilities();
+            List<MPDArtist> artistList;
+            // Check if server supports the right tag, otherwise use fallback list
+            if (null != caps && caps.hasTagAlbumArtist()) {
+                artistList = mMPDConnection.getAlbumArtists();
+            } else {
+                // If server does not support the albumartist tag
+                artistList = mMPDConnection.getArtists();
+            }
 
             Message artistResponseMsg = this.obtainMessage();
             artistResponseMsg.obj = artistList;
@@ -359,9 +366,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
              * Otherwise add it to the last playlist position and jump there.
              */
             List<MPDFileEntry> playlistFindTracks = mMPDConnection.getPlaylistFindTrack(url);
-            if ( playlistFindTracks.size() > 0 ) {
+            if (playlistFindTracks.size() > 0) {
                 // Song already found in the playlist. Jump there.
-                mMPDConnection.playSongIndex(((MPDTrack)playlistFindTracks.get(0)).getSongPosition());
+                mMPDConnection.playSongIndex(((MPDTrack) playlistFindTracks.get(0)).getSongPosition());
             } else {
                 // Not part of the current playlist. Add it at the end of the playlist and play it from there.
                 mMPDConnection.addSong(url);
@@ -382,11 +389,11 @@ public class MPDQueryHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
             int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
             mMPDConnection.removeIndex(index);
-        }  else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_RANGE_FROM_CURRENT_PLAYLIST) {
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_RANGE_FROM_CURRENT_PLAYLIST) {
             int start = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START);
             int end = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END);
 
-            mMPDConnection.removeRange(start,end);
+            mMPDConnection.removeRange(start, end);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES) {
             String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
