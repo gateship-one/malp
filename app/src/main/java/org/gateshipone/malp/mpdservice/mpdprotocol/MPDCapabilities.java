@@ -30,6 +30,10 @@ import java.util.List;
 public class MPDCapabilities {
     private static final String TAG = MPDCapabilities.class.getSimpleName();
 
+    private static final String MPD_TAG_TYPE_MUSICBRAINZ = "musicbrainz";
+    private static final String MPD_TAG_TYPE_ALBUMARTIST = "albumartist";
+    private static final String MPD_TAG_TYPE_DATE = "date";
+
     private int mMajorVersion;
     private int mMinorVersion;
 
@@ -47,6 +51,7 @@ public class MPDCapabilities {
     private boolean mMopidyDetected;
 
     private boolean mTagAlbumArtist;
+    private boolean mTagDate;
 
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
@@ -79,10 +84,8 @@ public class MPDCapabilities {
             }
 
             if (commands.contains(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME)) {
-                Log.v(TAG, "Searchadd available");
                 mHasSearchAdd = true;
             } else {
-                Log.v(TAG, "Searchadd not available");
                 mHasSearchAdd = false;
             }
         }
@@ -90,12 +93,14 @@ public class MPDCapabilities {
 
         if (null != tags) {
             for (String tag : tags) {
-                if (tag.contains("MUSICBRAINZ")) {
+                String tagLC = tag.toLowerCase();
+                if (tagLC.contains(MPD_TAG_TYPE_MUSICBRAINZ)) {
                     mHasMusicBrainzTags = true;
-                    Log.v(TAG, "Server has MusicBrainz support");
                     break;
-                } else if ( tag.toLowerCase().equals("albumartist")) {
+                } else if ( tagLC.equals(MPD_TAG_TYPE_ALBUMARTIST)) {
                     mTagAlbumArtist = true;
+                } else if ( tagLC.equals(MPD_TAG_TYPE_DATE)) {
+                    mTagDate = true;
                 }
             }
         }
@@ -141,12 +146,19 @@ public class MPDCapabilities {
         return mTagAlbumArtist;
     }
 
+    public boolean hasTagDate() {
+        return mTagDate;
+    }
+
     public String getServerFeatures() {
         return "MPD protocol version: " + mMajorVersion + '.' + mMinorVersion + '\n'
+                + "TAGS:" + '\n'
+                + "MUSICBRAINZ: " + mHasMusicBrainzTags + '\n'
+                + "AlbumArtist: " + mTagAlbumArtist + '\n'
+                + "Date: " + mTagDate + '\n'
                 + "IDLE support: " + mHasIdle + '\n'
                 + "Windowed playlist: " + mHasRangedCurrentPlaylist + '\n'
                 + "Fast search add: " + mHasSearchAdd + '\n'
-                + "MUSICBRAINZ tag support: " + mHasMusicBrainzTags + '\n'
                 + "List grouping: " + mHasListGroup + '\n'
                 + "List filtering: " + mHasListFiltering + '\n'
                 + "Fast ranged currentplaylist delete: " + mHasCurrentPlaylistRemoveRange
