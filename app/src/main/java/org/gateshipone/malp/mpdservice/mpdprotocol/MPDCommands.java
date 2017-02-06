@@ -28,35 +28,48 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_PASSWORD = "password ";
 
+    private static String createAlbumGroupString(MPDCapabilities caps) {
+        String groups = "";
+        if (caps.hasTagAlbumArtist()) {
+            groups += " group albumartist";
+        }
+        if (caps.hasMusicBrainzTags()) {
+            groups += " group musicbrainz_albumid";
+        }
+        if (caps.hasTagDate()) {
+            groups += " group date";
+        }
+        return groups;
+    }
+
     /* Database request commands */
-    public static final String MPD_COMMAND_REQUEST_ALBUMS(boolean groupFeatures) {
-        if ( groupFeatures) {
-            return "list album group albumartist group musicbrainz_albumid";
+    public static String MPD_COMMAND_REQUEST_ALBUMS(MPDCapabilities caps) {
+        if ( caps.hasListGroup()) {
+            return "list album" + createAlbumGroupString(caps);
         } else {
             return "list album";
         }
     }
 
-
-
-    public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName, boolean groupFeatures) {
-        if ( groupFeatures ) {
-            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group AlbumArtist group musicbrainz_albumid";
+    public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName, MPDCapabilities caps) {
+        if ( caps.hasListGroup() ) {
+            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
         } else {
             return "list album \"" + artistName.replaceAll("\"", "\\\\\"") + "\"";
         }
     }
 
-    public static final String MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(String path, boolean groupFeatures) {
-        if ( groupFeatures) {
-            return "list album base \"" + path + "\" group albumartist group musicbrainz_albumid";
+    public static final String MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(String path, MPDCapabilities caps) {
+        if ( caps.hasListGroup()) {
+            return "list album base \"" + path + "\"" + createAlbumGroupString(caps);
         } else {
+            // FIXME check if correct. Possible fallback for group missing -> base command also missing.
             return "list album";
         }
     }
 
-    public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName) {
-        return "list album AlbumArtist \"" + artistName.replaceAll("\"","\\\\\"") + "\" group AlbumArtist group musicbrainz_albumid";
+    public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName, MPDCapabilities caps) {
+        return "list album AlbumArtist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {

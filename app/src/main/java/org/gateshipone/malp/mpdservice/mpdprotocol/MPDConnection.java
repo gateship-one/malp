@@ -42,6 +42,8 @@ import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -762,6 +764,15 @@ public class MPDConnection {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME)) {
                 /* Check if the response is a albumartist. */
                 tempAlbum.setArtistName(response.substring(MPDResponses.MPD_RESPONSE_ALBUM_ARTIST_NAME.length()));
+            } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DATE)) {
+                // Try to parse Date
+                String dateString = response.substring(MPDResponses.MPD_RESPONSE_DATE.length());
+                SimpleDateFormat format = new SimpleDateFormat("yyyy");
+                try {
+                    tempAlbum.setDate(format.parse(dateString));
+                } catch (ParseException e) {
+                    Log.w(TAG,"Error parsing date: " + dateString);
+                }
             }
             response = readLine();
         }
@@ -1060,7 +1071,7 @@ public class MPDConnection {
      */
     public synchronized List<MPDAlbum> getAlbums() {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities));
         try {
             // Remove empty albums at beginning of the list
             List<MPDAlbum> albums = parseMPDAlbums();
@@ -1087,7 +1098,7 @@ public class MPDConnection {
      */
     public synchronized List<MPDAlbum> getAlbumsInPath(String path) {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mServerCapabilities));
         try {
             // Remove empty albums at beginning of the list
             List<MPDAlbum> albums = parseMPDAlbums();
@@ -1115,15 +1126,15 @@ public class MPDConnection {
      */
     public synchronized List<MPDAlbum> getArtistAlbums(String artistName) {
         // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
-        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities.hasMusicBrainzTags() && mServerCapabilities.hasListGroup()));
+        sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities));
 
         try {
-            if (mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()) {
+            if (mServerCapabilities.hasTagAlbumArtist() && mServerCapabilities.hasListGroup()) {
                 // Use a hashset for the results, to filter duplicates that will exist.
                 Set<MPDAlbum> result = new HashSet<>(parseMPDAlbums());
 
                 // Also get the list where artistName matches on AlbumArtist
-                sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName));
+                sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName,mServerCapabilities));
 
                 result.addAll(parseMPDAlbums());
 

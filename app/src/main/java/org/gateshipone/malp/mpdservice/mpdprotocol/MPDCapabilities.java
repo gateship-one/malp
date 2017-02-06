@@ -72,7 +72,7 @@ public class MPDCapabilities {
             mHasListFiltering = true;
         }
 
-        if (mMinorVersion>=16|| mMajorVersion > 0) {
+        if (mMinorVersion >= 16 || mMajorVersion > 0) {
             mHasCurrentPlaylistRemoveRange = true;
         }
 
@@ -97,9 +97,9 @@ public class MPDCapabilities {
                 if (tagLC.contains(MPD_TAG_TYPE_MUSICBRAINZ)) {
                     mHasMusicBrainzTags = true;
                     break;
-                } else if ( tagLC.equals(MPD_TAG_TYPE_ALBUMARTIST)) {
+                } else if (tagLC.equals(MPD_TAG_TYPE_ALBUMARTIST)) {
                     mTagAlbumArtist = true;
-                } else if ( tagLC.equals(MPD_TAG_TYPE_DATE)) {
+                } else if (tagLC.equals(MPD_TAG_TYPE_DATE)) {
                     mTagDate = true;
                 }
             }
