@@ -39,6 +39,7 @@ import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -739,8 +740,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-
+        // FIXME check why super.onMeasure(widthMeasureSpec, heightMeasureSpec); causes
+        // problems with scrolling header view.
         measureChildren(widthMeasureSpec, heightMeasureSpec);
 
         int maxWidth = MeasureSpec.getSize(widthMeasureSpec);
