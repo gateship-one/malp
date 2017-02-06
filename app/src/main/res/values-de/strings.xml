@@ -105,6 +105,11 @@
     <string name="preference_theme_message">Design auswählen</string>
     <string name="preference_theme_summary">Wählen Sie ein Design für diese Anwendung.</string>
     <string name="preference_theme_title">Design</string>
+    <string name="preference_album_sort_order_summary">Wähle die Sortierung für Alben eines Interpreten.</string>
+    <string name="preference_album_sort_order_name">Name</string>
+    <string name="preference_album_sort_order_year">Jahr</string>
+    <string name="preference_album_sort_order_title">Albensortierung</string>
+    <string name="preference_album_sort_order_message">Sortiere nach</string>
     <string name="search_choice_album">Album</string>
     <string name="search_choice_artist">Interpret</string>
     <string name="search_choice_everything">Alles</string>

@@ -29,6 +29,7 @@
         android:title="@string/action_reset_artwork"
         android:visible="false"
         app:showAsAction="never" />
+
     <item
         android:id="@+id/action_add_artist"
         android:orderInCategory="100"

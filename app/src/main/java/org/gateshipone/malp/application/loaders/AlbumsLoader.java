@@ -24,10 +24,14 @@ package org.gateshipone.malp.application.loaders;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.gateshipone.malp.R;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -41,6 +45,8 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
     private String mAlbumsPath;
 
+    private boolean mUseYear;
+
     public AlbumsLoader(Context context, String artistName, String albumsPath) {
         super(context);
 
@@ -48,6 +54,12 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
         mArtistName = artistName;
         mAlbumsPath = albumsPath;
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        String sortOrder = sharedPref.getString(getContext().getString(R.string.pref_album_sort_order_key), getContext().getString(R.string.pref_artist_albums_sort_default));
+        if ( sortOrder.equals(context.getString(R.string.pref_artist_albums_sort_year_key))) {
+            mUseYear = true;
+        }
     }
 
 
@@ -56,6 +68,10 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
         @Override
         public void handleAlbums(List<MPDAlbum> albumList) {
+            // If artist albums and sort by year is active, resort the list
+            if ( mUseYear && !((null == mArtistName) || mArtistName.isEmpty() ) ) {
+                Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
+            }
             deliverResult(albumList);
         }
     }

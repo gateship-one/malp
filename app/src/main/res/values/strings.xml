@@ -217,6 +217,18 @@
         <item>@string/preference_theme_item_oled_dark</item>
     </string-array>
 
+    <string name="preference_album_sort_order_title">Artist Albums sort order</string>
+    <string name="preference_album_sort_order_message">Sort by</string>
+    <string name="preference_album_sort_order_summary">Select the sort order for albums of an artist.</string>
+
+    <string name="preference_album_sort_order_name">Name</string>
+    <string name="preference_album_sort_order_year">Year</string>
+
+    <string-array name="preference_album_sort_orders">
+        <item>@string/preference_album_sort_order_name</item>
+        <item>@string/preference_album_sort_order_year</item>
+    </string-array>
+
     <string name="preference_dark_theme_title">Dark theme</string>
     <string name="preference_dark_theme_message">Use a dark theme</string>
 
