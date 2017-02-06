@@ -22,7 +22,9 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
-public abstract class MPDFileEntry implements MPDGenericItem,Comparable<MPDFileEntry> {
+import java.util.Comparator;
+
+public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFileEntry> {
     protected String mPath;
 
     // FIXME to some date format of java
@@ -50,38 +52,77 @@ public abstract class MPDFileEntry implements MPDGenericItem,Comparable<MPDFileE
 
     /**
      * This methods defines an hard order of directory, files, playlists
+     *
      * @param another
      * @return
      */
     @Override
     public int compareTo(MPDFileEntry another) {
-        if ( another == null) {
+        if (another == null) {
             return -1;
         }
 
-        if ( this instanceof MPDDirectory ) {
-            if ( another instanceof MPDDirectory ) {
-                return ((MPDDirectory)this).compareTo((MPDDirectory)another);
+        if (this instanceof MPDDirectory) {
+            if (another instanceof MPDDirectory) {
+                return ((MPDDirectory) this).compareTo((MPDDirectory) another);
             } else if (another instanceof MPDPlaylist || another instanceof MPDTrack) {
                 return -1;
             }
-        } else if ( this instanceof MPDTrack) {
-            if ( another instanceof MPDDirectory ) {
+        } else if (this instanceof MPDTrack) {
+            if (another instanceof MPDDirectory) {
                 return 1;
             } else if (another instanceof MPDPlaylist) {
                 return -1;
-            } else if ( another instanceof MPDTrack) {
-                return ((MPDTrack)this).compareTo((MPDTrack)another);
+            } else if (another instanceof MPDTrack) {
+                return ((MPDTrack) this).compareTo((MPDTrack) another);
             }
-        } else if ( this instanceof MPDPlaylist ) {
-            if ( another instanceof MPDPlaylist) {
-                return ((MPDPlaylist)this).compareTo((MPDPlaylist)another);
-            } else if ( another instanceof MPDDirectory || another instanceof MPDTrack) {
+        } else if (this instanceof MPDPlaylist) {
+            if (another instanceof MPDPlaylist) {
+                return ((MPDPlaylist) this).compareTo((MPDPlaylist) another);
+            } else if (another instanceof MPDDirectory || another instanceof MPDTrack) {
                 return 1;
             }
         }
 
         return -1;
+    }
+
+    public static class MPDFileIndexComparator implements Comparator<MPDFileEntry> {
+
+        @Override
+        public int compare(MPDFileEntry o1, MPDFileEntry o2) {
+            if (o1 == null && o2 == null) {
+                return 0;
+            } else if (o1 == null) {
+                return 1;
+            } else if (o2 == null) {
+                return -1;
+            }
+
+            if (o1 instanceof MPDDirectory) {
+                if (o2 instanceof MPDDirectory) {
+                    return ((MPDDirectory) o1).compareTo((MPDDirectory) o2);
+                } else if (o2 instanceof MPDPlaylist || o2 instanceof MPDTrack) {
+                    return -1;
+                }
+            } else if (o1 instanceof MPDTrack) {
+                if (o2 instanceof MPDDirectory) {
+                    return 1;
+                } else if (o2 instanceof MPDPlaylist) {
+                    return -1;
+                } else if (o2 instanceof MPDTrack) {
+                    return ((MPDTrack) o1).indexCompare((MPDTrack) o2);
+                }
+            } else if (o1 instanceof MPDPlaylist) {
+                if (o2 instanceof MPDPlaylist) {
+                    return ((MPDPlaylist) o1).compareTo((MPDPlaylist) o2);
+                } else if (o2 instanceof MPDDirectory || o2 instanceof MPDTrack) {
+                    return 1;
+                }
+            }
+
+            return -1;
+        }
     }
 
 }

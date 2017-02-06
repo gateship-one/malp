@@ -26,6 +26,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class MPDSortHelper {
@@ -36,43 +37,6 @@ public class MPDSortHelper {
      * @param inList List of objects to sort.
      */
     public static void sortFileListNumeric(List<MPDFileEntry> inList) {
-        ArrayList<MPDFileEntry> resList = new ArrayList<>();
-
-        if ( inList.size() == 0) {
-            return;
-        }
-
-        MPDFileEntry tmpElement = inList.remove(0);
-        MPDTrack trackElement;
-
-        resList.add(0, tmpElement);
-        while ( inList.size() != 0 ) {
-            tmpElement = inList.remove(0);
-            if ( tmpElement instanceof MPDTrack) {
-                trackElement = (MPDTrack)tmpElement;
-
-                for( int i = 0; i < resList.size(); i++ ) {
-                    MPDFileEntry compareItem = resList.get(i);
-                    // Check if the element in result list is "bigger" then add the element here.
-                    if ( (compareItem instanceof MPDTrack) && ((MPDTrack)compareItem).indexCompare(trackElement) == 1 ) {
-                        resList.add(i, tmpElement);
-                        tmpElement = null;
-                        break;
-                    } else if ( !(compareItem instanceof MPDTrack) ) {
-                        resList.add(i,tmpElement);
-                        tmpElement = null;
-                        break;
-                    }
-                }
-            }
-
-
-            // If the element to add was the biggest add at the end
-            if ( null != tmpElement ) {
-                // Add at the end
-                resList.add(tmpElement);
-            }
-        }
-        inList.addAll(resList);
+        Collections.sort(inList, new MPDFileEntry.MPDFileIndexComparator());
     }
 }
