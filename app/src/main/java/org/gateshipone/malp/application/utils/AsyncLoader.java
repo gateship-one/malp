@@ -131,8 +131,8 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
                 mCover.mAdapter.addImageLoadTime(System.currentTimeMillis() - mStartTime);
             }
 
-            // Set the newly loaded image to the view.
-            mCover.coverLoadable.setImage(result);
         }
+        // Set the newly loaded image to the view.
+        mCover.coverLoadable.setImage(result);
     }
 }

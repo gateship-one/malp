@@ -23,6 +23,7 @@
 package org.gateshipone.malp.application.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
@@ -70,7 +71,6 @@ public class AlbumsAdapter extends GenericSectionAdapter<MPDAlbum> implements Ar
             ImageListItem listItem;
             if (convertView != null) {
                 listItem = (ImageListItem) convertView;
-                listItem.setImage(null);
                 // Make sure to reset the layoutParams in case of change (rotation for example)
                 listItem.setText(label);
                 listItem.setDetails(albumArtist );

@@ -295,7 +295,6 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                     tracksListViewItem.setTrack(track, mContext);
                     tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
-                ((FileListItem)convertView).setImage(null);
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 ((FileListItem) convertView).prepareArtworkFetching(mArtworkManager, track);
 
