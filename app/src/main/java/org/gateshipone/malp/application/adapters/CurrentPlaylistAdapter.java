@@ -273,7 +273,6 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         if (track != null) {
             String trackAlbum = track.getTrackAlbum();
 
-            // Create new ViewItem
             VIEW_TYPES type = VIEW_TYPES.values()[getItemViewType(position)];
             // Normal track item type
             if (type == VIEW_TYPES.TYPE_TRACK_ITEM) {

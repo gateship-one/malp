@@ -208,13 +208,13 @@ public class BackgroundService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
             // Something wrong here.
-            return START_NOT_STICKY;
+            return START_STICKY;
         }
         String action = intent.getAction();
         if ( null != action ) {
             handleAction(action);
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
@@ -229,6 +229,7 @@ public class BackgroundService extends Service {
     }
 
     public void onTaskRemoved(Intent rootIntent) {
+        Log.v(TAG,"onTaskRemoved");
         // Disconnect from server gracefully
         onMPDDisconnect();
 

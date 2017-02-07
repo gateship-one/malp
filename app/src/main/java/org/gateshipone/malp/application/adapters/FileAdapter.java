@@ -186,7 +186,6 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
                         tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                     }
                 }
-                ((FileListItem) convertView).setImage(null);
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 // Dummy MPDAlbum
                 MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
