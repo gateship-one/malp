@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -111,6 +112,8 @@ public class BackgroundService extends Service {
      */
     public static final String ACTION_QUIT_BACKGROUND_SERVICE = "org.gateshipone.malp.background.quit";
 
+    public static final String ACTION_START_MPD_STREAM_PLAYBACK = "org.gateshipone.malp.stream.play";
+
     /**
      * Extra attached to an {@link Intent} containing the current MPD server status
      */
@@ -136,6 +139,8 @@ public class BackgroundService extends Service {
     private NotificationManager mNotificationManager;
 
     private boolean mConnecting;
+
+    private StreamPlaybackManager mPlaybackManager;
 
     /**
      * No bindable service.
@@ -169,6 +174,7 @@ public class BackgroundService extends Service {
         filter.addAction(ACTION_SHOW_NOTIFICATION);
         filter.addAction(ACTION_HIDE_NOTIFICATION);
         filter.addAction(ACTION_QUIT_BACKGROUND_SERVICE);
+        filter.addAction(ACTION_START_MPD_STREAM_PLAYBACK);
 
         // Register the receiver with the system
         registerReceiver(mBroadcastReceiver, filter);
@@ -201,7 +207,7 @@ public class BackgroundService extends Service {
 
         mNotificationManager.hideNotification();
 
-        Log.v(TAG,"MALP background service destroyed");
+        Log.v(TAG, "MALP background service destroyed");
         super.onDestroy();
     }
 
@@ -209,21 +215,21 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
-            Log.v(TAG,"Null intend in onStartCommand");
+            Log.v(TAG, "Null intend in onStartCommand");
             shutdownService();
             // Something wrong here.
             return START_STICKY;
         }
         String action = intent.getAction();
-        Log.v(TAG,"onStartCommand: " + action);
-        if ( null != action ) {
+        Log.v(TAG, "onStartCommand: " + action);
+        if (null != action) {
             handleAction(action);
         }
         return START_REDELIVER_INTENT;
     }
 
     @Override
-    public void onLowMemory () {
+    public void onLowMemory() {
         Log.v(TAG, "onLowMemory");
         // Disconnect from server gracefully
         onMPDDisconnect();
@@ -232,7 +238,7 @@ public class BackgroundService extends Service {
     }
 
     public void onTaskRemoved(Intent rootIntent) {
-        Log.v(TAG,"onTaskRemoved");
+        Log.v(TAG, "onTaskRemoved");
         // Disconnect from server gracefully
         onMPDDisconnect();
 
@@ -335,6 +341,7 @@ public class BackgroundService extends Service {
 
     /**
      * Sends the new {@link MPDTrack} to listening broadcast receivers
+     *
      * @param track Track to broadcast
      */
     private void notifyNewTrack(MPDTrack track) {
@@ -346,6 +353,7 @@ public class BackgroundService extends Service {
 
     /**
      * Sends the new {@link MPDCurrentStatus} to listening broadcast receivers.
+     *
      * @param status Status to broadcast
      */
     private void notifyNewStatus(MPDCurrentStatus status) {
@@ -383,10 +391,11 @@ public class BackgroundService extends Service {
 
     /**
      * Calls the desired action methods
+     *
      * @param action Action received via an {@link Intent}
      */
     private void handleAction(String action) {
-        Log.v(TAG,"Action: " + action);
+        Log.v(TAG, "Action: " + action);
         if (action.equals(ACTION_PLAY)) {
             onPlay();
         } else if (action.equals(ACTION_PAUSE)) {
@@ -412,6 +421,15 @@ public class BackgroundService extends Service {
             // Just disconnect from the server. Everything else happens when the connection is disconnected.
             onMPDDisconnect();
             // FIXME timeout?
+        } else if (action.equals(ACTION_START_MPD_STREAM_PLAYBACK)) {
+            if (mPlaybackManager == null) {
+                mPlaybackManager = new StreamPlaybackManager(this);
+            }
+
+
+            String url = "http://" + mProfileManager.getAutoconnectProfile().getHostname() + ":8081";
+            Log.v(TAG, "Start playback of: " + url);
+            mPlaybackManager.playURL(url);
         }
     }
 
@@ -427,7 +445,7 @@ public class BackgroundService extends Service {
                 return;
             }
             String action = intent.getAction();
-            if ( null != action ) {
+            if (null != action) {
                 handleAction(action);
             }
         }
@@ -453,7 +471,7 @@ public class BackgroundService extends Service {
          */
         @Override
         public void onDisconnected() {
-            Log.v(TAG,"Disconnected");
+            Log.v(TAG, "Disconnected");
             mService.get().mConnecting = false;
             mService.get().shutdownService();
         }

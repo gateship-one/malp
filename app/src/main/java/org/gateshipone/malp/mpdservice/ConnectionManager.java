@@ -286,6 +286,10 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
                 mContext.startService(showNotificationIntent);
             }
 
+//            Intent playbackStreamIntent = new Intent(mContext, BackgroundService.class);
+//            playbackStreamIntent.setAction(BackgroundService.ACTION_START_MPD_STREAM_PLAYBACK);
+//            mContext.startService(playbackStreamIntent);
+
             disconnectFromServer();
             mDisconnectTimer = null;
         }
