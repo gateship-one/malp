@@ -199,6 +199,8 @@ public class BackgroundService extends Service {
         MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusListener);
         notifyDisconnected();
 
+        mNotificationManager.hideNotification();
+
         Log.v(TAG,"MALP background service destroyed");
         super.onDestroy();
     }
@@ -207,25 +209,26 @@ public class BackgroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
+            Log.v(TAG,"Null intend in onStartCommand");
+            shutdownService();
             // Something wrong here.
             return START_STICKY;
         }
         String action = intent.getAction();
+        Log.v(TAG,"onStartCommand: " + action);
         if ( null != action ) {
             handleAction(action);
         }
-        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
     @Override
     public void onLowMemory () {
+        Log.v(TAG, "onLowMemory");
         // Disconnect from server gracefully
         onMPDDisconnect();
 
-        // Notify the widgets that the service is disconnected now
-        notifyDisconnected();
-
-        stopSelf();
+        shutdownService();
     }
 
     public void onTaskRemoved(Intent rootIntent) {
@@ -233,10 +236,15 @@ public class BackgroundService extends Service {
         // Disconnect from server gracefully
         onMPDDisconnect();
 
-        // Notify the widgets that the service is disconnected now
-        notifyDisconnected();
+        shutdownService();
+    }
 
-        //stop service
+    private void shutdownService() {
+        new Exception().printStackTrace();
+        Log.v(TAG, "shutdownService");
+        notifyDisconnected();
+        mNotificationManager.hideNotification();
+
         stopSelf();
     }
 
@@ -403,7 +411,7 @@ public class BackgroundService extends Service {
         } else if (action.equals(ACTION_QUIT_BACKGROUND_SERVICE)) {
             // Just disconnect from the server. Everything else happens when the connection is disconnected.
             onMPDDisconnect();
-            mNotificationManager.hideNotification();
+            // FIXME timeout?
         }
     }
 
@@ -447,9 +455,7 @@ public class BackgroundService extends Service {
         public void onDisconnected() {
             Log.v(TAG,"Disconnected");
             mService.get().mConnecting = false;
-            mService.get().notifyDisconnected();
-            mService.get().mNotificationManager.hideNotification();
-            mService.get().stopSelf();
+            mService.get().shutdownService();
         }
     }
 

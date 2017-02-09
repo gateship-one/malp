@@ -136,6 +136,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mMediaSession.setActive(true);
         }
 
+        mService.startForeground(NOTIFICATION_ID, mNotification);
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
         mSessionActive = true;
     }
@@ -151,7 +152,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
         mNotificationManager.cancel(NOTIFICATION_ID);
         if (mNotification != null) {
-
+            mService.stopForeground(true);
             mNotification = null;
             mNotificationBuilder = null;
         }
