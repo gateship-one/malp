@@ -131,6 +131,8 @@
     <string name="fragment_profile_password">Password:</string>
     <string name="fragment_profile_port">Port:</string>
 
+    <string name="fragment_profile_streaming_enabled">Enable streaming from server</string>
+
     <string name="fragment_profile_default_name">New Profile</string>
 
     <!-- Now playing view text view values -->

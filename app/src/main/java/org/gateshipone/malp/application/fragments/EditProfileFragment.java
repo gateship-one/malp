@@ -32,6 +32,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
 import android.widget.NumberPicker;
 import android.widget.Switch;
 
@@ -50,11 +51,17 @@ public class EditProfileFragment extends Fragment {
     private String mPassword;
     private int mPort;
 
+    private int mStreamingPort;
+    private boolean mStreamingEnabled;
+
 
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
     private TextInputEditText mPasswordView;
     private NumberPicker mPortView;
+
+    private Switch mStreamingEnabledView;
+    private NumberPicker mStreamingPortView;
 
 
     private MPDServerProfile mOldProfile;
@@ -75,9 +82,15 @@ public class EditProfileFragment extends Fragment {
         mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
         mPortView = (NumberPicker) rootView.findViewById(R.id.fragment_profile_port);
 
+        mStreamingPortView = (NumberPicker)rootView.findViewById(R.id.fragment_profile_streaming_port);
+        mStreamingEnabledView = (Switch)rootView.findViewById(R.id.fragment_profile_streaming_enabled);
+
         // Set to maximum tcp port
         mPortView.setMaxValue(65535);
         mPortView.setMinValue(1);
+
+        mStreamingPortView.setMaxValue(65535);
+        mStreamingPortView.setMinValue(1);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
@@ -89,12 +102,18 @@ public class EditProfileFragment extends Fragment {
                 mPassword = mOldProfile.getPassword();
                 mPort = mOldProfile.getPort();
 
+                mStreamingPort = mOldProfile.getStreamingPort();
+                mStreamingEnabled = mOldProfile.getStreamingEnabled();
+
                 mProfilenameView.setText(mProfilename);
             } else {
                 mHostname = "";
                 mProfilename = "";
                 mPassword = "";
-                mPort = 66012;
+                mPort = 6600;
+
+                mStreamingEnabled = false;
+                mStreamingPort = 8080;
 
                 mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
             }
@@ -103,6 +122,25 @@ public class EditProfileFragment extends Fragment {
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
         mPortView.setValue(mPort);
+
+        mStreamingEnabledView.setChecked(mStreamingEnabled);
+        mStreamingEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mStreamingPortView.setVisibility(View.VISIBLE);
+                } else {
+                    mStreamingPortView.setVisibility(View.GONE);
+                }
+
+            }
+        });
+
+        if ( !mStreamingEnabled) {
+            mStreamingPortView.setVisibility(View.GONE);
+        }
+        mStreamingPortView.setValue(mStreamingPort);
+
 
         mProfilenameView.setSelectAllOnFocus(true);
 
@@ -155,6 +193,14 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPort = mPortView.getValue();
         }
+        if (mStreamingPortView.getValue() != mStreamingPort) {
+            profileChanged = true;
+            mStreamingPort = mStreamingPortView.getValue();
+        }
+        if(mStreamingEnabledView.isChecked() != mStreamingEnabled) {
+            profileChanged = true;
+            mStreamingEnabled = mStreamingEnabledView.isChecked();
+        }
 
         if (profileChanged) {
             if (null != mOldProfile) {
@@ -166,6 +212,8 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setHostname(mHostname);
             mOldProfile.setPassword(mPassword);
             mOldProfile.setPort(mPort);
+            mOldProfile.setStreamingPort(mStreamingPort);
+            mOldProfile.setStreamingEnabled(mStreamingEnabled);
             mCallback.addProfile(mOldProfile);
         }
 

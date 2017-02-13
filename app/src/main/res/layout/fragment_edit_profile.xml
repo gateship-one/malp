@@ -86,6 +86,17 @@
                 android:layout_height="wrap_content"
                 />
 
+            <Switch
+                android:id="@+id/fragment_profile_streaming_enabled"
+                android:text="@string/fragment_profile_streaming_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <NumberPicker
+                android:id="@+id/fragment_profile_streaming_port"
+                android:layout_width="256dp"
+                android:layout_height="wrap_content"
+                />
+
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
