@@ -65,6 +65,7 @@ import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
+import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -1040,6 +1041,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             menu.getMenu().setGroupEnabled(R.id.group_playlist_actions, false);
             menu.getMenu().setGroupVisible(R.id.group_playlist_actions, false);
         }
+
+        // Check if streaming is configured for the current server
+        boolean streamingEnabled = ConnectionManager.getStreamingEnabled();
+        if ( !streamingEnabled ) {
+            menu.getMenu().findItem(R.id.action_start_streaming).setVisible(false);
+        }
+
         // Open the menu itself
         menu.show();
     }

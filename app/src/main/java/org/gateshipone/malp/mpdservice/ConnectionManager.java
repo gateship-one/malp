@@ -298,4 +298,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     public static String getProfileName() {
         return mConnectionManager.mServerProfile.getProfileName();
     }
+
+    public static boolean getStreamingEnabled() {
+        return mConnectionManager.mServerProfile.getStreamingEnabled();
+    }
 }

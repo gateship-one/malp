@@ -124,6 +124,7 @@
     <!-- popup menu titles -->
     <string name="action_clear_playlist">Clear playlist</string>
     <string name="action_save_playlist">Save playlist</string>
+    <string name="action_start_streaming">Start streaming</string>
     <string name="action_shuffle_playlist">Shuffle playlist</string>
 
     <!-- edit profile fragment strings -->

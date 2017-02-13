@@ -68,6 +68,11 @@
         android:orderInCategory="6"
         android:title="@string/action_open_fanart"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_start_streaming"
+        android:orderInCategory="7"
+        android:title="@string/action_start_streaming"
+        app:showAsAction="never" />
     <item android:title="@string/action_wikipedia"
         android:orderInCategory="100">
         <menu>
