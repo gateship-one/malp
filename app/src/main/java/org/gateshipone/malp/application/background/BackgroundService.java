@@ -142,6 +142,10 @@ public class BackgroundService extends Service {
 
     private StreamPlaybackManager mPlaybackManager;
 
+    private boolean mNotificationHidden = true;
+
+    private boolean mWasStreaming = false;
+
     /**
      * No bindable service.
      *
@@ -246,7 +250,6 @@ public class BackgroundService extends Service {
     }
 
     private void shutdownService() {
-        new Exception().printStackTrace();
         Log.v(TAG, "shutdownService");
         notifyDisconnected();
         mNotificationManager.hideNotification();
@@ -309,6 +312,10 @@ public class BackgroundService extends Service {
         // Notify about new dummy tracks
         notifyNewStatus(mLastStatus);
         notifyNewTrack(mLastTrack);
+    }
+
+    public void onStreamPlaybackStart() {
+        mWasStreaming = true;
     }
 
     /**
@@ -413,23 +420,54 @@ public class BackgroundService extends Service {
         } else if (action.equals(ACTION_PROFILE_CHANGED)) {
             onProfileChanged();
         } else if (action.equals(ACTION_SHOW_NOTIFICATION)) {
+            mNotificationHidden = false;
             checkMPDConnection();
             mNotificationManager.showNotification();
         } else if (action.equals(ACTION_HIDE_NOTIFICATION)) {
-            mNotificationManager.hideNotification();
-        } else if (action.equals(ACTION_QUIT_BACKGROUND_SERVICE)) {
-            // Just disconnect from the server. Everything else happens when the connection is disconnected.
-            onMPDDisconnect();
-            // FIXME timeout?
-        } else if (action.equals(ACTION_START_MPD_STREAM_PLAYBACK)) {
-            if (mPlaybackManager == null) {
-                mPlaybackManager = new StreamPlaybackManager(this);
+            // Only hide notification if no playback is active
+            if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
+                mNotificationManager.hideNotification();
             }
+            mNotificationHidden = true;
+        } else if (action.equals(ACTION_QUIT_BACKGROUND_SERVICE)) {
+            // Only quit service if no playback is active
+            if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
+                // Just disconnect from the server. Everything else happens when the connection is disconnected.
+                onMPDDisconnect();
+                // FIXME timeout?
+            }
+            mNotificationHidden = true;
+        } else if (action.equals(ACTION_START_MPD_STREAM_PLAYBACK)) {
+            startStreamingPlayback();
+        }
+    }
 
+    private void startStreamingPlayback() {
+        if (mPlaybackManager == null) {
+            mPlaybackManager = new StreamPlaybackManager(this);
+        } else if (mPlaybackManager.isPlaying()) {
+            return;
+        }
 
-            String url = "http://" + mProfileManager.getAutoconnectProfile().getHostname() + ":8081";
-            Log.v(TAG, "Start playback of: " + url);
-            mPlaybackManager.playURL(url);
+        // Connect to MPD server for controls
+        checkMPDConnection();
+        mNotificationManager.showNotification();
+        mNotificationManager.setDismissible(false);
+
+        String url = "http://" + mProfileManager.getAutoconnectProfile().getHostname() + ':' + mProfileManager.getAutoconnectProfile().getStreamingPort();
+        Log.v(TAG, "Start playback of: " + url);
+        mPlaybackManager.playURL(url);
+    }
+
+    private void stopStreamingPlayback() {
+        if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
+            mPlaybackManager.stop();
+        }
+        mNotificationManager.setDismissible(true);
+
+        if (mNotificationHidden) {
+            mNotificationManager.hideNotification();
+            onMPDDisconnect();
         }
     }
 
@@ -474,6 +512,10 @@ public class BackgroundService extends Service {
             Log.v(TAG, "Disconnected");
             mService.get().mConnecting = false;
             mService.get().shutdownService();
+
+            if (mService.get().mPlaybackManager != null && mService.get().mPlaybackManager.isPlaying()) {
+                mService.get().mPlaybackManager.stop();
+            }
         }
     }
 
@@ -489,6 +531,14 @@ public class BackgroundService extends Service {
 
         @Override
         protected void onNewStatusReady(MPDCurrentStatus status) {
+            if (mService.get().mLastStatus.getPlaybackState() != status.getPlaybackState()) {
+                if (status.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING && mService.get().mWasStreaming) {
+                    mService.get().startStreamingPlayback();
+                } else if (mService.get().mWasStreaming) {
+                    mService.get().stopStreamingPlayback();
+                }
+            }
+
             mService.get().mLastStatus = status;
             mService.get().notifyNewStatus(status);
             mService.get().mNotificationManager.setMPDStatus(status);
