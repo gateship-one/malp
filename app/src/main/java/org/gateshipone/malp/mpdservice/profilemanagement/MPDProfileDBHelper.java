@@ -25,8 +25,10 @@ package org.gateshipone.malp.mpdservice.profilemanagement;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class MPDProfileDBHelper extends SQLiteOpenHelper{
+    private static final String TAG = MPDProfileManager.class.getSimpleName();
     /**
      * Database name for the profiles database
      */
@@ -35,7 +37,7 @@ public class MPDProfileDBHelper extends SQLiteOpenHelper{
     /**
      * Database version, used for migrating to new versions.
      */
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
 
     /**
      * Constructor to create the database.
@@ -63,8 +65,19 @@ public class MPDProfileDBHelper extends SQLiteOpenHelper{
      */
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
-        /**
-         * No migrations necessary for now.
-         */
+        Log.v(TAG,"Upgrading database from version: " + oldVersion + " to new version: " + newVersion);
+        switch ( oldVersion ) {
+            // Upgrade from version 1 to 2 needs introduction of the streaming port and streaming
+            // enable column.
+            case 1: {
+                String sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT + " integer;";
+                database.execSQL(sqlString);
+
+                sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED + " integer;";
+                database.execSQL(sqlString);
+            }
+            default:
+                break;
+        }
     }
 }
