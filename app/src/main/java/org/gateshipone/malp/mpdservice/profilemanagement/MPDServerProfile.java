@@ -48,6 +48,10 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mPassword = "";
     private int mPort;
 
+    private int mStreamingPort;
+    private boolean mStreamingEnabled;
+
+
     private long mCreated;
 
     public MPDServerProfile(String profileName, boolean autoConnect) {
@@ -78,6 +82,8 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         mPort = in.readInt();
         mAutoconnect = in.readInt() == 1;
         mCreated = in.readLong();
+        mStreamingPort = in.readInt();
+        mStreamingEnabled = in.readInt() == 1;
     }
 
     /**
@@ -164,6 +170,23 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         this.mPort = port;
     }
 
+
+    public void setStreamingPort(int port) {
+        mStreamingPort = port;
+    }
+
+    public int getStreamingPort() {
+        return mStreamingPort;
+    }
+
+    public void setStreamingEnabled(boolean enabled) {
+        mStreamingEnabled = enabled;
+    }
+
+    public boolean getStreamingEnabled() {
+        return mStreamingEnabled;
+    }
+
     /**
      * Creates a string of the server profile. Be careful printing this out, because
      * it includes potential passwords.
@@ -214,6 +237,8 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         dest.writeInt(mPort);
         dest.writeInt(mAutoconnect ? 1 : 0);
         dest.writeLong(mCreated);
+        dest.writeInt(mStreamingPort);
+        dest.writeInt(mStreamingEnabled ? 1 :0);
     }
 
     public long getCreationDate() {
