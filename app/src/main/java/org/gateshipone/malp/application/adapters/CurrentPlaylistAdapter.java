@@ -574,7 +574,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
 
         }
         notifyDataSetChanged();
-        jumpToCurrent();
+        //jumpToCurrent();
     }
 
     /**
