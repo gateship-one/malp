@@ -42,6 +42,8 @@ public class StreamPlaybackManager {
 
     private String mSource;
 
+    private boolean mPreparing;
+
     public StreamPlaybackManager(BackgroundService service) {
         mService = service;
 
@@ -71,8 +73,13 @@ public class StreamPlaybackManager {
         mPlayer.prepareAsync();
     }
 
-    private void pause() {
+    public void stop() {
         mPlayer.stop();
+        mPlayer.reset();
+    }
+
+    public boolean isPlaying() {
+        return mPlayer.isPlaying();
     }
 
     private class PreparedListener implements MediaPlayer.OnPreparedListener {
@@ -82,6 +89,7 @@ public class StreamPlaybackManager {
             Log.v(TAG,"Prepared, start playback");
             mp.setWakeMode(mService.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mp.start();
+            mService.onStreamPlaybackStart();
         }
     }
 

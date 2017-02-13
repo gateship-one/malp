@@ -57,6 +57,7 @@ import android.widget.ViewSwitcher;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.FanartActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
+import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
@@ -453,6 +454,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 }
                 getContext().startActivity(artistIntent);
                 return true;
+            case R.id.action_start_streaming: {
+                Intent playbackStreamIntent = new Intent(getContext(), BackgroundService.class);
+                playbackStreamIntent.setAction(BackgroundService.ACTION_START_MPD_STREAM_PLAYBACK);
+                getContext().startService(playbackStreamIntent);
+                return true;
+            }
             default:
                 return false;
         }
