@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~  Copyright (C) 2017 Team Gateship-One
+  ~  (Hendrik Borghorst & Frederik Luetkes)
+  ~
+  ~  The AUTHORS.md file contains a detailed contributors list:
+  ~  <https://github.com/gateship-one/malp/blob/master/AUTHORS.md>
+  ~
+  ~  This program is free software: you can redistribute it and/or modify
+  ~  it under the terms of the GNU General Public License as published by
+  ~  the Free Software Foundation, either version 3 of the License, or
+  ~  (at your option) any later version.
+  ~
+  ~  This program is distributed in the hope that it will be useful,
+  ~  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~  GNU General Public License for more details.
+  ~
+  ~  You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<resources>
+    <string name="navigation_drawer_open">Ouvrir le tiroir de navigation</string>
+    <string name="navigation_drawer_close">Fermer le tiroir de navigation</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="action_edit_profile">Éditer les profiles</string>
+    <string name="action_connect_profile">Connexion au profil</string>
+    <string name="action_remove_profile">Supprimer le profil</string>
+    <string name="action_add_profile">Ajouter un profil</string>
+    <string name="action_add">Ajouter</string>
+    <string name="action_add_album">Ajouter l\'album</string>
+    <string name="action_play_album">Jouer l\'album</string>
+    <string name="action_show_all_tracks">Montrer toutes les pistes</string>
+    <string name="action_add_artist">Ajouter l\'artiste</string>
+    <string name="action_play_artist">Jouer les pistes de l\'artiste</string>
+    <string name="action_add_directory">Ajouter le répertoire</string>
+    <string name="action_play_directory">Jouer les pistes du répertoire</string>
+    <string name="action_add_playlist">Ajouter la playlist</string>
+    <string name="action_play_playlist">Jouer la playlist</string>
+    <string name="action_remove_playlist">Supprimer la playlist</string>
+    <string name="action_overwrite_playlist">Écraser la playlist</string>
+    <string name="action_delete_playlist">Supprimer la playlist</string>
+    <string name="action_play_everything">Tout jouer</string>
+    <string name="action_show_artist">Monter l\'artiste</string>
+    <string name="action_show_album">Montrer l\'album</string>
+    <string name="action_show_details">Afficher les détails</string>
+    <string name="action_reset_artwork">Réinitialiser les artworks</string>
+    <string name="action_search">Rechercher</string>
+    <string name="action_add_search_result">Ajouter les résultats de la recherche</string>
+    <string name="action_add_to_saved_playlist">Ajouter à la playlist enregistrée</string>
+    <string name="action_remove_from_list">Supprimer de la playlist</string>
+    <string name="action_jump_to_current">Aller à la piste actuelle</string>
+    <string name="action_toggle_single_mode">Single playback</string>
+    <string name="action_toggle_consume_mode">Consume track</string>
+    <string name="action_open_fanart">Plein écran</string>
+    <string name="action_enqueue">Ajouter à la playlist</string>
+    <string name="action_enqueue_as_next">Jouer après la piste actuelle</string>
+    <string name="action_play_song">Jouer la piste</string>
+    <string name="action_play_albums">Jouer l\'album</string>
+    <string name="action_remove_track">Supprimer la piste</string>
+    <string name="action_remove_album">Supprimer l\'album</string>
+    <string name="action_add_url">Ajouter l\'URL</string>
+    <string name="action_show_albums_from_here">Afficher les albums de ce répertoire</string>
+    <string name="action_wikipedia_album">Afficher l\'album</string>
+    <string name="action_wikipedia_artist">Afficher l\'artiste</string>
+    <string name="menu_library">Librairie</string>
+    <string name="menu_settings">Paramètres</string>
+    <string name="menu_server">Propriétés du serveur</string>
+    <string name="menu_profiles">Profils</string>
+    <string name="menu_playlists">Playlists</string>
+    <string name="menu_outputs">Sorties</string>
+    <string name="menu_files">Fichiers</string>
+    <string name="menu_statistic">Statistiques</string>
+    <string name="menu_app_settings">Paramètres de l'application</string>
+    <string name="menu_search">Rechercher</string>
+    <string name="menu_albums">Albums</string>
+    <string name="menu_artists">Artistes</string>
+    <string name="artwork_settings">Paramètres des artworks</string>
+    <string name="track_item_loading">Chargement de la piste</string>
+    <string name="main_activity_connected">Connecté avec le serveur MPD</string>
+    <string name="main_activity_disconnected">Déconnecté du serveur MPD</string>
+    <string name="no_album_tag">Tag album manquant</string>
+    <string name="no_artist_tag">Tag artiste manquant</string>
+    <string name="action_clear_playlist">Effacer la playlist</string>
+    <string name="action_save_playlist">Sauvegarder la playlist</string>
+    <string name="fragment_profile_title">Éditer le profil</string>
+    <string name="fragment_profile_profilename">Nom du profil</string>
+    <string name="fragment_profile_hostname">Hostname ou IP:</string>
+    <string name="fragment_profile_password">Mot de passe:</string>
+    <string name="fragment_profile_port">Port:</string>
+    <string name="fragment_profile_default_name">Nouveau profil</string>
+    <string name="song_track_no">Piste No.:</string>
+    <string name="song_playlist_no">Playlist No.:</string>
+    <string name="song_bitrate">Bitrate:</string>
+    <string name="song_audio_properties">Propriétés audio:</string>
+    <string name="song_uri">Piste URI:</string>
+    <string name="song_title">Titre:</string>
+    <string name="song_album">Album:</string>
+    <string name="song_artist">Artiste:</string>
+    <string name="song_album_artist">Artiste de l\'album:</string>
+    <string name="song_date">Date:</string>
+    <string name="song_disc">Disque:</string>
+    <string name="song_duration">Durée:</string>
+    <string name="song_title_mbid">MusicBrainz Track ID:</string>
+    <string name="song_album_mbid">MusicBrainz Album ID:</string>
+    <string name="song_artist_mbid">MusicBrainz Artist ID:</string>
+    <string name="song_album_artist_mbid">MusicBrainz AlbumArtist ID:</string>
+    <string name="bitrate_unit_kilo_bits">kbps</string>
+    <string name="bitcount_unit">bits</string>
+    <string name="channel_count_unit">channels</string>
+    <string name="server_statistic_artists_count">Nombre d\'artistes:</string>
+    <string name="server_statistic_albums_count">Nombre d\'albums:</string>
+    <string name="server_statistic_songs_count">Nombre de chanson:</string>
+    <string name="server_statistic_uptime">Uptime du serveur MPD:</string>
+    <string name="server_statistic_db_playtime">Durée d\'écoute de la base de donnée:</string>
+    <string name="server_statistic_playtime">Durée d\'écoute:</string>
+    <string name="server_statistic_db_update">Dernière mise à jour de la base de donnée:</string>
+    <string name="server_statistic_malp_server_info">Fonctionnalités du serveur</string>
+    <string name="server_statistic_update_database">Mettre à jour la base de donnnée</string>
+    <string name="server_statistic_updateing_database">Le serveur met à jour sa base de donnée, veuillez patienter!</string>
+    <string name="dialog_save_playlist">Sauvegarder la playlist</string>
+    <string name="dialog_action_cancel">Annuler</string>
+    <string name="dialog_action_save">Sauvegarder</string>
+    <string name="dialog_action_ok">OK</string>
+    <string name="dialog_action_yes">Oui</string>
+    <string name="dialog_action_no">Non</string>
+    <string name="dialog_choose_playlist">Choisir une playlist</string>
+    <string name="dialog_message_overwrite_playlist">Voulez-vous écraser la playlist:</string>
+    <string name="dialog_message_delete_playlist">Voulez-vous vraiment effacer la playlist:</string>
+    <string name="dialog_message_delete_current_playlist">Voulez-vous vraiment effacer la playlist?</string>
+    <string name="default_playlist_title">Nouvelle Playlist</string>
+    <string name="create_new_playlist">Créer une nouvelle playlist</string>
+    <string name="preference_launch_about">À propos</string>
+    <string name="preference_theme_title">Thème</string>
+    <string name="preference_theme_summary">Choisir un thème différent pour l\'application.</string>
+    <string name="preference_theme_message">Sélectionner un thème</string>
+    <string name="preference_theme_item_indigo">Indigo</string>
+    <string name="preference_theme_item_orange">Orange</string>
+    <string name="preference_theme_item_deep_orange">Orange foncé</string>
+    <string name="preference_theme_item_blue">Bleu</string>
+    <string name="preference_theme_item_dark_grey">Gris foncé</string>
+    <string name="preference_theme_item_brown">Marron</string>
+    <string name="preference_theme_item_light_green">Vert clair</string>
+    <string name="preference_theme_item_red">Rouge</string>
+    <string name="preference_theme_item_oled_dark">Noir OLED</string>
+    <string name="preference_album_sort_order_title">Artist Albums sort order</string>
+    <string name="preference_album_sort_order_message">Trier par</string>
+    <string name="preference_album_sort_order_summary">Sélectionner la méthode de tri pour les albums de l\'artiste</string>
+    <string name="preference_album_sort_order_name">Nom</string>
+    <string name="preference_album_sort_order_year">Année</string>
+    <string name="preference_dark_theme_title">Thème sombre</string>
+    <string name="preference_dark_theme_message">Utiliser un thème sombre</string>
+    <string name="preference_show_artist_image_title">Afficher l\'image de l\'artiste</string>
+    <string name="preference_show_artist_image_text">Alterner entre l\'image de la pochette de l\'album et un image de l\'artiste pour la piste actuelle</string>
+    <string name="preference_default_view_title">Vue par défaut</string>
+    <string name="preference_default_view_message">Choisir la vue par défaut</string>
+    <string name="preference_default_view_summary">Choisir la vue par défaut pour l\'application.</string>
+    <string name="preference_default_view_my_music_artists">Artistes</string>
+    <string name="preference_default_view_my_music_albums">Albums</string>
+    <string name="preference_default_view_my_music_playlists">Playlists</string>
+    <string name="preference_default_view_my_music_files">Fichiers</string>
+    <string name="preference_library_view_title">Choisir l\'affichage de la librairie</string>
+    <string name="preference_library_view_message">Choisir l\'affichage de la librairie</string>
+    <string name="preference_library_view_summary">Choisir la méthode d\'affichage pour l\'artiste et l\'album</string>
+    <string name="preference_library_view_list">Liste</string>
+    <string name="preference_library_view_grid">Grille</string>
+    <string name="preference_use_album_artists_title">Utiliser le tag AlbumArtist</string>
+    <string name="preference_use_album_artists_text">Utiliser le tag AlbumArtist</string>
+    <string name="preference_volume_control_title">Choisir la vue du contrôle de volume</string>
+    <string name="preference_volume_control_message">Choisir la vue du contrôle de volume</string>
+    <string name="preference_volume_control_summary">Choisir le type de vue utilisée pour le contrôle du volume</string>
+    <string name="preference_volume_control_off">Off</string>
+    <string name="preference_volume_control_seekbar">Slider</string>
+    <string name="preference_volume_control_buttons">Boutons</string>
+    <string name="preference_generic_hardware_keys_title">Utiliser les boutons physiques</string>
+    <string name="preference_generic_hardware_keys_text">Utiliser les boutons physiques pour contrôler la lecture..</string>
+    <string name="preference_show_notification_title">Show notification</string>
+    <string name="preference_show_notification_text">Afficher une notification lorsque l\'interface principale est quittée.</string>
+    <string name="preference_use_english_wikipedia_title">Utiliser Wikipedia en anglais</string>
+    <string name="preference_use_english_wikipedia_text">Use the English Wikipedia version to lookup pages</string>
+    <string name="preference_category_design">Design</string>
+    <string name="preference_category_library">Libraire</string>
+    <string name="preference_category_controls">Contrôles</string>
+    <string name="preference_category_other">Autres</string>
+    <string name="preference_artwork_album_provider_title">Fournisseur de pochette d\'album</string>
+    <string name="preference_artwork_album_provider_summary">Choisir un fournisseur pour les pochettes d\'albums</string>
+    <string name="preference_artwork_album_provider_message">Choisir un fournisseur pour les pochettes d\'albums</string>
+    <string name="provider_off">Off</string>
+    <string name="preference_artwork_artist_provider_title">Fournisseur de pochette d\'album</string>
+    <string name="preference_artwork_artist_provider_summary">Choisir un fournisseur pour les pochettes d\'albums</string>
+    <string name="preference_artwork_artist_provider_message">Choisir un fournisseur pour les pochettes d\'albums</string>
+    <string name="preference_artwork_clear_artist_summary">Supprime toutes les images associés à l\'artiste.</string>
+    <string name="preference_artwork_clear_album">Supprimer les images de l\'album</string>
+    <string name="preference_artwork_clear_album_summary">Supprimes toutes les images associés à l\'album.</string>
+    <string name="preference_artwork_clear_blocked_artist">Suprimer les images des artistes inconnus</string>
+    <string name="preference_artwork_clear_blocked_artist_summary">Supprimer les images associées aux artistes recherchés, mais non trouvés.</string>
+    <string name="preference_artwork_clear_blocked_album">Supprimer les images des albums inconnus</string>
+    <string name="preference_artwork_clear_blocked_album_summary">Supprimer les images associées aux albums recherchés, mais non trouvés.</string>
+    <string name="preference_artwork_bulk_load">Essayer de charger toutes les images de la base de données.</string>
+    <string name="preference_artwork_bulk_load_summary">Cela va charger un grand nombre d\'images. Soyez avertis qui cela peut prendre du temps.</string>
+    <string name="preference_artwork_wifi_only_title">Utiliser uniquement le wifi pour le téléchargement</string>
+    <string name="preference_artwork_wifi_only_text">Le téléchargement des artworks se fera uniquement lorsque le périphérique est connecté au WIFI.</string>
+    <string name="preference_category_artwork_settings">Paramètres des artworks</string>
+    <string name="preference_category_artwork_database_cleanup">Nettoyage de la base de donnnée</string>
+    <string name="preference_category_artwork_other_actions">Autres actions</string>
+    <string name="search_choice_track">Titre</string>
+    <string name="search_choice_album">Album</string>
+    <string name="search_choice_artist">Artist</string>
+    <string name="search_choice_file">Fichier</string>
+    <string name="search_choice_everything">Tout</string>
+    <string name="welcome_dialog_title">Aucun profil trouvé</string>
+    <string name="welcome_dialog_text">Cette application permet le contrôle à distance de MPD. Si vous ne savez pas ce qu\'est MPD, alors cette application vous est certainement inutile, désolé :).\n\nPour utiliser cette application, ajoutez un nouveau profile à l\'aide du bouton Ajouter dans le coin supérieur droit.\nCette application peut, ou ne peut pas fonctionner correctement avec Mopidy comme client MPD.\n\nSi vous souhaitez utiliser un balladeur qui reprendre la même interface, essayez Odyssey (https://github.com/gateship-one/odyssey).</string>
+    <string name="bulk_download_notice_title">Téléchargement d\'image</string>
+    <string name="bulk_download_notice_text">Télécharger un grand nombre d\'images nécessite de nombreuses ressources. Il est possible que le serveur du fournisseur arrête le téléchargement s\'il détecte que la charge du serveur est trop importante.\n\nMerci de penser à donner à ces fournisseurs un peu de votre temps ou de votre argent.</string>
+    <string name="artwork_provided_by">Artwork fourni par :</string>
+    <string name="acknowledgement_text">Un grand merci à Frederik Lütkes pour son développement actif Odyssey, un lecteur de musique dont ce programme utilise le GUI</string>
+    <string name="license_text">This application is licensed under the GPLv3 license.\nMaterial icons are licensed under the CC-BY license by Google.</string>
+    <string name="sources_text">Le code source est disponible sur GitHub:\nhttps://github.com/gateship-one/malp</string>
+    <string name="activity_about_version">Version: </string>
+    <string name="downloader_notification_title">Téléchargement depuis Bulk</string>
+    <string name="downloader_notification_remaining_images">Images téléchargées</string>
+    <string name="widget_disconnected">Déconnecté</string>
+    <string name="widget_connect">Connecté</string>
+    <string name="contributors_title">Contributeurs</string>
+    <string name="contributor_translator_japanese">Japanese Translation</string>
+    <string name="thirdparty_licenses_dialog_title">Third Party Licenses</string>
+</resources>
