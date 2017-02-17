@@ -269,4 +269,6 @@ public class MPDCommands {
     public static String MPD_COMMAND_PLAYLIST_FIND_URI(String url) {
         return "playlistfind file \"" + url + "\"";
     }
+
+    public static final String MPD_COMMAND_SHUFFLE_PLAYLIST = "shuffle";
 }

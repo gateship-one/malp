@@ -227,4 +227,5 @@
     <string name="preference_show_artist_image_title">Interpretenbild anzeigen</string>
     <string name="preference_show_artist_image_text">Abwechselnd das Albumcover und ein Bild des Interpreten in der aktuellen Liedansicht anzeigen</string>
     <string name="action_remove_album">Album entfernen</string>
+    <string name="action_shuffle_playlist">Liste durchmischen</string>
 </resources>

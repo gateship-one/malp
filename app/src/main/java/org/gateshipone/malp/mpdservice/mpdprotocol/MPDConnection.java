@@ -1926,6 +1926,22 @@ public class MPDConnection {
     }
 
     /**
+     * Instructs the mpd server to shuffle its current playlist.
+     *
+     * @return True if server responed with ok
+     */
+    public synchronized boolean shufflePlaylist() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SHUFFLE_PLAYLIST);
+    /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
      * Instructs the mpd server to remove one item from the current playlist at index.
      *
      * @param index Position of the item to remove from current playlist.
