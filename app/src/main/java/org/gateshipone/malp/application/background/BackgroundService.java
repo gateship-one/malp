@@ -28,6 +28,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -179,6 +180,7 @@ public class BackgroundService extends Service {
         filter.addAction(ACTION_HIDE_NOTIFICATION);
         filter.addAction(ACTION_QUIT_BACKGROUND_SERVICE);
         filter.addAction(ACTION_START_MPD_STREAM_PLAYBACK);
+        filter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 
         // Register the receiver with the system
         registerReceiver(mBroadcastReceiver, filter);
@@ -439,6 +441,8 @@ public class BackgroundService extends Service {
             mNotificationHidden = true;
         } else if (action.equals(ACTION_START_MPD_STREAM_PLAYBACK)) {
             startStreamingPlayback();
+        } else if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
+            stopStreamingPlayback();
         }
     }
 
