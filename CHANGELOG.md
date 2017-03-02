@@ -1,3 +1,7 @@
+### Version: 1.1.4 Tag: release-13 (2017-03-02) ###
+ * French translation (Thanks to Guy de Mölkky)
+ * UI flickering fixes in ListViews 
+
 ### Version: 1.1.3 Tag: release-12 (2017-02-05) ###
  * Crash fix on number conversion in MPD connection
  * Show artist image in now playing

@@ -377,6 +377,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
             }
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
             mMPDConnection.clearPlaylist();
+        }  else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SHUFFLE_CURRENT_PLAYLIST) {
+            mMPDConnection.shufflePlaylist();
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT) {
 
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
@@ -926,6 +928,18 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
     public static void clearPlaylist() {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    public static void shufflePlaylist() {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SHUFFLE_CURRENT_PLAYLIST);
         Message msg = Message.obtain();
         if (null == msg) {
             return;

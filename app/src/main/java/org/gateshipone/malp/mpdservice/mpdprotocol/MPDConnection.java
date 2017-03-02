@@ -776,7 +776,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+        if (null != response && response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
             Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
@@ -845,7 +845,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+        if (null != response && response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
             Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
@@ -1916,6 +1916,22 @@ public class MPDConnection {
      */
     public synchronized boolean clearPlaylist() {
         sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
+    /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    /**
+     * Instructs the mpd server to shuffle its current playlist.
+     *
+     * @return True if server responed with ok
+     */
+    public synchronized boolean shufflePlaylist() {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_SHUFFLE_PLAYLIST);
     /* Return the response value of MPD */
         try {
             return checkResponse();

@@ -26,11 +26,13 @@
         <item>Hendrik Borghorst</item>
         <item>Frederik Lütkes</item>
         <item>naofum</item>
+        <item>Guy de Mölkky</item>
     </string-array>
 
     <string-array name="contributors_type">
         <item>@string/contributor_team</item>
         <item>@string/contributor_team</item>
         <item>@string/contributor_translator_japanese</item>
+        <item>@string/contributor_translator_french</item>
     </string-array>
 </resources>

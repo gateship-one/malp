@@ -1,3 +1,4 @@
  - Hendrik Borghorst - Main developer
  - Frederik Lütkes - Shared Odyssey Code (https://github.com/gateship-one/odyssey)
  - naofum (Github user) - Japanese translation
+ - Guy de Mölkky (Github user) - French translation

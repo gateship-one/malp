@@ -229,4 +229,6 @@
     <string name="action_remove_album">Album entfernen</string>
     <string name="fragment_profile_streaming_enabled">Aktiviere Streaming vom Server</string>
     <string name="action_start_streaming">Starte Streaming</string>
+    <string name="action_shuffle_playlist">Liste durchmischen</string>
+    <string name="contributor_translator_french">Französische Übersetzung</string>
 </resources>

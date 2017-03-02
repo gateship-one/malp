@@ -340,6 +340,9 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 });
                 removeListBuilder.create().show();
                 break;
+            case R.id.action_shuffle_playlist:
+                MPDQueryHandler.shufflePlaylist();
+                return true;
             case R.id.action_save_playlist:
                 OnSaveDialogListener plDialogCallback = new OnSaveDialogListener() {
                     @Override
