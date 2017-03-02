@@ -776,7 +776,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+        if (null != response && response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
             Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
@@ -845,7 +845,7 @@ public class MPDConnection {
             }
             response = readLine();
         }
-        if (response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+        if (null != response && response.startsWith("ACK") && response.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
             Log.e(TAG, "Error parsing artists: " + response);
             enableMopidyWorkaround();
         }
