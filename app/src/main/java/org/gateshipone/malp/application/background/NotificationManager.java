@@ -147,6 +147,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public void hideNotification() {
         if (mMediaSession != null) {
             mMediaSession.setActive(false);
+            mMediaSession.release();
             mMediaSession = null;
         }
 
