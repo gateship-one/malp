@@ -27,12 +27,13 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
+import android.text.InputFilter;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.NumberPicker;
 import android.widget.Switch;
 
 import org.gateshipone.malp.R;
@@ -54,7 +55,7 @@ public class EditProfileFragment extends Fragment {
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
     private TextInputEditText mPasswordView;
-    private NumberPicker mPortView;
+    private TextInputEditText mPortView;
 
 
     private MPDServerProfile mOldProfile;
@@ -73,11 +74,33 @@ public class EditProfileFragment extends Fragment {
         mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
         mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
         mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
-        mPortView = (NumberPicker) rootView.findViewById(R.id.fragment_profile_port);
+        mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
 
         // Set to maximum tcp port
-        mPortView.setMaxValue(65535);
-        mPortView.setMinValue(1);
+        InputFilter portFilter = new InputFilter() {
+                public CharSequence filter(CharSequence source, int start, int end,
+                                           Spanned dest, int dstart, int dend) {
+                    if (end > start) {
+                        String destTxt = dest.toString();
+                        String resultingTxt = destTxt.substring(0, dstart) +
+                            source.subSequence(start, end) +
+                            destTxt.substring(dend);
+                        try {
+                            int port = Integer.parseInt(resultingTxt);
+                            if(port > 65535){
+                                return "";
+                            }
+                            if(port < 1){
+                                return "";
+                            }
+                        } catch (NumberFormatException e) {
+                            return "";
+                        }
+                    }
+                    return null;
+                }
+            };
+        mPortView.setFilters(new InputFilter[] {portFilter});
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
@@ -102,7 +125,7 @@ public class EditProfileFragment extends Fragment {
 
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
-        mPortView.setValue(mPort);
+        mPortView.setText(String.valueOf(mPort));
 
         mProfilenameView.setSelectAllOnFocus(true);
 
@@ -151,9 +174,9 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPassword = mPasswordView.getText().toString();
         }
-        if (mPortView.getValue() != mPort) {
+        if (Integer.parseInt(mPortView.getText().toString()) != mPort) {
             profileChanged = true;
-            mPort = mPortView.getValue();
+            mPort = Integer.parseInt(mPortView.getText().toString());
         }
 
         if (profileChanged) {
