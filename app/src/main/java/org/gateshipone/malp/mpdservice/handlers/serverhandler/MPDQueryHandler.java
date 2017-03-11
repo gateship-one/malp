@@ -435,7 +435,9 @@ public class MPDQueryHandler extends MPDGenericHandler {
             responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE) {
 
-            mMPDConnection.updateDatabase();
+            String updatePath = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
+
+            mMPDConnection.updateDatabase(updatePath);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES) {
             String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
             MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
@@ -1075,7 +1077,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
     }
 
 
-    public static void updateDatabase() {
+    public static void updateDatabase(String path) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UPDATE_DATABASE);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -1083,6 +1085,8 @@ public class MPDQueryHandler extends MPDGenericHandler {
         }
 
         msg.obj = action;
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH, path);
 
         MPDQueryHandler.getHandler().sendMessage(msg);
     }

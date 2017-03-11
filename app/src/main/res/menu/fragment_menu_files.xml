@@ -30,13 +30,18 @@
         app:actionViewClass="android.support.v7.widget.SearchView" />
     <item
         android:id="@+id/action_add_directory"
-        android:orderInCategory="100"
+        android:orderInCategory="2"
         android:icon="@drawable/ic_queue_24dp"
         android:title="@string/action_add_directory"
         app:showAsAction="always" />
     <item
+        android:id="@+id/action_update_database_here"
+        android:orderInCategory="3"
+        android:title="@string/action_update_database_here"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_show_albums_from_here"
-        android:orderInCategory="100"
+        android:orderInCategory="4"
         android:title="@string/action_show_albums_from_here"
         android:visible="false"
         app:showAsAction="never" />

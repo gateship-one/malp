@@ -84,6 +84,7 @@
 
     <string name="action_add_url">Add URL</string>
     <string name="action_show_albums_from_here">Show albums in this directory</string>
+    <string name="action_update_database_here">Update database here</string>
 
     <string name="action_wikipedia" translatable="false">Wikipedia</string>
     <string name="action_wikipedia_album">Open album</string>

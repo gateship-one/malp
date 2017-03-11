@@ -153,7 +153,8 @@ public class ServerStatisticFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            MPDQueryHandler.updateDatabase();
+            // Update the whole database => no path
+            MPDQueryHandler.updateDatabase("");
         }
     }
 

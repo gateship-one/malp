@@ -212,7 +212,13 @@ public class MPDCommands {
         return "toggleoutput " + String.valueOf(id);
     }
 
-    public static final String MPD_COMMAND_UPDATE_DATABASE = "update";
+    public static String MPD_COMMAND_UPDATE_DATABASE(String path) {
+        if (null != path && !path.isEmpty()) {
+            return "update \"" + path + "\"";
+        } else {
+            return "update";
+        }
+    }
 
     public enum MPD_SEARCH_TYPE {
         MPD_SEARCH_TRACK,
@@ -222,7 +228,7 @@ public class MPDCommands {
         MPD_SEARCH_ANY,
     }
 
-    public static final String MPD_COMMAND_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
+    public static String MPD_COMMAND_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
         switch (type) {
             case MPD_SEARCH_TRACK:
                 return "search title \"" + searchTerm + '\"';

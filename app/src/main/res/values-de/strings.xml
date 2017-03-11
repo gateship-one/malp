@@ -229,4 +229,5 @@
     <string name="action_remove_album">Album entfernen</string>
     <string name="action_shuffle_playlist">Liste durchmischen</string>
     <string name="contributor_translator_french">Französische Übersetzung</string>
+    <string name="action_update_database_here">Datenbank hier aktualisieren</string>
 </resources>

@@ -2241,12 +2241,14 @@ public class MPDConnection {
     }
 
     /**
-     * Instructs to update the database of the mpd server (path: / )
+     * Instructs to update the database of the mpd server.
      *
+     * @param path Path to update
      * @return True if server responed with ok
      */
-    public synchronized boolean updateDatabase() {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE);
+    public synchronized boolean updateDatabase(String path) {
+        // Update root directory
+        sendMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE(path));
 
         /* Return the response value of MPD */
         try {
@@ -2257,7 +2259,6 @@ public class MPDConnection {
         return false;
 
     }
-
 
     /**
      * Checks if the socket is ready for read operations

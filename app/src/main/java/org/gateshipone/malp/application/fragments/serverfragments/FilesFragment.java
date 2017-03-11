@@ -346,6 +346,9 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             case R.id.action_show_albums_from_here:
                 mCallback.showAlbumsForPath(mPath);
                 return true;
+            case R.id.action_update_database_here:
+                MPDQueryHandler.updateDatabase(mPath);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
