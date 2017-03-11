@@ -72,7 +72,7 @@ public class MPDProfileManager {
                 long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
 
                 /* Streaming parameters */
-                int streamingPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
+                String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
                 boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
 
                 /* Create temporary object to append to list. */
@@ -81,7 +81,7 @@ public class MPDProfileManager {
                 profile.setPassword(serverPassword);
                 profile.setPort(serverPort);
 
-                profile.setStreamingPort(streamingPort);
+                profile.setStreamingURL(streamingURL);
                 profile.setStreamingEnabled(streamingEnabled);
 
                 /* Finish and add to list */
@@ -125,7 +125,7 @@ public class MPDProfileManager {
         values.put(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED, profile.getCreationDate());
 
         /* Streaming parameters */
-        values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT, profile.getStreamingPort());
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT, profile.getStreamingURL());
         values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED, profile.getStreamingEnabled());
 
         /* Insert the table in the database */
@@ -174,7 +174,7 @@ public class MPDProfileManager {
             long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
 
             /* Streaming parameters */
-            int streamingPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
+            String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
             boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
 
             /* Create temporary object to append to list. */
@@ -183,7 +183,7 @@ public class MPDProfileManager {
             profile.setPassword(serverPassword);
             profile.setPort(serverPort);
 
-            profile.setStreamingPort(streamingPort);
+            profile.setStreamingURL(streamingURL);
             profile.setStreamingEnabled(streamingEnabled);
 
             cursor.close();

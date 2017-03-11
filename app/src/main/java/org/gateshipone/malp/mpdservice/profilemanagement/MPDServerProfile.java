@@ -48,7 +48,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mPassword = "";
     private int mPort;
 
-    private int mStreamingPort;
+    private String mStreamingURL;
     private boolean mStreamingEnabled;
 
 
@@ -82,7 +82,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         mPort = in.readInt();
         mAutoconnect = in.readInt() == 1;
         mCreated = in.readLong();
-        mStreamingPort = in.readInt();
+        mStreamingURL = in.readString();
         mStreamingEnabled = in.readInt() == 1;
     }
 
@@ -171,12 +171,12 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     }
 
 
-    public void setStreamingPort(int port) {
-        mStreamingPort = port;
+    public void setStreamingURL(String url) {
+        mStreamingURL = url;
     }
 
-    public int getStreamingPort() {
-        return mStreamingPort;
+    public String getStreamingURL() {
+        return mStreamingURL;
     }
 
     public void setStreamingEnabled(boolean enabled) {
@@ -237,7 +237,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         dest.writeInt(mPort);
         dest.writeInt(mAutoconnect ? 1 : 0);
         dest.writeLong(mCreated);
-        dest.writeInt(mStreamingPort);
+        dest.writeString(mStreamingURL);
         dest.writeInt(mStreamingEnabled ? 1 :0);
     }
 
