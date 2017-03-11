@@ -458,7 +458,7 @@ public class BackgroundService extends Service {
         mNotificationManager.showNotification();
         mNotificationManager.setDismissible(false);
 
-        String url = "http://" + mProfileManager.getAutoconnectProfile().getHostname() + ':' + mProfileManager.getAutoconnectProfile().getStreamingPort();
+        String url = mProfileManager.getAutoconnectProfile().getStreamingURL();
         Log.v(TAG, "Start playback of: " + url);
         mPlaybackManager.playURL(url);
     }
