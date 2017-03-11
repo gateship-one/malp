@@ -127,7 +127,7 @@
     <string name="server_statistic_playtime">Durée d\'écoute enregistrée :</string>
     <string name="server_statistic_db_update">Dernière mise à jour de la base de données :</string>
     <string name="server_statistic_malp_server_info">Fonctionnalités du serveur :</string>
-    <string name="server_statistic_update_database">Mettre à jour la base de donnnées</string>
+    <string name="server_statistic_update_database">Mettre à jour la base de données</string>
     <string name="server_statistic_updateing_database">Le serveur met à jour sa base de données, veuillez patienter !</string>
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Sauvegarder la playlist</string>
@@ -223,7 +223,7 @@
     <string name="preference_artwork_wifi_only_title">Utiliser uniquement le WIFI pour le téléchargement</string>
     <string name="preference_artwork_wifi_only_text">Le téléchargement des artworks se fera uniquement lorsque le périphérique est connecté via WIFI.</string>
     <string name="preference_category_artwork_settings">Paramètres des artworks</string>
-    <string name="preference_category_artwork_database_cleanup">Nettoyage de la base de donnnées</string>
+    <string name="preference_category_artwork_database_cleanup">Nettoyage de la base de données</string>
     <string name="preference_category_artwork_other_actions">Autres actions</string>
     <string name="search_choice_track">Titre</string>
     <string name="search_choice_album">Album</string>
