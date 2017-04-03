@@ -156,7 +156,7 @@ public class BackgroundService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return new BackgroundServiceInterface(this);
     }
 
     @Override
@@ -446,7 +446,7 @@ public class BackgroundService extends Service {
         }
     }
 
-    private void startStreamingPlayback() {
+    public void startStreamingPlayback() {
         if (mPlaybackManager == null) {
             mPlaybackManager = new StreamPlaybackManager(this);
         } else if (mPlaybackManager.isPlaying()) {
@@ -463,7 +463,7 @@ public class BackgroundService extends Service {
         mPlaybackManager.playURL(url);
     }
 
-    private void stopStreamingPlayback() {
+    public void stopStreamingPlayback() {
         if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
             mPlaybackManager.stop();
         }
@@ -473,6 +473,13 @@ public class BackgroundService extends Service {
             mNotificationManager.hideNotification();
             onMPDDisconnect();
         }
+    }
+
+    public boolean isPlayingStream() {
+        if (mPlaybackManager != null &&mPlaybackManager.isPlaying())  {
+            return true;
+        }
+        return false;
     }
 
     /**
