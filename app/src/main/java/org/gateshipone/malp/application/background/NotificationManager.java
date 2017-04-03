@@ -226,7 +226,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.addAction(stopActon);
             mNotificationBuilder.addAction(nextAction);
             NotificationCompat.MediaStyle notificationStyle = new NotificationCompat.MediaStyle();
-            notificationStyle.setShowActionsInCompactView(1, 2);
+            notificationStyle.setShowActionsInCompactView(1, 3);
             mNotificationBuilder.setStyle(notificationStyle);
 
             String title;
