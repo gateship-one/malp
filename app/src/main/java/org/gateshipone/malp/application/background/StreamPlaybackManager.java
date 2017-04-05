@@ -22,6 +22,7 @@
 
 package org.gateshipone.malp.application.background;
 
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -47,17 +48,20 @@ public class StreamPlaybackManager {
     public StreamPlaybackManager(BackgroundService service) {
         mService = service;
 
-        mPlayer = new MediaPlayer();
         mPreparedListener = new PreparedListener();
         mCompletionListener = new CompletionListener();
-
-        mPlayer.setOnPreparedListener(mPreparedListener);
-        mPlayer.setOnCompletionListener(mCompletionListener);
     }
 
     public void playURL(String url) {
         mSource = url;
 
+        if (null != mPlayer) {
+            mPlayer.release();
+        }
+
+        mPlayer = new MediaPlayer();
+        mPlayer.setOnPreparedListener(mPreparedListener);
+        mPlayer.setOnCompletionListener(mCompletionListener);
         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         startPlayback();
@@ -71,15 +75,29 @@ public class StreamPlaybackManager {
         }
 
         mPlayer.prepareAsync();
+        broadcastStatusUpdate(BackgroundService.STREAMING_STATUS.BUFFERING);
     }
 
     public void stop() {
         mPlayer.stop();
         mPlayer.reset();
+        mPlayer.release();
+        mPlayer = null;
+        broadcastStatusUpdate(BackgroundService.STREAMING_STATUS.STOPPED);
     }
 
     public boolean isPlaying() {
-        return mPlayer.isPlaying();
+        if (mPlayer != null) {
+            return mPlayer.isPlaying();
+        }
+        return false;
+    }
+
+    private void broadcastStatusUpdate(BackgroundService.STREAMING_STATUS status) {
+        Intent intent = new Intent();
+        intent.setAction(BackgroundService.ACTION_STREAMING_STATUS_CHANGED);
+        intent.putExtra(BackgroundService.INTENT_EXTRA_STREAMING_STATUS, status.ordinal());
+        mService.sendBroadcast(intent);
     }
 
     private class PreparedListener implements MediaPlayer.OnPreparedListener {
@@ -90,6 +108,18 @@ public class StreamPlaybackManager {
             mp.setWakeMode(mService.getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
             mp.start();
             mService.onStreamPlaybackStart();
+            broadcastStatusUpdate(BackgroundService.STREAMING_STATUS.PLAYING);
+        }
+    }
+
+    private class ErrorListener implements MediaPlayer.OnErrorListener {
+
+        @Override
+        public boolean onError(MediaPlayer mp, int what, int extra) {
+            mPlayer.release();
+            mPlayer = null;
+            broadcastStatusUpdate(BackgroundService.STREAMING_STATUS.STOPPED);
+            return true;
         }
     }
 
@@ -99,5 +129,16 @@ public class StreamPlaybackManager {
         public void onCompletion(MediaPlayer mp) {
 
         }
+    }
+
+    public BackgroundService.STREAMING_STATUS getStreamingStatus() {
+        if(null != mPlayer) {
+            if(mPlayer.isPlaying()) {
+                return BackgroundService.STREAMING_STATUS.PLAYING;
+            } else {
+                return BackgroundService.STREAMING_STATUS.BUFFERING;
+            }
+        }
+        return BackgroundService.STREAMING_STATUS.STOPPED;
     }
 }

@@ -22,6 +22,7 @@
 
 package org.gateshipone.malp.application.background;
 
+import android.os.Message;
 import android.os.RemoteException;
 
 import java.lang.ref.WeakReference;
@@ -35,16 +36,20 @@ public class BackgroundServiceInterface extends IBackgroundService.Stub {
 
     @Override
     public void stopStreamingPlayback() throws RemoteException {
-        mService.get().stopStreamingPlayback();
+        Message msg = mService.get().getHandler().obtainMessage();
+        msg.obj = new BackgroundServiceHandler.HandlerAction(BackgroundServiceHandler.HANDLER_ACTION_TYPE.ACTION_STOP_STREAMING);
+        mService.get().getHandler().sendMessage(msg);
     }
 
     @Override
     public void startStreamingPlayback() throws RemoteException {
-        mService.get().startStreamingPlayback();
+        Message msg = mService.get().getHandler().obtainMessage();
+        msg.obj = new BackgroundServiceHandler.HandlerAction(BackgroundServiceHandler.HANDLER_ACTION_TYPE.ACTION_START_STREAMING);
+        mService.get().getHandler().sendMessage(msg);
     }
 
     @Override
-    public boolean isPlayingStream() throws RemoteException {
-        return mService.get().isPlayingStream();
+    public int getStreamingStatus() throws RemoteException {
+        return mService.get().getStreamingStatus();
     }
 }

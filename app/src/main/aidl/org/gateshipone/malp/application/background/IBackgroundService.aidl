@@ -8,6 +8,6 @@ interface IBackgroundService {
     void stopStreamingPlayback();
     void startStreamingPlayback();
 
-    boolean isPlayingStream();
+    int getStreamingStatus();
 
 }

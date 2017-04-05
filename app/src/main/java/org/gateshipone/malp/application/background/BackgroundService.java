@@ -121,6 +121,22 @@ public class BackgroundService extends Service {
     public static final String INTENT_EXTRA_STATUS = "org.gateshipone.malp.widget.extra.status";
 
     /**
+     * Notification about a change in status of remote stream playback on the android device.
+     */
+    public static final String ACTION_STREAMING_STATUS_CHANGED = "org.gateshipone.malp.streaming.status_changed";
+
+    /**
+     * Contains the status as an STREAMING_STATUS enum value.
+     */
+    public static final String INTENT_EXTRA_STREAMING_STATUS = "org.gateshipone.malp.streaming.extra.status";
+
+    public enum STREAMING_STATUS {
+        STOPPED,
+        BUFFERING,
+        PLAYING
+    }
+
+    /**
      * Profile manage instance to get the last used profile out of the SQLite database.
      */
     private MPDProfileManager mProfileManager;
@@ -146,6 +162,8 @@ public class BackgroundService extends Service {
     private boolean mNotificationHidden = true;
 
     private boolean mWasStreaming = false;
+
+    private BackgroundServiceHandler mHandler;
 
     /**
      * No bindable service.
@@ -184,6 +202,9 @@ public class BackgroundService extends Service {
 
         // Register the receiver with the system
         registerReceiver(mBroadcastReceiver, filter);
+
+        // Create handler for service binding
+        mHandler = new BackgroundServiceHandler(this);
 
         // Create MPD callbacks
         mServerStatusListener = new BackgroundMPDStatusChangeListener(this);
@@ -231,7 +252,7 @@ public class BackgroundService extends Service {
         if (null != action) {
             handleAction(action);
         }
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Override
@@ -452,18 +473,28 @@ public class BackgroundService extends Service {
         } else if (mPlaybackManager.isPlaying()) {
             return;
         }
+        /*
+         * Make sure service is "started" so android doesn't handle it as a
+         * "bound service"
+         */
+        Intent serviceStartIntent = new Intent(this, BackgroundService.class);
+        serviceStartIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
+        startService(serviceStartIntent);
+
+        String url = mProfileManager.getAutoconnectProfile().getStreamingURL();
+        Log.v(TAG, "Start playback of: " + url);
 
         // Connect to MPD server for controls
         checkMPDConnection();
         mNotificationManager.showNotification();
         mNotificationManager.setDismissible(false);
 
-        String url = mProfileManager.getAutoconnectProfile().getStreamingURL();
-        Log.v(TAG, "Start playback of: " + url);
+
         mPlaybackManager.playURL(url);
     }
 
     public void stopStreamingPlayback() {
+        Log.v(TAG, "Stop stream playback");
         if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
             mPlaybackManager.stop();
         }
@@ -476,10 +507,22 @@ public class BackgroundService extends Service {
     }
 
     public boolean isPlayingStream() {
-        if (mPlaybackManager != null &&mPlaybackManager.isPlaying())  {
+        if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
             return true;
         }
         return false;
+    }
+
+    public BackgroundServiceHandler getHandler() {
+        return mHandler;
+    }
+
+    public int getStreamingStatus() {
+        if (null == mPlaybackManager) {
+            return STREAMING_STATUS.STOPPED.ordinal();
+        } else {
+            return mPlaybackManager.getStreamingStatus().ordinal();
+        }
     }
 
     /**

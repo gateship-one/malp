@@ -39,6 +39,7 @@ import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
@@ -129,14 +130,14 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     /**
      * Shows the notification
      */
-    public void showNotification() {
+    public synchronized void showNotification() {
         openMediaSession();
         mService.startForeground(NOTIFICATION_ID, mNotification);
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
         mSessionActive = true;
     }
 
-    private void openMediaSession() {
+    private synchronized void openMediaSession() {
         if (mMediaSession == null) {
             mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
             if (mDismissible) {
@@ -152,7 +153,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     /**
      * Hides the notification (if shown) and resets state variables.
      */
-    public void hideNotification() {
+    public synchronized void hideNotification() {
         if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession.release();
@@ -313,7 +314,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * @param track         Current track.
      * @param playbackState State of the PlaybackService.
      */
-    private void updateMetadata(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
+    private synchronized void updateMetadata(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
         if (track != null && mMediaSession != null) {
             if (playbackState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
@@ -357,7 +358,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
             updateNotification(mLastTrack, status.getPlaybackState());
-            if ( mVolumeControlProvider != null) {
+            if (mVolumeControlProvider != null) {
                 // Notify the mediasession about the new volume
                 mVolumeControlProvider.setCurrentVolume(status.getVolume());
             }
@@ -395,10 +396,13 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             /* Set lockscreen picture and stuff */
             if (mMediaSession != null) {
-                MediaMetadataCompat.Builder metaDataBuilder;
-                metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
-                metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
-                mMediaSession.setMetadata(metaDataBuilder.build());
+                MediaMetadataCompat metaData = mMediaSession.getController().getMetadata();
+                if (metaData != null) {
+                    MediaMetadataCompat.Builder metaDataBuilder;
+                    metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
+                    metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
+                    mMediaSession.setMetadata(metaDataBuilder.build());
+                }
             }
         }
     }
@@ -410,12 +414,12 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         }
     }
 
-    public void setDismissible(boolean dismissible) {
+    public synchronized void setDismissible(boolean dismissible) {
         mDismissible = dismissible;
 
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
 
-        if ( mMediaSession != null) {
+        if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession = null;
         }

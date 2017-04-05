@@ -23,15 +23,18 @@
 package org.gateshipone.malp.application.views;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
@@ -58,6 +61,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.FanartActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.background.BackgroundService;
+import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
@@ -81,6 +85,8 @@ import java.util.Locale;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener, ArtworkManager.onNewArtistImageListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
+
+    private static final String TAG = NowPlayingView.class.getSimpleName();
 
     private final ViewDragHelper mDragHelper;
 
@@ -122,6 +128,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     private boolean mShowArtistImage = false;
 
+    private BackgroundService.STREAMING_STATUS mStreamingStatus;
+
     /**
      * Main cover imageview
      */
@@ -153,6 +161,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      * (Used for smooth statusbar transition and state resuming)
      */
     private NowPlayingDragStatusReceiver mDragStatusReceiver = null;
+
+    private StreamingStatusReceiver mStreamingStatusReceiver;
+
+    private BackgroundServiceConnection mBackgroundServiceConnection;
 
     /**
      * Top buttons in the draggable header part.
@@ -455,9 +467,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 getContext().startActivity(artistIntent);
                 return true;
             case R.id.action_start_streaming: {
-                Intent playbackStreamIntent = new Intent(getContext(), BackgroundService.class);
-                playbackStreamIntent.setAction(BackgroundService.ACTION_START_MPD_STREAM_PLAYBACK);
-                getContext().startService(playbackStreamIntent);
+                if (mStreamingStatus == BackgroundService.STREAMING_STATUS.PLAYING || mStreamingStatus == BackgroundService.STREAMING_STATUS.BUFFERING) {
+                    try {
+                        mBackgroundServiceConnection.getService().stopStreamingPlayback();
+                    } catch (RemoteException e) {
+
+                    }
+                } else {
+                    try {
+                        mBackgroundServiceConnection.getService().startStreamingPlayback();
+                    } catch (RemoteException e) {
+
+                    }
+                }
                 return true;
             }
             default:
@@ -1051,8 +1073,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Check if streaming is configured for the current server
         boolean streamingEnabled = ConnectionManager.getStreamingEnabled();
-        if ( !streamingEnabled ) {
-            menu.getMenu().findItem(R.id.action_start_streaming).setVisible(false);
+        MenuItem streamingStartStopItem = menu.getMenu().findItem(R.id.action_start_streaming);
+        if (!streamingEnabled) {
+            streamingStartStopItem.setVisible(false);
+        } else {
+            if (mStreamingStatus == BackgroundService.STREAMING_STATUS.PLAYING || mStreamingStatus == BackgroundService.STREAMING_STATUS.BUFFERING) {
+                streamingStartStopItem.setTitle(getResources().getString(R.string.action_stop_streaming));
+            } else {
+                streamingStartStopItem.setTitle(getResources().getString(R.string.action_start_streaming));
+            }
         }
 
         // Open the menu itself
@@ -1107,6 +1136,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionStateListener);
         mPlaylistView.onPause();
 
+        if (null != mBackgroundServiceConnection) {
+            mBackgroundServiceConnection.closeConnection();
+            mBackgroundServiceConnection = null;
+        }
+
+        getContext().getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
+
         ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewAlbumImageListener(this);
         ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener(this);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
@@ -1129,6 +1165,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         if (mTrackAdditionalInfo != null) {
             mTrackAdditionalInfo.setSelected(true);
         }
+
+        if (mStreamingStatusReceiver == null) {
+            mStreamingStatusReceiver = new StreamingStatusReceiver();
+        }
+
+        if (null == mBackgroundServiceConnection) {
+            mBackgroundServiceConnection = new BackgroundServiceConnection(getContext().getApplicationContext(), new BackgroundServiceConnectionListener());
+        }
+        mBackgroundServiceConnection.openConnection();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BackgroundService.ACTION_STREAMING_STATUS_CHANGED);
+        getContext().getApplicationContext().registerReceiver(mStreamingStatusReceiver, filter);
 
         invalidate();
 
@@ -1547,5 +1596,30 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+    private class StreamingStatusReceiver extends BroadcastReceiver {
 
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BackgroundService.ACTION_STREAMING_STATUS_CHANGED)) {
+                mStreamingStatus = BackgroundService.STREAMING_STATUS.values()[intent.getIntExtra(BackgroundService.INTENT_EXTRA_STREAMING_STATUS, 0)];
+            }
+        }
+    }
+
+    private class BackgroundServiceConnectionListener implements BackgroundServiceConnection.OnConnectionStatusChangedListener {
+
+        @Override
+        public void onConnected() {
+            try {
+                mStreamingStatus = BackgroundService.STREAMING_STATUS.values()[mBackgroundServiceConnection.getService().getStreamingStatus()];
+            } catch (RemoteException e) {
+
+            }
+        }
+
+        @Override
+        public void onDisconnected() {
+
+        }
+    }
 }
