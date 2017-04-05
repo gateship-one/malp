@@ -109,6 +109,8 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         if (requestCursor.moveToFirst()) {
             // If the not_found flag is set then return null here, to indicate that the image is not here but was searched for before.
             if (requestCursor.getInt(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_NOT_FOUND)) == 1) {
+                requestCursor.close();
+                database.close();
                 return null;
             }
             byte[] imageData = requestCursor.getBlob(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_DATA));
@@ -148,6 +150,8 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         if (requestCursor.moveToFirst()) {
             // If the not_found flag is set then return null here, to indicate that the image is not here but was searched for before.
             if (requestCursor.getInt(requestCursor.getColumnIndex(ArtistArtTable.COLUMN_IMAGE_NOT_FOUND)) == 1) {
+                requestCursor.close();
+                database.close();
                 return null;
             }
             byte[] imageData = requestCursor.getBlob(requestCursor.getColumnIndex(ArtistArtTable.COLUMN_IMAGE_DATA));
@@ -183,6 +187,8 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         if (requestCursor.moveToFirst()) {
             // If the not_found flag is set then return null here, to indicate that the image is not here but was searched for before.
             if (requestCursor.getInt(requestCursor.getColumnIndex(ArtistArtTable.COLUMN_IMAGE_NOT_FOUND)) == 1) {
+                requestCursor.close();
+                database.close();
                 return null;
             }
             byte[] imageData = requestCursor.getBlob(requestCursor.getColumnIndex(ArtistArtTable.COLUMN_IMAGE_DATA));
@@ -249,6 +255,8 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         if (requestCursor.moveToFirst()) {
             // If the not_found flag is set then return null here, to indicate that the image is not here but was searched for before.
             if (requestCursor.getInt(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_NOT_FOUND)) == 1) {
+                requestCursor.close();
+                database.close();
                 return null;
             }
             byte[] imageData = requestCursor.getBlob(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_DATA));
@@ -284,6 +292,8 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         if (requestCursor.moveToFirst()) {
             // If the not_found flag is set then return null here, to indicate that the image is not here but was searched for before.
             if (requestCursor.getInt(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_NOT_FOUND)) == 1) {
+                requestCursor.close();
+                database.close();
                 return null;
             }
             byte[] imageData = requestCursor.getBlob(requestCursor.getColumnIndex(AlbumArtTable.COLUMN_IMAGE_DATA));
