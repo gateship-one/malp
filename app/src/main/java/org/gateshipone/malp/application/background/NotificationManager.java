@@ -39,6 +39,7 @@ import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
+import android.util.Log;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
@@ -97,6 +98,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     private CoverBitmapLoader mCoverLoader;
 
+    private boolean mDismissible;
 
     /**
      * Mediasession to set the lockscreen picture as well
@@ -116,6 +118,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         mLastStatus = new MPDCurrentStatus();
         mLastTrack = new MPDTrack("");
 
+        mDismissible = true;
         /**
          * Create loader to asynchronously load cover images. This class is the callback (s. receiveBitmap)
          */
@@ -127,24 +130,30 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     /**
      * Shows the notification
      */
-    public void showNotification() {
-        if (mMediaSession == null) {
-            mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
-            mMediaSession.setCallback(new MALPMediaSessionCallback());
-            mVolumeControlProvider = new MALPVolumeControlProvider();
-            mMediaSession.setPlaybackToRemote(mVolumeControlProvider);
-            mMediaSession.setActive(true);
-        }
-
+    public synchronized void showNotification() {
+        openMediaSession();
         mService.startForeground(NOTIFICATION_ID, mNotification);
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
         mSessionActive = true;
     }
 
+    private synchronized void openMediaSession() {
+        if (mMediaSession == null) {
+            mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
+            if (mDismissible) {
+                mMediaSession.setCallback(new MALPMediaSessionCallback());
+                mVolumeControlProvider = new MALPVolumeControlProvider();
+                mVolumeControlProvider.setCurrentVolume(mLastStatus.getVolume());
+                mMediaSession.setPlaybackToRemote(mVolumeControlProvider);
+            }
+            mMediaSession.setActive(true);
+        }
+    }
+
     /**
      * Hides the notification (if shown) and resets state variables.
      */
-    public void hideNotification() {
+    public synchronized void hideNotification() {
         if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession.release();
@@ -287,6 +296,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                     mNotificationBuilder.setLargeIcon(null);
                 }
             }
+            mNotificationBuilder.setOngoing(!mDismissible);
 
             // Build the notification
             mNotification = mNotificationBuilder.build();
@@ -304,19 +314,21 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * @param track         Current track.
      * @param playbackState State of the PlaybackService.
      */
-    private void updateMetadata(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
-        if (track != null) {
+    private synchronized void updateMetadata(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE playbackState) {
+        if (track != null && mMediaSession != null) {
             if (playbackState == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
                         .setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT + PlaybackStateCompat.ACTION_PAUSE +
                                 PlaybackStateCompat.ACTION_PLAY + PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS +
                                 PlaybackStateCompat.ACTION_STOP + PlaybackStateCompat.ACTION_SEEK_TO).build());
+
             } else {
                 mMediaSession.setPlaybackState(new PlaybackStateCompat.Builder().
                         setState(PlaybackStateCompat.STATE_PAUSED, 0, 1.0f).setActions(PlaybackStateCompat.ACTION_SKIP_TO_NEXT +
                         PlaybackStateCompat.ACTION_PAUSE + PlaybackStateCompat.ACTION_PLAY +
                         PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS + PlaybackStateCompat.ACTION_STOP +
                         PlaybackStateCompat.ACTION_SEEK_TO).build());
+
             }
             // Try to get old metadata to save image retrieval.
             MediaMetadataCompat oldData = mMediaSession.getController().getMetadata();
@@ -346,8 +358,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
             updateNotification(mLastTrack, status.getPlaybackState());
-            // Notify the mediasession about the new volume
-            mVolumeControlProvider.setCurrentVolume(status.getVolume());
+            if (mVolumeControlProvider != null) {
+                // Notify the mediasession about the new volume
+                mVolumeControlProvider.setCurrentVolume(status.getVolume());
+            }
         }
         // Save for later usage
         mLastStatus = status;
@@ -382,10 +396,13 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             /* Set lockscreen picture and stuff */
             if (mMediaSession != null) {
-                MediaMetadataCompat.Builder metaDataBuilder;
-                metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
-                metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
-                mMediaSession.setMetadata(metaDataBuilder.build());
+                MediaMetadataCompat metaData = mMediaSession.getController().getMetadata();
+                if (metaData != null) {
+                    MediaMetadataCompat.Builder metaDataBuilder;
+                    metaDataBuilder = new MediaMetadataCompat.Builder(mMediaSession.getController().getMetadata());
+                    metaDataBuilder.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bm);
+                    mMediaSession.setMetadata(metaDataBuilder.build());
+                }
             }
         }
     }
@@ -395,6 +412,18 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         if (mLastTrack.getTrackAlbum().equals(album.getName())) {
             mCoverLoader.getImage(mLastTrack, true);
         }
+    }
+
+    public synchronized void setDismissible(boolean dismissible) {
+        mDismissible = dismissible;
+
+        updateNotification(mLastTrack, mLastStatus.getPlaybackState());
+
+        if (mMediaSession != null) {
+            mMediaSession.setActive(false);
+            mMediaSession = null;
+        }
+        openMediaSession();
     }
 
     /**

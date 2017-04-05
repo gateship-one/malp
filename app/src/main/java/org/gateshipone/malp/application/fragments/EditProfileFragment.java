@@ -34,6 +34,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CompoundButton;
+import android.widget.NumberPicker;
 import android.widget.Switch;
 
 import org.gateshipone.malp.R;
@@ -51,11 +53,17 @@ public class EditProfileFragment extends Fragment {
     private String mPassword;
     private int mPort;
 
+    private String mStreamingURL;
+    private boolean mStreamingEnabled;
+
 
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
     private TextInputEditText mPasswordView;
     private TextInputEditText mPortView;
+
+    private Switch mStreamingEnabledView;
+    private TextInputEditText mStreamingURLView;
 
 
     private MPDServerProfile mOldProfile;
@@ -76,31 +84,14 @@ public class EditProfileFragment extends Fragment {
         mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
         mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
 
+        mStreamingURLView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_streaming_url);
+        mStreamingEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_streaming_enabled);
+
         // Set to maximum tcp port
-        InputFilter portFilter = new InputFilter() {
-                public CharSequence filter(CharSequence source, int start, int end,
-                                           Spanned dest, int dstart, int dend) {
-                    if (end > start) {
-                        String destTxt = dest.toString();
-                        String resultingTxt = destTxt.substring(0, dstart) +
-                            source.subSequence(start, end) +
-                            destTxt.substring(dend);
-                        try {
-                            int port = Integer.parseInt(resultingTxt);
-                            if(port > 65535){
-                                return "";
-                            }
-                            if(port < 1){
-                                return "";
-                            }
-                        } catch (NumberFormatException e) {
-                            return "";
-                        }
-                    }
-                    return null;
-                }
-            };
-        mPortView.setFilters(new InputFilter[] {portFilter});
+        InputFilter portFilter = new PortNumberFilter();
+
+        mPortView.setFilters(new InputFilter[]{portFilter});
+
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
@@ -112,12 +103,18 @@ public class EditProfileFragment extends Fragment {
                 mPassword = mOldProfile.getPassword();
                 mPort = mOldProfile.getPort();
 
+                mStreamingURL = mOldProfile.getStreamingURL();
+                mStreamingEnabled = mOldProfile.getStreamingEnabled();
+
                 mProfilenameView.setText(mProfilename);
             } else {
                 mHostname = "";
                 mProfilename = "";
                 mPassword = "";
-                mPort = 66012;
+                mPort = 6600;
+
+                mStreamingEnabled = false;
+                mStreamingURL = "";
 
                 mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
             }
@@ -126,6 +123,30 @@ public class EditProfileFragment extends Fragment {
         mHostnameView.setText(mHostname);
         mPasswordView.setText(mPassword);
         mPortView.setText(String.valueOf(mPort));
+
+        mStreamingEnabledView.setChecked(mStreamingEnabled);
+        mStreamingEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    if ( mStreamingURLView.getText().toString().isEmpty()) {
+                        // Check if a text was already set otherwise show an example
+                        mStreamingURL = "http://" + mHostnameView.getText().toString() + ":8080";
+                        mStreamingURLView.setText(mStreamingURL);
+                    }
+                    mStreamingURLView.setVisibility(View.VISIBLE);
+                } else {
+                    mStreamingURLView.setVisibility(View.GONE);
+                }
+
+            }
+        });
+
+        if (!mStreamingEnabled) {
+            mStreamingURLView.setVisibility(View.GONE);
+        }
+        mStreamingURLView.setText(mStreamingURL);
+
 
         mProfilenameView.setSelectAllOnFocus(true);
 
@@ -178,6 +199,14 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPort = Integer.parseInt(mPortView.getText().toString());
         }
+        if (!mStreamingURLView.getText().toString().equals(mStreamingURL)) {
+            profileChanged = true;
+            mStreamingURL = mStreamingURLView.getText().toString();
+        }
+        if (mStreamingEnabledView.isChecked() != mStreamingEnabled) {
+            profileChanged = true;
+            mStreamingEnabled = mStreamingEnabledView.isChecked();
+        }
 
         if (profileChanged) {
             if (null != mOldProfile) {
@@ -189,6 +218,8 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setHostname(mHostname);
             mOldProfile.setPassword(mPassword);
             mOldProfile.setPort(mPort);
+            mOldProfile.setStreamingURL(mStreamingURL);
+            mOldProfile.setStreamingEnabled(mStreamingEnabled);
             mCallback.addProfile(mOldProfile);
         }
 
@@ -211,4 +242,29 @@ public class EditProfileFragment extends Fragment {
         }
     }
 
+    private class PortNumberFilter implements InputFilter {
+        public CharSequence filter(CharSequence source, int start, int end,
+                                   Spanned dest, int dstart, int dend) {
+            if (end > start) {
+                String destTxt = dest.toString();
+                String resultingTxt = destTxt.substring(0, dstart) +
+                        source.subSequence(start, end) +
+                        destTxt.substring(dend);
+                try {
+                    int port = Integer.parseInt(resultingTxt);
+                    if (port > 65535) {
+                        return "";
+                    }
+                    if (port < 1) {
+                        return "";
+                    }
+                } catch (NumberFormatException e) {
+                    return "";
+                }
+            }
+            return null;
+        }
+    }
+
+    ;
 }

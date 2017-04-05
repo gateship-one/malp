@@ -71,11 +71,18 @@ public class MPDProfileManager {
                 int serverPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PORT));
                 long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
 
+                /* Streaming parameters */
+                String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
+                boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
+
                 /* Create temporary object to append to list. */
                 MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
                 profile.setHostname(serverHostname);
                 profile.setPassword(serverPassword);
                 profile.setPort(serverPort);
+
+                profile.setStreamingURL(streamingURL);
+                profile.setStreamingEnabled(streamingEnabled);
 
                 /* Finish and add to list */
                 profileList.add(profile);
@@ -116,6 +123,10 @@ public class MPDProfileManager {
         values.put(MPDServerProfileTable.COLUMN_SERVER_PASSWORD, profile.getPassword());
         values.put(MPDServerProfileTable.COLUMN_SERVER_PORT, profile.getPort());
         values.put(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED, profile.getCreationDate());
+
+        /* Streaming parameters */
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT, profile.getStreamingURL());
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED, profile.getStreamingEnabled());
 
         /* Insert the table in the database */
         db.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
@@ -162,12 +173,18 @@ public class MPDProfileManager {
             int serverPort = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_SERVER_PORT));
             long creationDate = cursor.getLong(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED));
 
+            /* Streaming parameters */
+            String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
+            boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
 
             /* Create temporary object to append to list. */
             MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
             profile.setHostname(serverHostname);
             profile.setPassword(serverPassword);
             profile.setPort(serverPort);
+
+            profile.setStreamingURL(streamingURL);
+            profile.setStreamingEnabled(streamingEnabled);
 
             cursor.close();
             db.close();
