@@ -27,6 +27,11 @@ import android.os.RemoteException;
 
 import java.lang.ref.WeakReference;
 
+/**
+ * Interface to handle requests over the {@link android.content.ServiceConnection}.
+ * Start/stop of stream playback is handled over an extra handler to ensure handling
+ * in the right thread. Otherwise it will fail.
+ */
 public class BackgroundServiceInterface extends IBackgroundService.Stub {
     WeakReference<BackgroundService> mService;
 

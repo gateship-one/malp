@@ -157,12 +157,19 @@ public class BackgroundService extends Service {
 
     private boolean mConnecting;
 
+    /**
+     * Playback manager for stream playback. Only instantiated if necessary.
+     */
     private StreamPlaybackManager mPlaybackManager;
 
     private boolean mNotificationHidden = true;
 
     private boolean mWasStreaming = false;
 
+    /**
+     * Handler that handles requests from the binded connection. This ensures that playback/control
+     * is handled in the right thread.
+     */
     private BackgroundServiceHandler mHandler;
 
     /**

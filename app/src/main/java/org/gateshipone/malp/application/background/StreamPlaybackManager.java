@@ -40,6 +40,7 @@ public class StreamPlaybackManager {
 
     private PreparedListener mPreparedListener;
     private CompletionListener mCompletionListener;
+    private ErrorListener mErrorListener;
 
     private String mSource;
 
@@ -50,6 +51,7 @@ public class StreamPlaybackManager {
 
         mPreparedListener = new PreparedListener();
         mCompletionListener = new CompletionListener();
+        mErrorListener = new ErrorListener();
     }
 
     public void playURL(String url) {
@@ -62,6 +64,7 @@ public class StreamPlaybackManager {
         mPlayer = new MediaPlayer();
         mPlayer.setOnPreparedListener(mPreparedListener);
         mPlayer.setOnCompletionListener(mCompletionListener);
+        mPlayer.setOnErrorListener(mErrorListener);
         mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
         startPlayback();

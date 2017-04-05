@@ -30,6 +30,10 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 
+/**
+ * {@link ServiceConnection} class to allow connection between the UI and the BackgroundService.
+ * This is necessary for control of the background service and query of the status.
+ */
 public class BackgroundServiceConnection implements ServiceConnection {
 
     private IBackgroundService mBackgroundService;

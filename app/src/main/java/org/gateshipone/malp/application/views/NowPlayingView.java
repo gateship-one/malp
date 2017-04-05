@@ -1596,6 +1596,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+    /**
+     * Receives stream playback status updates. When stream playback is started the status
+     * is necessary to show the right menu item.
+     */
     private class StreamingStatusReceiver extends BroadcastReceiver {
 
         @Override
@@ -1606,6 +1610,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+    /**
+     * Private class to handle when a {@link android.content.ServiceConnection} to the {@link BackgroundService}
+     * is established. When the connection is established, the stream playback status is retrieved.
+     */
     private class BackgroundServiceConnectionListener implements BackgroundServiceConnection.OnConnectionStatusChangedListener {
 
         @Override
