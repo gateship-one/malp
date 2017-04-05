@@ -1,3 +1,7 @@
+### Version: 1.2.0 Tag: release-14 (2017-xx-xx) ###
+ * Experimental support to play remote streams in M.A.L.P. (http output plugin of MPD for example)
+ * Small stability fixes
+
 ### Version: 1.1.4 Tag: release-13 (2017-03-02) ###
  * French translation (Thanks to Guy de Mölkky)
  * UI flickering fixes in ListViews 
