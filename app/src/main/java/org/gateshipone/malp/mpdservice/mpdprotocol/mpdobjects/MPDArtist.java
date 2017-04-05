@@ -107,12 +107,14 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
             return 0;
         }
 
-        if ( another.pArtistName.equals(pArtistName ) ) {
+        if ( another.pArtistName.toLowerCase().equals(pArtistName.toLowerCase()) ) {
             // Use MBID as sort criteria, without MBID before the ones with
             if ( another.pMBIDs.size() > pMBIDs.size() ) {
                 return -1;
-            } else {
+            } else if (another.pMBIDs.size() < pMBIDs.size()){
                 return 1;
+            } else {
+                return 0;
             }
         }
 
