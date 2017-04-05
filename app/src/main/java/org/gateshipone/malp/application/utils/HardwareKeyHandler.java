@@ -57,11 +57,14 @@ public class HardwareKeyHandler {
      * @param event
      * @return
      */
-    public boolean handleKeyEvent(KeyEvent event) {
+    public boolean handleKeyEvent(KeyEvent event, boolean volumeControl) {
         int action = event.getAction();
         int keyCode = event.getKeyCode();
         switch (keyCode) {
             case KeyEvent.KEYCODE_VOLUME_UP:
+                if (!volumeControl) {
+                    return false;
+                }
                 if (action == KeyEvent.ACTION_DOWN) {
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
@@ -78,6 +81,9 @@ public class HardwareKeyHandler {
                 }
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
+                if (!volumeControl) {
+                    return false;
+                }
                 if (action == KeyEvent.ACTION_DOWN) {
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {

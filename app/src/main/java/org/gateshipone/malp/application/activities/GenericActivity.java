@@ -22,14 +22,22 @@
 
 package org.gateshipone.malp.application.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.background.BackgroundService;
+import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
+import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
@@ -42,7 +50,13 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
     private boolean mHardwareControls;
 
+    private BackgroundServiceConnection mBackgroundServiceConnection;
+
+    private BackgroundService.STREAMING_STATUS mStreamingStatus;
+
     private MPDConnectionStateCallbackHandler mConnectionCallback;
+
+    private StreamingStatusReceiver mStreamingStatusReceiver;
 
 
     @Override
@@ -104,6 +118,19 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         ConnectionManager.registerMPDUse(getApplicationContext());
 
+        if (null == mBackgroundServiceConnection) {
+            mBackgroundServiceConnection = new BackgroundServiceConnection(getApplicationContext(), new BackgroundServiceConnectionStateListener());
+        }
+        mBackgroundServiceConnection.openConnection();
+
+        if (mStreamingStatusReceiver == null) {
+            mStreamingStatusReceiver = new StreamingStatusReceiver();
+        }
+
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(BackgroundService.ACTION_STREAMING_STATUS_CHANGED);
+        getApplicationContext().registerReceiver(mStreamingStatusReceiver, filter);
 
         // Check if hardware key control is enabled by the user
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
@@ -120,10 +147,13 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         // Disconnect from MPD server
         ConnectionManager.unregisterMPDUse(getApplicationContext());
 
+        mBackgroundServiceConnection.closeConnection();
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
+
+        getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
     }
 
 
@@ -142,8 +172,9 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
      */
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        boolean streamingActive = !(mStreamingStatus == BackgroundService.STREAMING_STATUS.STOPPED);
         if (mHardwareControls) {
-            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event)) {
+            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event,!streamingActive)) {
                 return super.dispatchKeyEvent(event);
             } else return true;
         } else {
@@ -186,6 +217,42 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
                     }
                 });
             }
+        }
+    }
+
+    /**
+     * Receives stream playback status updates. When stream playback is started the status
+     * is necessary to show the right menu item.
+     */
+    private class StreamingStatusReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(BackgroundService.ACTION_STREAMING_STATUS_CHANGED)) {
+                mStreamingStatus = BackgroundService.STREAMING_STATUS.values()[intent.getIntExtra(BackgroundService.INTENT_EXTRA_STREAMING_STATUS, 0)];
+            }
+        }
+    }
+
+
+    /**
+     * Private class to handle when a {@link android.content.ServiceConnection} to the {@link BackgroundService}
+     * is established. When the connection is established, the stream playback status is retrieved.
+     */
+    private class BackgroundServiceConnectionStateListener implements BackgroundServiceConnection.OnConnectionStatusChangedListener {
+
+        @Override
+        public void onConnected() {
+            try {
+                mStreamingStatus = BackgroundService.STREAMING_STATUS.values()[mBackgroundServiceConnection.getService().getStreamingStatus()];
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onDisconnected() {
+
         }
     }
 }
