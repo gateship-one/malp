@@ -214,6 +214,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Removes the image for the album and tries to reload it from the internet
+     *
      * @param album {@link MPDAlbum} to reload the image for
      */
     public void resetAlbumImage(final MPDAlbum album) {
@@ -231,6 +232,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
     /**
      * Removes the image for the artist and tries to reload it from the internet
+     *
      * @param artist {@link MPDArtist} to reload the image for
      */
     public void resetArtistImage(final MPDArtist artist) {
@@ -266,7 +268,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
          */
         if (artist.getMBIDCount() != 0) {
             image = mDBManager.getArtistImage(artist);
-        } else if (!artist.getArtistName().isEmpty()){
+        } else if (!artist.getArtistName().isEmpty()) {
             image = mDBManager.getArtistImage(artist.getArtistName());
         }
 
@@ -453,8 +455,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         ConnectivityManager cm =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-
-        boolean isWifi = cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI || cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET;
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return;
+        }
+        boolean isWifi = networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
 
         if (mWifiOnly && !isWifi) {
             return;
@@ -486,7 +491,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         ConnectivityManager cm =
                 (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        boolean isWifi = cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI || cm.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_ETHERNET;
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+        if (networkInfo == null) {
+            return;
+        }
+        boolean isWifi = networkInfo.getType() == ConnectivityManager.TYPE_WIFI || networkInfo.getType() == ConnectivityManager.TYPE_ETHERNET;
 
         if (mWifiOnly && !isWifi) {
             return;
