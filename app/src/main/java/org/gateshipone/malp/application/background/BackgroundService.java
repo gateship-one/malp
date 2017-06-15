@@ -31,6 +31,7 @@ import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.IBinder;
+import android.os.Process;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -306,6 +307,8 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         if (null != action) {
             handleAction(action);
         }
+
+        Process.setThreadPriority(Process.THREAD_PRIORITY_MORE_FAVORABLE);
         return START_STICKY;
     }
 
