@@ -233,4 +233,5 @@
     <string name="fragment_profile_streaming_enabled">Aktiviere Streaming vom Server</string>
     <string name="action_start_streaming">Starte Streaming</string>
     <string name="fragment_profile_streaming_url">Streaming-URL:</string>
+    <string name="contributor_translator_spanish">Spanische Übersetzung</string>
 </resources>
