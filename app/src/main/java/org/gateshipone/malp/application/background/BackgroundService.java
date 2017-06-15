@@ -47,7 +47,7 @@ import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 import java.lang.ref.WeakReference;
 
-public class BackgroundService extends Service {
+public class BackgroundService extends Service implements AudioManager.OnAudioFocusChangeListener {
     private static final String TAG = BackgroundService.class.getSimpleName();
     /**
      * Control actions for the MPD service
@@ -129,6 +129,53 @@ public class BackgroundService extends Service {
      * Contains the status as an STREAMING_STATUS enum value.
      */
     public static final String INTENT_EXTRA_STREAMING_STATUS = "org.gateshipone.malp.streaming.extra.status";
+
+    private boolean mIsDucked = false;
+
+    private boolean mLostAudioFocus = false;
+
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        if(null == mPlaybackManager) {
+            // No playback is running. Ignore!
+            return;
+        }
+
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // If we are ducked at the moment, return volume to full output
+                if (mIsDucked) {
+                    mPlaybackManager.setVolume(1.0f);
+                    mIsDucked = false;
+                } else if (mLostAudioFocus) {
+                    // If we temporarily lost the audio focus we can resume playback here
+                    startStreamingPlayback();
+                    mLostAudioFocus = false;
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // Stop playback here, because we lost audio focus (not temporarily)
+                if (mPlaybackManager.isPlaying()) {
+                    stopStreamingPlayback();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // Pause audio for the moment of focus loss, will be resumed.
+                if (mPlaybackManager.isPlaying()) {
+                    stopStreamingPlayback();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // We only need to duck our volume, so set it to 10%? and save that we ducked for resuming
+                if (mPlaybackManager.isPlaying()) {
+                    mPlaybackManager.setVolume(0.1f);
+                    mIsDucked = true;
+                }
+                break;
+            default:
+                break;
+        }
+    }
 
     public enum STREAMING_STATUS {
         STOPPED,
@@ -480,6 +527,15 @@ public class BackgroundService extends Service {
         } else if (mPlaybackManager.isPlaying()) {
             return;
         }
+
+        // Request audio focus before doing anything
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        int result = audioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        if (result != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            // Abort command if audio focus was not granted
+            return;
+        }
+
         /*
          * Make sure service is "started" so android doesn't handle it as a
          * "bound service"
@@ -511,13 +567,6 @@ public class BackgroundService extends Service {
             mNotificationManager.hideNotification();
             onMPDDisconnect();
         }
-    }
-
-    public boolean isPlayingStream() {
-        if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
-            return true;
-        }
-        return false;
     }
 
     public BackgroundServiceHandler getHandler() {

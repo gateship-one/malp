@@ -96,6 +96,12 @@ public class StreamPlaybackManager {
         return false;
     }
 
+    public void setVolume(float volume) {
+        if (mPlayer != null) {
+            mPlayer.setVolume(volume,volume);
+        }
+    }
+
     private void broadcastStatusUpdate(BackgroundService.STREAMING_STATUS status) {
         Intent intent = new Intent();
         intent.setAction(BackgroundService.ACTION_STREAMING_STATUS_CHANGED);
