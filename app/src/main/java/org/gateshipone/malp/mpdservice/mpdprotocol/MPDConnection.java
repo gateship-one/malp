@@ -1394,7 +1394,12 @@ public class MPDConnection {
         }
         /* Response line from MPD */
         String response = null;
-        response = readLine();
+        try {
+            response = readLine();
+        } catch (IOException e) {
+            handleSocketError();
+            return status;
+        }
 
         while (!response.startsWith("OK") && !response.startsWith("ACK") && !pSocket.isClosed()) {
             if (response.startsWith(MPDResponses.MPD_RESPONSE_VOLUME)) {
@@ -1492,7 +1497,12 @@ public class MPDConnection {
                 }
             }
 
-            response = readLine();
+            try {
+                response = readLine();
+            } catch (IOException e) {
+                handleSocketError();
+                return status;
+            }
 
         }
 
@@ -1523,7 +1533,12 @@ public class MPDConnection {
         /* Response line from MPD */
         String response = null;
 
-        response = readLine();
+        try {
+            response = readLine();
+        } catch (IOException e) {
+            handleSocketError();
+            return stats;
+        }
 
         while (isConnected() && response != null && !response.startsWith("OK") && !response.startsWith("ACK")) {
             if (response.startsWith(MPDResponses.MPD_STATS_UPTIME)) {
@@ -1542,7 +1557,12 @@ public class MPDConnection {
                 stats.setLastDBUpdate(Long.valueOf(response.substring(MPDResponses.MPD_STATS_DB_LAST_UPDATE.length())));
             }
 
-            response = readLine();
+            try {
+                response = readLine();
+            } catch (IOException e) {
+                handleSocketError();
+                return stats;
+            }
 
         }
 
@@ -2334,7 +2354,7 @@ public class MPDConnection {
      *
      * @return
      */
-    private String waitForIdleResponse() {
+    private String waitForIdleResponse() throws IOException {
         if (null != pReader) {
 
             printDebug("Waiting for input from server");
@@ -2364,7 +2384,43 @@ public class MPDConnection {
             boolean externalDeIdle = false;
 
             // This will block this thread until the server has some data available to read again.
-            String response = waitForIdleResponse();
+            String response = null;
+            try {
+                response = waitForIdleResponse();
+            } catch (IOException e) {
+                printDebug("Read error exception. Disconnecting and cleaning up");
+
+                try {
+                    /* Clear reader/writer up */
+                    if (null != pReader) {
+                        pReader = null;
+                    }
+                    if (null != pWriter) {
+                        pWriter = null;
+                    }
+
+                    /* Clear TCP-Socket up */
+                    if (null != pSocket && pSocket.isConnected()) {
+                        pSocket.setSoTimeout(500);
+                        pSocket.close();
+                    }
+                    pSocket = null;
+                } catch (IOException e2) {
+                    printDebug("Error during read error handling");
+                }
+
+                /* Clear up connection state variables */
+                pMPDConnectionIdle = false;
+                pMPDConnectionReady = false;
+
+
+                // Notify listener
+                notifyDisconnect();
+
+                // Release the idle mode
+                mIdleWaitLock.release();
+                return;
+            }
 
             printDebug("Idle over with response: " + response);
 
@@ -2483,15 +2539,11 @@ public class MPDConnection {
      *
      * @return The read string. null if no data is available.
      */
-    private String readLine() {
+    private String readLine() throws IOException {
         if (pReader != null) {
-            try {
-                String line = pReader.readLine();
-                //printDebug("Read line: " + line);
-                return line;
-            } catch (IOException e) {
-                handleSocketError();
-            }
+            String line = pReader.readLine();
+            //printDebug("Read line: " + line);
+            return line;
         }
         return null;
     }
