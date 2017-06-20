@@ -89,6 +89,11 @@ public class MPDConnection {
     private static final int SOCKET_TIMEOUT = 5 * 1000;
 
     /**
+     * Timeout to wait until deidle should be finished (time in ms)
+     */
+    private static final int DEIDLE_TIMEOUT = 5 * 1000;
+
+    /**
      * Time to wait for response from server. If server is not answering this prevents a livelock
      * after 5 seconds. (time in ns)
      */
@@ -159,14 +164,32 @@ public class MPDConnection {
      * Semaphore lock used by the deidling process. Necessary to guarantee the correct order of
      * deidling write / read operations.
      */
-    Semaphore mIdleWaitLock;
+    private Semaphore mIdleWaitLock;
 
     /**
      * Saves if a deidle was requested by this connection or is triggered by another client/connection.
      */
-    boolean mRequestedDeidle;
+    private boolean mRequestedDeidle;
 
+    /**
+     * Singleton instance
+     */
     private static MPDConnection mInstance;
+
+    /**
+     * Set if deidling was aborted. Used by IdleWaitThread
+     */
+    private boolean mDeIdlingTimedOut;
+
+    /**
+     * Semaphore to ensure correct deidle timeout execution order (TimeoutTimerTask -> IdleWaitThread)
+     */
+    private Semaphore mDeidleTimeoutLock;
+
+    /**
+     * Time to cancel deidling after a short period to prevent deadlocking
+     */
+    private Timer mDeidleTimeoutTimer;
 
     public static synchronized MPDConnection getInstance() {
         if (null == mInstance) {
@@ -182,6 +205,7 @@ public class MPDConnection {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
+        mDeidleTimeoutLock = new Semaphore(1);
         mID = id;
         mServerCapabilities = new MPDCapabilities("", null, null);
         pIdleListeners = new ArrayList<>();
@@ -194,7 +218,7 @@ public class MPDConnection {
      */
     private synchronized void handleSocketError() {
         printDebug("Read error exception. Disconnecting and cleaning up");
-
+        new Exception().printStackTrace();
         try {
             /* Clear reader/writer up */
             if (null != pReader) {
@@ -602,6 +626,14 @@ public class MPDConnection {
 
         printDebug("Sent deidle request");
 
+        // Set timeout task for deidling.
+        if(mDeidleTimeoutTimer != null) {
+            mDeidleTimeoutTimer.cancel();
+            mDeidleTimeoutTimer.purge();
+        }
+        mDeidleTimeoutTimer = new Timer();
+        mDeidleTimeoutTimer.schedule(new DeIdleTimeoutTask(), DEIDLE_TIMEOUT);
+
         /* Wait for idle thread to release the lock, which means we are finished waiting */
         try {
             mIdleWaitLock.acquire();
@@ -633,6 +665,7 @@ public class MPDConnection {
         }
 
         mRequestedDeidle = false;
+        mDeIdlingTimedOut = false;
 
         // This will send the idle command to the server. From there on we need to deidle before
         // sending new requests.
@@ -2387,8 +2420,49 @@ public class MPDConnection {
             String response = null;
             try {
                 response = waitForIdleResponse();
+
+                // Wait for possible deidle lock
+                try {
+                    mDeidleTimeoutLock.acquire();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // Clear possible timeout tasks
+                if(mDeidleTimeoutTimer != null) {
+                    mDeidleTimeoutTimer.cancel();
+                    mDeidleTimeoutTimer.purge();
+                    mDeidleTimeoutTimer = null;
+                }
+
+                // If deidling already timed out we don't need to take care here. Its already done by
+                // the timeout thread.
+                if(mDeIdlingTimedOut) {
+                    // Release held locks
+                    mDeidleTimeoutLock.release();
+                    mIdleWaitLock.release();
+                    return;
+                }
+                mDeidleTimeoutLock.release();
             } catch (IOException e) {
                 printDebug("Read error exception. Disconnecting and cleaning up");
+
+                // Clear possible timeout tasks
+                if(mDeidleTimeoutTimer != null) {
+                    mDeidleTimeoutTimer.cancel();
+                    mDeidleTimeoutTimer.purge();
+                    mDeidleTimeoutTimer = null;
+                }
+
+                // If deidling already timed out we don't need to take care here. Its already done by
+                // the timeout thread.
+                if(mDeIdlingTimedOut) {
+                    printDebug("Deidle timed out, cancel normal deidling");
+                    mDeidleTimeoutLock.release();
+                    mIdleWaitLock.release();
+                    return;
+                }
+                mDeidleTimeoutLock.release();
 
                 try {
                     /* Clear reader/writer up */
@@ -2503,7 +2577,6 @@ public class MPDConnection {
         mIdleWait = new Timer();
         mIdleWait.schedule(new IdleWaitTimeoutTask(), IDLE_WAIT_TIME);
         printDebug("IdleWait scheduled");
-        printStackTrace();
     }
 
     /**
@@ -2590,5 +2663,67 @@ public class MPDConnection {
         // Reconnect to server
         disconnectFromServer();
         connectToServer();
+    }
+
+    /**
+     * Private class that aborts the idle even if the server does not respond.
+     * This is necessary as the IdleWaitThread will not timeout on its on when it
+     * is blocked in a read operation.
+     */
+    private class DeIdleTimeoutTask extends TimerTask {
+
+        @Override
+        public void run() {
+            printDebug("Deidlind timeout!");
+            // Disconnect here because deidling took to long
+
+            // Acquire lock to prevent the IdleWaitThread from
+            // doing its work first.
+            try {
+                mDeidleTimeoutLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            /* Cleanup reader/writer */
+            try {
+            /* Clear reader/writer up */
+                if (null != pReader) {
+                    pReader = null;
+                }
+                if (null != pWriter) {
+                    pWriter = null;
+                }
+
+            /* Clear TCP-Socket up */
+                if (null != pSocket && pSocket.isConnected()) {
+                    pSocket.setSoTimeout(500);
+                    pSocket.close();
+                    pSocket = null;
+                }
+            } catch (IOException e) {
+                printDebug("Error during disconnecting:" + e.toString());
+            }
+
+            /* Clear up connection state variables */
+            pMPDConnectionIdle = false;
+            pMPDConnectionReady = false;
+
+            // Notify listener
+            notifyDisconnect();
+
+            // Set timeout task for deidling.
+            if(mDeidleTimeoutTimer != null) {
+                mDeidleTimeoutTimer.cancel();
+                mDeidleTimeoutTimer.purge();
+                mDeidleTimeoutTimer = null;
+            }
+
+            // Now let the the IdleWaitThread continue
+            mDeidleTimeoutLock.release();
+
+            // Set to indicate an aborted deidling.
+            mDeIdlingTimedOut = true;
+        }
     }
 }
