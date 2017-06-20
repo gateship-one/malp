@@ -1,4 +1,4 @@
-### Version: 1.2.0 Tag: release-14 (2017-xx-xx) ###
+### Version: 1.1.5 Tag: release-14 (2017-06-15) ###
  * Experimental support to play remote streams in M.A.L.P. (http output plugin of MPD for example)
  * Small stability fixes
 
