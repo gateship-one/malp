@@ -37,6 +37,7 @@
     <string name="action_connect_profile">Connect profile</string>
     <string name="action_remove_profile">Remove profile</string>
     <string name="action_add_profile">Add profile</string>
+    <string name="action_save_profile">Save profile</string>
 
     <string name="action_add">Add</string>
     <string name="action_add_album">Add album</string>

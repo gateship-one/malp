@@ -24,13 +24,18 @@ package org.gateshipone.malp.application.fragments;
 
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Spanned;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -41,6 +46,7 @@ import android.widget.Switch;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.ProfileManageCallbacks;
+import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 public class EditProfileFragment extends Fragment {
@@ -72,6 +78,7 @@ public class EditProfileFragment extends Fragment {
 
     private FABFragmentCallback mFABCallback = null;
 
+    private boolean mOptionsMenuHandled = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -150,6 +157,7 @@ public class EditProfileFragment extends Fragment {
 
         mProfilenameView.setSelectAllOnFocus(true);
 
+        setHasOptionsMenu(true);
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -182,6 +190,19 @@ public class EditProfileFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        if (!mOptionsMenuHandled) {
+            checkChanged();
+        }
+
+        // Hide keyboard
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        View view = getView();
+        if (null != view) {
+            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
+        }
+    }
+
+    private void checkChanged() {
         boolean profileChanged = false;
         if (!mProfilenameView.getText().toString().equals(mProfilename)) {
             profileChanged = true;
@@ -222,15 +243,7 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
             mCallback.addProfile(mOldProfile);
         }
-
-        // Hide keyboard
-        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        View view = getView();
-        if (null != view) {
-            imm.hideSoftInputFromWindow(getView().getWindowToken(), 0);
-        }
     }
-
 
     @Override
     public void onResume() {
@@ -266,5 +279,55 @@ public class EditProfileFragment extends Fragment {
         }
     }
 
-    ;
+    /**
+     * Initialize the options menu.
+     * Be sure to call {@link #setHasOptionsMenu} before.
+     *
+     * @param menu         The container for the custom options menu.
+     * @param menuInflater The inflater to instantiate the layout.
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        menuInflater.inflate(R.menu.fragment_menu_edit_profile, menu);
+
+        // get tint color
+        int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
+
+        Drawable drawable = menu.findItem(R.id.action_save).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_save).setIcon(drawable);
+
+        drawable = menu.findItem(R.id.action_delete).getIcon();
+        drawable = DrawableCompat.wrap(drawable);
+        DrawableCompat.setTint(drawable, tintColor);
+        menu.findItem(R.id.action_delete).setIcon(drawable);
+
+        super.onCreateOptionsMenu(menu, menuInflater);
+    }
+
+    /**
+     * Hook called when an menu item in the options menu is selected.
+     *
+     * @param item The menu item that was selected.
+     * @return True if the hook was consumed here.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_save:
+                checkChanged();
+                mOptionsMenuHandled = true;
+                getActivity().onBackPressed();
+                return true;
+            case R.id.action_delete:
+                mCallback.removeProfile(mOldProfile);
+                mOptionsMenuHandled = true;
+                getActivity().onBackPressed();
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 }
