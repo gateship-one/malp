@@ -35,6 +35,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDGenericHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
@@ -120,7 +121,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         int port = getInstance().mPort;
         mConnectionManager.mServerProfile = profile;
 
-        MPDConnection.getInstance().setServerParameters(hostname, password, port);
+        MPDCommandHandler.setServerParameters(hostname, password, port);
     }
 
     public static void reconnectLastServer(Context context) {
