@@ -118,6 +118,8 @@ public class MainActivity extends GenericActivity
     private MPDProfileManager mProfileManager;
 
 
+    private boolean mHeaderImageActive;
+
     private FloatingActionButton mFAB;
 
 
@@ -573,15 +575,17 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void onDragPositionChanged(float pos) {
-        // Get the primary color of the active theme from the helper.
-        int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimary);
+        if(mHeaderImageActive) {
+            // Get the primary color of the active theme from the helper.
+            int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark);
 
-        // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
-        // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
-        int alphaOffset = (((255 - (int) (255.0 * pos)) << 24) | 0xFFFFFF);
-        // and with this mask to set the new alpha value.
-        newColor &= (alphaOffset);
-        getWindow().setStatusBarColor(newColor);
+            // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
+            // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
+            int alphaOffset = (((255 - (int) (255.0 * pos)) << 24) | 0xFFFFFF);
+            // and with this mask to set the new alpha value.
+            newColor &= (alphaOffset);
+            getWindow().setStatusBarColor(newColor);
+        }
     }
 
     @Override
@@ -712,10 +716,25 @@ public class MainActivity extends GenericActivity
                 collapsingImage.setVisibility(View.VISIBLE);
                 collapsingImageGradientTop.setVisibility(View.VISIBLE);
                 collapsingImageGradientBottom.setVisibility(View.VISIBLE);
+                mHeaderImageActive = true;
+
+                // Get the primary color of the active theme from the helper.
+                int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark);
+
+                // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
+                // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
+                int alphaOffset = (((255 - (int) (255.0 * (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP  ? 0.0 : 1.0 ))) << 24) | 0xFFFFFF);
+                // and with this mask to set the new alpha value.
+                newColor &= (alphaOffset);
+                getWindow().setStatusBarColor(newColor);
             } else {
                 collapsingImage.setVisibility(View.GONE);
                 collapsingImageGradientTop.setVisibility(View.GONE);
                 collapsingImageGradientBottom.setVisibility(View.GONE);
+                mHeaderImageActive = false;
+
+                // Get the primary color of the active theme from the helper.
+                getWindow().setStatusBarColor(ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark));
             }
         }
         // set scrolling behaviour
@@ -765,13 +784,6 @@ public class MainActivity extends GenericActivity
         return resHeight;
     }
 
-
-    public void setToolbarImage(Drawable drawable) {
-        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
-        if (collapsingImage != null) {
-            collapsingImage.setImageDrawable(drawable);
-        }
-    }
 
     @Override
     public void openPath(String path) {
