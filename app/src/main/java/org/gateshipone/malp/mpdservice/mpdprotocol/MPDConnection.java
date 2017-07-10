@@ -53,6 +53,7 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This is the main MPDConnection class. It will connect to an MPD server via an java TCP socket.
@@ -191,6 +192,8 @@ public class MPDConnection {
      */
     private Timer mDeidleTimeoutTimer;
 
+    private ReentrantLock mDeIdleTimerLock;
+
     public static synchronized MPDConnection getInstance() {
         if (null == mInstance) {
             mInstance = new MPDConnection("global");
@@ -210,6 +213,8 @@ public class MPDConnection {
         mServerCapabilities = new MPDCapabilities("", null, null);
         pIdleListeners = new ArrayList<>();
         pStateListeners = new ArrayList<>();
+
+        mDeIdleTimerLock = new ReentrantLock();
     }
 
     /**
@@ -626,6 +631,7 @@ public class MPDConnection {
 
         printDebug("Sent deidle request");
 
+        mDeIdleTimerLock.lock();
         // Set timeout task for deidling.
         if(mDeidleTimeoutTimer != null) {
             mDeidleTimeoutTimer.cancel();
@@ -633,6 +639,7 @@ public class MPDConnection {
         }
         mDeidleTimeoutTimer = new Timer();
         mDeidleTimeoutTimer.schedule(new DeIdleTimeoutTask(), DEIDLE_TIMEOUT);
+        mDeIdleTimerLock.unlock();
 
         /* Wait for idle thread to release the lock, which means we are finished waiting */
         try {
@@ -2428,12 +2435,14 @@ public class MPDConnection {
                     e.printStackTrace();
                 }
 
+                mDeIdleTimerLock.lock();
                 // Clear possible timeout tasks
                 if(mDeidleTimeoutTimer != null) {
                     mDeidleTimeoutTimer.cancel();
                     mDeidleTimeoutTimer.purge();
                     mDeidleTimeoutTimer = null;
                 }
+                mDeIdleTimerLock.unlock();
 
                 // If deidling already timed out we don't need to take care here. Its already done by
                 // the timeout thread.
@@ -2447,12 +2456,14 @@ public class MPDConnection {
             } catch (IOException e) {
                 printDebug("Read error exception. Disconnecting and cleaning up");
 
+                mDeIdleTimerLock.lock();
                 // Clear possible timeout tasks
                 if(mDeidleTimeoutTimer != null) {
                     mDeidleTimeoutTimer.cancel();
                     mDeidleTimeoutTimer.purge();
                     mDeidleTimeoutTimer = null;
                 }
+                mDeIdleTimerLock.unlock();
 
                 // If deidling already timed out we don't need to take care here. Its already done by
                 // the timeout thread.
@@ -2712,12 +2723,14 @@ public class MPDConnection {
             // Notify listener
             notifyDisconnect();
 
+            mDeIdleTimerLock.lock();
             // Set timeout task for deidling.
             if(mDeidleTimeoutTimer != null) {
                 mDeidleTimeoutTimer.cancel();
                 mDeidleTimeoutTimer.purge();
                 mDeidleTimeoutTimer = null;
             }
+            mDeIdleTimerLock.unlock();
 
             // Now let the the IdleWaitThread continue
             mDeidleTimeoutLock.release();
