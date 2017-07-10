@@ -1,3 +1,8 @@
+### Version: 1.1.6 Tag: release-15 (2017-07-10) ###
+ * Deidleing with actual timeout to prevent deadlocking/ANR on certain disconnect situations
+ * UI refinements
+ * Horizontal resizeable launcher widget
+
 ### Version: 1.1.5 Tag: release-14 (2017-06-15) ###
  * Experimental support to play remote streams in M.A.L.P. (http output plugin of MPD for example)
  * Small stability fixes
