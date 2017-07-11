@@ -1627,9 +1627,11 @@ public class MPDConnection {
             return null;
         }
         if (retList.size() == 1) {
-            // If one element is in the list it is safe to assume that this element is
-            // the current song. So casting is no problem.
-            return (MPDTrack) retList.get(0);
+            MPDFileEntry tmpFileEntry = retList.get(0);
+            if ( null != tmpFileEntry && tmpFileEntry instanceof MPDTrack) {
+                return (MPDTrack)tmpFileEntry;
+            }
+            return null;
         } else {
             return null;
         }
