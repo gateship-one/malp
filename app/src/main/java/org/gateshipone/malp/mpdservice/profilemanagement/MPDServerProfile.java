@@ -32,7 +32,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     /**
      * Profile parameters
      */
-    private String mProfileName;
+    private String mProfileName = "";
 
     /**
      * If this boolean is set the application should use this profile to automatically
@@ -48,7 +48,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mPassword = "";
     private int mPort;
 
-    private String mStreamingURL;
+    private String mStreamingURL = "";
     private boolean mStreamingEnabled;
 
 
