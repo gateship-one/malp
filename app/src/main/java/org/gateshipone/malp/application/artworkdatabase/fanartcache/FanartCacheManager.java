@@ -45,6 +45,7 @@ public class FanartCacheManager {
     /**
      * The maximum size of the applications cache. If it gets too big it will be trimmed.
      */
+    // FIXME Replace with Android O Cache Quota when released
     private static final long MAX_CACHE_SIZE = 100 * 1024 * 1024;
 
     private final String mCacheBasePath;
@@ -52,9 +53,7 @@ public class FanartCacheManager {
     private List<String> mLastAccessedMBIDs;
 
     public FanartCacheManager(Context context) {
-        String cachePath = Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState()) ||
-                !Environment.isExternalStorageRemovable() ? context.getExternalCacheDir().getPath() :
-                context.getCacheDir().getPath();
+        String cachePath = context.getCacheDir().getPath();
         mCacheBasePath = cachePath + FANART_CACHE_SUFFIX;
 
         mLastAccessedMBIDs = new LinkedList<>();
@@ -115,7 +114,7 @@ public class FanartCacheManager {
         File outputDir = new File(mCacheBasePath + "/" + mbid);
         if (!outputDir.exists()) {
             if (!outputDir.mkdirs()) {
-                Log.e(TAG, "Fanart cache directory could be created");
+                Log.e(TAG, "Fanart cache directory could be created: " + outputDir.getAbsolutePath());
                 return;
             }
         }
