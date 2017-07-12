@@ -23,6 +23,11 @@
 package org.gateshipone.malp.application.utils;
 
 
+import android.content.Context;
+
+import org.gateshipone.malp.R;
+
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -85,6 +90,38 @@ public class FormatHelper {
     }
 
     /**
+     * Helper method to uniformly format length strings in Odyssey.
+     *
+     * @param length Length value in milliseconds
+     * @return the formatted string, usable in the ui
+     */
+    public static String formatTracktimeFromSWithDays(long length, Context context) {
+
+        String retVal;
+
+        int seconds = (int) (length);
+
+        int days = seconds / 86400;
+        seconds -= days * 86400;
+
+        int hours = seconds / 3600;
+        seconds -= hours * 3600;
+
+        int minutes = seconds / 60;
+        seconds -= minutes * 60;
+
+        if (days == 0 && hours == 0) {
+            retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d", minutes, seconds);
+        } else if (days == 0 && hours != 0)  {
+            retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d" + ":" + "%02d", hours, minutes, seconds);
+        } else {
+            retVal = String.format(Locale.getDefault(), "%02d" + " " + context.getResources().getString(R.string.duration_days)+ " %02d" + ":" + "%02d" + ":" + "%02d", days, hours, minutes, seconds);
+        }
+
+        return retVal;
+    }
+
+    /**
      * Helper method to format the mediastore track number to a track number string
      *
      * @param trackNumber the tracknumber from the mediastore
@@ -110,7 +147,7 @@ public class FormatHelper {
      */
     public static String formatTimeStampToString(long timestamp) {
         Date date = new Date(timestamp);
-        return new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(date);
+        return DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM, Locale.getDefault()).format(date);
     }
 
 

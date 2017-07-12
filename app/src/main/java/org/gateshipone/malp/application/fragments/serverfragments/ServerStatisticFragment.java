@@ -137,9 +137,9 @@ public class ServerStatisticFragment extends Fragment {
             mAlbumsCount.setText(String.valueOf(statistics.getAlbumCount()));
             mSongsCount.setText(String.valueOf(statistics.getSongCount()));
 
-            mUptime.setText(FormatHelper.formatTracktimeFromS(statistics.getServerUptime()));
-            mPlaytime.setText(FormatHelper.formatTracktimeFromS(statistics.getPlayDuration()));
-            mDBLength.setText(FormatHelper.formatTracktimeFromS(statistics.getAllSongDuration()));
+            mUptime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getServerUptime(),getContext()));
+            mPlaytime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getPlayDuration(),getContext()));
+            mDBLength.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getAllSongDuration(),getContext()));
             mLastUpdate.setText(FormatHelper.formatTimeStampToString(statistics.getLastDBUpdate() * 1000));
 
             MPDCapabilities capabilities = MPDQueryHandler.getServerCapabilities();

@@ -176,6 +176,8 @@
     <string name="server_statistic_db_update">Last database update:</string>
     <string name="server_statistic_malp_server_info">Server features:</string>
 
+    <string name="duration_days">Days</string>
+
     <string name="server_statistic_update_database">Update server database</string>
     <string name="server_statistic_updateing_database">Server is updating its database, please wait!</string>
 
