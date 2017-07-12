@@ -22,13 +22,19 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
+import android.util.Log;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.Locale;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
 public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFileEntry> {
     protected String mPath;
-
-    // FIXME to some date format of java
-    protected String mLastModified;
 
     protected MPDFileEntry(String path) {
         mPath = path;
@@ -43,12 +49,27 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
     }
 
     public void setLastModified(String lastModified) {
-        mLastModified = lastModified;
+        // Try to parse date
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.ROOT);
+        // Assume MPD sends time as UTC time
+        format.setTimeZone(TimeZone.getTimeZone("UTC"));
+        try {
+            mLastModifiedDate = format.parse(lastModified);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
     }
 
-    public String getLastModified() {
-        return mLastModified;
+    public String getLastModifiedString() {
+        if(null == mLastModifiedDate) {
+            return "";
+        }
+        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM,Locale.getDefault());
+        return format.format(mLastModifiedDate);
     }
+
+    public Date mLastModifiedDate;
 
     /**
      * This methods defines an hard order of directory, files, playlists

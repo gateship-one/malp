@@ -371,7 +371,7 @@ public class FileListItem extends AbsImageListViewItem {
      */
     public void setDirectory(MPDDirectory directory, Context context) {
         mTitleView.setText(directory.getSectionTitle());
-        mAdditionalInfoView.setText(directory.getLastModified());
+        mAdditionalInfoView.setText(directory.getLastModifiedString());
 
         if (mShowIcon) {
             Drawable icon = context.getDrawable(R.drawable.ic_folder_48dp);
@@ -393,7 +393,7 @@ public class FileListItem extends AbsImageListViewItem {
      */
     public void setPlaylist(MPDPlaylist playlist, Context context) {
         mTitleView.setText(playlist.getSectionTitle());
-        mAdditionalInfoView.setText(playlist.getLastModified());
+        mAdditionalInfoView.setText(playlist.getLastModifiedString());
 
         if (mShowIcon) {
             Drawable icon = context.getDrawable(R.drawable.ic_queue_music_black_48dp);
