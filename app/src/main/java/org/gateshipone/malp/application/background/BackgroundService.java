@@ -50,6 +50,13 @@ import java.lang.ref.WeakReference;
 
 public class BackgroundService extends Service implements AudioManager.OnAudioFocusChangeListener {
     private static final String TAG = BackgroundService.class.getSimpleName();
+
+    public enum STREAMING_STATUS {
+        STOPPED,
+        BUFFERING,
+        PLAYING
+    }
+
     /**
      * Control actions for the MPD service
      */
@@ -135,54 +142,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
     private boolean mLostAudioFocus = false;
 
-    @Override
-    public void onAudioFocusChange(int focusChange) {
-        if(null == mPlaybackManager) {
-            // No playback is running. Ignore!
-            return;
-        }
 
-        switch (focusChange) {
-            case AudioManager.AUDIOFOCUS_GAIN:
-                // If we are ducked at the moment, return volume to full output
-                if (mIsDucked) {
-                    mPlaybackManager.setVolume(1.0f);
-                    mIsDucked = false;
-                } else if (mLostAudioFocus) {
-                    // If we temporarily lost the audio focus we can resume playback here
-                    startStreamingPlayback();
-                    mLostAudioFocus = false;
-                }
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS:
-                // Stop playback here, because we lost audio focus (not temporarily)
-                if (mPlaybackManager.isPlaying()) {
-                    stopStreamingPlayback();
-                }
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                // Pause audio for the moment of focus loss, will be resumed.
-                if (mPlaybackManager.isPlaying()) {
-                    stopStreamingPlayback();
-                }
-                break;
-            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                // We only need to duck our volume, so set it to 10%? and save that we ducked for resuming
-                if (mPlaybackManager.isPlaying()) {
-                    mPlaybackManager.setVolume(0.1f);
-                    mIsDucked = true;
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
-    public enum STREAMING_STATUS {
-        STOPPED,
-        BUFFERING,
-        PLAYING
-    }
 
     /**
      * Profile manage instance to get the last used profile out of the SQLite database.
@@ -203,6 +163,9 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      */
     private NotificationManager mNotificationManager;
 
+    /**
+     * Set if currently connecting to a MPD server
+     */
     private boolean mConnecting;
 
     /**
@@ -210,8 +173,15 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      */
     private StreamPlaybackManager mPlaybackManager;
 
+    /**
+     * Set if the notification would normally not be visible but is because of streaming.
+     */
     private boolean mNotificationHidden = true;
 
+    /**
+     * Set if streaming was active. This is used to automatically resume streaming after
+     * stop or pause mode.
+     */
     private boolean mWasStreaming = false;
 
     /**
@@ -414,6 +384,49 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         ConnectionManager.setParameters(profile, this);
     }
 
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        if(null == mPlaybackManager) {
+            // No playback is running. Ignore!
+            return;
+        }
+
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                // If we are ducked at the moment, return volume to full output
+                if (mIsDucked) {
+                    mPlaybackManager.setVolume(1.0f);
+                    mIsDucked = false;
+                } else if (mLostAudioFocus) {
+                    // If we temporarily lost the audio focus we can resume playback here
+                    startStreamingPlayback();
+                    mLostAudioFocus = false;
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                // Stop playback here, because we lost audio focus (not temporarily)
+                if (mPlaybackManager.isPlaying()) {
+                    stopStreamingPlayback();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                // Pause audio for the moment of focus loss, will be resumed.
+                if (mPlaybackManager.isPlaying()) {
+                    stopStreamingPlayback();
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                // We only need to duck our volume, so set it to 10%? and save that we ducked for resuming
+                if (mPlaybackManager.isPlaying()) {
+                    mPlaybackManager.setVolume(0.1f);
+                    mIsDucked = true;
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     /**
      * Notifies the widgets that the server is disconnected now.
      */
@@ -564,8 +577,11 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         if (mPlaybackManager != null && mPlaybackManager.isPlaying()) {
             mPlaybackManager.stop();
         }
+        // Enable the notification to swipe away
         mNotificationManager.setDismissible(true);
 
+        // Notification was only visible because of stream playback but main UI is visible, so
+        // hide it again.
         if (mNotificationHidden) {
             mNotificationManager.hideNotification();
             onMPDDisconnect();
