@@ -22,19 +22,17 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
-import android.util.Log;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Locale;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFileEntry> {
-    protected String mPath;
+    String mPath;
+    private Date mLastModifiedDate;
 
     protected MPDFileEntry(String path) {
         mPath = path;
@@ -68,8 +66,6 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
         DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM,Locale.getDefault());
         return format.format(mLastModifiedDate);
     }
-
-    public Date mLastModifiedDate;
 
     /**
      * This methods defines an hard order of directory, files, playlists
