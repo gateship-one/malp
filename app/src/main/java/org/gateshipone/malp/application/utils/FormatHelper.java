@@ -36,7 +36,7 @@ public class FormatHelper {
     private static final String LUCENE_SPECIAL_CHARACTERS_REGEX = "([\\+\\-\\!\\(\\)\\{\\}\\[\\]\\^\\\"\\~\\*\\?\\:\\\\\\/])";
 
     /**
-     * Helper method to uniformly format length strings in Odyssey.
+     * Helper method to uniformly format length strings in M.A.L.P..
      *
      * @param length Length value in milliseconds
      * @return the formatted string, usable in the ui
@@ -63,7 +63,7 @@ public class FormatHelper {
     }
 
     /**
-     * Helper method to uniformly format length strings in Odyssey.
+     * Helper method to uniformly format length strings in M.A.L.P..
      *
      * @param length Length value in milliseconds
      * @return the formatted string, usable in the ui
@@ -90,7 +90,7 @@ public class FormatHelper {
     }
 
     /**
-     * Helper method to uniformly format length strings in Odyssey.
+     * Helper method to uniformly format length strings in M.A.L.P..
      *
      * @param length Length value in milliseconds
      * @return the formatted string, usable in the ui
@@ -140,7 +140,7 @@ public class FormatHelper {
     }
 
     /**
-     * Helper method to format a timestamp to a uniformly format date string in Odyssey.
+     * Helper method to format a timestamp to a uniformly format date string in M.A.L.P..
      *
      * @param timestamp The timestamp in milliseconds
      * @return the formatted string, usable in the ui
