@@ -736,6 +736,12 @@ public class MainActivity extends GenericActivity
                 // Get the primary color of the active theme from the helper.
                 getWindow().setStatusBarColor(ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark));
             }
+        } else {
+            // If in portrait mode (no collapsing image exists), the status bar also needs dark coloring
+            mHeaderImageActive = false;
+
+            // Get the primary color of the active theme from the helper.
+            getWindow().setStatusBarColor(ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark));
         }
         // set scrolling behaviour
         CollapsingToolbarLayout toolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
