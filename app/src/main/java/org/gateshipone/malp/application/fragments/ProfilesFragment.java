@@ -42,6 +42,8 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import java.util.List;
+import java.util.Observable;
+import java.util.Observer;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.ProfileAdapter;
@@ -49,9 +51,10 @@ import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.ProfileManageCallbacks;
 import org.gateshipone.malp.application.loaders.ProfilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
-public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDServerProfile>>, AbsListView.OnItemClickListener{
+public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<MPDServerProfile>>, AbsListView.OnItemClickListener, Observer{
     public final static String TAG = ProfilesFragment.class.getSimpleName();
     /**
      * Main ListView of this fragment
@@ -199,14 +202,22 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         super.onResume();
+        MPDProfileManager.getInstance(getActivity()).addObserver(this);
 
         // Prepare loader ( start new one or reuse old )
-        getLoaderManager().initLoader(0, getArguments(), this);
+        getLoaderManager().restartLoader(0, getArguments(), this);
 
         if ( null != mFABCallback ) {
             mFABCallback.setupFAB(false,null);
             mFABCallback.setupToolbar(getString(R.string.menu_profiles), false, true, false);
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        MPDProfileManager.getInstance(getActivity()).deleteObserver(this);
     }
 
     @Override
@@ -252,5 +263,11 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
             mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(position));
             mAdapter.setActive(position, true);
         }
+    }
+
+    @Override
+    public void update(Observable o, Object arg) {
+        // Prepare loader ( start new one or reuse old )
+        getLoaderManager().restartLoader(0, getArguments(), this);
     }
 }
