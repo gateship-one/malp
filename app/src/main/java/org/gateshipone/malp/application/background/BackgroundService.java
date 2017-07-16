@@ -236,6 +236,9 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
         mNotificationManager = new NotificationManager(this);
 
+        // Create empty status
+        mLastStatus = new MPDCurrentStatus();
+
         // Disable automatic reconnect after connection loss for the widget server
         ConnectionManager.setAutoconnect(false);
     }
