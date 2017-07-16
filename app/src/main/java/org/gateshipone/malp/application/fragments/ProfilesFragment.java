@@ -51,6 +51,7 @@ import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.ProfileManageCallbacks;
 import org.gateshipone.malp.application.loaders.ProfilesLoader;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
@@ -238,7 +239,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void connectProfile(int index) {
         if ( null != mCallback ) {
-            mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(index));
+            ConnectionManager.getInstance().connectProfile((MPDServerProfile)mAdapter.getItem(index), getContext());
         }
     }
 
@@ -250,7 +251,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void removeProfile(int index) {
         if ( null != mCallback ) {
-            mCallback.removeProfile((MPDServerProfile)mAdapter.getItem(index));
+            ConnectionManager.getInstance().removeProfile((MPDServerProfile)mAdapter.getItem(index),getContext());
             mAdapter.swapModel(null);
             // Prepare loader ( start new one or reuse old )
             getLoaderManager().restartLoader(0, getArguments(), this);
@@ -260,7 +261,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if ( null != mCallback ) {
-            mCallback.connectProfile((MPDServerProfile)mAdapter.getItem(position));
+            ConnectionManager.getInstance().connectProfile((MPDServerProfile)mAdapter.getItem(position),getContext());
             mAdapter.setActive(position, true);
         }
     }

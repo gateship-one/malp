@@ -95,7 +95,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         mUseCounter = 0;
     }
 
-    private synchronized static ConnectionManager getInstance() {
+    public synchronized static ConnectionManager getInstance() {
         if (null == mConnectionManager) {
             mConnectionManager = new ConnectionManager();
         }
@@ -103,7 +103,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
 
-    public static void setParameters(MPDServerProfile profile, Context context) {
+    public void setParameters(MPDServerProfile profile, Context context) {
         if ( null == profile ) {
             return;
         }
@@ -123,7 +123,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         MPDCommandHandler.setServerParameters(hostname, password, port);
     }
 
-    public static void reconnectLastServer(Context context) {
+    public void reconnectLastServer(Context context) {
         ConnectionManager instance = getInstance();
 
         if (instance.mHostname == null  && null != context) {
@@ -142,7 +142,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         mConnectionManager.mDisconnectRequested = true;
     }
 
-    public static void autoConnect(Context context) {
+    public void autoConnect(Context context) {
         mConnectionManager.mServerProfile = MPDProfileManager.getInstance(context).getAutoconnectProfile();
 
         setParameters(mConnectionManager.mServerProfile,context);
@@ -191,16 +191,16 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
      * Increases the use counter of the {@link ConnectionManager}.
      * @param context Context used for connection relevant calls.
      */
-    public static void registerMPDUse(Context context) {
-        getInstance().increaseMPDUse(context);
+    public void registerMPDUse(Context context) {
+        increaseMPDUse(context);
     }
 
     /**
      * Decreases the use counter of the {@link ConnectionManager}.
      * @param context Context used for connection relevant calls.
      */
-    public static void unregisterMPDUse(Context context) {
-        getInstance().decreaseMPDUse(context);
+    public void unregisterMPDUse(Context context) {
+        decreaseMPDUse(context);
     }
 
     @Override
@@ -289,11 +289,41 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         }
     }
 
-    public static String getProfileName() {
-        return mConnectionManager.mServerProfile.getProfileName();
+    public void connectProfile(MPDServerProfile profile, Context context) {
+        disconnectFromServer();
+        setParameters(profile, context);
+        reconnectLastServer(context);
+
+        // Notify the widget to also connect if possible
+        Intent connectIntent = new Intent(context, BackgroundService.class);
+        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
+        context.startService(connectIntent);
     }
 
-    public static boolean getStreamingEnabled() {
-        return mConnectionManager.mServerProfile.getStreamingEnabled();
+
+    public void addProfile(MPDServerProfile profile, Context context) {
+        MPDProfileManager.getInstance(context).addProfile(profile);
+
+        // Try connecting to the new profile
+        setParameters(profile, context);
+        reconnectLastServer(context);
+
+        // Notify the widget to also connect if possible
+        Intent connectIntent = new Intent(context, BackgroundService.class);
+        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
+        context.startService(connectIntent);
+    }
+
+    public void removeProfile(MPDServerProfile profile, Context context) {
+        MPDProfileManager.getInstance(context).deleteProfile(profile);
+    }
+
+
+    public String getProfileName() {
+        return mServerProfile.getProfileName();
+    }
+
+    public boolean getStreamingEnabled() {
+        return mServerProfile.getStreamingEnabled();
     }
 }

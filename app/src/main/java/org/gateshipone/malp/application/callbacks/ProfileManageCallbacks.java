@@ -29,9 +29,4 @@ public interface ProfileManageCallbacks {
 
     // Should show the EditProfileFragment to the user
     void editProfile(MPDServerProfile profile);
-
-    void connectProfile(MPDServerProfile profile);
-
-    void addProfile(MPDServerProfile profile);
-    void removeProfile(MPDServerProfile profile);
 }

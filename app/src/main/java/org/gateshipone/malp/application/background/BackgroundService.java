@@ -373,7 +373,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private void onProfileChanged() {
         onMPDDisconnect();
         MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
-        ConnectionManager.setParameters(profile, this);
+        ConnectionManager.getInstance().setParameters(profile, this);
     }
 
     @Override
@@ -475,10 +475,10 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         mConnecting = true;
 
         MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
-        ConnectionManager.setParameters(profile, this);
+        ConnectionManager.getInstance().setParameters(profile, this);
 
         /* Open the actual server connection */
-        ConnectionManager.reconnectLastServer(this);
+        ConnectionManager.getInstance().reconnectLastServer(this);
     }
 
     /**

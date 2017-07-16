@@ -1072,7 +1072,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         // Check if streaming is configured for the current server
-        boolean streamingEnabled = ConnectionManager.getStreamingEnabled();
+        boolean streamingEnabled = ConnectionManager.getInstance().getStreamingEnabled();
         MenuItem streamingStartStopItem = menu.getMenu().findItem(R.id.action_start_streaming);
         if (!streamingEnabled) {
             streamingStartStopItem.setVisible(false);

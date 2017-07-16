@@ -468,7 +468,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     protected void onConnected() {
-        setNavbarHeader(ConnectionManager.getProfileName());
+        setNavbarHeader(ConnectionManager.getInstance().getProfileName());
     }
 
     @Override
@@ -599,7 +599,7 @@ public class MainActivity extends GenericActivity
     public void editProfile(MPDServerProfile profile) {
         if (null == profile) {
             profile = new MPDServerProfile(getString(R.string.fragment_profile_default_name), true);
-            addProfile(profile);
+            ConnectionManager.getInstance().addProfile(profile, this);
         }
 
         // Create fragment and give it an argument for the selected article
@@ -627,36 +627,7 @@ public class MainActivity extends GenericActivity
         transaction.commit();
     }
 
-    @Override
-    public void connectProfile(MPDServerProfile profile) {
-        ConnectionManager.disconnectFromServer();
-        ConnectionManager.setParameters(profile, this);
-        ConnectionManager.reconnectLastServer(getApplicationContext());
 
-        // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, BackgroundService.class);
-        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
-        startService(connectIntent);
-    }
-
-    @Override
-    public void addProfile(MPDServerProfile profile) {
-        MPDProfileManager.getInstance(this).addProfile(profile);
-
-        // Try connecting to the new profile
-        ConnectionManager.setParameters(profile, this);
-        ConnectionManager.reconnectLastServer(getApplicationContext());
-
-        // Notify the widget to also connect if possible
-        Intent connectIntent = new Intent(this, BackgroundService.class);
-        connectIntent.setAction(BackgroundService.ACTION_PROFILE_CHANGED);
-        startService(connectIntent);
-    }
-
-    @Override
-    public void removeProfile(MPDServerProfile profile) {
-        MPDProfileManager.getInstance(this).deleteProfile(profile);
-    }
 
     @Override
     public void openPlaylist(String name) {

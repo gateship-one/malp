@@ -47,6 +47,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.ProfileManageCallbacks;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 public class EditProfileFragment extends Fragment {
@@ -231,7 +232,7 @@ public class EditProfileFragment extends Fragment {
 
         if (profileChanged) {
             if (null != mOldProfile) {
-                mCallback.removeProfile(mOldProfile);
+                ConnectionManager.getInstance().removeProfile(mOldProfile,getActivity());
             } else {
                 mOldProfile = new MPDServerProfile(mProfilename, true);
             }
@@ -241,7 +242,7 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setPort(mPort);
             mOldProfile.setStreamingURL(mStreamingURL);
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
-            mCallback.addProfile(mOldProfile);
+            ConnectionManager.getInstance().addProfile(mOldProfile, getContext());
         }
     }
 
@@ -322,7 +323,7 @@ public class EditProfileFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.action_delete:
-                mCallback.removeProfile(mOldProfile);
+                ConnectionManager.getInstance().removeProfile(mOldProfile,getContext());
                 mOptionsMenuHandled = true;
                 getActivity().onBackPressed();
                 return true;
