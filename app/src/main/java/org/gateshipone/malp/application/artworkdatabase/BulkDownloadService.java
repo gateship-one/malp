@@ -65,8 +65,6 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
     public static final String BUNDLE_KEY_ALBUM_PROVIDER = "org.gateshipone.malp.album_provider";
     public static final String BUNDLE_KEY_WIFI_ONLY = "org.gateshipone.malp.wifi_only";
 
-    private MPDProfileManager mProfileManager;
-
     private NotificationManager mNotificationManager;
     private NotificationCompat.Builder mBuilder;
 
@@ -96,9 +94,6 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             mConnectionHandler = new ConnectionStateHandler(this);
             Log.v(TAG, "Registering connection state listener");
             MPDQueryHandler.registerConnectionStateListener(mConnectionHandler);
-        }
-        if ( null == mProfileManager ) {
-            mProfileManager = new MPDProfileManager(getApplicationContext());
         }
 
         mSumImageDownloads = 0;

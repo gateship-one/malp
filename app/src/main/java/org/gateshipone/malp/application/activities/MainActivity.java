@@ -115,9 +115,6 @@ public class MainActivity extends GenericActivity
     private VIEW_SWITCHER_STATUS mNowPlayingViewSwitcherStatus;
     private VIEW_SWITCHER_STATUS mSavedNowPlayingViewSwitcherStatus;
 
-    private MPDProfileManager mProfileManager;
-
-
     private boolean mHeaderImageActive;
 
     private FloatingActionButton mFAB;
@@ -169,12 +166,10 @@ public class MainActivity extends GenericActivity
         mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
 
 
-        mProfileManager = new MPDProfileManager(getApplicationContext());
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
-
-        if (mProfileManager.getProfiles().size() == 0) {
+        if (MPDProfileManager.getInstance(this).getProfiles().size() == 0) {
             navId = R.id.nav_profiles;
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -646,7 +641,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void addProfile(MPDServerProfile profile) {
-        mProfileManager.addProfile(profile);
+        MPDProfileManager.getInstance(this).addProfile(profile);
 
         // Try connecting to the new profile
         ConnectionManager.setParameters(profile, this);
@@ -660,7 +655,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void removeProfile(MPDServerProfile profile) {
-        mProfileManager.deleteProfile(profile);
+        MPDProfileManager.getInstance(this).deleteProfile(profile);
     }
 
     @Override

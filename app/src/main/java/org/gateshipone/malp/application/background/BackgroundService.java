@@ -143,12 +143,6 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private boolean mLostAudioFocus = false;
 
 
-
-    /**
-     * Profile manage instance to get the last used profile out of the SQLite database.
-     */
-    private MPDProfileManager mProfileManager;
-
     private BackgroundServiceBroadcastReceiver mBroadcastReceiver;
 
     private BackgroundMPDStateChangeListener mServerConnectionStateListener;
@@ -242,8 +236,6 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
         mNotificationManager = new NotificationManager(this);
 
-        // Initialize an ProfileManager to get the default profile.
-        mProfileManager = new MPDProfileManager(this);
         // Disable automatic reconnect after connection loss for the widget server
         ConnectionManager.setAutoconnect(false);
     }
@@ -380,7 +372,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      */
     private void onProfileChanged() {
         onMPDDisconnect();
-        MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
+        MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
         ConnectionManager.setParameters(profile, this);
     }
 
@@ -482,7 +474,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private void connectMPDServer() {
         mConnecting = true;
 
-        MPDServerProfile profile = mProfileManager.getAutoconnectProfile();
+        MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
         ConnectionManager.setParameters(profile, this);
 
         /* Open the actual server connection */
@@ -560,7 +552,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         serviceStartIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
         startService(serviceStartIntent);
 
-        String url = mProfileManager.getAutoconnectProfile().getStreamingURL();
+        String url = MPDProfileManager.getInstance(this).getAutoconnectProfile().getStreamingURL();
         Log.v(TAG, "Start playback of: " + url);
 
         // Connect to MPD server for controls

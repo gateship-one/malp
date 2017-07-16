@@ -31,8 +31,9 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Observable;
 
-public class MPDProfileManager {
+public class MPDProfileManager extends Observable {
     private static final String TAG = "ProfileManager";
 
 
@@ -41,9 +42,18 @@ public class MPDProfileManager {
      */
     private MPDProfileDBHelper mDBHelper;
 
-    public MPDProfileManager(Context context) {
+    private static MPDProfileManager mInstance;
+
+    private MPDProfileManager(Context context) {
         /* Create instance of the helper class to get the writable DB later. */
         mDBHelper = new MPDProfileDBHelper(context);
+    }
+
+    public static synchronized MPDProfileManager getInstance(Context context) {
+        if (null == mInstance) {
+            mInstance = new MPDProfileManager(context.getApplicationContext());
+        }
+        return mInstance;
     }
 
     /**
@@ -132,6 +142,8 @@ public class MPDProfileManager {
         db.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
 
         db.close();
+
+        notifyObservers();
     }
 
 
@@ -148,6 +160,8 @@ public class MPDProfileManager {
         db.delete(MPDServerProfileTable.SQL_TABLE_NAME,whereClause, whereValues);
 
         db.close();
+
+        notifyObservers();
     }
 
 
