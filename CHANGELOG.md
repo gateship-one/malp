@@ -1,3 +1,9 @@
+### Version: 1.1.7 Tag: release-16 (2017-07-22) ###
+ * Stability fixes in UI
+ * Format MPD dates more nicely
+ * UI fixes when creating new profiles (new profiles not shown in list)
+ * Use internal cache instead of external cache for FanartActivity
+
 ### Version: 1.1.6 Tag: release-15 (2017-07-10) ###
  * Deidleing with actual timeout to prevent deadlocking/ANR on certain disconnect situations
  * UI refinements
