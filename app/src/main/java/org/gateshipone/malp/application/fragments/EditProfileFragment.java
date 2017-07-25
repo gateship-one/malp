@@ -217,7 +217,7 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mPassword = mPasswordView.getText().toString();
         }
-        if (Integer.parseInt(mPortView.getText().toString()) != mPort) {
+        if (!mPortView.getText().toString().isEmpty() && Integer.parseInt(mPortView.getText().toString()) != mPort) {
             profileChanged = true;
             mPort = Integer.parseInt(mPortView.getText().toString());
         }
