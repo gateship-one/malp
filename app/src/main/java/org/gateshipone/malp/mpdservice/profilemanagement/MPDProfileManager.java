@@ -60,7 +60,7 @@ public class MPDProfileManager extends Observable {
      * Creates a list of all available server profiles.
      * @return The list of currently saved server profiles.
      */
-    public List<MPDServerProfile> getProfiles() {
+    public synchronized List<MPDServerProfile> getProfiles() {
         ArrayList<MPDServerProfile> profileList = new ArrayList<>();
 
         /* Query the database table for profiles */
@@ -109,7 +109,7 @@ public class MPDProfileManager extends Observable {
      * Just delete and readd the profile.
      * @param profile Profile to add to the database.
      */
-    public void addProfile(MPDServerProfile profile) {
+    public synchronized void addProfile(MPDServerProfile profile) {
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         /* Check if autoconnect is set, if it is, all other autoconnects need to be set to 0 */
         if ( profile.getAutoconnect() ) {
@@ -151,7 +151,7 @@ public class MPDProfileManager extends Observable {
      * Removes a profile from the database. Make sure that you provide the correct profile.
      * @param profile Profile to remove.
      */
-    public void deleteProfile(MPDServerProfile profile) {
+    public synchronized void deleteProfile(MPDServerProfile profile) {
         SQLiteDatabase db = mDBHelper.getWritableDatabase();
         /* Create the where clauses */
         String whereClause = MPDServerProfileTable.COLUMN_PROFILE_DATE_CREATED + "=?";
@@ -169,7 +169,7 @@ public class MPDProfileManager extends Observable {
      * This method is convient to call to easily get the automatic connect server profile (if any).
      * @return Profile to connect to otherwise null.
      */
-    public MPDServerProfile getAutoconnectProfile() {
+    public synchronized MPDServerProfile getAutoconnectProfile() {
         SQLiteDatabase db = mDBHelper.getReadableDatabase();
         /* Query the database table for profiles */
         Cursor cursor  = db.query(MPDServerProfileTable.SQL_TABLE_NAME, MPDServerProfileTable.PROJECTION_SERVER_PROFILES,MPDServerProfileTable.COLUMN_PROFILE_AUTO_CONNECT + "=?", new String[]{"1"}, null, null, null);
