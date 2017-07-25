@@ -44,7 +44,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * This class is used to show ListItems that represent the songs in MPDs current playlist.
@@ -117,7 +118,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
     /**
      * Semaphore to synchronize list access from cleanup task and the UI thread.
      */
-    private Semaphore mListsLock;
+    private ReadWriteLock mListsLock;
 
     /**
      * Timer that is used for triggering the clean up of unneeded list blocks.
@@ -180,7 +181,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             mListView = listView;
             mListView.setChoiceMode(ListView.CHOICE_MODE_SINGLE);
         }
-        mListsLock = new Semaphore(1);
+        mListsLock = new ReentrantReadWriteLock();
         mClearTimer = null;
 
         mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
@@ -428,16 +429,12 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                 notifyDataSetChanged();
             } else {
                 // Get the lock to prevent race-conditions.
-                try {
-                    mListsLock.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                mListsLock.writeLock().lock();
 
                 if (mWindowedPlaylists.length <= start / WINDOW_SIZE) {
                     // Obviously we received old data here. Abort handling.
                     // Crash reported via Google Play (07.11.2016)
-                    mListsLock.release();
+                    mListsLock.writeLock().unlock();
                     return;
                 }
 
@@ -457,7 +454,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                 mClearTimer.schedule(new ListCleanUp(), CLEANUP_TIMEOUT);
 
                 // Relinquish the lock again
-                mListsLock.release();
+                mListsLock.writeLock().unlock();
 
                 // Notify the system that the internal data changed. This will change "loading" track
                 // views to the finished ones.
@@ -544,12 +541,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             // This determines how many list blocks we need locally.
             if (null != mLastStatus) {
                 // Lock list structures
-                try {
-                    mListsLock.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+                mListsLock.writeLock().lock();
                 // Calculate the number of needed list blocks
                 int listCount = (mLastStatus.getPlaylistLength() / WINDOW_SIZE) + 1;
                 // Create the array that later contains the list blocks
@@ -569,12 +561,11 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                 }
 
                 // Release the list lock
-                mListsLock.release();
+                mListsLock.writeLock().unlock();
             }
 
         }
         notifyDataSetChanged();
-        //jumpToCurrent();
     }
 
     /**
@@ -611,6 +602,9 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             // If ranged playlist is activated calculate the index of the requested list block.
             int listIndex = position / WINDOW_SIZE;
 
+            // Block the list
+            mListsLock.readLock().lock();
+
             // Check if this list block is already available.
             if (mWindowedListStates[listIndex] == LIST_STATE.LIST_READY) {
                 // Save that the list index was the last accessed one
@@ -620,14 +614,21 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                 int listPosition = position % WINDOW_SIZE;
                 if (listPosition < mWindowedPlaylists[listIndex].size()) {
                     // Return the MPDTrack from the list block.
+                    mListsLock.readLock().unlock();
                     return (MPDTrack) mWindowedPlaylists[listIndex].get(position % WINDOW_SIZE);
                 }
+                mListsLock.readLock().unlock();
             } else if (mWindowedListStates[position / WINDOW_SIZE] == LIST_STATE.LIST_EMPTY) {
                 // If the list is not yet available, request it with the method fetchWindow and set the state
                 // to LIST_LOADING.
                 mWindowedListStates[position / WINDOW_SIZE] = LIST_STATE.LIST_LOADING;
+                mListsLock.readLock().unlock();
                 fetchWindow(position);
+            } else {
+                mListsLock.readLock().unlock();
             }
+
+
         }
         return null;
     }
@@ -660,11 +661,8 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         @Override
         public void run() {
             // Lock the list structures
-            try {
-                mListsLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            mListsLock.writeLock().lock();
+
 
             // Cleanup all but the currently active list block.
             for (int i = 0; i < mWindowedPlaylists.length; i++) {
@@ -676,7 +674,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             // Cleanup the timer field
             mClearTimer = null;
             // Release the list lock
-            mListsLock.release();
+            mListsLock.writeLock().unlock();
         }
     }
 
