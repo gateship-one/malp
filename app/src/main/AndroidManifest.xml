@@ -82,6 +82,11 @@
             android:exported="false"
             android:stopWithTask="false"
             android:process=":widgetService" />
+        <receiver android:name=".application.background.RemoteControlReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".application.background.WidgetProvider">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
