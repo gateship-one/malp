@@ -1,0 +1,377 @@
+<!--
+  ~  Copyright (C) 2017 Team Gateship-One
+  ~  (Hendrik Borghorst & Frederik Luetkes)
+  ~
+  ~  The AUTHORS.md file contains a detailed contributors list:
+  ~  <https://github.com/gateship-one/malp/blob/master/AUTHORS.md>
+  ~
+  ~  This program is free software: you can redistribute it and/or modify
+  ~  it under the terms of the GNU General Public License as published by
+  ~  the Free Software Foundation, either version 3 of the License, or
+  ~  (at your option) any later version.
+  ~
+  ~  This program is distributed in the hope that it will be useful,
+  ~  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~  GNU General Public License for more details.
+  ~
+  ~  You should have received a copy of the GNU General Public License
+  ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  ~
+  -->
+
+<resources>
+    <string name="navigation_drawer_open">내비게이션 서랍 열기</string>
+    <string name="navigation_drawer_close">내비게이션 서랍 닫기</string>
+    <string name="action_settings">설정</string>
+    <string name="action_edit_profile">프로필 수정</string>
+    <string name="action_connect_profile">프로필 연결</string>
+    <string name="action_remove_profile">프로필 지우기</string>
+    <string name="action_add_profile">프로필 추가</string>
+    <string name="action_save_profile">프로필 저장</string>
+
+    <string name="action_add">추가</string>
+    <string name="action_add_album">음반 추가</string>
+    <string name="action_play_album">음반 연주</string>
+    <string name="action_show_all_tracks">모든 곡 보기</string>
+
+    <string name="action_add_artist">연주자 추가</string>
+    <string name="action_play_artist">연주자 연주</string>
+
+    <string name="action_add_directory">디렉터리 추가</string>
+    <string name="action_play_directory">디렉터리 연주</string>
+
+    <string name="action_add_playlist">연주목록 추가</string>
+    <string name="action_play_playlist">연주목록 연주</string>
+    <string name="action_remove_playlist">연주목록 지우기</string>
+
+    <string name="action_overwrite_playlist">연주목록 덮어쓰기</string>
+    <string name="action_delete_playlist">연주목록 지우기</string>
+
+    <string name="action_play_everything">모두 연주</string>
+
+    <string name="action_show_artist">연주자 보기</string>
+    <string name="action_show_album">음반 보기</string>
+    <string name="action_show_details">상세정보 보기</string>
+
+    <string name="action_reset_artwork">아트워크 재설정</string>
+
+    <string name="action_search">찾기</string>
+    <string name="action_add_search_result">찾은 결과 추가</string>
+
+    <string name="action_add_to_saved_playlist">저장된 연주목록에 추가</string>
+    <string name="action_remove_from_list">연주목록에서 지우기</string>
+
+    <string name="action_jump_to_current">지금 곡으로 가기</string>
+    <string name="action_toggle_single_mode">한 곡 연주</string>
+    <string name="action_toggle_consume_mode">곡 없애기</string>
+    <string name="action_open_fanart">전체화면으로 가기</string>
+
+    <string name="action_enqueue">연주목록에 추가</string>
+    <string name="action_enqueue_as_next">지금 곡 다음 연주</string>
+    <string name="action_play_song">곡 연주</string>
+    <string name="action_play_albums">음반 연주</string>
+    <string name="action_remove_track">곡 지우기</string>
+    <string name="action_remove_album">음반 지우기</string>
+
+    <string name="action_add_url">URL 추가</string>
+    <string name="action_show_albums_from_here">이 디렉터리에 음반 보기</string>
+    <string name="action_update_database_here">이 데이터베이스 업데이트</string>
+
+    <string name="action_wikipedia_album">음반 열기</string>
+    <string name="action_wikipedia_artist">연주자 열기</string>
+
+    <!-- Menu entries -->
+    <string name="menu_library">라이브러리</string>
+    <string name="menu_settings">설정</string>
+    <string name="menu_server">서버 설정</string>
+    <string name="menu_profiles">프로필</string>
+    <string name="menu_playlists">연주목록</string>
+    <string name="menu_outputs">출력</string>
+    <string name="menu_files">파일</string>
+    <string name="menu_statistic">정보</string>
+    <string name="menu_app_settings">앱 설정</string>
+
+    <string name="menu_search">찾기</string>
+
+    <string name="menu_albums">음반</string>
+    <string name="menu_artists">연주자</string>
+    <string name="artwork_settings">아트워크 설정</string>
+
+    <!-- seperator -->
+    <string name="track_item_loading">곡 읽기</string>
+
+    <string name="main_activity_connected">MPD 서버와 연결됨</string>
+    <string name="main_activity_disconnected">MPD 서버와 끊어짐</string>
+
+    <!-- No Tag texts -->
+    <string name="no_album_tag">음반 태그 없음</string>
+    <string name="no_artist_tag">연주자 태그 없음</string>
+
+    <!-- popup menu titles -->
+    <string name="action_clear_playlist">연주목록 지우기</string>
+    <string name="action_save_playlist">연주목록 저장</string>
+    <string name="action_start_streaming">스트리밍 시작</string>
+    <string name="action_stop_streaming">스트리밍 정지</string>
+    <string name="action_shuffle_playlist">연주목록 섞기</string>
+
+    <!-- edit profile fragment strings -->
+    <string name="fragment_profile_title">프로필 수정</string>
+    <string name="fragment_profile_profilename">프로필 이름:</string>
+    <string name="fragment_profile_hostname">호스트명이나 IP:</string>
+    <string name="fragment_profile_password">비밀번호:</string>
+    <string name="fragment_profile_port">포트:</string>
+    <string name="fragment_profile_streaming_url">스트리밍 url:</string>
+    <string name="fragment_profile_streaming_enabled">서버로부터 스트리밍하기</string>
+
+    <string name="fragment_profile_default_name">새 프로필</string>
+
+    <!-- Now playing view text view values -->
+    <string name="song_track_no">곡 번호:</string>
+    <string name="song_playlist_no">연주목록 번호:</string>
+    <string name="song_bitrate">비트레이트:</string>
+    <string name="song_audio_properties">오디오 속성:</string>
+    <string name="song_uri">곡 URI:</string>
+    <string name="song_title">제목:</string>
+    <string name="song_album">음반:</string>
+    <string name="song_artist">연주자:</string>
+    <string name="song_album_artist">음반 연주자:</string>
+
+    <string name="song_date">날짜:</string>
+    <string name="song_disc">디스크:</string>
+    <string name="song_duration">시간:</string>
+
+    <string name="song_title_mbid">MusicBrainz 곡 ID:</string>
+    <string name="song_album_mbid">MusicBrainz 음반 ID:</string>
+    <string name="song_artist_mbid">MusicBrainz 연주자 ID:</string>
+    <string name="song_album_artist_mbid">MusicBrainz 음반 연주자 ID:</string>
+
+    <string name="bitrate_unit_kilo_bits">kbps</string>
+    <string name="bitcount_unit">비트</string>
+    <string name="channel_count_unit">채널</string>
+
+    <!-- Server statistics text view values -->
+    <string name="server_statistic_artists_count">연주자 수:</string>
+    <string name="server_statistic_albums_count">음반 수:</string>
+    <string name="server_statistic_songs_count">곡 수:</string>
+
+    <string name="server_statistic_uptime">MPD 서버 가동 시간:</string>
+    <string name="server_statistic_db_playtime">데이터베이스 전체 시간:</string>
+    <string name="server_statistic_playtime">수록된 연주 시간:</string>
+    <string name="server_statistic_db_update">데이터베이스 마지막 업데이트:</string>
+    <string name="server_statistic_malp_server_info">서버 특성:</string>
+
+    <string name="duration_days">일</string>
+
+    <string name="server_statistic_update_database">서버 데이터베이스 업데이트</string>
+    <string name="server_statistic_updateing_database">서버가 데이터베이스를 업데이트하는 동안 기다려 주셔요!</string>
+
+    <!-- dialog titles -->
+    <string name="dialog_save_playlist">연주목록 저장</string>
+    <string name="dialog_action_cancel">취소</string>
+    <string name="dialog_action_save">저장</string>
+    <string name="dialog_action_ok">확인</string>
+    <string name="dialog_action_yes">예</string>
+    <string name="dialog_action_no">아니오</string>
+    <string name="dialog_choose_playlist">연주목록 선택</string>
+
+    <string name="dialog_message_overwrite_playlist">연주목록을 덮어씁니다:</string>
+    <string name="dialog_message_delete_playlist">연주목록을 지웁니다:</string>
+    <string name="dialog_message_delete_current_playlist">연주목록을 지울까요?</string>
+
+    <!-- dialog default names  -->
+    <string name="default_playlist_title">새 연주목록</string>
+    <string name="create_new_playlist">새 연주목록 만들기</string>
+
+    <string name="preference_launch_about">정보</string>
+
+    <string name="preference_theme_title">테마</string>
+    <string name="preference_theme_summary">앱에 다른 디자인을 적용합니다.</string>
+    <string name="preference_theme_message">테마를 선택합니다</string>
+
+    <string name="preference_theme_item_indigo">쪽빛</string>
+    <string name="preference_theme_item_orange">오렌지</string>
+    <string name="preference_theme_item_deep_orange">짙은 오렌지</string>
+    <string name="preference_theme_item_blue">파랑</string>
+    <string name="preference_theme_item_dark_grey">짙은 잿빛</string>
+    <string name="preference_theme_item_brown">구릿빛</string>
+    <string name="preference_theme_item_light_green">옅은 초록빛</string>
+    <string name="preference_theme_item_red">빨강</string>
+    <string name="preference_theme_item_oled_dark">어두운 OLED</string>
+
+    <string-array name="preference_odyssey_styles">
+        <item>@string/preference_theme_item_indigo</item>
+        <item>@string/preference_theme_item_orange</item>
+        <item>@string/preference_theme_item_deep_orange</item>
+        <item>@string/preference_theme_item_blue</item>
+        <item>@string/preference_theme_item_dark_grey</item>
+        <item>@string/preference_theme_item_brown</item>
+        <item>@string/preference_theme_item_light_green</item>
+        <item>@string/preference_theme_item_red</item>
+        <item>@string/preference_theme_item_oled_dark</item>
+    </string-array>
+
+    <string name="preference_album_sort_order_title">연주자 음반 정렬 순서</string>
+    <string name="preference_album_sort_order_message">순서</string>
+    <string name="preference_album_sort_order_summary">연주자의 음반을 정렬할 순서를 정합니다.</string>
+
+    <string name="preference_album_sort_order_name">이름</string>
+    <string name="preference_album_sort_order_year">연도</string>
+
+    <string-array name="preference_album_sort_orders">
+        <item>@string/preference_album_sort_order_name</item>
+        <item>@string/preference_album_sort_order_year</item>
+    </string-array>
+
+    <string name="preference_dark_theme_title">어두운 테마</string>
+    <string name="preference_dark_theme_message">어두운 테마를 씁니다</string>
+
+    <string name="preference_show_artist_image_title">연주자 이미지 보기</string>
+    <string name="preference_show_artist_image_text">지금 연주되는 곡을 보여줄 때 음반 이미지와 연주자 이미지 중에 고릅니다</string>#
+
+    <string name="preference_default_view_title">기본 보기</string>
+    <string name="preference_default_view_message">기본 보기를 고릅니다</string>
+    <string name="preference_default_view_summary">앱의 기본 보기를 고릅니다.</string>
+
+    <string name="preference_default_view_my_music_artists">연주자</string>
+    <string name="preference_default_view_my_music_albums">음반</string>
+    <string name="preference_default_view_my_music_playlists">연주목록</string>
+    <string name="preference_default_view_my_music_files">파일</string>
+
+    <string-array name="preference_default_views">
+        <item>@string/preference_default_view_my_music_artists</item>
+        <item>@string/preference_default_view_my_music_albums</item>
+        <item>@string/preference_default_view_my_music_playlists</item>
+        <item>@string/preference_default_view_my_music_files</item>
+    </string-array>
+
+    <string name="preference_library_view_title">라이브러리 보기</string>
+    <string name="preference_library_view_message">라이브러리 보기 고르기</string>
+    <string name="preference_library_view_summary">음반과 연주자 보기에 사용될 형식을 고릅니다</string>
+
+    <string name="preference_library_view_list">항목</string>
+    <string name="preference_library_view_grid">격자</string>
+
+    <string-array name="preference_library_view">
+        <item>@string/preference_library_view_list</item>
+        <item>@string/preference_library_view_grid</item>
+    </string-array>
+
+    <string name="preference_use_album_artists_title">음반 연주자 태그 사용</string>
+    <string name="preference_use_album_artists_text">연주자 항목에서 음반 연주자 태그를 씁니다.</string>
+
+    <string name="preference_volume_control_title">음량 컨트롤 보기</string>
+    <string name="preference_volume_control_message">음량 컨트롤 보기 선택</string>
+    <string name="preference_volume_control_summary">음악 재생 컨트롤에 사용될 보기를 고릅니다</string>
+
+    <string name="preference_volume_control_off">끄기</string>
+    <string name="preference_volume_control_seekbar">슬라이더</string>
+    <string name="preference_volume_control_buttons">버튼</string>
+
+    <string-array name="preference_volume_control">
+        <item>@string/preference_volume_control_off</item>
+        <item>@string/preference_volume_control_seekbar</item>
+        <item>@string/preference_volume_control_buttons</item>
+    </string-array>
+
+    <string name="preference_generic_hardware_keys_title">하드웨어 버튼 사용</string>
+    <string name="preference_generic_hardware_keys_text">재생 컨트롤에 장치의 하드웨어 버튼을 사용합니다.</string>
+
+    <string name="preference_show_notification_title">알림 보기</string>
+    <string name="preference_show_notification_text">메인 사용자 인터페이스를 나갈 때 알림을 보여줍니다.</string>
+
+    <string name="preference_use_english_wikipedia_title">영문 위키피디아 사용</string>
+    <string name="preference_use_english_wikipedia_text">페이지를 찾기위해 영문 위키피디아를 사용합니다</string>
+
+    <string name="preference_category_design">디자인</string>
+    <string name="preference_category_library">라이브러리</string>
+    <string name="preference_category_controls">컨트롤</string>
+    <string name="preference_category_other">기타</string>
+
+    <!-- artwork preferences -->
+    <string name="preference_artwork_album_provider_title">음반 이미지 제공</string>
+    <string name="preference_artwork_album_provider_summary">음반 이미지 제공자를 고릅니다.</string>
+    <string name="preference_artwork_album_provider_message">음반 이미지를 보여 줄 제공자를 고릅니다.</string>
+
+    <string name="provider_off">끄기</string>
+
+    <string-array name="preference_artwork_album_provider_entries">
+        <item>@string/provider_off</item>
+        <item>@string/musicbrainz</item>
+        <item>@string/last_fm</item>
+    </string-array>
+
+    <string name="preference_artwork_artist_provider_title">연주자 이미지 제공</string>
+    <string name="preference_artwork_artist_provider_summary">연주자 이미지 제공자를 고릅니다.</string>
+    <string name="preference_artwork_artist_provider_message">연주자 이미지를 보여 줄 제공자를 고릅니다.</string>
+
+    <string-array name="preference_artwork_artist_provider_entries">
+        <item>@string/provider_off</item>
+        <item>@string/last_fm</item>
+        <item>@string/fanart_tv</item>
+    </string-array>
+
+    <string name="preference_artwork_clear_artist">연주자 이미지 정리</string>
+    <string name="preference_artwork_clear_artist_summary">저장된 모든 연주자 이미지를 지웁니다.</string>
+    <string name="preference_artwork_clear_album">음반 이미지 정리</string>
+    <string name="preference_artwork_clear_album_summary">저장된 모든 음반 이미지를 지웁니다.</string>
+
+    <string name="preference_artwork_clear_blocked_artist">막힌 연주자 이미지 정리</string>
+    <string name="preference_artwork_clear_blocked_artist_summary">찾지 못한 연주자 목록을 모두 지웁니다.</string>
+    <string name="preference_artwork_clear_blocked_album">막힌 음반 이미지 정리</string>
+    <string name="preference_artwork_clear_blocked_album_summary">찿지 못한 음반 목록을 모두 지웁니다.</string>
+
+    <string name="preference_artwork_bulk_load">데이터베이스 전체 이미지 읽기.</string>
+    <string name="preference_artwork_bulk_load_summary">수많은 이미지를 읽어 시간이 오래 걸리므로 유의해야 합니다. 제공자의 임시 제한에 걸릴 수도 있습니다.</string>
+
+    <string name="preference_artwork_wifi_only_title">WIFI에서만 내려받기</string>
+    <string name="preference_artwork_wifi_only_text">장치가 WIFI에 연결된 때에만 아트워크를 내려받습니다.</string>
+
+    <string name="preference_category_artwork_settings">아트워크 설정</string>
+    <string name="preference_category_artwork_database_cleanup">데이터베이스 정리</string>
+    <string name="preference_category_artwork_other_actions">다른 기능</string>
+
+
+    <string name="search_choice_track">곡</string>
+    <string name="search_choice_album">음반</string>
+    <string name="search_choice_artist">연주자</string>
+    <string name="search_choice_file">파일</string>
+    <string name="search_choice_everything">모두</string>
+
+    <string-array name="server_search_choices">
+        <item>@string/search_choice_track</item>
+        <item>@string/search_choice_album</item>
+        <item>@string/search_choice_artist</item>
+        <item>@string/search_choice_file</item>
+        <item>@string/search_choice_everything</item>
+    </string-array>
+
+    <string name="welcome_dialog_title">프로필 없음</string>
+    <string name="welcome_dialog_text">이 앱은 MPD를 원격 제어합니다. MPD를 모르신다면 이 앱은 아마도 쓸모가 없을 것입니다. 죄송 :).\n\n이 앱을 쓰려면 위 오른쪽 모서리의 추가 단추로 새 프로필을 추가합니다.\n이 앱은 MPD 클라이언트로 Mopidy와 동작할 수도, 안 할 수도 있으며 Mopidy 지원이 제공되지 않습니다.\n\n동일한 인터페이스의 음악 플레이어를 원한다면, Odyssey (https://github.com/gateship-one/odyssey)를 써보시기 바랍니다.</string>
+
+    <string name="bulk_download_notice_title">이미지 내려받기</string>
+    <string name="bulk_download_notice_text">이미지를 대규모로 내려받으면 해당 서버에 큰 부하가 걸립니다. 이때 서버의 부하로 이미지를 내려받지 못할 수도 있습니다. 서버의 과부하가 감지되면 내려받기가 취소됩니다.\n\n아트워크 제공자에게 기부를 고려하시기 바랍니다.</string>
+
+    <!-- About activity -->
+    <string name="artwork_provided_by">아트워크 제공자:</string>
+    <string name="acknowledgement_text">이 GUI의 기반이 된 Odyssey 음악 플레이어 개발을 지속적으로 일깨워 준 Frederik Lütkes에게 큰 감사를 전합니다.</string>
+    <string name="license_text">이 앱은 GPLv3 사용권을 따릅니다.\n재료 아이콘은 구글의 CC-BY 사용권을 따릅니다.</string>
+    <string name="sources_text">소스코드는 깃허브에서 사용할 수 있습니다:\nhttps://github.com/gateship-one/malp</string>
+    <string name="activity_about_version">버전: </string>
+    <!-- Bulk downloader service -->
+    <string name="downloader_notification_title">대규모로 내려받는 중</string>
+    <string name="downloader_notification_remaining_images">내려받은 이미지:</string>
+
+    <!-- Widget -->
+    <string name="widget_disconnected">끊어짐</string>
+    <string name="widget_connect">연결됨</string>
+
+    <!-- Contributors activity -->
+    <string name="contributors_title">기여자</string>
+    <string name="contributor_translator_japanese">일본어 번역</string>
+    <string name="contributor_translator_french">프랑스어 번역</string>
+    <string name="contributor_translator_spanish">스페인어 번역</string>
+
+    <!-- Thirdparty Licenses dialog -->
+    <string name="thirdparty_licenses_dialog_title">제삼자 사용권</string>
+</resources>
