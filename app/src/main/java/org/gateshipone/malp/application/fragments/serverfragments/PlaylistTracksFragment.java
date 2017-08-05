@@ -24,8 +24,10 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -90,8 +92,12 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
             mPath = args.getString(EXTRA_PLAYLIST_NAME);
         }
 
+        // Check if sections should be shown
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        boolean showVisibleSections = sharedPref.getBoolean(getContext().getString(R.string.pref_show_playlist_sections_key), getContext().getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
+
         // Create the needed adapter for the ListView
-        mFileAdapter = new FileAdapter(getActivity(), false, false, true);
+        mFileAdapter = new FileAdapter(getActivity(), false, false, showVisibleSections);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);
