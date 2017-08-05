@@ -1,3 +1,10 @@
+### Version: 1.1.8 Tag: release-17 (2017-08-05) ###
+ * Stability fixes in UI
+ * Fix bug #59
+ * Implement feature request #46
+ * General stability fixes in current playlist adapter
+ * Crash fix when entering empty port number in profiles view
+
 ### Version: 1.1.7 Tag: release-16 (2017-07-22) ###
  * Stability fixes in UI
  * Format MPD dates more nicely

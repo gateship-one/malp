@@ -47,8 +47,8 @@ android {
         applicationId "org.gateshipone.malp"
         minSdkVersion 21
         targetSdkVersion 25
-        versionCode 16
-        versionName "1.1.7"
+        versionCode 17
+        versionName "1.1.8"
         signingConfig signingConfigs.config
     }
     buildTypes {
