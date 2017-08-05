@@ -381,8 +381,16 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
     public synchronized void removeArtistImage(MPDArtist artist) {
         SQLiteDatabase database = getWritableDatabase();
 
-        String where = ArtistArtTable.COLUMN_ARTIST_MBID + "=? OR " + ArtistArtTable.COLUMN_ARTIST_NAME + "=?";
-        String whereArgs[] = {artist.getMBIDCount() > 0 ? artist.getMBID(0) : "", artist.getArtistName()};
+        String where;
+        String whereArgs[];
+
+        if (artist.getMBIDCount() == 0) {
+            where = ArtistArtTable.COLUMN_ARTIST_NAME + "=?";
+            whereArgs = new String[]{artist.getArtistName()};
+        } else {
+            where = ArtistArtTable.COLUMN_ARTIST_MBID + "=? OR " + ArtistArtTable.COLUMN_ARTIST_NAME + "=?";
+            whereArgs = new String[]{artist.getMBID(0) , artist.getArtistName()};
+        }
 
         database.delete(ArtistArtTable.TABLE_NAME, where, whereArgs);
 
@@ -392,8 +400,17 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
     public synchronized void removeAlbumImage(MPDAlbum album) {
         SQLiteDatabase database = getWritableDatabase();
 
-        String where = AlbumArtTable.COLUMN_ALBUM_MBID + "=? OR (" + AlbumArtTable.COLUMN_ALBUM_NAME + "=? AND " + AlbumArtTable.COLUMN_ARTIST_NAME + "=? ) ";
-        String whereArgs[] = {album.getMBID(), album.getName(), album.getArtistName()};
+        String where;
+        String whereArgs[];
+
+        // Check if a MBID is present or not
+        if(album.getMBID().isEmpty()) {
+            where = "(" + AlbumArtTable.COLUMN_ALBUM_NAME + "=? AND " + AlbumArtTable.COLUMN_ARTIST_NAME + "=? ) ";
+            whereArgs = new String[]{album.getName(), album.getArtistName()};
+        } else {
+            where = AlbumArtTable.COLUMN_ALBUM_MBID + "=? OR (" + AlbumArtTable.COLUMN_ALBUM_NAME + "=? AND " + AlbumArtTable.COLUMN_ARTIST_NAME + "=? ) ";
+            whereArgs = new String[]{album.getMBID(), album.getName(), album.getArtistName()};
+        }
 
         database.delete(AlbumArtTable.TABLE_NAME, where, whereArgs);
 
