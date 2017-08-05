@@ -24,11 +24,14 @@ package org.gateshipone.malp.application.adapters;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
+import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.listviewitems.FileListItem;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -56,7 +59,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  * This decreases the memory footprint because the adapter is able to clear unneeded list blocks when
  * not longer needed (e.g. the user scrolled away)
  */
-public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements ArtworkManager.onNewAlbumImageListener {
+public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements ArtworkManager.onNewAlbumImageListener, SharedPreferences.OnSharedPreferenceChangeListener {
     /**
      * States of list blocks.
      */
@@ -159,6 +162,8 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
      */
     private boolean mWindowEnabled = true;
 
+    private boolean mSectionsEnabled = true;
+
     private ArtworkManager mArtworkManager;
 
 
@@ -185,6 +190,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         mClearTimer = null;
 
         mArtworkManager = ArtworkManager.getInstance(context.getApplicationContext());
+
+        // Check if sections should be shown
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        mSectionsEnabled = sharedPref.getBoolean(mContext.getString(R.string.pref_show_playlist_sections_key), mContext.getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
     }
 
     /**
@@ -218,6 +227,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
      */
     @Override
     public int getItemViewType(int position) {
+        // If playlist sections are disabled, just return track type here
+        if(!mSectionsEnabled) {
+            return VIEW_TYPES.TYPE_TRACK_ITEM.ordinal();
+        }
         // Get MPDTrack at the given index used for this item.
         MPDTrack track = getTrack(position);
         boolean newAlbum = false;
@@ -514,6 +527,9 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         updatePlaylist();
         mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getLastStatus());
         ArtworkManager.getInstance(mContext.getApplicationContext()).registerOnNewAlbumImageListener(this);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sharedPref.registerOnSharedPreferenceChangeListener(this);
     }
 
     /**
@@ -526,6 +542,9 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
 
         mPlaylist = null;
         ArtworkManager.getInstance(mContext.getApplicationContext()).unregisterOnNewAlbumImageListener(this);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
+        sharedPref.unregisterOnSharedPreferenceChangeListener(this);
     }
 
     /**
@@ -681,5 +700,13 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
     @Override
     public void newAlbumImage(MPDAlbum album) {
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(mContext.getString(R.string.pref_show_playlist_sections_key))) {
+            mSectionsEnabled = sharedPreferences.getBoolean(mContext.getString(R.string.pref_show_playlist_sections_key), mContext.getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
+            notifyDataSetInvalidated();
+        }
     }
 }

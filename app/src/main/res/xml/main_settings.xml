@@ -76,6 +76,12 @@
             android:persistent="true"
             android:summary="@string/preference_use_album_artists_text"
             android:title="@string/preference_use_album_artists_title" />
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_show_playlist_sections_default"
+            android:key="@string/pref_show_playlist_sections_key"
+            android:persistent="true"
+            android:summary="@string/preference_show_playlist_sections_text"
+            android:title="@string/preference_show_playlist_sections_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_category_controls">
         <CheckBoxPreference

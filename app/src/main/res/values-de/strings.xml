@@ -236,5 +236,8 @@
     <string name="contributor_translator_spanish">Spanische Übersetzung</string>
     <string name="action_save_profile">Profil speichern</string>
     <string name="duration_days">Tage</string>
+    <string name="action_stop_streaming">Stoppe Streaming</string>
+    <string name="preference_show_playlist_sections_text">Zeige Sektionen mit Alben-Covern in Wiedergabelisten</string>
+    <string name="preference_show_playlist_sections_title">Verwende Sektionen in Wiedergabelisten</string>
     <string name="contributor_translator_korean">Koreanische Übersetzung</string>
 </resources>
