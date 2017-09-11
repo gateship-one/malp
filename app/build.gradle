@@ -41,12 +41,12 @@ android {
             }
         }
     }
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
     defaultConfig {
         applicationId "org.gateshipone.malp"
         minSdkVersion 21
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 17
         versionName "1.1.8"
         signingConfig signingConfigs.config
@@ -73,9 +73,10 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.+'
-    compile 'com.android.support:support-v4:25.+'
-    compile 'com.android.support:design:25.+'
-    compile 'com.android.support:preference-v14:25.+'
+    compile 'com.android.support:appcompat-v7:26.0.2'
+    compile 'com.android.support:support-compat:26.0.2'
+    compile 'com.android.support:support-media-compat:26.0.2'
+    compile 'com.android.support:design:26.0.2'
+    compile 'com.android.support:preference-v14:26.0.2'
     compile 'com.android.volley:volley:1.0.0'
 }

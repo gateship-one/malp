@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.background;
 
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -34,11 +35,14 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.support.v4.app.NotificationManagerCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.NotificationCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.app.NotificationCompat.MediaStyle;
 import android.util.Log;
 
 import org.gateshipone.malp.R;
@@ -53,7 +57,9 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = NotificationManager.class.getSimpleName();
-    private static final int NOTIFICATION_ID = 0;
+    private static final int NOTIFICATION_ID = 1;
+
+    private static final String NOTIFICATION_CHANNEL_ID = "Playback";
 
     private BackgroundService mService;
 
@@ -132,8 +138,9 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     public synchronized void showNotification() {
         openMediaSession();
-        mService.startForeground(NOTIFICATION_ID, mNotification);
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
+        Intent intent = new Intent(mService, BackgroundService.class);
+
         mSessionActive = true;
     }
 
@@ -147,6 +154,17 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                 mMediaSession.setPlaybackToRemote(mVolumeControlProvider);
             }
             mMediaSession.setActive(true);
+        }
+    }
+
+    private void openChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, mService.getResources().getString(R.string.notification_channel_name_playback), android.app.NotificationManager.IMPORTANCE_LOW);
+            channel.enableVibration(false);
+            channel.enableLights(false);
+            channel.setVibrationPattern(null);
+            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+            mNotificationManager.createNotificationChannel(channel);
         }
     }
 
@@ -176,7 +194,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     */
     public synchronized void updateNotification(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
         if (track != null) {
-            mNotificationBuilder = new NotificationCompat.Builder(mService);
+            openChannel();
+            mNotificationBuilder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
+
+            mNotificationBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
 
             // Open application intent
             Intent contentIntent = new Intent(mService, MainActivity.class);
@@ -226,7 +247,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.addAction(playPauseAction);
             mNotificationBuilder.addAction(stopActon);
             mNotificationBuilder.addAction(nextAction);
-            NotificationCompat.MediaStyle notificationStyle = new NotificationCompat.MediaStyle();
+            MediaStyle notificationStyle = new MediaStyle();
+            if(mMediaSession != null) {
+                notificationStyle.setMediaSession(mMediaSession.getSessionToken());
+            }
             notificationStyle.setShowActionsInCompactView(1, 3);
             mNotificationBuilder.setStyle(notificationStyle);
 
@@ -417,13 +441,13 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public synchronized void setDismissible(boolean dismissible) {
         mDismissible = dismissible;
 
-        updateNotification(mLastTrack, mLastStatus.getPlaybackState());
-
+        // Reopen the notification
         if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession = null;
         }
         openMediaSession();
+        updateNotification(mLastTrack, mLastStatus.getPlaybackState());
     }
 
     /**

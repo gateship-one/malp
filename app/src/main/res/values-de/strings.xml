@@ -240,4 +240,5 @@
     <string name="preference_show_playlist_sections_text">Zeige Sektionen mit Alben-Covern in Wiedergabelisten</string>
     <string name="preference_show_playlist_sections_title">Verwende Sektionen in Wiedergabelisten</string>
     <string name="contributor_translator_korean">Koreanische Übersetzung</string>
+    <string name="notification_channel_name_playback">Wiedergabe</string>
 </resources>
