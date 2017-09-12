@@ -142,11 +142,18 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         Intent intent = new Intent(mService, BackgroundService.class);
 
         mSessionActive = true;
+
+        if ( null != mNotification) {
+            // Change to foreground service otherwise android will just kill it
+            mService.startForeground(NOTIFICATION_ID, mNotification);
+        }
     }
 
     private synchronized void openMediaSession() {
         if (mMediaSession == null) {
             mMediaSession = new MediaSessionCompat(mService, mService.getString(R.string.app_name));
+
+            // Check if stream playback is enabled or not
             if (mDismissible) {
                 mMediaSession.setCallback(new MALPMediaSessionCallback());
                 mVolumeControlProvider = new MALPVolumeControlProvider();
@@ -157,13 +164,21 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         }
     }
 
+    /**
+     * Creates the {@link NotificationChannel} for devices running Android O or higher
+     */
     private void openChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, mService.getResources().getString(R.string.notification_channel_name_playback), android.app.NotificationManager.IMPORTANCE_LOW);
+            // Disable lights & vibration
             channel.enableVibration(false);
             channel.enableLights(false);
             channel.setVibrationPattern(null);
+
+            // Allow lockscreen playback control
             channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+
+            // Register the channel
             mNotificationManager.createNotificationChannel(channel);
         }
     }
@@ -172,6 +187,9 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * Hides the notification (if shown) and resets state variables.
      */
     public synchronized void hideNotification() {
+        // Stop foreground service as it is not necessary anymore
+        mService.stopForeground(true);
+
         if (mMediaSession != null) {
             mMediaSession.setActive(false);
             mMediaSession.release();
@@ -381,11 +399,25 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     public void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
-            updateNotification(mLastTrack, status.getPlaybackState());
+            // Only update the notification if playback state really changed
+            if ( mLastStatus.getPlaybackState() != status.getPlaybackState()) {
+                updateNotification(mLastTrack, status.getPlaybackState());
+
+                // Check if playing or not. If activate the service as foreground
+                if( status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                    mService.stopForeground(false);
+                } else {
+                    mService.startForeground(NOTIFICATION_ID, mNotification);
+                }
+            }
             if (mVolumeControlProvider != null) {
                 // Notify the mediasession about the new volume
-                mVolumeControlProvider.setCurrentVolume(status.getVolume());
+                if (mLastStatus.getVolume() != status.getVolume()) {
+                    mVolumeControlProvider.setCurrentVolume(status.getVolume());
+                }
             }
+
+
         }
         // Save for later usage
         mLastStatus = status;
@@ -397,11 +429,27 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      * @param track New MPD track
      */
     public void setMPDFile(MPDTrack track) {
-        if (mSessionActive) {
+        if (mSessionActive && notificationNeedsUpdate(track)) {
             updateNotification(track, mLastStatus.getPlaybackState());
         }
         // Save for later usage
         mLastTrack = track;
+    }
+
+    public boolean notificationNeedsUpdate(MPDTrack track) {
+        if (!track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
+            return true;
+        }
+
+        if (!track.getTrackArtist().equals(mLastTrack.getTrackArtist())) {
+            return true;
+        }
+
+        if (!track.getTrackTitle().equals(mLastTrack.getTrackTitle())) {
+            return true;
+        }
+
+        return false;
     }
 
     /*
