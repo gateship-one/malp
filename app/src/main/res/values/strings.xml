@@ -389,6 +389,7 @@
     <string name="downloader_notification_remaining_images">Downloaded images:</string>
 
     <string name="notification_channel_name_playback">Playback</string>
+    <string name="notification_channel_name_bulk_download">Bulk downloader</string>
 
     <!-- Widget -->
     <string name="widget_disconnected">Disconnected</string>

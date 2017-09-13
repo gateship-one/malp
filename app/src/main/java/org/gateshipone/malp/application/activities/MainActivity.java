@@ -722,7 +722,7 @@ public class MainActivity extends GenericActivity
         } else if (!scrollingEnabled && showImage && collapsingImage != null) {
             toolbar.setTitleEnabled(true);
             toolbar.setTitle(title);
-            
+
 
             params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_EXIT_UNTIL_COLLAPSED + AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL);
         } else {

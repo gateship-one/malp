@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.artworkdatabase;
 
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 
 import android.app.PendingIntent;
@@ -35,6 +36,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -51,12 +53,12 @@ import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 
 public class BulkDownloadService extends Service implements ArtworkManager.BulkLoadingProgressCallback {
     private static final String TAG = BulkDownloadService.class.getSimpleName();
 
-    private static final int NOTIFICATION_ID = 42;
+    private static final int NOTIFICATION_ID = 2;
+    private static final String NOTIFICATION_CHANNEL_ID = "BulkDownloader";
 
     public static final String ACTION_CANCEL = "org.gateshipone.malp.cancel_download";
     public static final String ACTION_START_BULKDOWNLOAD = "org.gateshipone.malp.start_download";
@@ -172,6 +174,22 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
     }
 
+    private void openChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, this.getResources().getString(R.string.notification_channel_name_bulk_download), android.app.NotificationManager.IMPORTANCE_LOW);
+            // Disable lights & vibration
+            channel.enableVibration(false);
+            channel.enableLights(false);
+            channel.setVibrationPattern(null);
+
+            // Allow lockscreen playback control
+            channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PRIVATE);
+
+            // Register the channel
+            mNotificationManager.createNotificationChannel(channel);
+        }
+    }
+
     private void runAsForeground() {
         if (mBroadcastReceiver == null) {
             mBroadcastReceiver = new ActionReceiver();
@@ -184,7 +202,9 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             registerReceiver(mBroadcastReceiver, intentFilter);
         }
 
-        mBuilder = new NotificationCompat.Builder(this)
+        openChannel();
+
+        mBuilder = new NotificationCompat.Builder(this,NOTIFICATION_CHANNEL_ID)
                 .setContentTitle(getResources().getString(R.string.downloader_notification_title))
                 .setStyle(new NotificationCompat.BigTextStyle()
                         .bigText(getResources().getString(R.string.downloader_notification_remaining_images) + ' ' + String.valueOf(mSumImageDownloads - (mRemainingArtists + mRemainingAlbums)) + '/' + String.valueOf(mSumImageDownloads)))
@@ -196,7 +216,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         // Cancel action
         Intent nextIntent = new Intent(BulkDownloadService.ACTION_CANCEL);
         PendingIntent nextPendingIntent = PendingIntent.getBroadcast(getApplicationContext(), 1, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        android.support.v7.app.NotificationCompat.Action cancelAction = new android.support.v7.app.NotificationCompat.Action.Builder(R.drawable.ic_cancel_24dp, getResources().getString(R.string.dialog_action_cancel), nextPendingIntent).build();
+        android.support.v4.app.NotificationCompat.Action cancelAction = new android.support.v4.app.NotificationCompat.Action.Builder(R.drawable.ic_cancel_24dp, getResources().getString(R.string.dialog_action_cancel), nextPendingIntent).build();
 
         mBuilder.addAction(cancelAction);
 
