@@ -55,6 +55,8 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = NotificationManager.class.getSimpleName();
     private static final int NOTIFICATION_ID = 1;
@@ -117,6 +119,8 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     private MALPVolumeControlProvider mVolumeControlProvider;
 
+    private ReentrantLock mArtworkLock;
+
 
     public NotificationManager(BackgroundService service) {
         mService = service;
@@ -131,6 +135,8 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         mCoverLoader = new CoverBitmapLoader(mService, this);
 
         ArtworkManager.getInstance(service).registerOnNewAlbumImageListener(this);
+
+        mArtworkLock = new ReentrantLock();
     }
 
     /**
@@ -140,8 +146,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         openMediaSession();
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
         Intent intent = new Intent(mService, BackgroundService.class);
-
-        mSessionActive = true;
 
         if ( null != mNotification) {
             // Change to foreground service otherwise android will just kill it
@@ -161,6 +165,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                 mMediaSession.setPlaybackToRemote(mVolumeControlProvider);
             }
             mMediaSession.setActive(true);
+            mSessionActive = true;
         }
     }
 
@@ -212,6 +217,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     */
     public synchronized void updateNotification(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
         if (track != null) {
+            mArtworkLock.lock();
             openChannel();
             mNotificationBuilder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
 
@@ -346,6 +352,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             // Send the notification away
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+            mArtworkLock.unlock();
         }
     }
 
@@ -461,6 +468,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public synchronized void receiveBitmap(Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
         // Check if notification exists and set picture
         mLastBitmap = bm;
+        mArtworkLock.lock();
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && mNotification != null && bm != null) {
             mNotificationBuilder.setLargeIcon(bm);
             mNotification = mNotificationBuilder.build();
@@ -477,6 +485,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                 }
             }
         }
+        mArtworkLock.unlock();
     }
 
     @Override
