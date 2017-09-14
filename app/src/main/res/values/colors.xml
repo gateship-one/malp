@@ -192,6 +192,7 @@
     <color name="colorTextBackgroundPrimary_light_red">#1D1D1D</color>
     <color name="colorNavheaderIcon_light_red">#000000</color>
 
+    <color name="colorIconBackground">#fd9600</color>
 
     <!-- Fixed colors -->
     <color name="colorWidgetBackground">#424242</color>
