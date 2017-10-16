@@ -411,7 +411,7 @@ public class MPDConnection {
             return false;
         }
 
-        sendMPDCommand(MPDCommands.MPD_COMMAND_PASSWORD + pPassword);
+        sendMPDCommand(MPDCommands.MPD_COMMAND_PASSWORD(pPassword));
 
         /* Check if the result was positive or negative */
 

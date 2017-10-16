@@ -26,7 +26,9 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_CLOSE = "close";
 
-    public static final String MPD_COMMAND_PASSWORD = "password ";
+    public static String MPD_COMMAND_PASSWORD(String password) {
+        return "password \"" + password.replace("\"","\\\"") + "\"";
+    }
 
     private static String createAlbumGroupString(MPDCapabilities caps) {
         String groups = "";
