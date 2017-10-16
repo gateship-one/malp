@@ -88,7 +88,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:maxHeight="12dp"
                 android:layout_toStartOf="@+id/track_duration"
                 android:ellipsize="end"
                 android:singleLine="true"
