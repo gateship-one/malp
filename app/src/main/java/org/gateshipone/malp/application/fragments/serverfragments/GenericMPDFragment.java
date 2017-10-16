@@ -23,6 +23,7 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -35,7 +36,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-public abstract class GenericMPDFragment<T extends Object> extends Fragment implements LoaderManager.LoaderCallbacks<T> {
+public abstract class GenericMPDFragment<T extends Object> extends DialogFragment implements LoaderManager.LoaderCallbacks<T> {
     private static final String TAG = GenericMPDFragment.class.getSimpleName();
 
     protected ConnectionStateListener mConnectionStateListener;

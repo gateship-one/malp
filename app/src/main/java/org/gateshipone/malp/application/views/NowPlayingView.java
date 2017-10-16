@@ -66,6 +66,7 @@ import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
+import org.gateshipone.malp.application.fragments.serverfragments.OutputsDialog;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -869,6 +870,16 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 MPDCommandHandler.setVolume(0);
             }
         });
+
+        mVolumeIcon.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                OutputsDialog dialog = new OutputsDialog();
+                dialog.show(((AppCompatActivity)getContext()).getSupportFragmentManager(), OutputsDialog.class.getSimpleName());
+                return true;
+            }
+        });
+
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 

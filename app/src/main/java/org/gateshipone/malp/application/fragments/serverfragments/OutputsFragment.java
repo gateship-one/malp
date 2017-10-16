@@ -23,7 +23,6 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
@@ -37,7 +36,6 @@ import java.util.List;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.OutputAdapter;
-import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.OutputsLoader;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;

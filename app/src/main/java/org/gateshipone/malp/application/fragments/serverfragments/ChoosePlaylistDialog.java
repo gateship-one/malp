@@ -44,7 +44,7 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
-public class ChoosePlaylistDialog extends DialogFragment implements LoaderManager.LoaderCallbacks<List<MPDFileEntry>> {
+public class ChoosePlaylistDialog extends GenericMPDFragment<List<MPDFileEntry>> {
 
     public static final String EXTRA_SHOW_NEW_ENTRY = "show_newentry";
 
