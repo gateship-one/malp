@@ -1,3 +1,13 @@
+### Version: 1.1.9 Tag: release-18 (2017-10-17) ###
+ * Fix bugs: #72, #68
+ * New sdk version (26)
+ * Adaptive icon
+ * Notification channels
+ * Foreground notification during playback
+ * Statusbar is currently colored in artist/album view (no fix known at the time)
+ * Output dialog on longpress on the volume button in NowPlayingView
+ * Fix for notification image sometimes not showing
+
 ### Version: 1.1.8 Tag: release-17 (2017-08-05) ###
  * Stability fixes in UI
  * Fix bug #59
