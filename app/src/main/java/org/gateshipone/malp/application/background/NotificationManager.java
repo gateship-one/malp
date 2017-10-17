@@ -119,9 +119,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     private MALPVolumeControlProvider mVolumeControlProvider;
 
-    private ReentrantLock mArtworkLock;
-
-
     public NotificationManager(BackgroundService service) {
         mService = service;
         mNotificationManager = (android.app.NotificationManager) mService.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -136,7 +133,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
         ArtworkManager.getInstance(service).registerOnNewAlbumImageListener(this);
 
-        mArtworkLock = new ReentrantLock();
     }
 
     /**
@@ -217,7 +213,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     */
     public synchronized void updateNotification(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
         if (track != null) {
-            mArtworkLock.lock();
             openChannel();
             mNotificationBuilder = new NotificationCompat.Builder(mService, NOTIFICATION_CHANNEL_ID);
 
@@ -352,7 +347,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
 
             // Send the notification away
             mNotificationManager.notify(NOTIFICATION_ID, mNotification);
-            mArtworkLock.unlock();
         }
     }
 
@@ -404,7 +398,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      *
      * @param status New MPD status
      */
-    public void setMPDStatus(MPDCurrentStatus status) {
+    public synchronized void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
             // Only update the notification if playback state really changed
             if ( mLastStatus.getPlaybackState() != status.getPlaybackState()) {
@@ -468,11 +462,8 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public synchronized void receiveBitmap(Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
         // Check if notification exists and set picture
         mLastBitmap = bm;
-        mArtworkLock.lock();
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && mNotification != null && bm != null) {
-            mNotificationBuilder.setLargeIcon(bm);
-            mNotification = mNotificationBuilder.build();
-            mNotificationManager.notify(NOTIFICATION_ID, mNotification);
+            updateNotification(mLastTrack,mLastStatus.getPlaybackState());
 
             /* Set lockscreen picture and stuff */
             if (mMediaSession != null) {
@@ -485,7 +476,6 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
                 }
             }
         }
-        mArtworkLock.unlock();
     }
 
     @Override
