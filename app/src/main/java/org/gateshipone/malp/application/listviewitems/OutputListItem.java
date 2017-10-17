@@ -47,4 +47,12 @@ public class OutputListItem extends LinearLayout {
         mMainView.setChecked(active);
     }
 
+    public void setName(String name) {
+        mMainView.setText(name);
+    }
+
+    public void setChecked(boolean checked) {
+        mMainView.setChecked(checked);
+    }
+
 }

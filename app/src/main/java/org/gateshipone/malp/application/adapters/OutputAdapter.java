@@ -49,8 +49,14 @@ public class OutputAdapter extends GenericSectionAdapter<MPDOutput> {
         int outputId = output.getID();
         boolean active = output.getOutputState();
 
-
-        convertView = new OutputListItem(mContext, outputName, active, outputId);
+        if ( convertView == null ) {
+            // Create a new View and not reuse it
+            convertView = new OutputListItem(mContext, outputName, active, outputId);
+        } else {
+            OutputListItem outputItem = (OutputListItem)convertView;
+            outputItem.setName(outputName);
+            outputItem.setChecked(active);
+        }
 
         return convertView;
     }
