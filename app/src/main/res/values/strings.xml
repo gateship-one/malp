@@ -91,6 +91,9 @@
     <string name="action_wikipedia_album">Open album</string>
     <string name="action_wikipedia_artist">Open artist</string>
 
+    <string name="action_switch_to_output">Switch to Output</string>
+    <string name="action_toggle_outputs">Toggle Outputs</string>
+
     <!-- Menu entries -->
     <string name="menu_library">Library</string>
     <string name="menu_settings">Settings</string>

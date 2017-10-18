@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -37,14 +38,17 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -66,7 +70,6 @@ import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
-import org.gateshipone.malp.application.fragments.serverfragments.OutputsDialog;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -74,14 +77,17 @@ import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
+import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
+import java.util.List;
 import java.util.Locale;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener, ArtworkManager.onNewArtistImageListener,
@@ -873,9 +879,81 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         mVolumeIcon.setOnLongClickListener(new OnLongClickListener() {
             @Override
-            public boolean onLongClick(View view) {
-                OutputsDialog dialog = new OutputsDialog();
-                dialog.show(((AppCompatActivity)getContext()).getSupportFragmentManager(), OutputsDialog.class.getSimpleName());
+            public boolean onLongClick(final View view) {
+
+                MPDQueryHandler.getOutputs(new MPDResponseOutputList() {
+                    @Override
+                    public void handleOutputs(final List<MPDOutput> outputList) {
+                        // we need at least 2 output plugins configured
+                        if (outputList.size() > 1) {
+                            PopupMenu popup = new PopupMenu((AppCompatActivity)getContext(), view);
+                            Menu menu = popup.getMenu();
+                            SubMenu menuSwitch =  menu.addSubMenu(R.string.action_switch_to_output);
+                            SubMenu menuToggle = menu.addSubMenu(R.string.action_toggle_outputs);
+
+                            int menuId = 0;
+                            for (final MPDOutput output : outputList) {
+                                MenuItem subMenuItem = menuToggle.add(0, menuId, 0, output.getOutputName())
+                                        .setCheckable(true)
+                                        .setChecked(output.getOutputState());
+
+                                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        MPDOutput out = outputList.get(item.getItemId());
+
+                                        if (out.getOutputState() == true) {
+                                            MPDCommandHandler.disableOutput(out.getID());
+                                        } else {
+                                            MPDCommandHandler.enableOutput(out.getID());
+                                        }
+                                        out.setOutputState(!out.getOutputState());
+
+                                        item.setChecked(out.getOutputState());
+                                        // Keep the popup menu open
+                                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                                        item.setActionView(new View(getContext()));
+                                        item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                                            @Override
+                                            public boolean onMenuItemActionExpand(MenuItem item) {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public boolean onMenuItemActionCollapse(MenuItem item) {
+                                                return false;
+                                            }
+                                        });
+                                        return false;
+                                    }
+                                });
+
+                                subMenuItem = menuSwitch.add(0, menuId, 0, output.getOutputName());
+                                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        MPDOutput selectedOut = outputList.get(item.getItemId());
+
+                                        // first enable the selected output so we have always an active ones
+                                        MPDCommandHandler.enableOutput(selectedOut.getID());
+                                        selectedOut.setOutputState(true);
+
+                                        for(MPDOutput current: outputList) {
+                                            if (current != selectedOut) {
+                                                MPDCommandHandler.disableOutput(current.getID());
+                                                current.setOutputState(false);
+                                            }
+                                        }
+                                        return false;
+                                    }
+                                });
+                                menuId++;
+                            }
+                            popup.show();
+                        }
+                    }
+                });
+
                 return true;
             }
         });
