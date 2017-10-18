@@ -214,6 +214,14 @@ public class MPDCommands {
         return "toggleoutput " + String.valueOf(id);
     }
 
+    public static String MPD_COMMAND_ENABLE_OUTPUT(int id) {
+        return "enableoutput " + String.valueOf(id);
+    }
+
+    public static String MPD_COMMAND_DISABLE_OUTPUT(int id) {
+        return "disableoutput " + String.valueOf(id);
+    }
+
     public static String MPD_COMMAND_UPDATE_DATABASE(String path) {
         if (null != path && !path.isEmpty()) {
             return "update \"" + path + "\"";

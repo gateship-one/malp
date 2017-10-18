@@ -172,6 +172,12 @@ public class MPDCommandHandler extends MPDGenericHandler {
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
             int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
             mMPDConnection.toggleOutput(outputID);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ENABLE_OUTPUT) {
+            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+            mMPDConnection.enableOutput(outputID);
+        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISABLE_OUTPUT) {
+            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+            mMPDConnection.disableOutput(outputID);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME) {
             MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
@@ -482,6 +488,40 @@ public class MPDCommandHandler extends MPDGenericHandler {
      */
     public static void toggleOutput(int outputID) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID, outputID);
+
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Enable the output of the specified output id.
+     * @param outputID ID of the output to enable
+     */
+    public static void enableOutput(int outputID) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ENABLE_OUTPUT);
+        Message msg = Message.obtain();
+        if (msg == null) {
+            return;
+        }
+
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID, outputID);
+
+        msg.obj = action;
+        MPDCommandHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Disable the output of the specified output id.
+     * @param outputID ID of the output to disable
+     */
+    public static void disableOutput(int outputID) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISABLE_OUTPUT);
         Message msg = Message.obtain();
         if (msg == null) {
             return;

@@ -2303,6 +2303,42 @@ public class MPDConnection {
     }
 
     /**
+     * Enable the output with the id.
+     *
+     * @param id Id of the output to enable (active/deactive)
+     * @return True if server responed with ok
+     */
+    public synchronized boolean enableOutput(int id) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_ENABLE_OUTPUT(id));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            handleSocketError();
+        }
+        return false;
+    }
+
+    /**
+     * Disable the output with the id.
+     *
+     * @param id Id of the output to disable (active/deactive)
+     * @return True if server responed with ok
+     */
+    public synchronized boolean disableOutput(int id) {
+        sendMPDCommand(MPDCommands.MPD_COMMAND_DISABLE_OUTPUT(id));
+
+        /* Return the response value of MPD */
+        try {
+            return checkResponse();
+        } catch (IOException e) {
+            handleSocketError();
+        }
+        return false;
+    }
+
+    /**
      * Instructs to update the database of the mpd server.
      *
      * @param path Path to update
