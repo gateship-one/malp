@@ -950,6 +950,50 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                                 menuId++;
                             }
                             popup.show();
+                        } else {
+                            // Only one output, show toggle menu
+                            PopupMenu popup = new PopupMenu((AppCompatActivity)getContext(), view);
+
+                            Menu menu = popup.getMenu();
+
+                            for (final MPDOutput output : outputList) {
+                                MenuItem subMenuItem = menu.add(0, 0, 0, output.getOutputName())
+                                        .setCheckable(true)
+                                        .setChecked(output.getOutputState());
+
+                                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
+                                    @Override
+                                    public boolean onMenuItemClick(MenuItem item) {
+                                        MPDOutput out = outputList.get(item.getItemId());
+
+                                        if (out.getOutputState() == true) {
+                                            MPDCommandHandler.disableOutput(out.getID());
+                                        } else {
+                                            MPDCommandHandler.enableOutput(out.getID());
+                                        }
+                                        out.setOutputState(!out.getOutputState());
+
+                                        item.setChecked(out.getOutputState());
+                                        // Keep the popup menu open
+                                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                                        item.setActionView(new View(getContext()));
+                                        item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                                            @Override
+                                            public boolean onMenuItemActionExpand(MenuItem item) {
+                                                return false;
+                                            }
+
+                                            @Override
+                                            public boolean onMenuItemActionCollapse(MenuItem item) {
+                                                return false;
+                                            }
+                                        });
+                                        return false;
+                                    }
+                                });
+
+                            }
+                            popup.show();
                         }
                     }
                 });
