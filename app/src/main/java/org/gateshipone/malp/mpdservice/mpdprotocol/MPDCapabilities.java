@@ -48,6 +48,8 @@ public class MPDCapabilities {
 
     private boolean mHasCurrentPlaylistRemoveRange;
 
+    private boolean mHasToggleOutput;
+
     private boolean mMopidyDetected;
 
     private boolean mTagAlbumArtist;
@@ -67,14 +69,20 @@ public class MPDCapabilities {
             mHasRangedCurrentPlaylist = false;
         }
 
+        if (mMinorVersion >= 16 || mMajorVersion > 0) {
+            mHasCurrentPlaylistRemoveRange = true;
+        }
+
+        if (mMinorVersion >= 18 || mMajorVersion > 0) {
+            mHasToggleOutput = true;
+        }
+
         if (mMinorVersion >= 19 || mMajorVersion > 0) {
             mHasListGroup = true;
             mHasListFiltering = true;
         }
 
-        if (mMinorVersion >= 16 || mMajorVersion > 0) {
-            mHasCurrentPlaylistRemoveRange = true;
-        }
+
 
         if (null != commands) {
             if (commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
@@ -148,6 +156,10 @@ public class MPDCapabilities {
 
     public boolean hasTagDate() {
         return mTagDate;
+    }
+
+    public boolean hasToggleOutput() {
+        return mHasToggleOutput;
     }
 
     public String getServerFeatures() {

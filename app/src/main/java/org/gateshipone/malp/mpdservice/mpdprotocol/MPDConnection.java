@@ -2291,7 +2291,19 @@ public class MPDConnection {
      * @return True if server responed with ok
      */
     public synchronized boolean toggleOutput(int id) {
-        sendMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
+        if (mServerCapabilities.hasToggleOutput()) {
+            sendMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
+        } else {
+            // Implement functionality with enable/disable
+            List<MPDOutput> outputs = getOutputs();
+            if ( id < outputs.size()) {
+                if ( outputs.get(id).getOutputState()) {
+                    disableOutput(id);
+                } else {
+                    enableOutput(id);
+                }
+            }
+        }
 
         /* Return the response value of MPD */
         try {
