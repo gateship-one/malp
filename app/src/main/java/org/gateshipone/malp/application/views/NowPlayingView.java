@@ -32,6 +32,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -43,6 +44,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.graphics.Palette;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Menu;
@@ -63,11 +65,13 @@ import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.FanartActivity;
+import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
 import org.gateshipone.malp.application.callbacks.TextDialogCallback;
+import org.gateshipone.malp.application.fragments.SwatchDialog;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
@@ -229,6 +233,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     private MPDCurrentStatus mLastStatus;
     private MPDTrack mLastTrack;
+
+    private int mCoverTintColor = -1;
 
     private boolean mUseEnglishWikipedia;
 
@@ -1354,12 +1360,14 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 break;
         }
 
+        int tintedColor = mCoverTintColor == -1 ? ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent) : mCoverTintColor;
+
         // update repeat button
         // FIXME with single playback
         switch (status.getRepeat()) {
             case 0:
                 mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
-                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
+                mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(tintedColor));
                 break;
             case 1:
                 mBottomRepeatButton.setImageResource(R.drawable.ic_repeat_24dp);
@@ -1370,7 +1378,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // update random button
         switch (status.getRandom()) {
             case 0:
-                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
+                mBottomRandomButton.setImageTintList(ColorStateList.valueOf(tintedColor));
                 break;
             case 1:
                 mBottomRandomButton.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), android.R.attr.colorAccent)));
@@ -1401,8 +1409,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mVolumeIcon.setImageResource(R.drawable.ic_volume_mute_black_48dp);
             mVolumeIconButtons.setImageResource(R.drawable.ic_volume_mute_black_48dp);
         }
-        mVolumeIcon.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
-        mVolumeIconButtons.setImageTintList(ColorStateList.valueOf(ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent)));
+        mVolumeIcon.setImageTintList(ColorStateList.valueOf(tintedColor));
+        mVolumeIconButtons.setImageTintList(ColorStateList.valueOf(tintedColor));
 
         mVolumeText.setText(String.valueOf(volume) + '%');
 
@@ -1579,6 +1587,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Called when the user starts the drag
         void onStartDrag();
+
+        void setStatusBarTargetColor(int color);
     }
 
     private class ServerStatusListener extends MPDStatusChangeHandler {
@@ -1694,6 +1704,20 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
+    private void setButtonTintColor(int color) {
+        mBottomPlayPauseButton.setImageTintList(ColorStateList.valueOf(color));
+        mTopPlayPauseButton.setImageTintList(ColorStateList.valueOf(color));
+        mTopPlaylistButton.setImageTintList(ColorStateList.valueOf(color));
+        mTopMenuButton.setImageTintList(ColorStateList.valueOf(color));
+        mBottomNextButton.setImageTintList(ColorStateList.valueOf(color));
+        mBottomPreviousButton.setImageTintList(ColorStateList.valueOf(color));
+        mBottomRepeatButton.setImageTintList(ColorStateList.valueOf(color));
+        mBottomRandomButton.setImageTintList(ColorStateList.valueOf(color));
+        mBottomStopButton.setImageTintList(ColorStateList.valueOf(color));
+
+        mVolumeIcon.setImageTintList(ColorStateList.valueOf(color));
+    }
+
     /**
      * Private class that handles when the CoverGenerator finishes its fetching of cover images.
      */
@@ -1709,6 +1733,55 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             if (bm != null) {
                 Activity activity = (Activity) getContext();
                 if (activity != null) {
+                    if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE) {
+                        // Extract color palette
+                        final Palette p = Palette.from(bm).generate();
+                        List<Palette.Swatch> swatches = p.getSwatches();
+                        Palette.Swatch maxSwatch = null;
+                        float maxSat = 0;
+                        float maxLight = 0;
+                        final Palette.Swatch dominantSwatch = p.getDominantSwatch();
+                        for (Palette.Swatch swatch : swatches ) {
+                            if (!swatch.equals(dominantSwatch) && swatch.getHsl()[1] > maxSat && swatch.getHsl()[2] > maxLight) {
+                                Log.v(TAG,"New best candidate");
+                                maxSwatch = swatch;
+                                maxLight = swatch.getHsl()[2];
+                                maxSat = swatch.getHsl()[1];
+                            }
+                            Log.v(TAG, "Pixels: " + swatch.getPopulation());
+                            Log.v(TAG, "H: " + swatch.getHsl()[0] + " S: " + swatch.getHsl()[1] + " L: " +swatch.getHsl()[2]);
+                        }
+                        SwatchDialog dialog = SwatchDialog.createDialog(swatches);
+                        dialog.show(((AppCompatActivity)getContext()).getSupportFragmentManager(), "SwatchDialog");
+                        final Palette.Swatch finalSwatch = maxSwatch;
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                int darkVibrantColor;
+                                int lightVibrantColor;
+                                if ( dominantSwatch != null) {
+                                    darkVibrantColor = dominantSwatch.getRgb();
+                                } else {
+                                    return;
+                                }
+                                if (finalSwatch != null) {
+                                    lightVibrantColor = finalSwatch.getRgb();
+                                } else {
+                                    return;
+                                }
+                                mHeaderView.setBackgroundColor(darkVibrantColor);
+                                View mainButtons = findViewById(R.id.now_playing_control_layout);
+                                mainButtons.setBackgroundColor(darkVibrantColor);
+                                if (mDragStatusReceiver!= null) {
+                                    mDragStatusReceiver.setStatusBarTargetColor(darkVibrantColor);
+                                }
+                                setButtonTintColor(lightVibrantColor);
+
+                                mCoverTintColor = lightVibrantColor;
+                            }
+                        });
+                    }
+
                     // Run on the UI thread of the activity because we are modifying gui elements.
                     activity.runOnUiThread(new Runnable() {
 

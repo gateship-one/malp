@@ -119,6 +119,8 @@ public class MainActivity extends GenericActivity
 
     private FloatingActionButton mFAB;
 
+    private int mImageColoredStatusBar = -1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -570,9 +572,14 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void onDragPositionChanged(float pos) {
-        if(mHeaderImageActive) {
-            // Get the primary color of the active theme from the helper.
-            int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark);
+        if(mHeaderImageActive || mImageColoredStatusBar != -1) {
+            int newColor;
+            if ( mImageColoredStatusBar != -1) {
+                newColor = mImageColoredStatusBar;
+            } else {
+                // Get the primary color of the active theme from the helper.
+                newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark);
+            }
 
             // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
             // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
@@ -580,6 +587,13 @@ public class MainActivity extends GenericActivity
             // and with this mask to set the new alpha value.
             newColor &= (alphaOffset);
             getWindow().setStatusBarColor(newColor);
+        }
+    }
+
+    public void setStatusBarTargetColor(int color) {
+        mImageColoredStatusBar = color;
+        if(mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
+            getWindow().setStatusBarColor(color);
         }
     }
 
