@@ -885,7 +885,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                     @Override
                     public void handleOutputs(final List<MPDOutput> outputList) {
                         // we need at least 2 output plugins configured
-                        if (outputList.size() > 1) {
+                        if (outputList != null && outputList.size() > 1) {
                             PopupMenu popup = new PopupMenu((AppCompatActivity)getContext(), view);
                             Menu menu = popup.getMenu();
                             SubMenu menuSwitch =  menu.addSubMenu(R.string.action_switch_to_output);
@@ -902,7 +902,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                                     public boolean onMenuItemClick(MenuItem item) {
                                         MPDOutput out = outputList.get(item.getItemId());
 
-                                        if (out.getOutputState() == true) {
+                                        if (out.getOutputState()) {
                                             MPDCommandHandler.disableOutput(out.getID());
                                         } else {
                                             MPDCommandHandler.enableOutput(out.getID());
