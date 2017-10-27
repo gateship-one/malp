@@ -1,0 +1,35 @@
+This application is a remote control for the music player daemon (www.musicpd.org).
+
+* For support for this application please open an issue at our GitHub repository ( https://github.com/gateship-one/malp ).
+
+This application works with every mpd above version 0.14 but to get the best performance and features we recommend to use at least version 0.15 (for playlist performance). Consider updating to the newest version.
+
+This application has workarounds for Mopidy, it may or may not work. No support for Mopidy, as this is an MPD client.
+
+If you don't know MPD and are looking for a music player for android, we recommend you have a look into Odyssey, which shares the same user interface with this application. ( https://play.google.com/store/apps/details?id=org.gateshipone.odyssey )
+
+The client implements most of the daemons functionality so that full media control and management is possible.
+
+
+To filter albums this client uses the album artist tag (if available) to filter multiple albums with the same title (e.g. Greatest Hits)
+
+We recommend that your music is tagged with musicbrainz library to get the best experience as the data tags are used to fetch artwork for artists and albums. 
+
+Features:
+ * Artist/Album/Files, saved playlist library browsing
+ * AlbumArtist filtering
+ * MBID filtering (multiple albums with same AlbumArtist and title can be accessed separately if MusicBrainzID is available)
+ * Local  & server-based search
+ * Basic playlist management (add songs to saved lists, remove songs from saved lists, remove lists, save lists)
+ * Launcher widget
+ * Optional notification (enable in settings)
+ * Background volume control via hardware buttons (only with notification enabled)
+ * Multiple server profiles
+ * Server statistics (use this to request a database update)
+ * Output control
+ * Artwork support with MusicBrainz,Last.fm, Fanart.tv as artwork provider (Album, artist images)
+ * Fanart view for tablets or stuff like that (click on the cover in the now playing view, or select fullscreen mode from menu), best used on widescreen devices in landscape mode.
+
+Cover images shown on screenshots gratefully used with permission from Carbon Based Lifeforms ( http://carbonbasedlifeforms.net )
+
+This software is free software, licensed under the GPLv3 or later license. The source code is available on GitHub ( https://github.com/gateship-one/malp )
