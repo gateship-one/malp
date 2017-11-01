@@ -30,6 +30,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.view.View;
 import android.widget.RemoteViews;
 
@@ -185,7 +186,15 @@ public class WidgetProvider extends AppWidgetProvider {
             // connect action
             Intent connectIntent = new Intent(context, BackgroundService.class);
             connectIntent.setAction(BackgroundService.ACTION_CONNECT);
-            PendingIntent connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent connectPendingIntent;
+
+            // As of Android O it is not allowed to spawn background services
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                connectPendingIntent = PendingIntent.getForegroundService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            } else {
+                connectPendingIntent = PendingIntent.getService(context, INTENT_NEXT, connectIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            }
+
             views.setOnClickPendingIntent(R.id.widget_connect_button, connectPendingIntent);
 
             // Main action
