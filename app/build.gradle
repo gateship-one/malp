@@ -31,7 +31,7 @@ android {
         config {
             if (keystorePropertiesFile.exists()) {
                 // load keystore file
-                def Properties keystoreProperties = new Properties()
+                Properties keystoreProperties = new Properties()
                 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 
                 keyAlias keystoreProperties['keyAlias']
@@ -70,13 +70,16 @@ android {
     }
 }
 
+ext{
+    // define support library version
+    supportLibraryVersion = '26.1.0'
+}
+
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:support-compat:26.1.0'
-    compile 'com.android.support:support-media-compat:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.android.support:preference-v14:26.1.0'
-    compile 'com.android.volley:volley:1.0.0'
+    implementation "com.android.support:appcompat-v7:${supportLibraryVersion}"
+    implementation "com.android.support:support-compat:${supportLibraryVersion}"
+    implementation "com.android.support:support-media-compat:${supportLibraryVersion}"
+    implementation "com.android.support:design:${supportLibraryVersion}"
+    implementation "com.android.support:preference-v14:${supportLibraryVersion}"
+    implementation 'com.android.volley:volley:1.0.0'
 }
