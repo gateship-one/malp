@@ -1898,10 +1898,15 @@ public class MPDConnection {
      * @param artistname Name of the artist to enqueue the albums from.
      * @return True if server responed with ok
      */
-    public synchronized boolean addArtist(String artistname) {
+    public synchronized boolean addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) {
         List<MPDAlbum> albums = getArtistAlbums(artistname);
         if (null == albums) {
             return false;
+        }
+
+        // Check if sort by date is active and resort collection first
+        if(sortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE) {
+            Collections.sort(albums, new MPDAlbum.MPDAlbumDateComparator());
         }
 
         boolean success = true;

@@ -30,6 +30,11 @@ import java.util.Comparator;
 import java.util.Date;
 
 public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelable {
+    public enum MPD_ALBUM_SORT_ORDER {
+        TITLE, // Default value
+        DATE
+    }
+
     /* Album properties */
     private String mName;
 

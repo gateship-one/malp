@@ -337,13 +337,15 @@ public class MPDQueryHandler extends MPDGenericHandler {
             mMPDConnection.playSongIndex(0);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST) {
             String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+            MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder = MPDAlbum.MPD_ALBUM_SORT_ORDER.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER)];
 
-            mMPDConnection.addArtist(artistname);
+            mMPDConnection.addArtist(artistname, sortOrder);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST) {
             String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+            MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder = MPDAlbum.MPD_ALBUM_SORT_ORDER.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER)];
 
             mMPDConnection.clearPlaylist();
-            mMPDConnection.addArtist(artistname);
+            mMPDConnection.addArtist(artistname, sortOrder);
             mMPDConnection.playSongIndex(0);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_PATH) {
             String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
@@ -831,7 +833,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      *
      * @param artistname Name of the artist to add to the current playlist.
      */
-    public static void addArtist(String artistname) {
+    public static void addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -839,6 +841,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         }
 
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER, sortOrder.ordinal());
 
         msg.obj = action;
 
@@ -850,7 +853,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      *
      * @param artistname Name of the artist to play its albums
      */
-    public static void playArtist(String artistname) {
+    public static void playArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST);
         Message msg = Message.obtain();
         if (null == msg) {
@@ -858,6 +861,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         }
 
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER, sortOrder.ordinal());
 
         msg.obj = action;
 

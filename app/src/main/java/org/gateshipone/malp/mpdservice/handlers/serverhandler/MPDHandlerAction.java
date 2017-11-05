@@ -135,6 +135,7 @@ public class MPDHandlerAction {
         EXTRA_WINDOW_END,
         EXTRA_OUTPUT_ID,
         EXTRA_SEARCH_TYPE,
+        EXTRA_SORT_ORDER,
     }
 
     /**

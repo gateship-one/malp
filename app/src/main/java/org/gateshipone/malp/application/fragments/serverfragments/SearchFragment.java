@@ -53,9 +53,11 @@ import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.SearchResultLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
@@ -87,6 +89,8 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     private MPDCommands.MPD_SEARCH_TYPE mSearchType;
 
+    private MPDAlbum.MPD_ALBUM_SORT_ORDER mAlbumSortOrder;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -94,7 +98,6 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
-
 
         // Create the needed adapter for the ListView
         mFileAdapter = new FileAdapter(getActivity(), false, true);
@@ -136,6 +139,9 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
         setHasOptionsMenu(true);
 
+        // Get album sort order
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        mAlbumSortOrder = PreferenceHelper.getMPDAlbumSortOrder(sharedPref, getContext());
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -279,10 +285,10 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 MPDQueryHandler.playArtistAlbum(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
                 return true;
             case R.id.action_add_artist:
-                MPDQueryHandler.addArtist(track.getTrackArtist());
+                MPDQueryHandler.addArtist(track.getTrackArtist(),mAlbumSortOrder);
                 return true;
             case R.id.action_play_artist:
-                MPDQueryHandler.playArtist(track.getTrackArtist());
+                MPDQueryHandler.playArtist(track.getTrackArtist(),mAlbumSortOrder);
                 return true;
             default:
                 return super.onContextItemSelected(item);

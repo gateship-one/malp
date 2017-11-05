@@ -32,7 +32,6 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,6 +50,7 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumsLoader;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -99,6 +99,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
     private CoverBitmapLoader mBitmapLoader;
 
+    private MPDAlbum.MPD_ALBUM_SORT_ORDER mSortOrder;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -121,6 +123,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             mAdapterView = (GridView) rootView.findViewById(R.id.grid_refresh_gridview);
         }
 
+        mSortOrder = PreferenceHelper.getMPDAlbumSortOrder(sharedPref, getContext());
 
         mAlbumsAdapter = new AlbumsAdapter(getActivity(), mAdapterView, mUseList);
 
@@ -421,14 +424,14 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     }
 
     private void enqueueArtist() {
-        MPDQueryHandler.addArtist(mArtist.getArtistName());
+        MPDQueryHandler.addArtist(mArtist.getArtistName(), mSortOrder);
     }
 
     private class FABOnClickListener implements View.OnClickListener {
 
         @Override
         public void onClick(View v) {
-            MPDQueryHandler.playArtist(mArtist.getArtistName());
+            MPDQueryHandler.playArtist(mArtist.getArtistName(), mSortOrder);
         }
     }
 
