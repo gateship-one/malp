@@ -108,8 +108,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
         if (libraryView.equals(getString(R.string.pref_library_view_list_key))) {
             mUseList = true;
-        } else {
-            mUseList = false;
         }
 
         View rootView;
