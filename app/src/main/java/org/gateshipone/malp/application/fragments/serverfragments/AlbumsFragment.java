@@ -398,6 +398,10 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
     }
 
+    /**
+     * Callback for asynchronous image fetching
+     * @param artist Artist for which a new image is received
+     */
     @Override
     public void newArtistImage(MPDArtist artist) {
         if (artist.equals(mArtist)) {
@@ -405,24 +409,37 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
     }
 
-
+    /**
+     * Interface to implement for the activity containing this fragment
+     */
     public interface AlbumSelectedCallback {
         void onAlbumSelected(MPDAlbum album);
     }
 
 
+    /**
+     * Enqueues the album selected by the user
+     * @param index Index of the selected album
+     */
     private void enqueueAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
         MPDQueryHandler.addArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }
 
+    /**
+     * Plays the album selected by the user
+     * @param index Index of the selected album
+     */
     private void playAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
         MPDQueryHandler.playArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }
 
+    /**
+     * Enqueues the artist that is currently shown (if the fragment is not shown for all albums)
+     */
     private void enqueueArtist() {
         MPDQueryHandler.addArtist(mArtist.getArtistName(), mSortOrder);
     }
