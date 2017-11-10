@@ -1,3 +1,11 @@
+### Version: 1.1.10 Tag: release-19 (2017-11-10) ###
+ * Fix bug: #83
+ * Follow album sort method in play/add action
+ * New output selection from NowPlayingView on hold volume button (thanks to sejerpz)
+ * Statusbar image fix
+ * Adaptable icon fix
+ * Widget fix on Android 8
+
 ### Version: 1.1.9 Tag: release-18 (2017-10-17) ###
  * Fix bugs: #72, #68
  * New sdk version (26)

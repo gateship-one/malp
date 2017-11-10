@@ -1,0 +1,6 @@
+ * Fix bug: #83
+ * Follow album sort method in play/add action
+ * New output selection from NowPlayingView on hold volume button (thanks to sejerpz)
+ * Statusbar image fix
+ * Adaptable icon fix
+ * Widget fix on Android 8
