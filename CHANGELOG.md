@@ -1,3 +1,6 @@
+### Version: 1.1.11 Tag: release-20 (2017-11-13) ###
+ * Hotfix for: https://issuetracker.google.com/issues/64434571
+
 ### Version: 1.1.10 Tag: release-19 (2017-11-10) ###
  * Fix bug: #83
  * Follow album sort method in play/add action
