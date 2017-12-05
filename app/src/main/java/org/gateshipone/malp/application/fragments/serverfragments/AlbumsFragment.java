@@ -32,6 +32,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -48,6 +49,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.AlbumsAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
+import org.gateshipone.malp.application.listviewitems.AbsImageListViewItem;
 import org.gateshipone.malp.application.loaders.AlbumsLoader;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
@@ -70,6 +72,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public static final String BUNDLE_STRING_EXTRA_ARTIST = "artist";
 
     public static final String BUNDLE_STRING_EXTRA_PATH = "album_path";
+
+    public static final String BUNDLE_STRING_EXTRA_BITMAP = "bitmap";
 
     /**
      * GridView adapter object used for this GridView
@@ -96,6 +100,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private FABFragmentCallback mFABCallback = null;
 
     private boolean mUseList = false;
+
+    private Bitmap mBitmap;
 
     private CoverBitmapLoader mBitmapLoader;
 
@@ -133,6 +139,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         if (null != args) {
             mAlbumsPath = args.getString(BUNDLE_STRING_EXTRA_PATH);
             mArtist = args.getParcelable(BUNDLE_STRING_EXTRA_ARTIST);
+            mBitmap = args.getParcelable(BUNDLE_STRING_EXTRA_BITMAP);
         } else {
             mAlbumsPath = "";
             // Create dummy album
@@ -350,6 +357,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         mLastPosition = position;
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
+        Bitmap bitmap = null;
+
+        // Check if correct view type, to be safe
+        if (view instanceof AbsImageListViewItem ) {
+            bitmap = ((AbsImageListViewItem) view).getBitmap();
+        }
 
         if (mArtist != null) {
             if (!mArtist.getArtistName().equals(album.getArtistName())) {
@@ -358,7 +371,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
 
         // Check if the album already has an artist set. If not use the artist of the fragment
-        mAlbumSelectCallback.onAlbumSelected(album);
+        mAlbumSelectCallback.onAlbumSelected(album, bitmap);
     }
 
     @Override
@@ -378,9 +391,14 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         if (null != mFABCallback) {
             if (null != mArtist && !mArtist.getArtistName().equals("")) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
-                mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
-                if (mArtist != null) {
+                if (mArtist != null && mBitmap == null) {
                     mBitmapLoader.getArtistImage(mArtist, true);
+                } else if (mArtist != null && mBitmap != null) {
+                    // Reuse image
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
+                    mFABCallback.setupToolbarImage(mBitmap);
+                } else {
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 }
             } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
                 String lastPath = mAlbumsPath;
@@ -413,7 +431,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      * Interface to implement for the activity containing this fragment
      */
     public interface AlbumSelectedCallback {
-        void onAlbumSelected(MPDAlbum album);
+        void onAlbumSelected(MPDAlbum album, Bitmap bitmap);
     }
 
 

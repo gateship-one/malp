@@ -326,7 +326,7 @@ public class MainActivity extends GenericActivity
                     currentPlaylistView.removeAlbumFrom(info.position);
                     return true;
                 case R.id.action_show_artist:
-                    onArtistSelected(new MPDArtist(track.getTrackArtist()));
+                    onArtistSelected(new MPDArtist(track.getTrackArtist()), null);
                     return true;
                 case R.id.action_show_album:
                     MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
@@ -336,7 +336,7 @@ public class MainActivity extends GenericActivity
                         tmpAlbum.setArtistName(track.getTrackArtist());
                     }
                     tmpAlbum.setMBID(track.getTrackAlbumMBID());
-                    onAlbumSelected(tmpAlbum);
+                    onAlbumSelected(tmpAlbum, null);
                     return true;
                 case R.id.action_show_details:
                     // Open song details dialog
@@ -487,7 +487,7 @@ public class MainActivity extends GenericActivity
     }
 
     @Override
-    public void onAlbumSelected(MPDAlbum album) {
+    public void onAlbumSelected(MPDAlbum album, Bitmap bitmap) {
 
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
@@ -502,6 +502,9 @@ public class MainActivity extends GenericActivity
         AlbumTracksFragment newFragment = new AlbumTracksFragment();
         Bundle args = new Bundle();
         args.putParcelable(AlbumTracksFragment.BUNDLE_STRING_EXTRA_ALBUM, album);
+        if (bitmap != null) {
+            args.putParcelable(AlbumTracksFragment.BUNDLE_STRING_EXTRA_BITMAP, bitmap);
+        }
 
         newFragment.setArguments(args);
 
@@ -523,7 +526,7 @@ public class MainActivity extends GenericActivity
     }
 
     @Override
-    public void onArtistSelected(MPDArtist artist) {
+    public void onArtistSelected(MPDArtist artist, Bitmap bitmap) {
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
             NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
@@ -539,6 +542,10 @@ public class MainActivity extends GenericActivity
         args.putString(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTISTNAME, artist.getArtistName());
         args.putParcelable(AlbumsFragment.BUNDLE_STRING_EXTRA_ARTIST, artist);
 
+        // Transfer the bitmap to the next fragment
+        if (bitmap != null) {
+            args.putParcelable(AlbumsFragment.BUNDLE_STRING_EXTRA_BITMAP, bitmap);
+        }
 
         newFragment.setArguments(args);
 

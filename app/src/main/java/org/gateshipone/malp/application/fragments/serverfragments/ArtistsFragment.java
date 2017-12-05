@@ -47,6 +47,7 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.ArtistsAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
+import org.gateshipone.malp.application.listviewitems.AbsImageListViewItem;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
@@ -265,11 +266,18 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
         MPDArtist artist = (MPDArtist) mArtistAdapter.getItem(position);
 
-        mSelectedCallback.onArtistSelected(artist);
+        Bitmap bitmap = null;
+
+        // Check if correct view type, to be safe
+        if (view instanceof AbsImageListViewItem) {
+            bitmap = ((AbsImageListViewItem) view).getBitmap();
+        }
+
+        mSelectedCallback.onArtistSelected(artist, bitmap);
     }
 
     public interface ArtistSelectedCallback {
-        void onArtistSelected(MPDArtist artistname);
+        void onArtistSelected(MPDArtist artistname, Bitmap bitmap);
     }
 
 

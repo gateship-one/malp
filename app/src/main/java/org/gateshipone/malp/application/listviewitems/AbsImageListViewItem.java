@@ -44,6 +44,8 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
     protected final ImageView mImageView;
     protected final ViewSwitcher mSwitcher;
 
+    private Bitmap mBitmap;
+
     private AsyncLoader mLoaderTask;
     protected boolean mCoverDone = false;
 
@@ -119,6 +121,7 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
      * @param image Image to show inside the view. null will result in the placeholder being shown.
      */
     public void setImage(Bitmap image) {
+        mBitmap = image;
         if ( null == mImageView || null == mSwitcher) {
             return;
         }
@@ -144,5 +147,9 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
             mSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
             mSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
         }
+    }
+
+    public Bitmap getBitmap() {
+        return mBitmap;
     }
 }

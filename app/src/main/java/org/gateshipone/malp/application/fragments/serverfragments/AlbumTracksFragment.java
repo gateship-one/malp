@@ -64,6 +64,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      * retrieve from the MPD server.
      */
     public static final String BUNDLE_STRING_EXTRA_ALBUM = "album";
+    public static final String BUNDLE_STRING_EXTRA_BITMAP = "bitmap";
 
     /**
      * Album definition variables
@@ -82,6 +83,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     private FileAdapter mFileAdapter;
 
+    private Bitmap mBitmap;
+
     private CoverBitmapLoader mBitmapLoader;
 
     @Override
@@ -96,9 +99,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         Bundle args = getArguments();
         if (null != args) {
             mAlbum = args.getParcelable(BUNDLE_STRING_EXTRA_ALBUM);
-            if (null != mAlbum) {
-                Log.v(TAG, "Album:" + mAlbum.getName() + ":" + mAlbum.getArtistName());
-            }
+
+            mBitmap = args.getParcelable(BUNDLE_STRING_EXTRA_BITMAP);
         }
 
         // Create the needed adapter for the ListView
@@ -145,8 +147,13 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             mFABCallback.setupToolbar(mAlbum.getName(), false, false, false);
         }
 
-        if (mAlbum != null) {
+        if (mAlbum != null && mBitmap == null) {
             mBitmapLoader.getAlbumImage(mAlbum, false);
+        } else if (mAlbum != null) {
+            // Reuse the image passed from the previous fragment
+            mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
+            mFABCallback.setupToolbarImage(mBitmap);
+
         }
 
         ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(this);
