@@ -332,6 +332,17 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Do not save the bitmap for later use (too big for binder)
+        Bundle args = getArguments();
+        if (args != null) {
+            getArguments().remove(BUNDLE_STRING_EXTRA_BITMAP);
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
     private void enqueueTrack(int index) {
         MPDTrack track = (MPDTrack) mFileAdapter.getItem(index);
 
@@ -363,6 +374,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 public void run() {
                     mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
                     mFABCallback.setupToolbarImage(bm);
+                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP,bm);
                 }
             });
         }

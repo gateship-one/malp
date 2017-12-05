@@ -341,6 +341,17 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        // Do not save the bitmap for later use (too big for binder)
+        Bundle args = getArguments();
+        if (args != null) {
+            getArguments().remove(BUNDLE_STRING_EXTRA_BITMAP);
+        }
+        super.onSaveInstanceState(savedInstanceState);
+    }
+
+
     /**
      * If a loader is reset the model data should be cleared.
      *
@@ -382,6 +393,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                 public void run() {
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
                     mFABCallback.setupToolbarImage(bm);
+                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
                 }
             });
         }
