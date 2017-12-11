@@ -7,7 +7,7 @@ This whole project is licensed under the  **GPLv3 or later** license (see LICENS
 
 [Screenshots](https://github.com/gateship-one/malp/wiki/Screenshots)
 
-** Please do not invest your work time on pull requests without contacting us first!!! Major pull requests without consultation will be ignored! **
+**Please do not invest your work time on pull requests without contacting us first!!! Major pull requests without consultation will be ignored!**
 
 **Remote stream playback functionality is only experimental at the moment. Problems might occur, please consider contacting us or opening an issue**
 
