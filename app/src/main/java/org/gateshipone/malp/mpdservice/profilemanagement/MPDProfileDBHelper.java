@@ -37,7 +37,7 @@ public class MPDProfileDBHelper extends SQLiteOpenHelper{
     /**
      * Database version, used for migrating to new versions.
      */
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
 
     /**
      * Constructor to create the database.
@@ -74,6 +74,14 @@ public class MPDProfileDBHelper extends SQLiteOpenHelper{
                 database.execSQL(sqlString);
 
                 sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED + " integer;";
+                database.execSQL(sqlString);
+            }
+            case 2: {
+                // Upgrading from version 2 to 3 needs new http regex columns
+                String sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX + " text;";
+                database.execSQL(sqlString);
+
+                sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED + " integer;";
                 database.execSQL(sqlString);
             }
             default:

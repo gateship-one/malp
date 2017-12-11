@@ -51,6 +51,8 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mStreamingURL = "";
     private boolean mStreamingEnabled;
 
+    private String mHTTPCoverRegex = "";
+    private boolean mHTTPCoverEnabled;
 
     private long mCreated;
 
@@ -77,14 +79,47 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
 
     protected MPDServerProfile(Parcel in) {
         mProfileName = in.readString();
+        mAutoconnect = in.readByte() != 0;
         mHostname = in.readString();
         mPassword = in.readString();
         mPort = in.readInt();
-        mAutoconnect = in.readInt() == 1;
-        mCreated = in.readLong();
         mStreamingURL = in.readString();
-        mStreamingEnabled = in.readInt() == 1;
+        mStreamingEnabled = in.readByte() != 0;
+        mHTTPCoverRegex = in.readString();
+        mHTTPCoverEnabled = in.readByte() != 0;
+        mCreated = in.readLong();
     }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mProfileName);
+        dest.writeByte((byte) (mAutoconnect ? 1 : 0));
+        dest.writeString(mHostname);
+        dest.writeString(mPassword);
+        dest.writeInt(mPort);
+        dest.writeString(mStreamingURL);
+        dest.writeByte((byte) (mStreamingEnabled ? 1 : 0));
+        dest.writeString(mHTTPCoverRegex);
+        dest.writeByte((byte) (mHTTPCoverEnabled ? 1 : 0));
+        dest.writeLong(mCreated);
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    public static final Creator<MPDServerProfile> CREATOR = new Creator<MPDServerProfile>() {
+        @Override
+        public MPDServerProfile createFromParcel(Parcel in) {
+            return new MPDServerProfile(in);
+        }
+
+        @Override
+        public MPDServerProfile[] newArray(int size) {
+            return new MPDServerProfile[size];
+        }
+    };
 
     /**
      *
@@ -187,6 +222,22 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         return mStreamingEnabled;
     }
 
+    public void setHTTPRegex(String regex) {
+        mHTTPCoverRegex = regex;
+    }
+
+    public String getHTTPRegex() {
+        return mHTTPCoverRegex;
+    }
+
+    public void setHTTPCoverEnabled(boolean enabled) {
+        mHTTPCoverEnabled = enabled;
+    }
+
+    public boolean getHTTPCoverEnabled() {
+        return mHTTPCoverEnabled;
+    }
+
     /**
      * Creates a string of the server profile. Be careful printing this out, because
      * it includes potential passwords.
@@ -209,36 +260,6 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     @Override
     public String getSectionTitle() {
         return mProfileName;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    public static final Creator<MPDServerProfile> CREATOR = new Creator<MPDServerProfile>() {
-        @Override
-        public MPDServerProfile createFromParcel(Parcel in) {
-            return new MPDServerProfile(in);
-        }
-
-        @Override
-        public MPDServerProfile[] newArray(int size) {
-            return new MPDServerProfile[size];
-        }
-    };
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        // Serialize profile
-        dest.writeString(mProfileName);
-        dest.writeString(mHostname);
-        dest.writeString(mPassword);
-        dest.writeInt(mPort);
-        dest.writeInt(mAutoconnect ? 1 : 0);
-        dest.writeLong(mCreated);
-        dest.writeString(mStreamingURL);
-        dest.writeInt(mStreamingEnabled ? 1 :0);
     }
 
     public long getCreationDate() {

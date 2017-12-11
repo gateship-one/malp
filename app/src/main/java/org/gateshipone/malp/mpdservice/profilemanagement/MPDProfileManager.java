@@ -85,6 +85,10 @@ public class MPDProfileManager extends Observable {
                 String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
                 boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
 
+                /* HTTP cover parameters */
+                String httpCoverRegex = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX));
+                boolean httpCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED)) == 1;
+
                 /* Create temporary object to append to list. */
                 MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
                 profile.setHostname(serverHostname);
@@ -93,6 +97,9 @@ public class MPDProfileManager extends Observable {
 
                 profile.setStreamingURL(streamingURL);
                 profile.setStreamingEnabled(streamingEnabled);
+
+                profile.setHTTPRegex(httpCoverRegex);
+                profile.setHTTPCoverEnabled(httpCoverEnabled);
 
                 /* Finish and add to list */
                 profileList.add(profile);
@@ -137,6 +144,10 @@ public class MPDProfileManager extends Observable {
         /* Streaming parameters */
         values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT, profile.getStreamingURL());
         values.put(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED, profile.getStreamingEnabled());
+
+        /* HTTP cover parameters */
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX, profile.getHTTPRegex());
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED, profile.getHTTPCoverEnabled());
 
         /* Insert the table in the database */
         db.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
@@ -191,6 +202,10 @@ public class MPDProfileManager extends Observable {
             String streamingURL = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT));
             boolean streamingEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED)) == 1;
 
+            /* HTTP cover parameters */
+            String httpCoverRegex = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX));
+            boolean httpCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED)) == 1;
+
             /* Create temporary object to append to list. */
             MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
             profile.setHostname(serverHostname);
@@ -199,6 +214,9 @@ public class MPDProfileManager extends Observable {
 
             profile.setStreamingURL(streamingURL);
             profile.setStreamingEnabled(streamingEnabled);
+
+            profile.setHTTPRegex(httpCoverRegex);
+            profile.setHTTPCoverEnabled(httpCoverEnabled);
 
             cursor.close();
             db.close();
