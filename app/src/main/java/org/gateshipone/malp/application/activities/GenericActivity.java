@@ -116,7 +116,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
 
-        ConnectionManager.getInstance().registerMPDUse(getApplicationContext());
+        ConnectionManager.getInstance(getApplicationContext()).registerMPDUse(getApplicationContext());
 
         if (null == mBackgroundServiceConnection) {
             mBackgroundServiceConnection = new BackgroundServiceConnection(getApplicationContext(), new BackgroundServiceConnectionStateListener());
@@ -145,7 +145,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Disconnect from MPD server
-        ConnectionManager.getInstance().unregisterMPDUse(getApplicationContext());
+        ConnectionManager.getInstance(getApplicationContext()).unregisterMPDUse(getApplicationContext());
 
         mBackgroundServiceConnection.closeConnection();
 

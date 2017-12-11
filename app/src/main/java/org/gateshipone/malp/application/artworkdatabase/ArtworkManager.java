@@ -44,6 +44,7 @@ import com.android.volley.VolleyError;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.LastFMManager;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MusicBrainzManager;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
@@ -465,6 +466,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return;
         }
 
+
         if (mArtistProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
             LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
                 @Override
@@ -529,8 +531,19 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         album.setMBID(track.getTrackAlbumMBID());
         album.setArtistName(track.getTrackAlbumArtist());
 
-        // Use the dummy album to fetch the image
-        fetchAlbumImage(album);
+
+        // Check if user-specified HTTP cover download is activated
+        if (HTTPAlbumImageProvider.getInstance(mContext).getActive()) {
+            HTTPAlbumImageProvider.getInstance(mContext).fetchAlbumImage(track, new Response.Listener<AlbumImageResponse>() {
+                @Override
+                public void onResponse(AlbumImageResponse response) {
+                    new InsertAlbumImageTask().execute(response);
+                }
+            }, this);
+        } else {
+            // Use the dummy album to fetch the image
+            fetchAlbumImage(album);
+        }
     }
 
     /**
@@ -997,6 +1010,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
     }
+
 
     /**
      * Interface used for adapters to be notified about data set changes

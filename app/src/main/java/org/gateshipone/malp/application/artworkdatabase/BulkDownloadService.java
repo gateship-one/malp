@@ -168,7 +168,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
             // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
             mWakelock.acquire();
-            ConnectionManager.getInstance().reconnectLastServer(this);
+            ConnectionManager.getInstance(getApplicationContext()).reconnectLastServer(this);
         }
         return START_NOT_STICKY;
 

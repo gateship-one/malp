@@ -274,7 +274,7 @@ public class EditProfileFragment extends Fragment {
 
         if (profileChanged) {
             if (null != mOldProfile) {
-                ConnectionManager.getInstance().removeProfile(mOldProfile,getActivity());
+                ConnectionManager.getInstance(getContext().getApplicationContext()).removeProfile(mOldProfile,getActivity());
             } else {
                 mOldProfile = new MPDServerProfile(mProfilename, true);
             }
@@ -286,7 +286,7 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
             mOldProfile.setHTTPCoverEnabled(mHTTPCoverEnabled);
             mOldProfile.setHTTPRegex(mHTTPCoverRegex);
-            ConnectionManager.getInstance().addProfile(mOldProfile, getContext());
+            ConnectionManager.getInstance(getContext().getApplicationContext()).addProfile(mOldProfile, getContext());
         }
     }
 
@@ -367,7 +367,7 @@ public class EditProfileFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.action_delete:
-                ConnectionManager.getInstance().removeProfile(mOldProfile,getContext());
+                ConnectionManager.getInstance(getContext().getApplicationContext()).removeProfile(mOldProfile,getContext());
                 mOptionsMenuHandled = true;
                 getActivity().onBackPressed();
                 return true;

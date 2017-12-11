@@ -468,7 +468,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     protected void onConnected() {
-        setNavbarHeader(ConnectionManager.getInstance().getProfileName());
+        setNavbarHeader(ConnectionManager.getInstance(getApplicationContext()).getProfileName());
     }
 
     @Override
@@ -606,7 +606,8 @@ public class MainActivity extends GenericActivity
     public void editProfile(MPDServerProfile profile) {
         if (null == profile) {
             profile = new MPDServerProfile(getString(R.string.fragment_profile_default_name), true);
-            ConnectionManager.getInstance().addProfile(profile, this);
+            ConnectionManager.getInstance(getApplicationContext()
+            ).addProfile(profile, this);
         }
 
         // Create fragment and give it an argument for the selected article

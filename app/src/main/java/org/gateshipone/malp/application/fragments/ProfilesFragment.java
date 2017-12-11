@@ -239,7 +239,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void connectProfile(int index) {
         if ( null != mCallback ) {
-            ConnectionManager.getInstance().connectProfile((MPDServerProfile)mAdapter.getItem(index), getContext());
+            ConnectionManager.getInstance(getContext().getApplicationContext()).connectProfile((MPDServerProfile)mAdapter.getItem(index), getContext());
         }
     }
 
@@ -251,7 +251,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
     private void removeProfile(int index) {
         if ( null != mCallback ) {
-            ConnectionManager.getInstance().removeProfile((MPDServerProfile)mAdapter.getItem(index),getContext());
+            ConnectionManager.getInstance(getContext().getApplicationContext()).removeProfile((MPDServerProfile)mAdapter.getItem(index),getContext());
             mAdapter.swapModel(null);
             // Prepare loader ( start new one or reuse old )
             getLoaderManager().restartLoader(0, getArguments(), this);
@@ -261,7 +261,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if ( null != mCallback ) {
-            ConnectionManager.getInstance().connectProfile((MPDServerProfile)mAdapter.getItem(position),getContext());
+            ConnectionManager.getInstance(getContext().getApplicationContext()).connectProfile((MPDServerProfile)mAdapter.getItem(position),getContext());
             mAdapter.setActive(position, true);
         }
     }
