@@ -48,15 +48,32 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
-    private static final String[] COVER_FILENAMES = {"cover","folder","Cover","Folder"};
-    private static final String[] COVER_FILEEXTENSIIONS = {"png","jpg","jpeg","PNG","JPG","JPEG"};
-
     private static final String TAG = HTTPAlbumImageProvider.class.getSimpleName();
 
+    /**
+     * Filename combinations used if only a directory is specified
+     */
+    private static final String[] COVER_FILENAMES = {"cover","folder","Cover","Folder"};
+
+    /**
+     * File extensions tried for all filenames
+     */
+    private static final String[] COVER_FILEEXTENSIIONS = {"png","jpg","jpeg","PNG","JPG","JPEG"};
+
+    /**
+     * Singleton instance
+     */
     private static HTTPAlbumImageProvider mInstance;
 
+    /**
+     * Regex used for downloading
+     */
     private static String mRegex;
 
+    /**
+     * {@link RequestQueue} used for downloading images. Separate queue for this provider
+     * because no request limitations are necessary
+     */
     private RequestQueue mRequestQueue;
 
 
@@ -93,20 +110,17 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
         return true;
     }
 
-    public String resolveRegex(String path) {
+    private String resolveRegex(String path) {
         String result = mRegex;
-        Log.v(TAG,"Path without replacement: " + result);
 
         result = mRegex.replaceAll("%f", FormatHelper.encodeURLUnsafeCharacters(path));
         result = result.replaceAll("%d", FormatHelper.encodeURLUnsafeCharacters(FormatHelper.getDirectoryFromPath(path)));
-        Log.v(TAG,"Path to use: " + result);
 
         return result;
     }
 
     @Override
     public void fetchAlbumImage(final MPDTrack track, Response.Listener<TrackAlbumImageResponse> listener, final TrackAlbumFetchError errorListener) {
-        Log.v(TAG,"Try fetching album for track: " + track.getTrackTitle() + " URL: " + track.getPath());
 
         String url = resolveRegex(track.getPath());
 
@@ -121,7 +135,6 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
                     getAlbumImage(fileURL, track, listener, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
-                            Log.v(TAG,"Error: " + error.getMessage());
                             multiRequest.increaseFailure(error);
                         }
                     });
@@ -132,7 +145,6 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
             getAlbumImage(url, track, listener, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    Log.v(TAG,"Error: " + error.getMessage());
                     errorListener.fetchVolleyError(track,error);
                 }
             });
@@ -164,7 +176,6 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
         public synchronized void increaseFailure(VolleyError error) {
             mFailureCount++;
             if ( mFailureCount == COVER_FILENAMES.length * COVER_FILEEXTENSIIONS.length) {
-                Log.v(TAG,"All cover downloads failed, signalling error");
                 mErrorListener.fetchVolleyError(mTrack, error);
             }
         }
