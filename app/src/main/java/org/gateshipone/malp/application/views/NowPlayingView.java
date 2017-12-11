@@ -1433,11 +1433,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     }
 
     private void updateMPDCurrentTrack(MPDTrack track) {
-        if (track.getTrackTitle().isEmpty()) {
-            mTrackName.setText(FormatHelper.getFilenameFromPath(track.getPath()));
+        // Check if track title is set, otherwise use track name, otherwise path
+        String title;
+        if(!(title = track.getTrackTitle()).isEmpty()) {
+
+        } else if (!(title = track.getTrackName()).isEmpty()) {
+
+        } else if (!track.getPath().isEmpty()) {
+            title = FormatHelper.getFilenameFromPath(track.getPath());
         } else {
-            mTrackName.setText(track.getTrackTitle());
+            title = "";
         }
+        mTrackName.setText(title);
+
 
         if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
             mTrackAdditionalInfo.setText(track.getTrackArtist() + getResources().getString(R.string.track_item_separator) + track.getTrackAlbum());

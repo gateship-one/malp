@@ -274,11 +274,16 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.setStyle(notificationStyle);
 
             String title;
-            if (track.getTrackTitle().isEmpty()) {
+            if(!(title = track.getTrackTitle()).isEmpty()) {
+
+            } else if (!(title = track.getTrackName()).isEmpty()) {
+
+            } else if (!track.getPath().isEmpty()) {
                 title = FormatHelper.getFilenameFromPath(track.getPath());
             } else {
-                title = track.getTrackTitle();
+                title = "";
             }
+
 
             mNotificationBuilder.setContentTitle(title);
 

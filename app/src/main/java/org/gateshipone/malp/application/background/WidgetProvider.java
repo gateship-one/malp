@@ -105,14 +105,18 @@ public class WidgetProvider extends AppWidgetProvider {
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.widget_malp_big);
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
+            // Check if track title is set, otherwise use track name, otherwise path
+            String title;
+            if(!(title = mLastTrack.getTrackTitle()).isEmpty()) {
 
-            if (!mLastTrack.getTrackTitle().isEmpty()) {
-                views.setTextViewText(R.id.widget_big_trackName, mLastTrack.getTrackTitle());
-            } else if (mLastTrack.getTrackTitle().isEmpty() && !mLastTrack.getPath().isEmpty()) {
-                views.setTextViewText(R.id.widget_big_trackName, FormatHelper.getFilenameFromPath(mLastTrack.getTrackTitle()));
+            } else if (!(title = mLastTrack.getTrackName()).isEmpty()) {
+
+            } else if (!mLastTrack.getPath().isEmpty()) {
+                title = FormatHelper.getFilenameFromPath(mLastTrack.getPath());
             } else {
-                views.setTextViewText(R.id.widget_big_trackName, "");
+                title = "";
             }
+            views.setTextViewText(R.id.widget_big_trackName, title);
 
             if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
                 views.setTextViewText(R.id.widget_big_ArtistAlbum, mLastTrack.getTrackArtist() + " - " + mLastTrack.getTrackAlbum());
