@@ -138,6 +138,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pTrackArtist = "";
         pTrackAlbum = "";
         pTrackAlbumArtist = "";
+        pTrackName = "";
 
         pDate = "";
 
@@ -166,6 +167,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pTrackAlbum = in.readString();
         pTrackArtist = in.readString();
         pTrackAlbumArtist = in.readString();
+        pTrackName = in.readString();
 
         pDate = in.readString();
 
@@ -389,6 +391,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         dest.writeString(pTrackAlbum);
         dest.writeString(pTrackArtist);
         dest.writeString(pTrackAlbumArtist);
+        dest.writeString(pTrackName);
 
         dest.writeString(pDate);
 
