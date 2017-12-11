@@ -539,7 +539,18 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 public void onResponse(AlbumImageResponse response) {
                     new InsertAlbumImageTask().execute(response);
                 }
-            }, this);
+            }, new AlbumFetchError() {
+                @Override
+                public void fetchJSONException(MPDAlbum album, JSONException exception) {
+
+                }
+
+                @Override
+                public void fetchVolleyError(MPDAlbum album, VolleyError error) {
+                    Log.v(TAG,"Local HTTP download failed, try user-selected download provider");
+                    fetchAlbumImage(album);
+                }
+            });
         } else {
             // Use the dummy album to fetch the image
             fetchAlbumImage(album);

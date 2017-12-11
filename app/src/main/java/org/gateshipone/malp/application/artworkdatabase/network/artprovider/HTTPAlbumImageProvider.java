@@ -56,6 +56,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
 
     private RequestQueue mRequestQueue;
 
+
     private HTTPAlbumImageProvider(Context context) {
         // Don't use MALPRequestQueue because we do not need to limit the load on the local server
         Network network = new BasicNetwork(new HurlStack());
@@ -108,6 +109,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
 
         // Check if URL ends with a file or directory
         if (url.endsWith("/")) {
+            final HTTPMultiRequest multiRequest = new HTTPMultiRequest(fakeAlbum, errorListener);
             // Directory check all pre-defined files
             for(String filename : COVER_FILENAMES) {
                 for (String fileextension: COVER_FILEEXTENSIIONS) {
@@ -116,6 +118,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.v(TAG,"Error: " + error.getMessage());
+                            multiRequest.increaseFailure(error);
                         }
                     });
                 }
@@ -126,6 +129,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.v(TAG,"Error: " + error.getMessage());
+                    errorListener.fetchVolleyError(fakeAlbum,error);
                 }
             });
         }
@@ -142,5 +146,24 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
         Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
         Log.v(TAG,"Get image: " + url + " for album: " + album.getName());
         mRequestQueue.add(byteResponse);
+    }
+
+    private class HTTPMultiRequest {
+        private int mFailureCount;
+        private AlbumFetchError mErrorListener;
+        private MPDAlbum mAlbum;
+
+        public HTTPMultiRequest(MPDAlbum album, AlbumFetchError errorListener) {
+            mAlbum = album;
+            mErrorListener = errorListener;
+        }
+
+        public synchronized void increaseFailure(VolleyError error) {
+            mFailureCount++;
+            if ( mFailureCount == COVER_FILENAMES.length * COVER_FILEEXTENSIIONS.length) {
+                Log.v(TAG,"All cover downloads failed, signalling error");
+                mErrorListener.fetchVolleyError(mAlbum, error);
+            }
+        }
     }
 }
