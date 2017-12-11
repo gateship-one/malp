@@ -20,18 +20,16 @@
  *
  */
 
-package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
+package org.gateshipone.malp.application.artworkdatabase.network.responses;
 
 
-import com.android.volley.Response;
+import com.android.volley.VolleyError;
 
-import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumFetchError;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumImageResponse;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
+import org.json.JSONException;
 
-public interface TrackAlbumImageProvider {
-    void fetchAlbumImage(final MPDTrack track, final Response.Listener<TrackAlbumImageResponse> listener, final TrackAlbumFetchError errorListener);
+public interface TrackAlbumFetchError {
+    void fetchJSONException(MPDTrack track, JSONException exception);
 
+    void fetchVolleyError(MPDTrack track, VolleyError error);
 }

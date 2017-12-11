@@ -38,8 +38,11 @@ import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 
 import org.gateshipone.malp.application.artworkdatabase.network.requests.AlbumImageByteRequest;
+import org.gateshipone.malp.application.artworkdatabase.network.requests.TrackAlbumImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumFetchError;
+import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumImageResponse;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
@@ -79,6 +82,10 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
         mRegex = regex;
     }
 
+    public String getRegex() {
+        return mRegex;
+    }
+
     public boolean getActive() {
         if (mRegex==null || mRegex.isEmpty()) {
             return false;
@@ -98,23 +105,20 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
     }
 
     @Override
-    public void fetchAlbumImage(MPDTrack track, Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
+    public void fetchAlbumImage(final MPDTrack track, Response.Listener<TrackAlbumImageResponse> listener, final TrackAlbumFetchError errorListener) {
         Log.v(TAG,"Try fetching album for track: " + track.getTrackTitle() + " URL: " + track.getPath());
 
         String url = resolveRegex(track.getPath());
 
-        final MPDAlbum fakeAlbum = new MPDAlbum(track.getTrackAlbum());
-        fakeAlbum.setMBID(track.getTrackAlbumMBID());
-        fakeAlbum.setArtistName(track.getTrackAlbumArtist());
 
         // Check if URL ends with a file or directory
         if (url.endsWith("/")) {
-            final HTTPMultiRequest multiRequest = new HTTPMultiRequest(fakeAlbum, errorListener);
+            final HTTPMultiRequest multiRequest = new HTTPMultiRequest(track, errorListener);
             // Directory check all pre-defined files
             for(String filename : COVER_FILENAMES) {
                 for (String fileextension: COVER_FILEEXTENSIIONS) {
                     String fileURL = url + filename + '.' + fileextension;
-                    getAlbumImage(fileURL, fakeAlbum, listener, new Response.ErrorListener() {
+                    getAlbumImage(fileURL, track, listener, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
                             Log.v(TAG,"Error: " + error.getMessage());
@@ -125,11 +129,11 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
             }
         } else {
             // File, just check the file
-            getAlbumImage(url, fakeAlbum, listener, new Response.ErrorListener() {
+            getAlbumImage(url, track, listener, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
                     Log.v(TAG,"Error: " + error.getMessage());
-                    errorListener.fetchVolleyError(fakeAlbum,error);
+                    errorListener.fetchVolleyError(track,error);
                 }
             });
         }
@@ -138,23 +142,22 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
     /**
      * Raw download for an image
      * @param url Final image URL to download
-     * @param album Album associated with the image to download
+     * @param track Track associated with the image to download
      * @param listener Response listener to receive the image as a byte array
      * @param errorListener Error listener
      */
-    private void getAlbumImage(String url, MPDAlbum album, Response.Listener<AlbumImageResponse> listener, Response.ErrorListener errorListener) {
-        Request<AlbumImageResponse> byteResponse = new AlbumImageByteRequest(url, album, listener, errorListener);
-        Log.v(TAG,"Get image: " + url + " for album: " + album.getName());
+    private void getAlbumImage(String url, MPDTrack track, Response.Listener<TrackAlbumImageResponse> listener, Response.ErrorListener errorListener) {
+        Request<TrackAlbumImageResponse> byteResponse = new TrackAlbumImageByteRequest(url, track, listener, errorListener);
         mRequestQueue.add(byteResponse);
     }
 
     private class HTTPMultiRequest {
         private int mFailureCount;
-        private AlbumFetchError mErrorListener;
-        private MPDAlbum mAlbum;
+        private TrackAlbumFetchError mErrorListener;
+        private MPDTrack mTrack;
 
-        public HTTPMultiRequest(MPDAlbum album, AlbumFetchError errorListener) {
-            mAlbum = album;
+        public HTTPMultiRequest(MPDTrack track, TrackAlbumFetchError errorListener) {
+            mTrack = track;
             mErrorListener = errorListener;
         }
 
@@ -162,7 +165,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
             mFailureCount++;
             if ( mFailureCount == COVER_FILENAMES.length * COVER_FILEEXTENSIIONS.length) {
                 Log.v(TAG,"All cover downloads failed, signalling error");
-                mErrorListener.fetchVolleyError(mAlbum, error);
+                mErrorListener.fetchVolleyError(mTrack, error);
             }
         }
     }
