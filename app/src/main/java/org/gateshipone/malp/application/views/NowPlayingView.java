@@ -1182,31 +1182,34 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      * @param v
      */
     private void showAdditionalOptionsMenu(View v) {
-        PopupMenu menu = new PopupMenu(getContext(), v);
+        PopupMenu popupMenu = new PopupMenu(getContext(), v);
         // Inflate the menu from a menu xml file
-        menu.inflate(R.menu.popup_menu_nowplaying);
+        popupMenu.inflate(R.menu.popup_menu_nowplaying);
         // Set the main NowPlayingView as a listener (directly implements callback)
-        menu.setOnMenuItemClickListener(this);
+        popupMenu.setOnMenuItemClickListener(this);
+        // Real menu
+        Menu menu = popupMenu.getMenu();
 
         // Set the checked menu item state if a MPDCurrentStatus is available
         if (null != mLastStatus) {
-            MenuItem singlePlaybackItem = menu.getMenu().findItem(R.id.action_toggle_single_mode);
+            MenuItem singlePlaybackItem = menu.findItem(R.id.action_toggle_single_mode);
             singlePlaybackItem.setChecked(mLastStatus.getSinglePlayback() == 1);
 
-            MenuItem consumeItem = menu.getMenu().findItem(R.id.action_toggle_consume_mode);
+            MenuItem consumeItem = menu.findItem(R.id.action_toggle_consume_mode);
             consumeItem.setChecked(mLastStatus.getConsume() == 1);
         }
 
         // Check if the current view is the cover or the playlist. If it is the playlist hide its actions.
         // If the viewswitcher only has one child the dual pane layout is used
         if (mViewSwitcher.getDisplayedChild() == 0 && (mViewSwitcher.getChildCount() > 1)) {
-            menu.getMenu().setGroupEnabled(R.id.group_playlist_actions, false);
-            menu.getMenu().setGroupVisible(R.id.group_playlist_actions, false);
+            menu.setGroupEnabled(R.id.group_playlist_actions, false);
+            menu.setGroupVisible(R.id.group_playlist_actions, false);
         }
 
         // Check if streaming is configured for the current server
         boolean streamingEnabled = ConnectionManager.getInstance(getContext().getApplicationContext()).getStreamingEnabled();
-        MenuItem streamingStartStopItem = menu.getMenu().findItem(R.id.action_start_streaming);
+        MenuItem streamingStartStopItem = menu.findItem(R.id.action_start_streaming);
+
         if (!streamingEnabled) {
             streamingStartStopItem.setVisible(false);
         } else {
@@ -1218,7 +1221,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
 
         // Open the menu itself
-        menu.show();
+        popupMenu.show();
     }
 
 
