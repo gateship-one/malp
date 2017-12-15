@@ -1315,8 +1315,6 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         filter.addAction(BackgroundService.ACTION_STREAMING_STATUS_CHANGED);
         getContext().getApplicationContext().registerReceiver(mStreamingStatusReceiver, filter);
 
-        invalidate();
-
         // Register with MPDStateMonitoring system
         MPDStateMonitoringHandler.registerStatusListener(mStateListener);
         MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionStateListener);
@@ -1422,12 +1420,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         // Check for fancy new formats here (dsd, float = f)
         String sampleFormat = status.getBitDepth();
 
-        if (sampleFormat.equals("8") || sampleFormat.equals("16") || sampleFormat.equals("24") || sampleFormat.equals("32")) {
-            properties += status.getBitDepth() + getResources().getString(R.string.bitcount_unit) + ' ';
+        // 16bit is the most probable sample format
+        if (sampleFormat.equals("16") || sampleFormat.equals("24")  || sampleFormat.equals("8") || sampleFormat.equals("32")) {
+            properties += sampleFormat + getResources().getString(R.string.bitcount_unit) + ' ';
         } else if (sampleFormat.equals("f")) {
             properties += "float ";
         } else {
-            properties += status.getBitDepth() + ' ';
+            properties += sampleFormat + ' ';
         }
 
 
