@@ -72,6 +72,7 @@ import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.FormatHelper;
+import org.gateshipone.malp.application.utils.OutputResponseMenuHandler;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
@@ -882,7 +883,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             @Override
             public boolean onLongClick(final View view) {
 
-                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(NowPlayingView.this, view));
+                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
 
                 return true;
             }
@@ -905,7 +906,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             @Override
             public boolean onLongClick(final View view) {
 
-                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(NowPlayingView.this, view));
+                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
 
                 return true;
             }
@@ -1670,130 +1671,5 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
-    private static class OutputResponseMenuHandler extends MPDResponseOutputList {
 
-        private WeakReference<NowPlayingView> mNPV;
-
-        private WeakReference<View> mView;
-
-        public OutputResponseMenuHandler(NowPlayingView npv, View view) {
-            mNPV = new WeakReference<NowPlayingView>(npv);
-            mView = new WeakReference<View>(view);
-        }
-
-        @Override
-        public void handleOutputs(final List<MPDOutput> outputList) {
-            // we need at least 2 output plugins configured
-            if (outputList != null && outputList.size() > 1) {
-                PopupMenu popup = new PopupMenu((AppCompatActivity)mNPV.get().getContext(), mView.get());
-                Menu menu = popup.getMenu();
-                SubMenu menuSwitch =  menu.addSubMenu(R.string.action_switch_to_output);
-                SubMenu menuToggle = menu.addSubMenu(R.string.action_toggle_outputs);
-
-                int menuId = 0;
-                for (final MPDOutput output : outputList) {
-                    MenuItem subMenuItem = menuToggle.add(0, menuId, 0, output.getOutputName())
-                            .setCheckable(true)
-                            .setChecked(output.getOutputState());
-
-                    subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            MPDOutput out = outputList.get(item.getItemId());
-
-                            if (out.getOutputState()) {
-                                MPDCommandHandler.disableOutput(out.getID());
-                            } else {
-                                MPDCommandHandler.enableOutput(out.getID());
-                            }
-                            out.setOutputState(!out.getOutputState());
-
-                            item.setChecked(out.getOutputState());
-                            // Keep the popup menu open
-                            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                            item.setActionView(new View(mNPV.get().getContext()));
-                            item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                                @Override
-                                public boolean onMenuItemActionExpand(MenuItem item) {
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onMenuItemActionCollapse(MenuItem item) {
-                                    return false;
-                                }
-                            });
-                            return false;
-                        }
-                    });
-
-                    subMenuItem = menuSwitch.add(0, menuId, 0, output.getOutputName());
-                    subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            MPDOutput selectedOut = outputList.get(item.getItemId());
-
-                            // first enable the selected output so we have always an active ones
-                            MPDCommandHandler.enableOutput(selectedOut.getID());
-                            selectedOut.setOutputState(true);
-
-                            for(MPDOutput current: outputList) {
-                                if (current != selectedOut) {
-                                    MPDCommandHandler.disableOutput(current.getID());
-                                    current.setOutputState(false);
-                                }
-                            }
-                            return false;
-                        }
-                    });
-                    menuId++;
-                }
-                popup.show();
-            } else {
-                // Only one output, show toggle menu
-                PopupMenu popup = new PopupMenu((AppCompatActivity)mNPV.get().getContext(), mView.get());
-
-                Menu menu = popup.getMenu();
-
-                for (final MPDOutput output : outputList) {
-                    MenuItem subMenuItem = menu.add(0, 0, 0, output.getOutputName())
-                            .setCheckable(true)
-                            .setChecked(output.getOutputState());
-
-                    subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            MPDOutput out = outputList.get(item.getItemId());
-
-                            if (out.getOutputState() == true) {
-                                MPDCommandHandler.disableOutput(out.getID());
-                            } else {
-                                MPDCommandHandler.enableOutput(out.getID());
-                            }
-                            out.setOutputState(!out.getOutputState());
-
-                            item.setChecked(out.getOutputState());
-                            // Keep the popup menu open
-                            item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                            item.setActionView(new View(mNPV.get().getContext()));
-                            item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                                @Override
-                                public boolean onMenuItemActionExpand(MenuItem item) {
-                                    return false;
-                                }
-
-                                @Override
-                                public boolean onMenuItemActionCollapse(MenuItem item) {
-                                    return false;
-                                }
-                            });
-                            return false;
-                        }
-                    });
-
-                }
-                popup.show();
-            }
-        }
-    }
 }
