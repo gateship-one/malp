@@ -26,7 +26,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
@@ -38,7 +37,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AlertDialog;
 import android.transition.Slide;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.MenuInflater;
@@ -58,7 +56,6 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.CurrentPlaylistAdapter;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
-import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
@@ -88,9 +85,6 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
-
-import java.util.List;
-
 
 public class MainActivity extends GenericActivity
         implements NavigationView.OnNavigationItemSelectedListener, AlbumsFragment.AlbumSelectedCallback, ArtistsFragment.ArtistSelectedCallback,
@@ -196,7 +190,6 @@ public class MainActivity extends GenericActivity
                 fragment = new MyMusicTabsFragment();
                 MyMusicTabsFragment.DEFAULTTAB defaultTab = getDefaultTab();
                 Bundle args = new Bundle();
-                Log.v(TAG,"Default tab: " + defaultTab.ordinal());
                 args.putInt(MyMusicTabsFragment.MY_MUSIC_REQUESTED_TAB, defaultTab.ordinal());
 
                 fragment.setArguments(args);
@@ -441,7 +434,6 @@ public class MainActivity extends GenericActivity
 
                 // set view switcher status
                 if (mSavedNowPlayingViewSwitcherStatus != null) {
-                    Log.v(TAG, "Restoring switcher status: " + mSavedNowPlayingViewSwitcherStatus);
                     nowPlayingView.setViewSwitcherStatus(mSavedNowPlayingViewSwitcherStatus);
                     mNowPlayingViewSwitcherStatus = mSavedNowPlayingViewSwitcherStatus;
                 }
@@ -454,7 +446,6 @@ public class MainActivity extends GenericActivity
     @Override
     protected void onPause() {
         super.onPause();
-        Log.v(TAG, "onPause");
 
         NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
@@ -757,20 +748,6 @@ public class MainActivity extends GenericActivity
         }
     }
 
-
-    /**
-     * Method to retrieve the height of the statusbar to compensate in non-transparent cases.
-     *
-     * @return The Dimension of the statusbar. Used to compensate the padding.
-     */
-    private int getStatusBarHeight() {
-        int resHeight = 0;
-        int resId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-        if (resId > 0) {
-            resHeight = getResources().getDimensionPixelSize(resId);
-        }
-        return resHeight;
-    }
 
 
     @Override
