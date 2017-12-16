@@ -49,6 +49,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
@@ -673,14 +674,13 @@ public class MainActivity extends GenericActivity
         // set drawer state
         mDrawerToggle.setDrawerIndicatorEnabled(drawerIndicatorEnabled);
 
+        RelativeLayout collapsingImageLayout = findViewById(R.id.appbar_image_layout);
+
         ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
-        View collapsingImageGradientTop = findViewById(R.id.collapsing_image_gradient_top);
-        View collapsingImageGradientBottom = findViewById(R.id.collapsing_image_gradient_bottom);
-        if (collapsingImage != null && collapsingImageGradientTop != null && collapsingImageGradientBottom != null) {
+
+        if (collapsingImage != null) {
             if (showImage) {
-                collapsingImage.setVisibility(View.VISIBLE);
-                collapsingImageGradientTop.setVisibility(View.VISIBLE);
-                collapsingImageGradientBottom.setVisibility(View.VISIBLE);
+                collapsingImageLayout.setVisibility(View.VISIBLE);
                 mHeaderImageActive = true;
 
                 // Get the primary color of the active theme from the helper.
@@ -693,9 +693,7 @@ public class MainActivity extends GenericActivity
                 newColor &= (alphaOffset);
                 getWindow().setStatusBarColor(newColor);
             } else {
-                collapsingImage.setVisibility(View.GONE);
-                collapsingImageGradientTop.setVisibility(View.GONE);
-                collapsingImageGradientBottom.setVisibility(View.GONE);
+                collapsingImageLayout.setVisibility(View.GONE);
                 mHeaderImageActive = false;
 
                 // Get the primary color of the active theme from the helper.
