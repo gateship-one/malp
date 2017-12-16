@@ -165,6 +165,20 @@ public class FormatHelper {
     }
 
     /**
+     * Returns the path without the filename
+     * @param url Path to use
+     * @return Path without file
+     */
+    public static String getDirectoryFromPath(String url) {
+        String[] splitPath = url.split("/");
+        String result = "";
+        for (int i = 0; i < splitPath.length - 1; i++) {
+            result += splitPath[i] + '/';
+        }
+        return result;
+    }
+
+    /**
      * Escapes Apache lucene special characters (e.g. used by MusicBrainz) for URLs.
      * See:
      * https://lucene.apache.org/core/4_3_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html
@@ -177,5 +191,29 @@ public class FormatHelper {
 
         retVal = retVal.replaceAll(LUCENE_SPECIAL_CHARACTERS_REGEX,"\\\\$1");
         return retVal;
+    }
+
+    public static String encodeURLUnsafeCharacters(String input) {
+        StringBuilder resultStr = new StringBuilder();
+        for (char ch : input.toCharArray()) {
+            if (unsafeCharacter(ch)) {
+                resultStr.append('%');
+                resultStr.append(characterToHex(ch / 16));
+                resultStr.append(characterToHex(ch % 16));
+            } else {
+                resultStr.append(ch);
+            }
+        }
+        return resultStr.toString();
+    }
+
+    private static char characterToHex(int ch) {
+        return (char) (ch < 10 ? '0' + ch : 'A' + ch - 10);
+    }
+
+    private static boolean unsafeCharacter(char ch) {
+        if (ch > 128 || ch < 0)
+            return true;
+        return " %$&+,:;=?@<>#%".indexOf(ch) >= 0;
     }
 }

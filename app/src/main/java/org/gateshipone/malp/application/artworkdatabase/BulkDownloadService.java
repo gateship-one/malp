@@ -50,6 +50,7 @@ import com.android.volley.RequestQueue;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -65,6 +66,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
     public static final String BUNDLE_KEY_ARTIST_PROVIDER = "org.gateshipone.malp.artist_provider";
     public static final String BUNDLE_KEY_ALBUM_PROVIDER = "org.gateshipone.malp.album_provider";
+    public static final String BUNDLE_KEY_HTTP_COVER_REGEX = "org.gateshipone.malp.http_cover_regex";
     public static final String BUNDLE_KEY_WIFI_ONLY = "org.gateshipone.malp.wifi_only";
 
     private NotificationManager mNotificationManager;
@@ -76,6 +78,8 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
     private int mRemainingAlbums;
 
     private int mSumImageDownloads;
+
+    private String mHTTPRegex;
 
     private ActionReceiver mBroadcastReceiver;
 
@@ -142,6 +146,10 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 artistProvider = extras.getString(BUNDLE_KEY_ARTIST_PROVIDER, getString(R.string.pref_artwork_provider_artist_default));
                 albumProvider = extras.getString(BUNDLE_KEY_ALBUM_PROVIDER, getString(R.string.pref_artwork_provider_album_default));
                 mWifiOnly = intent.getBooleanExtra(BUNDLE_KEY_WIFI_ONLY, true);
+                mHTTPRegex = intent.getStringExtra(BUNDLE_KEY_HTTP_COVER_REGEX);
+                if (mHTTPRegex != null && !mHTTPRegex.isEmpty()) {
+                    HTTPAlbumImageProvider.getInstance(getApplicationContext()).setRegex(mHTTPRegex);
+                }
             }
 
 
@@ -168,7 +176,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
             // FIXME do some timeout checking. e.g. 5 minutes no new image then cancel the process
             mWakelock.acquire();
-            ConnectionManager.getInstance().reconnectLastServer(this);
+            ConnectionManager.getInstance(getApplicationContext()).reconnectLastServer(this);
         }
         return START_NOT_STICKY;
 

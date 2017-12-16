@@ -32,6 +32,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.gateshipone.malp.R;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -86,18 +87,21 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
     private MPDServerProfile mServerProfile;
 
-    private ConnectionManager() {
+    private Context mContext;
+
+    private ConnectionManager(Context context) {
         MPDStateMonitoringHandler.registerConnectionStateListener(this);
         MPDQueryHandler.registerConnectionStateListener(this);
         MPDCommandHandler.registerConnectionStateListener(this);
         mHostname = null;
         mPassword = null;
         mUseCounter = 0;
+        mContext = context;
     }
 
-    public synchronized static ConnectionManager getInstance() {
+    public synchronized static ConnectionManager getInstance(Context context) {
         if (null == mConnectionManager) {
-            mConnectionManager = new ConnectionManager();
+            mConnectionManager = new ConnectionManager(context);
         }
         return mConnectionManager;
     }
@@ -107,24 +111,21 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         if ( null == profile ) {
             return;
         }
-        getInstance().mHostname = profile.getHostname();
-        getInstance().mPassword = profile.getPassword();
-        getInstance().mPort = profile.getPort();
+        mHostname = profile.getHostname();
+        mPassword = profile.getPassword();
+        mPort = profile.getPort();
 
         MPDProfileManager.getInstance(context).deleteProfile(profile);
         profile.setAutoconnect(true);
         MPDProfileManager.getInstance(context).addProfile(profile);
 
-        String hostname = getInstance().mHostname;
-        String password = getInstance().mPassword;
-        int port = getInstance().mPort;
         mConnectionManager.mServerProfile = profile;
 
-        MPDCommandHandler.setServerParameters(hostname, password, port);
+        MPDCommandHandler.setServerParameters(mHostname, mPassword, mPort);
     }
 
     public void reconnectLastServer(Context context) {
-        ConnectionManager instance = getInstance();
+        ConnectionManager instance = getInstance(context);
 
         if (instance.mHostname == null  && null != context) {
             // Not connected so far
@@ -213,10 +214,15 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
             mReconnectTimer.purge();
             mReconnectTimer = null;
         }
+
+        // Check if this profile has user-specified HTTP cover loading active
+        if(mServerProfile.getHTTPCoverEnabled()) {
+            HTTPAlbumImageProvider.getInstance(mContext).setRegex(mServerProfile.getHTTPRegex());
+        }
     }
 
-    public synchronized static void setAutoconnect(boolean enabled) {
-        getInstance().mAutoConnect = enabled;
+    public synchronized void setAutoconnect(boolean enabled) {
+        mAutoConnect = enabled;
     }
 
     @Override
@@ -234,6 +240,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
                 mReconnectTimer.schedule(new ReconnectTask(), LONG_RECONNECT_TIME);
             }
         }
+        HTTPAlbumImageProvider.getInstance(mContext).setRegex(null);
     }
 
     /**

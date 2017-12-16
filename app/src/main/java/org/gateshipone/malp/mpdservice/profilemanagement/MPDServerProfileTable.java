@@ -44,12 +44,17 @@ public class MPDServerProfileTable {
     public static final String COLUMN_PROFILE_STREAMING_PORT = "streaming_port";
     public static final String COLUMN_PROFILE_STREAMING_ENABLED = "streaming_enabled";
 
+    public static final String COLUMN_PROFILE_HTTP_COVER_REGEX = "http_cover_regex";
+    public static final String COLUMN_PROFILE_HTTP_COVER_ENABLED = "http_cover_enabled";
+
+
     /**
      * Projection string array used for queries on this table
      */
     public static final String[] PROJECTION_SERVER_PROFILES = {COLUMN_PROFILE_NAME, COLUMN_PROFILE_AUTO_CONNECT,
         COLUMN_SERVER_HOSTNAME, COLUMN_SERVER_PASSWORD, COLUMN_SERVER_PORT, COLUMN_PROFILE_DATE_CREATED,
-            COLUMN_PROFILE_STREAMING_PORT, COLUMN_PROFILE_STREAMING_ENABLED
+            COLUMN_PROFILE_STREAMING_PORT, COLUMN_PROFILE_STREAMING_ENABLED,
+            COLUMN_PROFILE_HTTP_COVER_REGEX, COLUMN_PROFILE_HTTP_COVER_ENABLED
     };
 
 
@@ -60,7 +65,8 @@ public class MPDServerProfileTable {
             COLUMN_PROFILE_NAME + " text," + COLUMN_PROFILE_AUTO_CONNECT + " integer," +
             COLUMN_SERVER_HOSTNAME + " text," + COLUMN_SERVER_PASSWORD + " text," +
             COLUMN_SERVER_PORT  + " integer,"  + COLUMN_PROFILE_DATE_CREATED  + " integer PRIMARY KEY, " +
-            COLUMN_PROFILE_STREAMING_PORT  + " integer,"  + COLUMN_PROFILE_STREAMING_ENABLED  + " integer" + " );";
+            COLUMN_PROFILE_STREAMING_PORT  + " integer,"  + COLUMN_PROFILE_STREAMING_ENABLED  + " integer," +
+            COLUMN_PROFILE_HTTP_COVER_REGEX  + " text,"  + COLUMN_PROFILE_HTTP_COVER_ENABLED  + " integer" + " );";
 
     /**
      * Creates the inital database table.

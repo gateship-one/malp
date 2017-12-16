@@ -111,6 +111,24 @@
                 android:hint="@string/fragment_profile_streaming_url"
                 android:inputType="textNoSuggestions" />
             </android.support.design.widget.TextInputLayout>
+            <Switch
+                android:id="@+id/fragment_profile_http_covers_enabled"
+                android:text="@string/fragment_profile_http_cover_enabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <android.support.design.widget.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp">
+
+                <android.support.design.widget.TextInputEditText
+                    android:id="@+id/fragment_profile_cover_regex"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/fragment_profile_http_cover_regex"
+                    android:inputType="textNoSuggestions" />
+            </android.support.design.widget.TextInputLayout>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

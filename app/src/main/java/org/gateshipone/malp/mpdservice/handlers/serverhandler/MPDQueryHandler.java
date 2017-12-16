@@ -221,6 +221,17 @@ public class MPDQueryHandler extends MPDGenericHandler {
             Message responseMessage = this.obtainMessage();
             responseMessage.obj = trackList;
             responseHandler.sendMessage(responseMessage);
+        }  else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_TRACKS) {
+            responseHandler = mpdAction.getResponseHandler();
+            if (!(responseHandler instanceof MPDResponseFileList)) {
+                return;
+            }
+
+            List<MPDFileEntry> trackList = mMPDConnection.getAllTracks();
+
+            Message responseMessage = this.obtainMessage();
+            responseMessage.obj = trackList;
+            responseHandler.sendMessage(responseMessage);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_ALBUM_TRACKS) {
             String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
             String albumName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
@@ -624,6 +635,23 @@ public class MPDQueryHandler extends MPDGenericHandler {
         action.setResponseHandler(responseHandler);
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME, albumName);
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID, mbid);
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Requests a list of tracks (MPDFileEntry objects).
+     *
+     * @param responseHandler The handler used to send the requested data
+     */
+    public static void getAllTracks(MPDResponseFileList responseHandler) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_TRACKS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
         msg.obj = action;
 
         MPDQueryHandler.getHandler().sendMessage(msg);

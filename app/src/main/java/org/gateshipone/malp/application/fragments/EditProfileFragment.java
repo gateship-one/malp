@@ -63,6 +63,8 @@ public class EditProfileFragment extends Fragment {
     private String mStreamingURL;
     private boolean mStreamingEnabled;
 
+    private String mHTTPCoverRegex;
+    private boolean mHTTPCoverEnabled;
 
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
@@ -72,6 +74,8 @@ public class EditProfileFragment extends Fragment {
     private Switch mStreamingEnabledView;
     private TextInputEditText mStreamingURLView;
 
+    private Switch mHTTPCoverEnabledView;
+    private TextInputEditText mHTTPCoverRegexView;
 
     private MPDServerProfile mOldProfile;
 
@@ -95,6 +99,10 @@ public class EditProfileFragment extends Fragment {
         mStreamingURLView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_streaming_url);
         mStreamingEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_streaming_enabled);
 
+        mHTTPCoverRegexView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_cover_regex);
+        mHTTPCoverEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
+
+
         // Set to maximum tcp port
         InputFilter portFilter = new PortNumberFilter();
 
@@ -114,6 +122,9 @@ public class EditProfileFragment extends Fragment {
                 mStreamingURL = mOldProfile.getStreamingURL();
                 mStreamingEnabled = mOldProfile.getStreamingEnabled();
 
+                mHTTPCoverRegex = mOldProfile.getHTTPRegex();
+                mHTTPCoverEnabled = mOldProfile.getHTTPCoverEnabled();
+
                 mProfilenameView.setText(mProfilename);
             } else {
                 mHostname = "";
@@ -124,6 +135,9 @@ public class EditProfileFragment extends Fragment {
                 mStreamingEnabled = false;
                 mStreamingURL = "";
 
+                mHTTPCoverEnabled = false;
+                mHTTPCoverRegex = "";
+
                 mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
             }
         }
@@ -132,6 +146,7 @@ public class EditProfileFragment extends Fragment {
         mPasswordView.setText(mPassword);
         mPortView.setText(String.valueOf(mPort));
 
+        // Show/Hide streaming url view depending on state
         mStreamingEnabledView.setChecked(mStreamingEnabled);
         mStreamingEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -154,6 +169,25 @@ public class EditProfileFragment extends Fragment {
             mStreamingURLView.setVisibility(View.GONE);
         }
         mStreamingURLView.setText(mStreamingURL);
+
+        // Show/Hide HTTP cover regex view depending on state
+        mHTTPCoverEnabledView.setChecked(mHTTPCoverEnabled);
+        mHTTPCoverEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    mHTTPCoverRegexView.setText(mHTTPCoverRegex);
+                    mHTTPCoverRegexView.setVisibility(View.VISIBLE);
+                } else {
+                    mHTTPCoverRegexView.setVisibility(View.GONE);
+                }
+
+            }
+        });
+        if (!mHTTPCoverEnabled) {
+            mHTTPCoverRegexView.setVisibility(View.GONE);
+        }
+        mHTTPCoverRegexView.setText(mHTTPCoverRegex);
 
 
         mProfilenameView.setSelectAllOnFocus(true);
@@ -229,10 +263,18 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mStreamingEnabled = mStreamingEnabledView.isChecked();
         }
+        if (!mHTTPCoverRegexView.getText().toString().equals(mHTTPCoverRegex)) {
+            profileChanged = true;
+            mHTTPCoverRegex = mHTTPCoverRegexView.getText().toString();
+        }
+        if (mHTTPCoverEnabledView.isChecked() != mHTTPCoverEnabled) {
+            profileChanged = true;
+            mHTTPCoverEnabled = mHTTPCoverEnabledView.isChecked();
+        }
 
         if (profileChanged) {
             if (null != mOldProfile) {
-                ConnectionManager.getInstance().removeProfile(mOldProfile,getActivity());
+                ConnectionManager.getInstance(getContext().getApplicationContext()).removeProfile(mOldProfile,getActivity());
             } else {
                 mOldProfile = new MPDServerProfile(mProfilename, true);
             }
@@ -242,7 +284,9 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setPort(mPort);
             mOldProfile.setStreamingURL(mStreamingURL);
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
-            ConnectionManager.getInstance().addProfile(mOldProfile, getContext());
+            mOldProfile.setHTTPCoverEnabled(mHTTPCoverEnabled);
+            mOldProfile.setHTTPRegex(mHTTPCoverRegex);
+            ConnectionManager.getInstance(getContext().getApplicationContext()).addProfile(mOldProfile, getContext());
         }
     }
 
@@ -323,7 +367,7 @@ public class EditProfileFragment extends Fragment {
                 getActivity().onBackPressed();
                 return true;
             case R.id.action_delete:
-                ConnectionManager.getInstance().removeProfile(mOldProfile,getContext());
+                ConnectionManager.getInstance(getContext().getApplicationContext()).removeProfile(mOldProfile,getContext());
                 mOptionsMenuHandled = true;
                 getActivity().onBackPressed();
                 return true;

@@ -27,6 +27,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import org.gateshipone.malp.BuildConfig;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -34,7 +35,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 
 public class ArtworkDatabaseManager extends SQLiteOpenHelper {
-
+    private static final String TAG = ArtworkDatabaseManager.class.getSimpleName();
     /**
      * The name of the database
      */
@@ -101,9 +102,12 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
 
         String selection = AlbumArtTable.COLUMN_ALBUM_MBID + "=?";
 
+        Log.v(TAG,"MBID:" + mbid);
 
         Cursor requestCursor = database.query(AlbumArtTable.TABLE_NAME, new String[]{AlbumArtTable.COLUMN_ALBUM_MBID, AlbumArtTable.COLUMN_IMAGE_DATA, AlbumArtTable.COLUMN_IMAGE_NOT_FOUND},
                 selection, new String[]{mbid}, null, null, null);
+
+        Log.v(TAG,"Cursor count:" + requestCursor.getCount());
 
         // Check if an image was found
         if (requestCursor.moveToFirst()) {

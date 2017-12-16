@@ -240,7 +240,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         mLastStatus = new MPDCurrentStatus();
 
         // Disable automatic reconnect after connection loss for the widget server
-        ConnectionManager.setAutoconnect(false);
+        ConnectionManager.getInstance(getApplicationContext()).setAutoconnect(false);
     }
 
     @Override
@@ -376,7 +376,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private void onProfileChanged() {
         onMPDDisconnect();
         MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
-        ConnectionManager.getInstance().setParameters(profile, this);
+        ConnectionManager.getInstance(getApplicationContext()).setParameters(profile, this);
     }
 
     @Override
@@ -478,10 +478,10 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         mConnecting = true;
 
         MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
-        ConnectionManager.getInstance().setParameters(profile, this);
+        ConnectionManager.getInstance(getApplicationContext()).setParameters(profile, this);
 
         /* Open the actual server connection */
-        ConnectionManager.getInstance().reconnectLastServer(this);
+        ConnectionManager.getInstance(getApplicationContext()).reconnectLastServer(this);
     }
 
     /**
