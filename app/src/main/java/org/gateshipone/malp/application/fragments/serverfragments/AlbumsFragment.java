@@ -401,16 +401,15 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
     private void setupToolbarAndStuff() {
         if (null != mFABCallback) {
-            if (null != mArtist && !mArtist.getArtistName().equals("")) {
+            if (null != mArtist && !mArtist.getArtistName().isEmpty()) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
-                if (mArtist != null && mBitmap == null) {
+                if (mBitmap == null) {
                     mBitmapLoader.getArtistImage(mArtist, true);
-                } else if (mArtist != null && mBitmap != null) {
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
+                } else {
                     // Reuse image
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
                     mFABCallback.setupToolbarImage(mBitmap);
-                } else {
-                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 }
             } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
                 String lastPath = mAlbumsPath;
