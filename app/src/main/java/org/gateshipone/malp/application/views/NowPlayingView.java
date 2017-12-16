@@ -901,6 +901,16 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             }
         });
 
+        mVolumeIconButtons.setOnLongClickListener(new OnLongClickListener() {
+            @Override
+            public boolean onLongClick(final View view) {
+
+                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(NowPlayingView.this, view));
+
+                return true;
+            }
+        });
+
         mVolumeText = (TextView) findViewById(R.id.volume_button_text);
 
         mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
