@@ -111,7 +111,7 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
     }
 
     private String resolveRegex(String path) {
-        String result = mRegex;
+        String result;
 
         result = mRegex.replaceAll("%f", FormatHelper.encodeURLUnsafeCharacters(path));
         result = result.replaceAll("%d", FormatHelper.encodeURLUnsafeCharacters(FormatHelper.getDirectoryFromPath(path)));

@@ -142,7 +142,7 @@
     <string name="fragment_profile_streaming_enabled">Enable streaming from server</string>
 
     <string name="fragment_profile_http_cover_enabled">Prefer HTTP cover files</string>
-    <string name="fragment_profile_http_cover_regex">Cover regex (%f replaced by filename, %d by the path without the file)</string>
+    <string name="fragment_profile_http_cover_regex">Cover path (%d replaced by the files directory)</string>
 
     <string name="fragment_profile_default_name">New Profile</string>
 
