@@ -32,6 +32,7 @@ import android.widget.SectionIndexer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
@@ -59,9 +60,13 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     private FilterTask mFilterTask;
 
+    private ReentrantReadWriteLock mLock;
+
 
     public GenericSectionAdapter() {
         super();
+
+        mLock = new ReentrantReadWriteLock();
 
         mSectionList = new ArrayList<>();
         mSectionPositions = new ArrayList<>();
@@ -84,15 +89,17 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      * @param data Actual model data
      */
     public void swapModel(List<T> data) {
+        mLock.writeLock().lock();
+        mFilteredModelData.clear();
         if (data == null) {
             mModelData.clear();
         } else {
             mModelData.clear();
             mModelData.addAll(data);
         }
-        synchronized (mFilteredModelData) {
-            mFilteredModelData.clear();
-        }
+        mLock.writeLock().unlock();
+
+
         setScrollSpeed(0);
 
         if (mFilterString.isEmpty()) {
@@ -146,8 +153,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             }
 
             if (mPositionSectionMap.containsKey(itemSection)) {
-                int sectionIndex = mPositionSectionMap.get(itemSection);
-                return sectionIndex;
+                return mPositionSectionMap.get(itemSection);
             }
             return 0;
         }
@@ -170,13 +176,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     @Override
     public int getCount() {
-        synchronized (mFilteredModelData) {
-            if (!mFilteredModelData.isEmpty() || !mFilterString.isEmpty()) {
-                return mFilteredModelData.size();
-            } else {
-                return mModelData.size();
-            }
-        }
+        mLock.readLock().lock();
+        int filteredSize = mFilteredModelData.size();
+        int normalSize = mModelData.size();
+        mLock.readLock().unlock();
+
+        return (filteredSize > 0 || !mFilterString.isEmpty()) ? filteredSize : normalSize;
     }
 
     /**
@@ -187,13 +192,15 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
      */
     @Override
     public Object getItem(int position) {
-        synchronized (mFilteredModelData) {
-            if (!mFilteredModelData.isEmpty() || !mFilterString.isEmpty()) {
-                return mFilteredModelData.get(position);
-            } else {
-                return mModelData.get(position);
-            }
-        }
+        mLock.readLock().lock();
+
+        int filteredSize = mFilteredModelData.size();
+
+        Object obj = filteredSize > 0 ? mFilteredModelData.get(position) : mModelData.get(position);
+
+        mLock.readLock().unlock();
+
+        return obj;
     }
 
     /**
@@ -209,12 +216,17 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
 
     private void createSections() {
+        // Get write lock, to ensure count does not change during execution
+        mLock.writeLock().lock();
         mSectionList.clear();
         mSectionPositions.clear();
         mPositionSectionMap.clear();
 
-        if (getCount() > 0) {
-            MPDGenericItem currentModel = (MPDGenericItem) getItem(0);
+        int count = getCount();
+        boolean filtered = mFilteredModelData.size() > 0;
+
+        if (count > 0) {
+            MPDGenericItem currentModel = (filtered ? mFilteredModelData.get(0) : mModelData.get(0));
 
             char lastSection;
             if (currentModel.getSectionTitle().length() > 0) {
@@ -227,9 +239,8 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             mSectionPositions.add(0);
             mPositionSectionMap.put(lastSection, mSectionList.size() - 1);
 
-            for (int i = 1; i < getCount(); i++) {
-
-                currentModel = (MPDGenericItem) getItem(i);
+            for (int i = 1; i < count; i++) {
+                currentModel = (filtered ? mFilteredModelData.get(i) : mModelData.get(i));
 
                 char currentSection;
                 if (currentModel.getSectionTitle().length() > 0) {
@@ -248,6 +259,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
             }
         }
+        mLock.writeLock().unlock();
     }
 
     public void applyFilter(String filterString) {
@@ -264,11 +276,12 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
 
     public void removeFilter() {
         if (!mFilterString.isEmpty()) {
-            synchronized (mFilteredModelData) {
-                mFilteredModelData.clear();
-            }
+            mLock.writeLock().lock();
 
+            mFilteredModelData.clear();
             mFilterString = "";
+
+            mLock.writeLock().unlock();
 
             if (mSectionsEnabled) {
                 createSections();
@@ -284,29 +297,32 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             List<T> resultList = new ArrayList<>();
 
             String filterString = lists[0];
-
+            mLock.readLock().lock();
             for (T elem : mModelData) {
                 // Check if task was cancelled from the outside.
                 if (isCancelled()) {
                     resultList.clear();
+                    mLock.readLock().unlock();
                     return new Pair<>(resultList, filterString);
                 }
                 if (elem.getSectionTitle().toLowerCase().contains(filterString.toLowerCase())) {
                     resultList.add(elem);
                 }
             }
+            mLock.readLock().unlock();
 
             return new Pair<List<T>, String>(resultList, filterString);
         }
 
         protected void onPostExecute(Pair<List<T>, String> result) {
             if (!isCancelled() && mFilterString.equals(result.second)) {
+                mLock.writeLock().lock();
 
-                synchronized (mFilteredModelData) {
-                    mFilteredModelData.clear();
+                mFilteredModelData.clear();
+                mFilteredModelData.addAll(result.first);
 
-                    mFilteredModelData.addAll(result.first);
-                }
+                mLock.writeLock().unlock();
+
                 setScrollSpeed(0);
                 if (mSectionsEnabled) {
                     createSections();
@@ -328,9 +344,11 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
         if (mSectionsEnabled) {
             createSections();
         } else {
+            mLock.writeLock().lock();
             mSectionList.clear();
             mSectionPositions.clear();
             mPositionSectionMap.clear();
+            mLock.writeLock().unlock();
         }
         notifyDataSetChanged();
     }
