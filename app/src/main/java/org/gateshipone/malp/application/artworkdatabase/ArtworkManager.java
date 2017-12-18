@@ -246,7 +246,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         // Clear the old image
-        mDBManager.removeAlbumImage(album);
+        mDBManager.removeAlbumImage(mContext, album);
 
         // Reload the image from the internet
         fetchAlbumImage(album);
@@ -264,7 +264,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         // Clear the old image
-        mDBManager.removeArtistImage(artist);
+        mDBManager.removeArtistImage(mContext, artist);
 
         // Reload the image from the internet
         fetchArtistImage(artist);
@@ -290,9 +290,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
          * the artist with name instead of id.
          */
         if (artist.getMBIDCount() != 0) {
-            image = mDBManager.getArtistImage(artist);
+            image = mDBManager.getArtistImage(mContext, artist);
         } else if (!artist.getArtistName().isEmpty()) {
-            image = mDBManager.getArtistImage(artist.getArtistName());
+            image = mDBManager.getArtistImage(mContext, artist.getArtistName());
         }
 
 
@@ -318,7 +318,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         byte[] image;
 
-        image = mDBManager.getAlbumImageFromMBID(mbid);
+        image = mDBManager.getAlbumImageFromMBID(mContext, mbid);
 
         // Checks if the database has an image for the requested album
         if (null != image) {
@@ -346,7 +346,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         byte[] image;
 
 
-        image = mDBManager.getAlbumImage(albumName, artistName);
+        image = mDBManager.getAlbumImage(mContext, albumName, artistName);
 
         // Checks if the database has an image for the requested album
         if (null != image) {
@@ -373,7 +373,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         byte[] image;
 
 
-        image = mDBManager.getAlbumImage(albumName);
+        image = mDBManager.getAlbumImage(mContext, albumName);
 
         // Checks if the database has an image for the requested album
         if (null != image) {
@@ -453,10 +453,10 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             // Check if ID is available (should be the case). If not use the album name for
             // lookup.
             // FIXME use artistname also
-            image = mDBManager.getAlbumImage(album.getName());
+            image = mDBManager.getAlbumImage(mContext, album.getName());
         } else {
             // If id is available use it.
-            image = mDBManager.getAlbumImage(album);
+            image = mDBManager.getAlbumImage(mContext, album);
         }
 
         // Checks if the database has an image for the requested album
@@ -759,7 +759,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
 
             if (response.image == null) {
-                mDBManager.insertArtistImage(response.artist, response.image);
+                mDBManager.insertArtistImage(mContext, response.artist, response.image);
                 return response.artist;
             }
 
@@ -774,11 +774,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 Bitmap.createScaledBitmap(bm, MAXIMUM_IMAGE_RESOLUTION, MAXIMUM_IMAGE_RESOLUTION, true).compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
                 if(byteStream.size() <= MAXIMUM_IMAGE_SIZE) {
-                    mDBManager.insertArtistImage(response.artist, byteStream.toByteArray());
+                    mDBManager.insertArtistImage(mContext, response.artist, byteStream.toByteArray());
                 }
             } else {
                 if(response.image.length <= MAXIMUM_IMAGE_SIZE) {
-                    mDBManager.insertArtistImage(response.artist, response.image);
+                    mDBManager.insertArtistImage(mContext, response.artist, response.image);
                 }
             }
 
@@ -821,7 +821,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 fetchNextBulkAlbum();
             }
             if (response.image == null) {
-                mDBManager.insertAlbumImage(response.album, response.image);
+                mDBManager.insertAlbumImage(mContext, response.album, response.image);
                 return response.album;
             }
 
@@ -837,11 +837,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 Bitmap.createScaledBitmap(bm, MAXIMUM_IMAGE_RESOLUTION, MAXIMUM_IMAGE_RESOLUTION, true).compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
                 if(byteStream.size() <= MAXIMUM_IMAGE_SIZE) {
-                    mDBManager.insertAlbumImage(response.album, byteStream.toByteArray());
+                    mDBManager.insertAlbumImage(mContext, response.album, byteStream.toByteArray());
                 }
             } else {
                 if(response.image.length <= MAXIMUM_IMAGE_SIZE) {
-                    mDBManager.insertAlbumImage(response.album, response.image);
+                    mDBManager.insertAlbumImage(mContext, response.album, response.image);
                 }
             }
 
@@ -900,9 +900,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
                 Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, MAXIMUM_IMAGE_SIZE, MAXIMUM_IMAGE_SIZE, true);
                 scaledBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
-                mDBManager.insertAlbumImage(fakeAlbum, byteStream.toByteArray());
+                mDBManager.insertAlbumImage(mContext, fakeAlbum, byteStream.toByteArray());
             } else {
-                mDBManager.insertAlbumImage(fakeAlbum, response.image);
+                mDBManager.insertAlbumImage(mContext, fakeAlbum, response.image);
             }
 
             AlbumImageResponse albumResponse = new AlbumImageResponse();
@@ -1104,7 +1104,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
             // Check if image already there
             try {
-                mDBManager.getAlbumImage(album);
+                mDBManager.getAlbumImage(mContext, album);
                 // If this does not throw the exception it already has an image.
             } catch (ImageNotFoundException e) {
                 fetchAlbumImage(album);
@@ -1145,7 +1145,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
             // Check if image already there
             try {
-                mDBManager.getArtistImage(artist);
+                mDBManager.getArtistImage(mContext, artist);
                 // If this does not throw the exception it already has an image.
             } catch (ImageNotFoundException e) {
                 fetchArtistImage(artist);
