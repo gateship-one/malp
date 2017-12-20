@@ -782,6 +782,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
      */
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         // FIXME check why super.onMeasure(widthMeasureSpec, heightMeasureSpec); causes
         // problems with scrolling header view.
         measureChildren(widthMeasureSpec, heightMeasureSpec);
