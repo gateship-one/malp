@@ -30,7 +30,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
 /**
- * Simple LRU-based cacheing for album & artist images. This could reduce CPU usage
+ * Simple LRU-based caching for album & artist images. This could reduce CPU usage
  * for the cost of memory usage by caching decoded {@link Bitmap} objects in a {@link LruCache}.
  */
 public class BitmapCache {
@@ -78,7 +78,7 @@ public class BitmapCache {
      * @param album Album object to try
      * @return Bitmap if cache hit, null otherwise
      */
-    public Bitmap requestAlbumBitmap(MPDAlbum album) {
+    public synchronized Bitmap requestAlbumBitmap(MPDAlbum album) {
         Bitmap bitmap = mCache.get(getAlbumHash(album));
         printUsage();
         return bitmap;
@@ -90,7 +90,7 @@ public class BitmapCache {
      * @param album Album object to use for cache key
      * @param bm    Bitmap to store in cache
      */
-    public void putAlbumBitmap(MPDAlbum album, Bitmap bm) {
+    public synchronized void putAlbumBitmap(MPDAlbum album, Bitmap bm) {
         mCache.put(getAlbumHash(album), bm);
         printUsage();
     }
@@ -102,7 +102,7 @@ public class BitmapCache {
      * @param artistName Albumartist name used as key
      * @return Bitmap if cache hit, null otherwise
      */
-    public Bitmap requestAlbumBitmap(String albumName, String artistName) {
+    public synchronized Bitmap requestAlbumBitmap(String albumName, String artistName) {
         printUsage();
         return mCache.get(getAlbumHash(albumName, artistName));
     }
@@ -114,7 +114,7 @@ public class BitmapCache {
      * @param artistName Albumartist name used as key
      * @param bm         Bitmap to store in cache
      */
-    public void putAlbumBitmap(String albumName, String artistName, Bitmap bm) {
+    public synchronized void putAlbumBitmap(String albumName, String artistName, Bitmap bm) {
         mCache.put(getAlbumHash(albumName, artistName), bm);
         printUsage();
     }
@@ -125,7 +125,7 @@ public class BitmapCache {
      * @param mbid MBID used as key
      * @return Bitmap if cache hit, null otherwise
      */
-    public Bitmap requestAlbumBitmapMBID(final String mbid) {
+    public synchronized Bitmap requestAlbumBitmapMBID(final String mbid) {
         printUsage();
         return mCache.get(getAlbumHashMBID(mbid));
     }
@@ -136,7 +136,7 @@ public class BitmapCache {
      * @param mbid MBID used as key
      * @param bm   Bitmap to store in cache
      */
-    public void putAlbumBitmapMBID(String mbid, Bitmap bm) {
+    public synchronized void putAlbumBitmapMBID(String mbid, Bitmap bm) {
         mCache.put(getAlbumHashMBID(mbid), bm);
         printUsage();
     }
@@ -194,7 +194,7 @@ public class BitmapCache {
      * @param artist Artist object to check in cache
      * @return Bitmap if cache hit, null otherwise
      */
-    public Bitmap requestArtistImage(MPDArtist artist) {
+    public synchronized Bitmap requestArtistImage(MPDArtist artist) {
         printUsage();
         return mCache.get(getArtistHash(artist));
     }
@@ -205,7 +205,7 @@ public class BitmapCache {
      * @param artist Artist used as cache key
      * @param bm     Bitmap to store in cache
      */
-    public void putArtistImage(MPDArtist artist, Bitmap bm) {
+    public synchronized void putArtistImage(MPDArtist artist, Bitmap bm) {
         mCache.put(getArtistHash(artist), bm);
         printUsage();
     }
