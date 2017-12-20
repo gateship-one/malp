@@ -67,7 +67,6 @@ import org.json.JSONException;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
@@ -282,6 +281,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return null;
         }
 
+        // Try cache first
+        Bitmap cacheImage = BitmapCache.getInstance().requestArtistImage(artist);
+        if(cacheImage!=null) {
+            return cacheImage;
+        }
+
 
         byte[] image = null;
 
@@ -299,7 +304,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested artist
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            return BitmapFactory.decodeByteArray(image, 0, image.length);
+            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            BitmapCache.getInstance().putArtistImage(artist, bm);
+            return bm;
         }
         return null;
     }
@@ -316,6 +323,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return null;
         }
 
+        // Try cache first
+        Bitmap cacheImage = BitmapCache.getInstance().requestAlbumBitmapMBID(mbid);
+        if(cacheImage!=null) {
+            return cacheImage;
+        }
+
         byte[] image;
 
         image = mDBManager.getAlbumImageFromMBID(mContext, mbid);
@@ -323,8 +336,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            return BitmapFactory.decodeByteArray(image, 0, image.length);
-
+            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            BitmapCache.getInstance().putAlbumBitmapMBID(mbid,bm);
+            return bm;
         }
         return null;
     }
@@ -342,6 +356,11 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return null;
         }
 
+        // Try cache first
+        Bitmap cacheImage = BitmapCache.getInstance().requestAlbumBitmap(albumName, artistName);
+        if(cacheImage != null) {
+            return cacheImage;
+        }
 
         byte[] image;
 
@@ -351,8 +370,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            return BitmapFactory.decodeByteArray(image, 0, image.length);
-
+            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            BitmapCache.getInstance().putAlbumBitmap(albumName, artistName, bm);
+            return bm;
         }
         return null;
     }
@@ -446,6 +466,12 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             return null;
         }
 
+        // Try cache first
+        Bitmap cacheBitmap = BitmapCache.getInstance().requestAlbumBitmap(album);
+        if(null != cacheBitmap ) {
+            return cacheBitmap;
+        }
+
 
         byte[] image;
 
@@ -462,8 +488,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            return BitmapFactory.decodeByteArray(image, 0, image.length);
-
+            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            BitmapCache.getInstance().putAlbumBitmap(album, bm);
+            return bm;
         }
         return null;
     }

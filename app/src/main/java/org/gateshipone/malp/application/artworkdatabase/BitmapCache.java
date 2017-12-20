@@ -1,0 +1,241 @@
+/*
+ *  Copyright (C) 2017 Team Gateship-One
+ *  (Hendrik Borghorst & Frederik Luetkes)
+ *
+ *  The AUTHORS.md file contains a detailed contributors list:
+ *  <https://github.com/gateship-one/malp/blob/master/AUTHORS.md>
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+package org.gateshipone.malp.application.artworkdatabase;
+
+import android.graphics.Bitmap;
+import android.support.v4.util.LruCache;
+import android.util.Log;
+
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
+
+/**
+ * Simple LRU-based cacheing for album & artist images. This could reduce CPU usage
+ * for the cost of memory usage by caching decoded {@link Bitmap} objects in a {@link LruCache}.
+ */
+public class BitmapCache {
+    private static final String TAG = BitmapCache.class.getSimpleName();
+
+    /**
+     * Number of entries to cache. This should not be too high and not too low.
+     */
+    private static final int CACHE_ENTRIES = 128;
+
+    /**
+     * Hash prefix for album images
+     */
+    private static final String ALBUM_PREFIX = "A_";
+
+    /**
+     * Hash prefix for artist images
+     */
+    private static final String ARTIST_PREFIX = "B_";
+
+    /**
+     * Private cache instance
+     */
+    private LruCache<String, Bitmap> mCache;
+
+    /**
+     * Singleton instance
+     */
+    private static BitmapCache mInstance;
+
+    private BitmapCache() {
+        mCache = new LruCache<>(CACHE_ENTRIES);
+    }
+
+    public static synchronized BitmapCache getInstance() {
+        if (mInstance == null) {
+            mInstance = new BitmapCache();
+        }
+        return mInstance;
+    }
+
+    /**
+     * Tries to get an album image from the cache
+     *
+     * @param album Album object to try
+     * @return Bitmap if cache hit, null otherwise
+     */
+    public Bitmap requestAlbumBitmap(MPDAlbum album) {
+        Bitmap bitmap = mCache.get(getAlbumHash(album));
+        printUsage();
+        return bitmap;
+    }
+
+    /**
+     * Puts an album image to the cache
+     *
+     * @param album Album object to use for cache key
+     * @param bm    Bitmap to store in cache
+     */
+    public void putAlbumBitmap(MPDAlbum album, Bitmap bm) {
+        mCache.put(getAlbumHash(album), bm);
+        printUsage();
+    }
+
+    /**
+     * Tries to get an album image from the cache
+     *
+     * @param albumName  Album name used as key
+     * @param artistName Albumartist name used as key
+     * @return Bitmap if cache hit, null otherwise
+     */
+    public Bitmap requestAlbumBitmap(String albumName, String artistName) {
+        printUsage();
+        return mCache.get(getAlbumHash(albumName, artistName));
+    }
+
+    /**
+     * Puts an album image to the cache
+     *
+     * @param albumName  Album name used as key
+     * @param artistName Albumartist name used as key
+     * @param bm         Bitmap to store in cache
+     */
+    public void putAlbumBitmap(String albumName, String artistName, Bitmap bm) {
+        mCache.put(getAlbumHash(albumName, artistName), bm);
+        printUsage();
+    }
+
+    /**
+     * Tries to get an album image from the cache
+     *
+     * @param mbid MBID used as key
+     * @return Bitmap if cache hit, null otherwise
+     */
+    public Bitmap requestAlbumBitmapMBID(final String mbid) {
+        printUsage();
+        return mCache.get(getAlbumHashMBID(mbid));
+    }
+
+    /**
+     * Puts an album image to the cache
+     *
+     * @param mbid MBID used as key
+     * @param bm   Bitmap to store in cache
+     */
+    public void putAlbumBitmapMBID(String mbid, Bitmap bm) {
+        mCache.put(getAlbumHashMBID(mbid), bm);
+        printUsage();
+    }
+
+    /**
+     * Private hash method for cache key
+     *
+     * @param album Album to calculate the key from
+     * @return Hash string for cache key
+     */
+    private String getAlbumHash(MPDAlbum album) {
+        String hashString = "ALBUM_";
+        final String albumMBID = album.getMBID();
+
+        if (!albumMBID.isEmpty()) {
+            hashString += albumMBID;
+            return hashString;
+        }
+
+        final String albumArtist = album.getArtistName();
+        final String albumName = album.getName();
+
+        hashString += albumArtist + '_' + albumName;
+        return hashString;
+    }
+
+    /**
+     * Private hash method for cache key
+     *
+     * @param albumName  Album name to calculate key from
+     * @param artistName Album artist name to calculate key from
+     * @return Hash string for cache key
+     */
+    private String getAlbumHash(String albumName, String artistName) {
+        return ALBUM_PREFIX + artistName + '_' + albumName;
+    }
+
+    /**
+     * Private hash method for cache key
+     *
+     * @param mbid MBID used as cache key
+     * @return Hash string for cache key
+     */
+    private String getAlbumHashMBID(String mbid) {
+        return ALBUM_PREFIX + mbid;
+    }
+
+    /*
+     * Begin of artist image handling
+     */
+
+    /**
+     * Tries to get an artist image from the cache
+     *
+     * @param artist Artist object to check in cache
+     * @return Bitmap if cache hit, null otherwise
+     */
+    public Bitmap requestArtistImage(MPDArtist artist) {
+        printUsage();
+        return mCache.get(getArtistHash(artist));
+    }
+
+    /**
+     * Puts an artist image to the cache
+     *
+     * @param artist Artist used as cache key
+     * @param bm     Bitmap to store in cache
+     */
+    public void putArtistImage(MPDArtist artist, Bitmap bm) {
+        mCache.put(getArtistHash(artist), bm);
+        printUsage();
+    }
+
+    /**
+     * Private hash method for cache key
+     *
+     * @param artist Artist used as cache key
+     * @return Hash string for cache key
+     */
+    private String getArtistHash(MPDArtist artist) {
+        String hashString = ARTIST_PREFIX;
+        if (artist.getMBIDCount() > 0) {
+            hashString += artist.getMBID(0);
+            return hashString;
+        }
+
+        hashString += artist.getArtistName();
+        return hashString;
+    }
+
+    /**
+     * Debug method to provide performance evaluation metrics
+     */
+    private void printUsage() {
+        Log.v(TAG, "Cache usage: " + ((mCache.size() * 100) / mCache.maxSize()) + '%');
+        int missCount = mCache.missCount();
+        int hitCount = mCache.hitCount();
+        if (missCount > 0) {
+            Log.v(TAG, "Cache hit count: " + hitCount + " miss count: " + missCount + " Miss rate: " + ((hitCount * 100) / missCount)+ '%');
+        }
+    }
+}
