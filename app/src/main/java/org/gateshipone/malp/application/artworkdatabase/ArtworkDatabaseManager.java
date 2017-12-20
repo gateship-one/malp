@@ -108,13 +108,9 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
         final SQLiteDatabase database = getReadableDatabase();
 
         final String selection = AlbumArtTable.COLUMN_ALBUM_MBID + "=?";
-
-        Log.v(TAG, "MBID:" + mbid);
-
+        
         final Cursor requestCursor = database.query(AlbumArtTable.TABLE_NAME, new String[]{AlbumArtTable.COLUMN_ALBUM_MBID, AlbumArtTable.COLUMN_IMAGE_FILE_PATH, AlbumArtTable.COLUMN_IMAGE_NOT_FOUND},
                 selection, new String[]{mbid}, null, null, null);
-
-        Log.v(TAG, "Cursor count:" + requestCursor.getCount());
 
         // Check if an image was found
         if (requestCursor.moveToFirst()) {
