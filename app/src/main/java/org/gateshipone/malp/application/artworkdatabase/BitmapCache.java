@@ -100,7 +100,9 @@ public class BitmapCache {
      * @param bm    Bitmap to store in cache
      */
     public synchronized void putAlbumBitmap(MPDAlbum album, Bitmap bm) {
-        mCache.put(getAlbumHash(album), bm);
+        if (bm != null) {
+            mCache.put(getAlbumHash(album), bm);
+        }
     }
 
     /**
@@ -122,7 +124,9 @@ public class BitmapCache {
      * @param bm         Bitmap to store in cache
      */
     public synchronized void putAlbumBitmap(String albumName, String artistName, Bitmap bm) {
-        mCache.put(getAlbumHash(albumName, artistName), bm);
+        if (bm != null) {
+            mCache.put(getAlbumHash(albumName, artistName), bm);
+        }
     }
 
     /**
@@ -142,7 +146,9 @@ public class BitmapCache {
      * @param bm   Bitmap to store in cache
      */
     public synchronized void putAlbumBitmapMBID(String mbid, Bitmap bm) {
-        mCache.put(getAlbumHashMBID(mbid), bm);
+        if (bm != null) {
+            mCache.put(getAlbumHashMBID(mbid), bm);
+        }
     }
 
     /**
@@ -209,7 +215,9 @@ public class BitmapCache {
      * @param bm     Bitmap to store in cache
      */
     public synchronized void putArtistImage(MPDArtist artist, Bitmap bm) {
-        mCache.put(getArtistHash(artist), bm);
+        if (bm != null) {
+            mCache.put(getArtistHash(artist), bm);
+        }
     }
 
     /**
