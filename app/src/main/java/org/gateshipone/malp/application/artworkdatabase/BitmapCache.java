@@ -90,7 +90,6 @@ public class BitmapCache {
      */
     public synchronized Bitmap requestAlbumBitmap(MPDAlbum album) {
         Bitmap bitmap = mCache.get(getAlbumHash(album));
-        printUsage();
         return bitmap;
     }
 
@@ -102,7 +101,6 @@ public class BitmapCache {
      */
     public synchronized void putAlbumBitmap(MPDAlbum album, Bitmap bm) {
         mCache.put(getAlbumHash(album), bm);
-        printUsage();
     }
 
     /**
@@ -113,7 +111,6 @@ public class BitmapCache {
      * @return Bitmap if cache hit, null otherwise
      */
     public synchronized Bitmap requestAlbumBitmap(String albumName, String artistName) {
-        printUsage();
         return mCache.get(getAlbumHash(albumName, artistName));
     }
 
@@ -126,7 +123,6 @@ public class BitmapCache {
      */
     public synchronized void putAlbumBitmap(String albumName, String artistName, Bitmap bm) {
         mCache.put(getAlbumHash(albumName, artistName), bm);
-        printUsage();
     }
 
     /**
@@ -136,7 +132,6 @@ public class BitmapCache {
      * @return Bitmap if cache hit, null otherwise
      */
     public synchronized Bitmap requestAlbumBitmapMBID(final String mbid) {
-        printUsage();
         return mCache.get(getAlbumHashMBID(mbid));
     }
 
@@ -148,7 +143,6 @@ public class BitmapCache {
      */
     public synchronized void putAlbumBitmapMBID(String mbid, Bitmap bm) {
         mCache.put(getAlbumHashMBID(mbid), bm);
-        printUsage();
     }
 
     /**
@@ -205,7 +199,6 @@ public class BitmapCache {
      * @return Bitmap if cache hit, null otherwise
      */
     public synchronized Bitmap requestArtistImage(MPDArtist artist) {
-        printUsage();
         return mCache.get(getArtistHash(artist));
     }
 
@@ -217,7 +210,6 @@ public class BitmapCache {
      */
     public synchronized void putArtistImage(MPDArtist artist, Bitmap bm) {
         mCache.put(getArtistHash(artist), bm);
-        printUsage();
     }
 
     /**
