@@ -148,12 +148,33 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         }
 
         if (mAlbum != null && mBitmap == null) {
-            mBitmapLoader.getAlbumImage(mAlbum, false);
+            final View rootView = getView();
+            if (rootView != null) {
+                getView().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int width = rootView.getWidth();
+                        mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
+                    }
+                });
+            }
         } else if (mAlbum != null) {
             // Reuse the image passed from the previous fragment
             mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
             mFABCallback.setupToolbarImage(mBitmap);
-
+            final View rootView = getView();
+            if (rootView != null) {
+                getView().post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int width = rootView.getWidth();
+                        // Image too small
+                        if(mBitmap.getWidth() < width) {
+                            mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
+                        }
+                    }
+                });
+            }
         }
 
         ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(this);
@@ -383,7 +404,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     @Override
     public void newAlbumImage(MPDAlbum album) {
         if (album.equals(mAlbum)) {
-            mBitmapLoader.getAlbumImage(mAlbum, false);
+            int width = getView().getWidth();
+            mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
         }
     }
 

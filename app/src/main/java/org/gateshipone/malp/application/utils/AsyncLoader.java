@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.utils;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.util.Pair;
 
 
 import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
@@ -51,6 +52,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
      * Wrapper class for covers
      */
     public static class CoverViewHolder {
+        public Pair<Integer, Integer> imageDimension;
         public CoverLoadable coverLoadable;
         public ArtworkManager artworkManager;
         public MPDGenericItem modelItem;
@@ -74,7 +76,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             try {
                 // Check if image is available. If it is not yet fetched it will throw an exception
                 // If it was already searched for and not found, this will be null.
-                image = mCover.artworkManager.getArtistImage(artist);
+                image = mCover.artworkManager.getArtistImage(artist, mCover.imageDimension.first, mCover.imageDimension.second, false);
             } catch (ImageNotFoundException e) {
                 // Check if fetching for this item is already ongoing
                 if (!artist.getFetching()) {
@@ -88,7 +90,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             try {
                 // Check if image is available. If it is not yet fetched it will throw an exception.
                 // If it was already searched for and not found, this will be null.
-                image = mCover.artworkManager.getAlbumImage(album);
+                image = mCover.artworkManager.getAlbumImage(album, mCover.imageDimension.first, mCover.imageDimension.second, false);
             } catch (ImageNotFoundException e) {
                 // Check if fetching for this item is already ongoing
                 if (!album.getFetching()) {
@@ -102,7 +104,7 @@ public class AsyncLoader extends AsyncTask<AsyncLoader.CoverViewHolder, Void, Bi
             try {
                 // Check if image is available. If it is not yet fetched it will throw an exception.
                 // If it was already searched for and not found, this will be null.
-                image = mCover.artworkManager.getAlbumImageForTrack(track);
+                image = mCover.artworkManager.getAlbumImageForTrack(track, mCover.imageDimension.first, mCover.imageDimension.second, false);
             } catch (ImageNotFoundException e) {
                 // Check if fetching for this item is already ongoing
                 if (!track.getFetching()) {

@@ -501,7 +501,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     public void newAlbumImage(MPDAlbum album) {
         if (mLastTrack.getTrackAlbum().equals(album.getName())) {
-            mCoverLoader.getImage(mLastTrack, true);
+            mCoverLoader.getImage(mLastTrack, true, mCoverImage.getWidth(), mCoverImage.getHeight());
         }
     }
 
@@ -516,7 +516,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
             // Show artist image if artwork is requested
             if (mShowArtistImage) {
-                mCoverLoader.getArtistImage(mLastTrack, true);
+                mCoverLoader.getArtistImage(mLastTrack, true, mCoverImage.getWidth(), mCoverImage.getHeight());
             } else {
                 // Hide artist image
                 mCoverImage.clearArtistImage();
@@ -555,7 +555,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     @Override
     public void newArtistImage(MPDArtist artist) {
         if (mShowArtistImage && mLastTrack.getTrackArtist().equals(artist.getArtistName())) {
-            mCoverLoader.getArtistImage(artist, false);
+            mCoverLoader.getArtistImage(artist, false, mCoverImage.getWidth(), mCoverImage.getHeight());
         }
     }
 
@@ -1378,13 +1378,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             // The same for the small header image
             mTopCoverImage.setImageDrawable(drawable);
             // Start the cover loader
-            mCoverLoader.getImage(track, true);
+            mCoverLoader.getImage(track, true, mCoverImage.getWidth(), mCoverImage.getHeight());
         }
 
         if (mShowArtistImage && (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist()))) {
             mCoverImage.clearArtistImage();
 
-            mCoverLoader.getArtistImage(track, true);
+            mCoverLoader.getArtistImage(track, true, mCoverImage.getWidth(), mCoverImage.getHeight());
         }
 
         // Calculate the margin to avoid cut off textviews

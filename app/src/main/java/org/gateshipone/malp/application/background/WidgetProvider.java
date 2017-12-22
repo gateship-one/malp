@@ -258,7 +258,7 @@ public class WidgetProvider extends AppWidgetProvider {
 
                 if (newImage) {
                     CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
-                    coverLoader.getImage(track, false);
+                    coverLoader.getImage(track, false,-1,-1);
                 }
             }
         } else if (intent.getAction().equals(BackgroundService.ACTION_SERVER_DISCONNECTED)) {
@@ -270,7 +270,7 @@ public class WidgetProvider extends AppWidgetProvider {
                 // Got new artwork
                 mLastCover = null;
                 CoverBitmapLoader coverLoader = new CoverBitmapLoader(context, new CoverReceiver(context, this));
-                coverLoader.getImage(mLastTrack, false);
+                coverLoader.getImage(mLastTrack, false,-1,-1);
             }
         }
         // Refresh the widget with the new information

@@ -53,6 +53,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.Artist
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumImageResponse;
+import org.gateshipone.malp.application.utils.BitmapUtils;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtistList;
@@ -276,15 +277,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getArtistImage(final MPDArtist artist) throws ImageNotFoundException {
+    public Bitmap getArtistImage(final MPDArtist artist, int width, int height, boolean skipCache) throws ImageNotFoundException {
         if (null == artist) {
             return null;
         }
 
-        // Try cache first
-        Bitmap cacheImage = BitmapCache.getInstance().requestArtistImage(artist);
-        if(cacheImage!=null) {
-            return cacheImage;
+        if(!skipCache) {
+            // Try cache first
+            Bitmap cacheBitmap = BitmapCache.getInstance().requestArtistImage(artist);
+            if (cacheBitmap != null && width <= cacheBitmap.getWidth() && height <= cacheBitmap.getWidth()) {
+                return cacheBitmap;
+            }
         }
 
 
@@ -304,7 +307,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested artist
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            Bitmap bm = BitmapUtils.decodeSampledBitmapFromByteArray(image, width, height);
             BitmapCache.getInstance().putArtistImage(artist, bm);
             return bm;
         }
@@ -318,15 +321,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImageFromMBID(final String mbid) throws ImageNotFoundException {
+    public Bitmap getAlbumImageFromMBID(final String mbid, int width, int height, boolean skipCache) throws ImageNotFoundException {
         if (null == mbid) {
             return null;
         }
 
-        // Try cache first
-        Bitmap cacheImage = BitmapCache.getInstance().requestAlbumBitmapMBID(mbid);
-        if(cacheImage!=null) {
-            return cacheImage;
+        if(!skipCache) {
+            // Try cache first
+            Bitmap cacheBitmap = BitmapCache.getInstance().requestAlbumBitmapMBID(mbid);
+            if (cacheBitmap != null && width <= cacheBitmap.getWidth() && height <= cacheBitmap.getWidth()) {
+                return cacheBitmap;
+            }
         }
 
         byte[] image;
@@ -336,7 +341,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            Bitmap bm = BitmapUtils.decodeSampledBitmapFromByteArray(image, width, height);
             BitmapCache.getInstance().putAlbumBitmapMBID(mbid,bm);
             return bm;
         }
@@ -351,15 +356,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImageFromAlbumNameArtistName(final String albumName, final String artistName) throws ImageNotFoundException {
+    public Bitmap getAlbumImageFromAlbumNameArtistName(final String albumName, final String artistName, int width, int height, boolean skipCache) throws ImageNotFoundException {
         if (null == albumName || null == artistName) {
             return null;
         }
 
-        // Try cache first
-        Bitmap cacheImage = BitmapCache.getInstance().requestAlbumBitmap(albumName, artistName);
-        if(cacheImage != null) {
-            return cacheImage;
+        if(!skipCache) {
+            // Try cache first
+            Bitmap cacheBitmap = BitmapCache.getInstance().requestAlbumBitmap(albumName, artistName);
+            if (cacheBitmap != null && width <= cacheBitmap.getWidth() && height <= cacheBitmap.getWidth()) {
+                return cacheBitmap;
+            }
         }
 
         byte[] image;
@@ -370,7 +377,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            Bitmap bm = BitmapUtils.decodeSampledBitmapFromByteArray(image, width, height);
             BitmapCache.getInstance().putAlbumBitmap(albumName, artistName, bm);
             return bm;
         }
@@ -384,7 +391,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImageFromName(final String albumName) throws ImageNotFoundException {
+    public Bitmap getAlbumImageFromName(final String albumName, int width, int height) throws ImageNotFoundException {
         if (null == albumName) {
             return null;
         }
@@ -398,8 +405,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            return BitmapFactory.decodeByteArray(image, 0, image.length);
-
+            return BitmapUtils.decodeSampledBitmapFromByteArray(image, width, height);
         }
         return null;
     }
@@ -411,14 +417,14 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImageForTrack(final MPDTrack track) throws ImageNotFoundException {
+    public Bitmap getAlbumImageForTrack(final MPDTrack track, int width, int height, boolean skipCache) throws ImageNotFoundException {
         if (null == track) {
             return null;
         }
         Bitmap image = null;
         if (!track.getTrackAlbumMBID().isEmpty()) {
             try {
-                image = getAlbumImageFromMBID(track.getTrackAlbumMBID());
+                image = getAlbumImageFromMBID(track.getTrackAlbumMBID(), width, height, skipCache);
             } catch (ImageNotFoundException e) {
             }
             if (null != image) {
@@ -428,7 +434,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         // Try to get image from Albumname/Album artistname
         try {
-            image = getAlbumImageFromAlbumNameArtistName(track.getTrackAlbum(), track.getTrackAlbumArtist());
+            image = getAlbumImageFromAlbumNameArtistName(track.getTrackAlbum(), track.getTrackAlbumArtist(), width, height, skipCache);
         } catch (ImageNotFoundException e) {
         }
         if (null != image) {
@@ -436,7 +442,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         try {
-            image = getAlbumImageFromAlbumNameArtistName(track.getTrackAlbum(), track.getTrackArtist());
+            image = getAlbumImageFromAlbumNameArtistName(track.getTrackAlbum(), track.getTrackArtist(), width, height, skipCache);
         } catch (ImageNotFoundException e) {
         }
         if (null != image) {
@@ -444,7 +450,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         // Last resort, try just the name
-        image = getAlbumImageFromName(track.getTrackAlbum());
+        image = getAlbumImageFromName(track.getTrackAlbum(), width, height);
 
         if (null != image) {
             return image;
@@ -461,15 +467,17 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      * @return The image if found or null if it is not available and has been tried to download before.
      * @throws ImageNotFoundException If the image is not found and was not searched before.
      */
-    public Bitmap getAlbumImage(final MPDAlbum album) throws ImageNotFoundException {
+    public Bitmap getAlbumImage(final MPDAlbum album, int width, int height, boolean skipCache) throws ImageNotFoundException {
         if (null == album) {
             return null;
         }
 
-        // Try cache first
-        Bitmap cacheBitmap = BitmapCache.getInstance().requestAlbumBitmap(album);
-        if(null != cacheBitmap ) {
-            return cacheBitmap;
+        if(!skipCache) {
+            // Try cache first
+            Bitmap cacheBitmap = BitmapCache.getInstance().requestAlbumBitmap(album);
+            if (null != cacheBitmap && width <= cacheBitmap.getWidth() && height <= cacheBitmap.getWidth()) {
+                return cacheBitmap;
+            }
         }
 
 
@@ -488,7 +496,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         // Checks if the database has an image for the requested album
         if (null != image) {
             // Create a bitmap from the data blob in the database
-            Bitmap bm = BitmapFactory.decodeByteArray(image, 0, image.length);
+            Bitmap bm = BitmapUtils.decodeSampledBitmapFromByteArray(image, width, height);
             BitmapCache.getInstance().putAlbumBitmap(album, bm);
             return bm;
         }
@@ -1212,7 +1220,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
             // Check if image already there
             try {
-                getAlbumImageForTrack(track);
+                getAlbumImageForTrack(track,-1,-1, true);
                 // If this does not throw the exception it already has an image.
             } catch (ImageNotFoundException e) {
                 fetchAlbumImage(track);

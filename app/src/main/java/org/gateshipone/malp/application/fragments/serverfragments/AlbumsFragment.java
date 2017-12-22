@@ -404,12 +404,31 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             if (null != mArtist && !mArtist.getArtistName().isEmpty()) {
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 if (mBitmap == null) {
-                    mBitmapLoader.getArtistImage(mArtist, true);
+                    final View rootView = getView();
+                    rootView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            int width = rootView.getWidth();
+                            mBitmapLoader.getArtistImage(mArtist, true, width, width);
+                        }
+                    });
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 } else {
                     // Reuse image
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
                     mFABCallback.setupToolbarImage(mBitmap);
+                    final View rootView = getView();
+                    rootView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            int width = rootView.getWidth();
+
+                            // Image too small
+                            if(mBitmap.getWidth() < width) {
+                                mBitmapLoader.getArtistImage(mArtist, true, width, width);
+                            }
+                        }
+                    });
                 }
             } else if (null != mAlbumsPath && !mAlbumsPath.equals("")) {
                 String lastPath = mAlbumsPath;

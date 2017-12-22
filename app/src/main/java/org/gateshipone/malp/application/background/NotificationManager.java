@@ -311,7 +311,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             if (mNotification == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
                 mLastTrack = track;
                 mLastBitmap = null;
-                mCoverLoader.getImage(mLastTrack, true);
+                mCoverLoader.getImage(mLastTrack, true,-1,-1);
             }
 
             // Only set image if an saved one is available
@@ -486,7 +486,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     @Override
     public void newAlbumImage(MPDAlbum album) {
         if (mLastTrack.getTrackAlbum().equals(album.getName())) {
-            mCoverLoader.getImage(mLastTrack, true);
+            mCoverLoader.getImage(mLastTrack, true,-1,-1);
         }
     }
 
