@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.listviewitems;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.animation.AnimationUtils;
@@ -64,6 +65,7 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
         mHolder = new AsyncLoader.CoverViewHolder();
         mHolder.coverLoadable = this;
         mHolder.mAdapter = adapter;
+        mHolder.imageDimension = new Pair<>(0,0);
 
         mCoverDone = false;
         if ( null != mImageView && null != mSwitcher) {
@@ -76,14 +78,15 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
         }
     }
 
+    public void setImageDimension(int width, int height) {
+        mHolder.imageDimension = new Pair<>(width, height);
+    }
+
     /**
      * Starts the image retrieval task
      */
     public void startCoverImageTask() {
         if (mLoaderTask == null && mHolder.artworkManager != null && mHolder.modelItem != null && !mCoverDone) {
-            if (mImageView != null) {
-                mHolder.imageDimension = new Pair<>(mImageView.getWidth(), mImageView.getHeight());
-            }
             mLoaderTask = new AsyncLoader();
             mLoaderTask.execute(mHolder);
         }
