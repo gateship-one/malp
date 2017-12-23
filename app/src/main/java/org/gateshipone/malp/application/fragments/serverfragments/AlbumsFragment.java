@@ -369,6 +369,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         mLastPosition = position;
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
+        Log.v(TAG,"Selected album:" + album.getName() + "album mbid:" + album.getMBID() + "artist: " + album.getArtistName());
         Bitmap bitmap = null;
 
         // Check if correct view type, to be safe
@@ -376,7 +377,8 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             bitmap = ((AbsImageListViewItem) view).getBitmap();
         }
 
-        if (mArtist != null) {
+        // If artist albums are shown set artist for the album
+        if (mArtist != null && !mArtist.getArtistName().isEmpty()) {
             if (!mArtist.getArtistName().equals(album.getArtistName())) {
                 album.setArtistName(mArtist.getArtistName());
             }
