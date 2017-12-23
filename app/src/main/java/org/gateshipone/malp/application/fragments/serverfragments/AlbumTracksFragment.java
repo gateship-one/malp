@@ -26,6 +26,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -390,14 +391,17 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     @Override
     public void receiveBitmap(final Bitmap bm, final CoverBitmapLoader.IMAGE_TYPE type) {
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && null != mFABCallback && bm != null) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
-                    mFABCallback.setupToolbarImage(bm);
-                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP,bm);
-                }
-            });
+            FragmentActivity activity = getActivity();
+            if (activity != null) {
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
+                        mFABCallback.setupToolbarImage(bm);
+                        getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
+                    }
+                });
+            }
         }
     }
 
