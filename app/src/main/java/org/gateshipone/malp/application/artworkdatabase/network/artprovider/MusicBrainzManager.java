@@ -262,7 +262,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
                 getAlbumImage(url, album, listener, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        if ( releaseIndex + 1 < releases.length()) {
+                        if ( releaseIndex + 1 < releases.length() && (error.networkResponse != null && error.networkResponse.statusCode == 404) ) {
                             parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
                         } else {
                             errorListener.fetchVolleyError(album, error);
