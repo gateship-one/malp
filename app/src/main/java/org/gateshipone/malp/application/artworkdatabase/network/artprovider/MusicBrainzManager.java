@@ -207,8 +207,12 @@ public class MusicBrainzManager implements AlbumImageProvider {
             getAlbumImage(url, album, listener, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError error) {
-                    // Try without MBID from MPD
-                    resolveAlbumMBID(album, listener, errorListener);
+                    if(error.networkResponse != null && error.networkResponse.statusCode == 404) {
+                        // Try without MBID from MPD
+                        resolveAlbumMBID(album, listener, errorListener);
+                    } else {
+                        errorListener.fetchVolleyError(album, error);
+                    }
                 }
             });
         }
