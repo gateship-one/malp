@@ -223,7 +223,9 @@ public class MPDConnection {
      * Clear up connection state variables.
      */
     private synchronized void handleSocketError() {
-        printDebug("Read error exception. Disconnecting and cleaning up");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Read error exception. Disconnecting and cleaning up");
+        }
         new Exception().printStackTrace();
         try {
             /* Clear reader/writer up */
@@ -241,7 +243,9 @@ public class MPDConnection {
             }
             pSocket = null;
         } catch (IOException e) {
-            printDebug("Error during read error handling");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Error during read error handling");
+            }
         }
 
         /* Clear up connection state variables */
@@ -424,7 +428,9 @@ public class MPDConnection {
                     success = true;
                 } else if (readString.startsWith("ACK")) {
                     success = false;
-                    printDebug("Could not successfully authenticate with mpd server");
+                    if (DEBUG_ENABLED) {
+                        Log.v(TAG,"Could not successfully authenticate with mpd server");
+                    }
                 }
             }
         } catch (IOException|MPDException e) {
@@ -469,7 +475,9 @@ public class MPDConnection {
                 pSocket = null;
             }
         } catch (IOException e) {
-            printDebug("Error during disconnecting:" + e.toString());
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Error during disconnecting:" + e.toString());
+            }
         }
 
         /* Clear up connection state variables */
@@ -499,7 +507,9 @@ public class MPDConnection {
      * @param command
      */
     private void sendMPDCommand(String command) {
-        printDebug("Send command: " + command);
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Send command: " + command);
+        }
         // Stop possible idling timeout tasks.
         stopIdleWait();
 
@@ -526,7 +536,9 @@ public class MPDConnection {
              */
             writeLine(command);
 
-            printDebug("Sent command: " + command);
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Sent command: " + command);
+            }
 
             // This waits until the server sends a response (OK,ACK(failure) or the requested data)
             try {
@@ -534,9 +546,13 @@ public class MPDConnection {
             } catch (IOException e) {
                 handleSocketError();
             }
-            printDebug("Sent command, got response");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Sent command, got response");
+            }
         } else {
-            printDebug("Connection not ready, command not sent");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Connection not ready, command not sent");
+            }
         }
     }
 
@@ -628,7 +644,9 @@ public class MPDConnection {
         /* Send the "noidle" command to the server to initiate noidle */
         writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
 
-        printDebug("Sent deidle request");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Sent deidle request");
+        }
 
         mDeIdleTimerLock.lock();
         // Set timeout task for deidling.
@@ -646,7 +664,9 @@ public class MPDConnection {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        printDebug("Deidle lock acquired, server usage allowed again");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Deidle lock acquired, server usage allowed again");
+        }
 
         mIdleWaitLock.release();
     }
@@ -661,7 +681,9 @@ public class MPDConnection {
         if (!pMPDConnectionReady || pMPDConnectionIdle) {
             return;
         }
-        printDebug("Start idle mode");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Start idle mode");
+        }
 
         // Set the timeout to zero to block when no data is available
         try {
@@ -702,7 +724,9 @@ public class MPDConnection {
      * the response.
      */
     private void waitForResponse() throws IOException {
-        printDebug("Waiting for response");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Waiting for response");
+        }
         if (null != pReader) {
             long currentTime = System.nanoTime();
 
@@ -710,7 +734,9 @@ public class MPDConnection {
                 long compareTime = System.nanoTime() - currentTime;
                 // Terminate waiting after waiting to long. This indicates that the server is not responding
                 if (compareTime > RESPONSE_TIMEOUT) {
-                    printDebug("Stuck waiting for server response");
+                    if (DEBUG_ENABLED) {
+                        Log.v(TAG,"Stuck waiting for server response");
+                    }
                     printStackTrace();
                     throw new IOException();
                 }
@@ -734,7 +760,9 @@ public class MPDConnection {
         boolean success = false;
         String response;
 
-        printDebug("Check response");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Check response");
+        }
 
         // Wait for data to be available to read. MPD communication could take some time.
         while (readyRead()) {
@@ -743,15 +771,21 @@ public class MPDConnection {
                 success = true;
             } else if (response.startsWith("ACK")) {
                 success = false;
-                printDebug("Server response error: " + response);
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG,"Server response error: " + response);
+                }
             }
         }
 
-        printDebug("Response: " + success);
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Response: " + success);
+        }
         // The command was handled now it is time to set the connection to idle again (after the timeout,
         // to prevent disconnecting).
         startIdleWait();
-        printDebug("Started idle wait");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"Started idle wait");
+        }
         // Return if successful or not.
         return success;
     }
@@ -1888,7 +1922,7 @@ public class MPDConnection {
     private String waitForIdleResponse() throws IOException {
         if (null != pReader) {
 
-            printDebug("Waiting for input from server");
+            Log.v(TAG,"Waiting for input from server");
             // Set thread to sleep, because there should be no line available to read.
             String response = null;
             try {
@@ -1950,7 +1984,7 @@ public class MPDConnection {
                 }
                 mDeidleTimeoutLock.release();
             } catch (IOException e) {
-                printDebug("Read error exception. Disconnecting and cleaning up");
+                Log.v(TAG,"Read error exception. Disconnecting and cleaning up");
 
                 mDeIdleTimerLock.lock();
                 // Clear possible timeout tasks
@@ -1964,7 +1998,7 @@ public class MPDConnection {
                 // If deidling already timed out we don't need to take care here. Its already done by
                 // the timeout thread.
                 if(mDeIdlingTimedOut) {
-                    printDebug("Deidle timed out, cancel normal deidling");
+                    Log.v(TAG,"Deidle timed out, cancel normal deidling");
                     mDeidleTimeoutLock.release();
                     mIdleWaitLock.release();
                     return;
@@ -1987,7 +2021,7 @@ public class MPDConnection {
                     }
                     pSocket = null;
                 } catch (IOException e2) {
-                    printDebug("Error during read error handling");
+                    Log.v(TAG,"Error during read error handling");
                 }
 
                 /* Clear up connection state variables */
@@ -2003,11 +2037,15 @@ public class MPDConnection {
                 return;
             }
 
-            printDebug("Idle over with response: " + response);
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Idle over with response: " + response);
+            }
 
             // This happens when disconnected
             if (null == response || response.isEmpty()) {
-                printDebug("Probably disconnected during idling");
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG,"Probably disconnected during idling");
+                }
                 // First handle the disconnect, then allow further action
                 handleSocketError();
 
@@ -2021,15 +2059,21 @@ public class MPDConnection {
              * the idle again.
              */
             if (response.startsWith("changed")) {
-                printDebug("Externally deidled!");
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG,"Externally deidled!");
+                }
                 externalDeIdle = true;
                 try {
                     while (readyRead()) {
                         response = readLine();
                         if (response.startsWith("OK")) {
-                            printDebug("Deidled with status ok");
+                            if (DEBUG_ENABLED) {
+                                Log.v(TAG,"Deidled with status ok");
+                            }
                         } else if (response.startsWith("ACK")) {
-                            printDebug("Server response error: " + response);
+                            if (DEBUG_ENABLED) {
+                                Log.v(TAG,"Server response error: " + response);
+                            }
                         }
                     }
                 } catch (IOException e) {
@@ -2038,7 +2082,9 @@ public class MPDConnection {
                     handleSocketError();
                 }
             } else {
-                printDebug("Deidled on purpose");
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG,"Deidled on purpose");
+                }
             }
             // Set the connection as non-idle again.
             pMPDConnectionIdle = false;
@@ -2059,7 +2105,9 @@ public class MPDConnection {
             for (MPDConnectionIdleChangeListener listener : pIdleListeners) {
                 listener.onNonIdle();
             }
-            printDebug("Idling over");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Idling over");
+            }
 
             // Start the idle clock again, but only if we were deidled from the server. Otherwise we let the
             // active command deidle when finished.
@@ -2085,7 +2133,9 @@ public class MPDConnection {
         // Start the new timer with a new Idle Task.
         mIdleWait = new Timer();
         mIdleWait.schedule(new IdleWaitTimeoutTask(), IDLE_WAIT_TIME);
-        printDebug("IdleWait scheduled");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"IdleWait scheduled");
+        }
     }
 
     /**
@@ -2097,7 +2147,9 @@ public class MPDConnection {
             mIdleWait.purge();
             mIdleWait = null;
         }
-        printDebug("IdleWait terminated");
+        if (DEBUG_ENABLED) {
+            Log.v(TAG,"IdleWait terminated");
+        }
     }
 
     /**
@@ -2131,7 +2183,7 @@ public class MPDConnection {
                 }
                 throw new MPDException(line);
             }
-            //printDebug("Read line: " + line);
+            //Log.v(TAG,"Read line: " + line);
             return line;
         }
         return null;
@@ -2147,22 +2199,18 @@ public class MPDConnection {
         if (pWriter != null) {
             pWriter.println(line);
             pWriter.flush();
-            printDebug("Write line: " + line);
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,"Write line: " + line);
+            }
         }
-    }
-
-    private void printDebug(String debug) {
-        if (!DEBUG_ENABLED) {
-            return;
-        }
-
-        Log.v(TAG, mID + ':' + Thread.currentThread().getId() + ':' + "Idle:" + pMPDConnectionIdle + ':' + debug);
     }
 
     private void printStackTrace() {
         StackTraceElement[] st = new Exception().getStackTrace();
         for (StackTraceElement el : st) {
-            printDebug(el.toString());
+            if (DEBUG_ENABLED) {
+                Log.v(TAG,el.toString());
+            }
         }
     }
 
@@ -2190,7 +2238,9 @@ public class MPDConnection {
 
         @Override
         public void run() {
-            printDebug("Deidlind timeout!");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG, "Deidling timeout!");
+            }
             // Disconnect here because deidling took to long
 
             // Acquire lock to prevent the IdleWaitThread from
@@ -2218,7 +2268,9 @@ public class MPDConnection {
                     pSocket = null;
                 }
             } catch (IOException e) {
-                printDebug("Error during disconnecting:" + e.toString());
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG,"Error during disconnecting:" + e.toString());
+                }
             }
 
             /* Clear up connection state variables */
