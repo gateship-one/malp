@@ -78,8 +78,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class MPDConnection {
     private static final String TAG = MPDConnection.class.getSimpleName();
 
-    private String mID;
-
     /**
      * Set this flag to enable debugging in this class. DISABLE before releasing
      */
@@ -197,7 +195,7 @@ public class MPDConnection {
 
     public static synchronized MPDConnection getInstance() {
         if (null == mInstance) {
-            mInstance = new MPDConnection("global");
+            mInstance = new MPDConnection();
         }
         return mInstance;
     }
@@ -205,12 +203,11 @@ public class MPDConnection {
     /**
      * Creates disconnected MPDConnection with following parameters
      */
-    private MPDConnection(String id) {
+    private MPDConnection() {
         pSocket = null;
         pReader = null;
         mIdleWaitLock = new Semaphore(1);
         mDeidleTimeoutLock = new Semaphore(1);
-        mID = id;
         mServerCapabilities = new MPDCapabilities("", null, null);
         pIdleListeners = new ArrayList<>();
         pStateListeners = new ArrayList<>();
