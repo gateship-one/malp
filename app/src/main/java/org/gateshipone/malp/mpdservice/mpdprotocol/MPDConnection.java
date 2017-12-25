@@ -1764,8 +1764,9 @@ public class MPDConnection {
      */
     private String waitForIdleResponse() throws IOException {
         if (null != mReader) {
-
-            Log.v(TAG, "Waiting for input from server");
+            if (DEBUG_ENABLED) {
+                Log.v(TAG, "Waiting for input from server");
+            }
             // Set thread to sleep, because there should be no line available to read.
             String response = null;
             try {
