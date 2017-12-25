@@ -28,7 +28,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -112,7 +111,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
             mStatusListeners = new ArrayList<>();
 
-            mHandlerSingleton.mMPDConnection.setpIdleListener(mHandlerSingleton);
+            mHandlerSingleton.mMPDConnection.setIdleListener(mHandlerSingleton);
 
             mHandlerSingleton.mLastStatus = new MPDCurrentStatus();
         }
