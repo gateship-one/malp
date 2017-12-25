@@ -47,6 +47,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
@@ -75,7 +76,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 
 public class MPDConnection {
-    private static final String TAG = "MPDConnection";
+    private static final String TAG = MPDConnection.class.getSimpleName();
 
     private String mID;
 
@@ -345,7 +346,7 @@ public class MPDConnection {
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (IOException|MPDException e) {
                 handleSocketError();
                 return;
             }
@@ -364,17 +365,16 @@ public class MPDConnection {
                 List<String> commands = null;
                 try {
                     commands = parseMPDCommands();
-                } catch (IOException e) {
+                } catch (IOException|MPDException e){
                     handleSocketError();
                     return;
                 }
-
                 // Get list of supported tags
                 sendMPDCommand(MPDCommands.MPD_COMMAND_GET_TAGS);
                 List<String> tags = null;
                 try {
                     tags = parseMPDTagTypes();
-                } catch (IOException e) {
+                } catch (IOException|MPDException e) {
                     handleSocketError();
                     return;
                 }
@@ -382,7 +382,6 @@ public class MPDConnection {
                 mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
                 mCapabilitiesChanged = false;
             }
-
 
             // Start the initial idling procedure.
             startIdleWait();
@@ -428,7 +427,7 @@ public class MPDConnection {
                     printDebug("Could not successfully authenticate with mpd server");
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException|MPDException e) {
             handleSocketError();
         }
 
@@ -731,7 +730,7 @@ public class MPDConnection {
      *
      * @return True if command was successfully executed, false otherwise.
      */
-    public boolean checkResponse() throws IOException {
+    public boolean checkResponse() throws IOException, MPDException {
         boolean success = false;
         String response;
 
@@ -777,7 +776,7 @@ public class MPDConnection {
      * @return List of MPDAlbum objects
      * @throws IOException
      */
-    private ArrayList<MPDAlbum> parseMPDAlbums() throws IOException {
+    private ArrayList<MPDAlbum> parseMPDAlbums() throws IOException, MPDException {
         ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
         if (!isConnected()) {
             return albumList;
@@ -843,7 +842,7 @@ public class MPDConnection {
      * @return List of MPDArtists objects
      * @throws IOException
      */
-    private ArrayList<MPDArtist> parseMPDArtists() throws IOException {
+    private ArrayList<MPDArtist> parseMPDArtists() throws IOException, MPDException {
         ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
         if (!isConnected()) {
             return artistList;
@@ -944,7 +943,7 @@ public class MPDConnection {
      * @return List of MPDFileEntry objects
      * @throws IOException
      */
-    private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist, String filterAlbumMBID) throws IOException {
+    private ArrayList<MPDFileEntry> parseMPDTracks(String filterArtist, String filterAlbumMBID) throws IOException, MPDException {
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!isConnected()) {
             return trackList;
@@ -952,7 +951,6 @@ public class MPDConnection {
 
         /* Temporary track item (added to list later */
         MPDFileEntry tempFileEntry = null;
-
 
         /* Response line from MPD */
         String response = readLine();
@@ -1112,7 +1110,7 @@ public class MPDConnection {
      *
      * @return List of MPDAlbum
      */
-    public synchronized List<MPDAlbum> getAlbums() {
+    public synchronized List<MPDAlbum> getAlbums() throws MPDException {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mServerCapabilities));
         try {
@@ -1139,7 +1137,7 @@ public class MPDConnection {
      *
      * @return List of MPDAlbum
      */
-    public synchronized List<MPDAlbum> getAlbumsInPath(String path) {
+    public synchronized List<MPDAlbum> getAlbumsInPath(String path) throws MPDException {
         // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mServerCapabilities));
         try {
@@ -1167,7 +1165,7 @@ public class MPDConnection {
      * @param artistName Artist to filter album list with.
      * @return List of MPDAlbum objects
      */
-    public synchronized List<MPDAlbum> getArtistAlbums(String artistName) {
+    public synchronized List<MPDAlbum> getArtistAlbums(String artistName) throws MPDException {
         // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mServerCapabilities));
 
@@ -1202,7 +1200,7 @@ public class MPDConnection {
      *
      * @return List of MPDArtist objects
      */
-    public synchronized List<MPDArtist> getArtists() {
+    public synchronized List<MPDArtist> getArtists() throws MPDException  {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
@@ -1224,7 +1222,7 @@ public class MPDConnection {
      *
      * @return List of MPDArtist objects
      */
-    public synchronized List<MPDArtist> getAlbumArtists() {
+    public synchronized List<MPDArtist> getAlbumArtists() throws MPDException  {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(mServerCapabilities.hasListGroup() && mServerCapabilities.hasMusicBrainzTags()));
         try {
@@ -1245,7 +1243,7 @@ public class MPDConnection {
      *
      * @return List of MPDArtist objects
      */
-    public synchronized List<MPDFileEntry> getPlaylists() {
+    public synchronized List<MPDFileEntry> getPlaylists() throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
         try {
             List<MPDFileEntry> playlists = parseMPDTracks("", "");
@@ -1262,7 +1260,7 @@ public class MPDConnection {
      *
      * @return A list of all tracks in MPDTrack objects
      */
-    public synchronized List<MPDFileEntry> getAllTracks() {
+    public synchronized List<MPDFileEntry> getAllTracks() throws MPDException  {
         Log.w(TAG, "This command should not be used");
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
         try {
@@ -1280,7 +1278,7 @@ public class MPDConnection {
      * @param albumName Album to get tracks from
      * @return List of MPDTrack track objects
      */
-    public synchronized List<MPDFileEntry> getAlbumTracks(String albumName, String mbid) {
+    public synchronized List<MPDFileEntry> getAlbumTracks(String albumName, String mbid) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
         try {
             List<MPDFileEntry> result = parseMPDTracks("", mbid);
@@ -1301,7 +1299,7 @@ public class MPDConnection {
      *                   same name exists multiple times.
      * @return List of MPDTrack track objects
      */
-    public synchronized List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) {
+    public synchronized List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
         try {
             /* Filter tracks with artistName */
@@ -1320,7 +1318,7 @@ public class MPDConnection {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public synchronized List<MPDFileEntry> getCurrentPlaylist() {
+    public synchronized List<MPDFileEntry> getCurrentPlaylist() throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
         try {
         /* Parse the return */
@@ -1336,7 +1334,7 @@ public class MPDConnection {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public synchronized List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) {
+    public synchronized List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
         try {
         /* Parse the return */
@@ -1352,7 +1350,7 @@ public class MPDConnection {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public synchronized List<MPDFileEntry> getSavedPlaylist(String playlistName) {
+    public synchronized List<MPDFileEntry> getSavedPlaylist(String playlistName) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
         try {
         /* Parse the return */
@@ -1368,7 +1366,7 @@ public class MPDConnection {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public synchronized List<MPDFileEntry> getFiles(String path) {
+    public synchronized List<MPDFileEntry> getFiles(String path) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
         try {
         /* Parse the return */
@@ -1388,7 +1386,7 @@ public class MPDConnection {
      * @param type The type of items to search
      * @return List of MPDTrack items with all tracks matching the search
      */
-    public synchronized List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+    public synchronized List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
         try {
         /* Parse the return */
@@ -1405,7 +1403,7 @@ public class MPDConnection {
      * @param url URL to search in the current playlist.
      * @return List with one entry or none.
      */
-    public synchronized List<MPDFileEntry> getPlaylistFindTrack(String url) {
+    public synchronized List<MPDFileEntry> getPlaylistFindTrack(String url) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PLAYLIST_FIND_URI(url));
         try {
             /* Parse the return */
@@ -1421,7 +1419,7 @@ public class MPDConnection {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public synchronized MPDCurrentStatus getCurrentServerStatus() {
+    public synchronized MPDCurrentStatus getCurrentServerStatus() throws MPDException  {
         MPDCurrentStatus status = new MPDCurrentStatus();
 
         /* Request status */
@@ -1559,7 +1557,7 @@ public class MPDConnection {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public synchronized MPDStatistics getServerStatistics() {
+    public synchronized MPDStatistics getServerStatistics() throws MPDException {
         MPDStatistics stats = new MPDStatistics();
 
         /* Request status */
@@ -1618,7 +1616,7 @@ public class MPDConnection {
      *
      * @return MPDTrack entry for the song playing.
      */
-    public synchronized MPDTrack getCurrentSong() {
+    public synchronized MPDTrack getCurrentSong() throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
 
         // Reuse the parsing function for tracks here.
@@ -1653,7 +1651,7 @@ public class MPDConnection {
      * @param pause 1 if playback should be paused, 0 if resumed
      * @return
      */
-    public synchronized boolean pause(boolean pause) {
+    public synchronized boolean pause(boolean pause) throws MPDException {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
 
     /* Return the response value of MPD */
@@ -1670,7 +1668,7 @@ public class MPDConnection {
      *
      * @return true if successful, false otherwise
      */
-    public synchronized boolean nextSong() {
+    public synchronized boolean nextSong() throws MPDException {
         sendMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
 
     /* Return the response value of MPD */
@@ -1687,7 +1685,7 @@ public class MPDConnection {
      *
      * @return true if successful, false otherwise
      */
-    public synchronized boolean previousSong() {
+    public synchronized boolean previousSong() throws MPDException {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
 
     /* Return the response value of MPD */
@@ -1704,7 +1702,7 @@ public class MPDConnection {
      *
      * @return true if successful, false otherwise
      */
-    public synchronized boolean stopPlayback() {
+    public synchronized boolean stopPlayback() throws MPDException {
         sendMPDCommand(MPDCommands.MPD_COMMAND_STOP);
 
     /* Return the response value of MPD */
@@ -1722,7 +1720,7 @@ public class MPDConnection {
      * @param random If random should be set (true) or not (false)
      * @return True if server responed with ok
      */
-    public synchronized boolean setRandom(boolean random) {
+    public synchronized boolean setRandom(boolean random) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
 
     /* Return the response value of MPD */
@@ -1740,7 +1738,7 @@ public class MPDConnection {
      * @param repeat If repeat should be set (true) or not (false)
      * @return True if server responed with ok
      */
-    public synchronized boolean setRepeat(boolean repeat) {
+    public synchronized boolean setRepeat(boolean repeat) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
 
     /* Return the response value of MPD */
@@ -1758,7 +1756,7 @@ public class MPDConnection {
      * @param single if single playback should be enabled or not.
      * @return True if server responed with ok
      */
-    public synchronized boolean setSingle(boolean single) {
+    public synchronized boolean setSingle(boolean single) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SET_SINGLE(single));
 
     /* Return the response value of MPD */
@@ -1776,7 +1774,7 @@ public class MPDConnection {
      * @param consume True if yes and false if not.
      * @return True if server responed with ok
      */
-    public synchronized boolean setConsume(boolean consume) {
+    public synchronized boolean setConsume(boolean consume) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
 
     /* Return the response value of MPD */
@@ -1794,7 +1792,7 @@ public class MPDConnection {
      * @param index Index of the song that should be played.
      * @return True if server responed with ok
      */
-    public synchronized boolean playSongIndex(int index) {
+    public synchronized boolean playSongIndex(int index) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
 
     /* Return the response value of MPD */
@@ -1812,7 +1810,7 @@ public class MPDConnection {
      * @param seconds Position in seconds to which a seek is requested to.
      * @return True if server responed with ok
      */
-    public synchronized boolean seekSeconds(int seconds) {
+    public synchronized boolean seekSeconds(int seconds) throws MPDException  {
         MPDCurrentStatus status = null;
         status = getCurrentServerStatus();
 
@@ -1834,7 +1832,7 @@ public class MPDConnection {
      * @param volume Volume to set to the server.
      * @return True if server responed with ok
      */
-    public synchronized boolean setVolume(int volume) {
+    public synchronized boolean setVolume(int volume) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
 
     /* Return the response value of MPD */
@@ -1858,7 +1856,7 @@ public class MPDConnection {
      * @param tracks List of MPDFileEntry objects to add to the current playlist.
      * @return True if server responed with ok
      */
-    public synchronized boolean addTrackList(List<MPDFileEntry> tracks) {
+    public synchronized boolean addTrackList(List<MPDFileEntry> tracks) throws MPDException  {
         if (null == tracks) {
             return false;
         }
@@ -1889,7 +1887,7 @@ public class MPDConnection {
      *                   be left empty then all tracks from the album will be added.
      * @return True if server responed with ok
      */
-    public synchronized boolean addAlbumTracks(String albumname, String artistname, String mbid) {
+    public synchronized boolean addAlbumTracks(String albumname, String artistname, String mbid) throws MPDException  {
         List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname, mbid);
         return addTrackList(tracks);
     }
@@ -1901,7 +1899,7 @@ public class MPDConnection {
      * @param artistname Name of the artist to enqueue the albums from.
      * @return True if server responed with ok
      */
-    public synchronized boolean addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) {
+    public synchronized boolean addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) throws MPDException {
         List<MPDAlbum> albums = getArtistAlbums(artistname);
         if (null == albums) {
             return false;
@@ -1929,7 +1927,7 @@ public class MPDConnection {
      * @param url URL of the file or directory! to add to the current playlist.
      * @return True if server responed with ok
      */
-    public synchronized boolean addSong(String url) {
+    public synchronized boolean addSong(String url) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
 
     /* Return the response value of MPD */
@@ -1949,7 +1947,7 @@ public class MPDConnection {
      * @param index Index at which the item should be added.
      * @return True if server responed with ok
      */
-    public synchronized boolean addSongatIndex(String url, int index) {
+    public synchronized boolean addSongatIndex(String url, int index) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE_AT_INDEX(url, index));
 
     /* Return the response value of MPD */
@@ -1968,7 +1966,7 @@ public class MPDConnection {
      * @param type The type of items to search
      * @return True if server responed with ok
      */
-    public synchronized boolean addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) {
+    public synchronized boolean addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES(term, type));
         try {
         /* Parse the return */
@@ -1984,7 +1982,7 @@ public class MPDConnection {
      *
      * @return True if server responed with ok
      */
-    public synchronized boolean clearPlaylist() {
+    public synchronized boolean clearPlaylist() throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
     /* Return the response value of MPD */
         try {
@@ -2000,7 +1998,7 @@ public class MPDConnection {
      *
      * @return True if server responed with ok
      */
-    public synchronized boolean shufflePlaylist() {
+    public synchronized boolean shufflePlaylist() throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SHUFFLE_PLAYLIST);
     /* Return the response value of MPD */
         try {
@@ -2017,7 +2015,7 @@ public class MPDConnection {
      * @param index Position of the item to remove from current playlist.
      * @return True if server responed with ok
      */
-    public synchronized boolean removeIndex(int index) {
+    public synchronized boolean removeIndex(int index) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
     /* Return the response value of MPD */
         try {
@@ -2035,7 +2033,7 @@ public class MPDConnection {
      * @param end End of the range
      * @return True if server responed with ok
      */
-    public synchronized boolean removeRange(int start, int end) {
+    public synchronized boolean removeRange(int start, int end) throws MPDException  {
         // Check capabilities if removal with one command is possible
         if (mServerCapabilities.hasCurrentPlaylistRemoveRange() ) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_RANGE_FROM_CURRENT_PLAYLIST(start,end + 1));
@@ -2066,7 +2064,7 @@ public class MPDConnection {
      * @param to   Position to enter item
      * @return
      */
-    public synchronized boolean moveSongFromTo(int from, int to) {
+    public synchronized boolean moveSongFromTo(int from, int to) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
     /* Return the response value of MPD */
         try {
@@ -2083,7 +2081,7 @@ public class MPDConnection {
      * @param name Name of the playlist to save to.
      * @return True if server responed with ok
      */
-    public synchronized boolean savePlaylist(String name) {
+    public synchronized boolean savePlaylist(String name) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_SAVE_PLAYLIST(name));
 
     /* Return the response value of MPD */
@@ -2102,7 +2100,7 @@ public class MPDConnection {
      * @param url          URL to add to the saved playlist
      * @return True if server responed with ok
      */
-    public synchronized boolean addSongToPlaylist(String playlistName, String url) {
+    public synchronized boolean addSongToPlaylist(String playlistName, String url) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(playlistName, url));
 
     /* Return the response value of MPD */
@@ -2121,7 +2119,7 @@ public class MPDConnection {
      * @param position     Index of the song to remove from the lits
      * @return
      */
-    public synchronized boolean removeSongFromPlaylist(String playlistName, int position) {
+    public synchronized boolean removeSongFromPlaylist(String playlistName, int position) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_TRACK_FROM_PLAYLIST(playlistName, position));
 
         /* Return the response value of MPD */
@@ -2139,7 +2137,7 @@ public class MPDConnection {
      * @param name Name of the playlist to remove.
      * @return True if server responed with ok
      */
-    public synchronized boolean removePlaylist(String name) {
+    public synchronized boolean removePlaylist(String name) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_PLAYLIST(name));
 
     /* Return the response value of MPD */
@@ -2157,7 +2155,7 @@ public class MPDConnection {
      * @param name Of the playlist to add to.
      * @return True if server responed with ok
      */
-    public synchronized boolean loadPlaylist(String name) {
+    public synchronized boolean loadPlaylist(String name) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_LOAD_PLAYLIST(name));
 
     /* Return the response value of MPD */
@@ -2175,7 +2173,7 @@ public class MPDConnection {
      * @return A list of MPDOutput objects with name,active,id values if successful. Otherwise empty list.
      * @throws IOException
      */
-    private List<MPDOutput> parseMPDOutputs() throws IOException {
+    private List<MPDOutput> parseMPDOutputs() throws IOException,MPDException {
         ArrayList<MPDOutput> outputList = new ArrayList<>();
         // Parse outputs
         String outputName = null;
@@ -2224,7 +2222,7 @@ public class MPDConnection {
      * @return A list of Strings of commands that are allowed on the server
      * @throws IOException
      */
-    private List<String> parseMPDCommands() throws IOException {
+    private List<String> parseMPDCommands() throws IOException, MPDException {
         ArrayList<String> commandList = new ArrayList<>();
         // Parse outputs
         String commandName = null;
@@ -2252,7 +2250,7 @@ public class MPDConnection {
      * @return List of tags supported by the connected MPD host
      * @throws IOException
      */
-    private List<String> parseMPDTagTypes() throws IOException {
+    private List<String> parseMPDTagTypes() throws IOException, MPDException {
         ArrayList<String> tagList = new ArrayList<>();
         // Parse outputs
         String tagName = null;
@@ -2279,7 +2277,7 @@ public class MPDConnection {
      *
      * @return List of MPDOutput objects or null in case of error.
      */
-    public List<MPDOutput> getOutputs() {
+    public List<MPDOutput> getOutputs() throws MPDException  {
         synchronized (this) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_GET_OUTPUTS);
 
@@ -2298,7 +2296,7 @@ public class MPDConnection {
      * @param id Id of the output to toggle (active/deactive)
      * @return True if server responed with ok
      */
-    public synchronized boolean toggleOutput(int id) {
+    public synchronized boolean toggleOutput(int id) throws MPDException  {
         if (mServerCapabilities.hasToggleOutput()) {
             sendMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
         } else {
@@ -2328,7 +2326,7 @@ public class MPDConnection {
      * @param id Id of the output to enable (active/deactive)
      * @return True if server responed with ok
      */
-    public synchronized boolean enableOutput(int id) {
+    public synchronized boolean enableOutput(int id) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_ENABLE_OUTPUT(id));
 
         /* Return the response value of MPD */
@@ -2346,7 +2344,7 @@ public class MPDConnection {
      * @param id Id of the output to disable (active/deactive)
      * @return True if server responed with ok
      */
-    public synchronized boolean disableOutput(int id) {
+    public synchronized boolean disableOutput(int id) throws MPDException  {
         sendMPDCommand(MPDCommands.MPD_COMMAND_DISABLE_OUTPUT(id));
 
         /* Return the response value of MPD */
@@ -2364,7 +2362,7 @@ public class MPDConnection {
      * @param path Path to update
      * @return True if server responed with ok
      */
-    public synchronized boolean updateDatabase(String path) {
+    public synchronized boolean updateDatabase(String path) throws MPDException  {
         // Update root directory
         sendMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE(path));
 
@@ -2457,7 +2455,12 @@ public class MPDConnection {
 
             printDebug("Waiting for input from server");
             // Set thread to sleep, because there should be no line available to read.
-            String response = readLine();
+            String response = null;
+            try {
+                response = readLine();
+            } catch (MPDException e) {
+                handleSocketError();
+            }
             return response;
         }
         return "";
@@ -2596,6 +2599,8 @@ public class MPDConnection {
                     }
                 } catch (IOException e) {
                     handleSocketError();
+                } catch (MPDException e) {
+                    handleSocketError();
                 }
             } else {
                 printDebug("Deidled on purpose");
@@ -2681,9 +2686,12 @@ public class MPDConnection {
      *
      * @return The read string. null if no data is available.
      */
-    private String readLine() throws IOException {
+    String readLine() throws IOException, MPDException {
         if (pReader != null) {
             String line = pReader.readLine();
+            if(line.startsWith("ACK")) {
+                throw new MPDException(line);
+            }
             //printDebug("Read line: " + line);
             return line;
         }
@@ -2725,7 +2733,7 @@ public class MPDConnection {
      * that this client is connected to Mopidy so we enable a workaround and reconnect
      * to force the GUI to reload the contents.
      */
-    private void enableMopidyWorkaround() {
+    void enableMopidyWorkaround() {
         // Enable the workaround in the capabilities object
         mServerCapabilities.enableMopidyWorkaround();
 

@@ -35,6 +35,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 
 /**
@@ -120,82 +121,86 @@ public class MPDCommandHandler extends MPDGenericHandler {
         /* Catch MPD exceptions here for now. */
         MPDHandlerAction.NET_HANDLER_ACTION action = mpdAction.getAction();
 
-        // Handle all the simple MPD actions here like play, pause, ....
-        // None of the actions should result in a returned result like a track list.
-        if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_NEXT_SONG) {
-            mMPDConnection.nextSong();
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PREVIOUS_SONG) {
-            mMPDConnection.previousSong();
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_STOP) {
-            mMPDConnection.stopPlayback();
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PAUSE) {
-            mMPDConnection.pause(true);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PLAY) {
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-            MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
-            if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING ) {
-                mMPDConnection.pause(false);
-            } else {
-                mMPDConnection.playSongIndex(status.getCurrentSongIndex());
-            }
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_TOGGLE_PAUSE) {
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-            MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
-            if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING ) {
+        try {
+            // Handle all the simple MPD actions here like play, pause, ....
+            // None of the actions should result in a returned result like a track list.
+            if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_NEXT_SONG) {
+                mMPDConnection.nextSong();
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PREVIOUS_SONG) {
+                mMPDConnection.previousSong();
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_STOP) {
+                mMPDConnection.stopPlayback();
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PAUSE) {
                 mMPDConnection.pause(true);
-            } else if ( state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING ) {
-                mMPDConnection.pause(false);
-            } else {
-                mMPDConnection.playSongIndex(status.getCurrentSongIndex());
-            }
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_RANDOM) {
-            boolean random = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_RANDOM) == 1;
-            mMPDConnection.setRandom(random);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_REPEAT) {
-            boolean repeat = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_REPEAT) == 1;
-            mMPDConnection.setRepeat(repeat);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SINGLE) {
-            boolean single = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SINGLE) == 1;
-            mMPDConnection.setSingle(single);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_CONSUME) {
-            boolean consume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_CONSUME) == 1;
-            mMPDConnection.setConsume(consume);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_JUMP_INDEX) {
-            int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
-            mMPDConnection.playSongIndex(index);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS) {
-            int seconds = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEEK_TIME);
-            mMPDConnection.seekSeconds(seconds);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME) {
-            int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
-            mMPDConnection.setVolume(volume);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
-            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
-            mMPDConnection.toggleOutput(outputID);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ENABLE_OUTPUT) {
-            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
-            mMPDConnection.enableOutput(outputID);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISABLE_OUTPUT) {
-            int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
-            mMPDConnection.disableOutput(outputID);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME) {
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_PLAY) {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+                if (state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                    mMPDConnection.pause(false);
+                } else {
+                    mMPDConnection.playSongIndex(status.getCurrentSongIndex());
+                }
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_TOGGLE_PAUSE) {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                MPDCurrentStatus.MPD_PLAYBACK_STATE state = status.getPlaybackState();
+                if (state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                    mMPDConnection.pause(true);
+                } else if (state == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING) {
+                    mMPDConnection.pause(false);
+                } else {
+                    mMPDConnection.playSongIndex(status.getCurrentSongIndex());
+                }
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_RANDOM) {
+                boolean random = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_RANDOM) == 1;
+                mMPDConnection.setRandom(random);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_REPEAT) {
+                boolean repeat = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_REPEAT) == 1;
+                mMPDConnection.setRepeat(repeat);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SINGLE) {
+                boolean single = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SINGLE) == 1;
+                mMPDConnection.setSingle(single);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_CONSUME) {
+                boolean consume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_CONSUME) == 1;
+                mMPDConnection.setConsume(consume);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_JUMP_INDEX) {
+                int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
+                mMPDConnection.playSongIndex(index);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS) {
+                int seconds = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEEK_TIME);
+                mMPDConnection.seekSeconds(seconds);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME) {
+                int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
+                mMPDConnection.setVolume(volume);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
+                int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+                mMPDConnection.toggleOutput(outputID);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ENABLE_OUTPUT) {
+                int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+                mMPDConnection.enableOutput(outputID);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISABLE_OUTPUT) {
+                int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
+                mMPDConnection.disableOutput(outputID);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME) {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
-            // Limit the volume value to 100(%)
-            int targetVolume = status.getVolume() + VOLUME_STEP_SIZE;
-            if ( targetVolume > 100 ) {
-                targetVolume = 100;
-            }
-            mMPDConnection.setVolume(targetVolume);
-        } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME) {
-            MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                // Limit the volume value to 100(%)
+                int targetVolume = status.getVolume() + VOLUME_STEP_SIZE;
+                if (targetVolume > 100) {
+                    targetVolume = 100;
+                }
+                mMPDConnection.setVolume(targetVolume);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME) {
+                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
 
-            // Limit the volume value to 0(%)
-            int targetVolume = status.getVolume() - VOLUME_STEP_SIZE;
-            if ( targetVolume < 0 ) {
-                targetVolume = 0;
+                // Limit the volume value to 0(%)
+                int targetVolume = status.getVolume() - VOLUME_STEP_SIZE;
+                if (targetVolume < 0) {
+                    targetVolume = 0;
+                }
+                mMPDConnection.setVolume(targetVolume);
             }
-            mMPDConnection.setVolume(targetVolume);
+        } catch (MPDException e) {
+            handleMPDError();
         }
     }
 
@@ -539,5 +544,9 @@ public class MPDCommandHandler extends MPDGenericHandler {
 
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         getHandler().internalUnregisterConnectionStateListener(stateHandler);
+    }
+
+    private void handleMPDError() {
+        // FIXME empty stub
     }
 }
