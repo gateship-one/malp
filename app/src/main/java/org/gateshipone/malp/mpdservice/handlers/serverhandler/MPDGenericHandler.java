@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 
 /**
  * This class is a base class for all derived handlers that talk to the MPD server.
@@ -125,7 +126,11 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
             mMPDConnection.setServerParameters(hostname, password, port);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER) {
             // Connect to the mpd server. Server parameters have to be set before.
-            mMPDConnection.connectToServer();
+            try {
+                mMPDConnection.connectToServer();
+            } catch (MPDException e) {
+                // FIXME error handling (feedback to user)
+            }
 
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
             // Disconnect from the mpd server.
