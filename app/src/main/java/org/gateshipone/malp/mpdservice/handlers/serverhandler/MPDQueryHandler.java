@@ -83,7 +83,6 @@ public class MPDQueryHandler extends MPDGenericHandler {
      */
     protected MPDQueryHandler(Looper looper) {
         super(looper);
-        mMPDConnection.setID("Query");
     }
 
     /**

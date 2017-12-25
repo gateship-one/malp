@@ -2161,10 +2161,6 @@ public class MPDConnection {
 
     }
 
-    public void setID(String id) {
-        mID = id;
-    }
-
     /**
      * Central method to read a line from the sockets reader
      *
