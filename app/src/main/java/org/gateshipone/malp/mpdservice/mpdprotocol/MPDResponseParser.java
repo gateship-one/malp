@@ -85,7 +85,7 @@ public class MPDResponseParser {
                 try {
                     tempAlbum.setDate(format.parse(dateString));
                 } catch (ParseException e) {
-                    Log.w(TAG,"Error parsing date: " + dateString);
+                    Log.w(TAG, "Error parsing date: " + dateString);
                 }
             }
             responseString = connection.readLine();
@@ -358,7 +358,7 @@ public class MPDResponseParser {
 
     static MPDCurrentStatus parseMPDCurrentStatus(final MPDConnection connection) throws IOException, MPDException {
         MPDCurrentStatus status = new MPDCurrentStatus();
-        if(!connection.isConnected()) {
+        if (!connection.isConnected()) {
             return status;
         }
 
@@ -467,9 +467,10 @@ public class MPDResponseParser {
 
     /**
      * Parses the MPD response to a statistics request
+     *
      * @param connection {@link MPDConnection} to use
      * @return
-     * @throws IOException Thrown if an IO error occured
+     * @throws IOException  Thrown if an IO error occured
      * @throws MPDException Thrown if MPD throws an error
      */
     static MPDStatistics parseMPDStatistic(final MPDConnection connection) throws IOException, MPDException {
@@ -559,7 +560,7 @@ public class MPDResponseParser {
      * @return A list of MPDOutput objects with name,active,id values if successful. Otherwise empty list.
      * @throws IOException
      */
-    static List<MPDOutput> parseMPDOutputs(final MPDConnection connection) throws IOException,MPDException {
+    static List<MPDOutput> parseMPDOutputs(final MPDConnection connection) throws IOException, MPDException {
         ArrayList<MPDOutput> outputList = new ArrayList<>();
         // Parse outputs
         String outputName = null;
