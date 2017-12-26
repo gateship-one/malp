@@ -76,7 +76,7 @@ public class MPDConnection {
     /**
      * Set this flag to enable debugging in this class. DISABLE before releasing
      */
-    private static final boolean DEBUG_ENABLED = true;
+    private static final boolean DEBUG_ENABLED = false;
 
     /**
      * Timeout to wait for socket operations (time in ms)
@@ -371,9 +371,6 @@ public class MPDConnection {
                 mCapabilitiesChanged = false;
             }
 
-            // Start the initial idling procedure.
-            startIdleWait();
-
             // Set the timeout to infinite again
             try {
                 mSocket.setSoTimeout(SOCKET_TIMEOUT);
@@ -622,13 +619,6 @@ public class MPDConnection {
             handleSocketError();
         }
 
-        /* Send the "noidle" command to the server to initiate noidle */
-        writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
-
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Sent deidle request");
-        }
-
         mDeIdleTimerLock.lock();
         // Set timeout task for deidling.
         if (mDeidleTimeoutTimer != null) {
@@ -637,7 +627,17 @@ public class MPDConnection {
         }
         mDeidleTimeoutTimer = new Timer();
         mDeidleTimeoutTimer.schedule(new DeIdleTimeoutTask(), DEIDLE_TIMEOUT);
+        if(DEBUG_ENABLED) {
+            Log.v(TAG,"DeIdle Timeout scheduled");
+        }
         mDeIdleTimerLock.unlock();
+
+        /* Send the "noidle" command to the server to initiate noidle */
+        writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
+
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Sent deidle request");
+        }
 
         /* Wait for idle thread to release the lock, which means we are finished waiting */
         try {
@@ -759,12 +759,7 @@ public class MPDConnection {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Response: " + success);
         }
-        // The command was handled now it is time to set the connection to idle again (after the timeout,
-        // to prevent disconnecting).
-        startIdleWait();
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Started idle wait");
-        }
+
         // Return if successful or not.
         return success;
     }
@@ -904,6 +899,9 @@ public class MPDConnection {
             String response = null;
             try {
                 response = waitForIdleResponse();
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG, "waitForIdleResponse returned");
+                }
 
                 // Wait for possible deidle lock
                 try {
@@ -918,6 +916,9 @@ public class MPDConnection {
                     mDeidleTimeoutTimer.cancel();
                     mDeidleTimeoutTimer.purge();
                     mDeidleTimeoutTimer = null;
+                    if(DEBUG_ENABLED) {
+                        Log.v(TAG,"Cancelled deIdle timeout");
+                    }
                 }
                 mDeIdleTimerLock.unlock();
 
@@ -939,6 +940,9 @@ public class MPDConnection {
                     mDeidleTimeoutTimer.cancel();
                     mDeidleTimeoutTimer.purge();
                     mDeidleTimeoutTimer = null;
+                    if(DEBUG_ENABLED) {
+                        Log.v(TAG,"Stop deidle timeout");
+                    }
                 }
                 mDeIdleTimerLock.unlock();
 
@@ -1129,6 +1133,9 @@ public class MPDConnection {
                 }
                 throw new MPDException(line);
             } else if (line.startsWith("OK")) {
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG,"OK read, starting idle wait");
+                }
                 // Request is handled. Go idle
                 startIdleWait();
             }
