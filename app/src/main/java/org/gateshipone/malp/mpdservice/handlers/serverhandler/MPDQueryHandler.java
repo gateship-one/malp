@@ -39,6 +39,7 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServe
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCommands;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -148,7 +149,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDAlbum> albumList = mMPDConnection.getAlbums();
+                List<MPDAlbum> albumList = MPDInterface.getAlbums(mMPDConnection);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = albumList;
@@ -159,7 +160,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
                 String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
-                List<MPDAlbum> albumList = mMPDConnection.getAlbumsInPath(path);
+                List<MPDAlbum> albumList = MPDInterface.getAlbumsInPath(mMPDConnection, path);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = albumList;
@@ -171,7 +172,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDAlbum> albumList = mMPDConnection.getArtistAlbums(artistName);
+                List<MPDAlbum> albumList = MPDInterface.getArtistAlbums(mMPDConnection, artistName);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = albumList;
@@ -183,7 +184,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDArtist> artistList = mMPDConnection.getArtists();
+                List<MPDArtist> artistList = MPDInterface.getArtists(mMPDConnection);
 
                 Message artistResponseMsg = this.obtainMessage();
                 artistResponseMsg.obj = artistList;
@@ -199,10 +200,10 @@ public class MPDQueryHandler extends MPDGenericHandler {
                 List<MPDArtist> artistList;
                 // Check if server supports the right tag, otherwise use fallback list
                 if (null != caps && caps.hasTagAlbumArtist()) {
-                    artistList = mMPDConnection.getAlbumArtists();
+                    artistList = MPDInterface.getAlbumArtists(mMPDConnection);
                 } else {
                     // If server does not support the albumartist tag
-                    artistList = mMPDConnection.getArtists();
+                    artistList = MPDInterface.getArtists(mMPDConnection);
                 }
 
                 Message artistResponseMsg = this.obtainMessage();
@@ -217,7 +218,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getAlbumTracks(albumName, albumMBID);
+                List<MPDFileEntry> trackList = MPDInterface.getAlbumTracks(mMPDConnection, albumName, albumMBID);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -228,7 +229,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getAllTracks();
+                List<MPDFileEntry> trackList = MPDInterface.getAllTracks(mMPDConnection);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -242,7 +243,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getArtistAlbumTracks(albumName, artistName, albumMBID);
+                List<MPDFileEntry> trackList = MPDInterface.getArtistAlbumTracks(mMPDConnection, albumName, artistName, albumMBID);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -253,7 +254,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylist();
+                List<MPDFileEntry> trackList = MPDInterface.getCurrentPlaylist(mMPDConnection);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -266,7 +267,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getCurrentPlaylistWindow(start, end);
+                List<MPDFileEntry> trackList = MPDInterface.getCurrentPlaylistWindow(mMPDConnection, start, end);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -282,7 +283,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> trackList = mMPDConnection.getSavedPlaylist(playlistName);
+                List<MPDFileEntry> trackList = MPDInterface.getSavedPlaylist(mMPDConnection, playlistName);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = trackList;
@@ -293,7 +294,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> playlistList = mMPDConnection.getPlaylists();
+                List<MPDFileEntry> playlistList = MPDInterface.getPlaylists(mMPDConnection);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = playlistList;
@@ -301,74 +302,74 @@ public class MPDQueryHandler extends MPDGenericHandler {
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SAVE_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
 
-                mMPDConnection.savePlaylist(playlistName);
+                MPDInterface.savePlaylist(mMPDConnection, playlistName);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_SONG_TO_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
                 String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
-                mMPDConnection.addSongToPlaylist(playlistName, path);
+                MPDInterface.addSongToPlaylist(mMPDConnection, playlistName, path);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
                 int position = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
 
-                mMPDConnection.removeSongFromPlaylist(playlistName, position);
+                MPDInterface.removeSongFromPlaylist(mMPDConnection, playlistName, position);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
 
-                mMPDConnection.removePlaylist(playlistName);
+                MPDInterface.removePlaylist(mMPDConnection, playlistName);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_LOAD_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
 
 
-                mMPDConnection.loadPlaylist(playlistName);
+                MPDInterface.loadPlaylist(mMPDConnection, playlistName);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_PLAYLIST) {
                 String playlistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PLAYLIST_NAME);
 
-                mMPDConnection.clearPlaylist();
-                mMPDConnection.loadPlaylist(playlistName);
-                mMPDConnection.playSongIndex(0);
+                MPDInterface.clearPlaylist(mMPDConnection);
+                MPDInterface.loadPlaylist(mMPDConnection, playlistName);
+                MPDInterface.playSongIndex(mMPDConnection, 0);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST_ALBUM) {
                 String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
                 String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
                 String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
 
-                mMPDConnection.addAlbumTracks(albumname, artistname, albumMBID);
+                MPDInterface.addAlbumTracks(mMPDConnection, albumname, artistname, albumMBID);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM) {
                 String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
                 String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
                 String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
 
-                mMPDConnection.clearPlaylist();
-                mMPDConnection.addAlbumTracks(albumname, artistname, albumMBID);
-                mMPDConnection.playSongIndex(0);
+                MPDInterface.clearPlaylist(mMPDConnection);
+                MPDInterface.addAlbumTracks(mMPDConnection, albumname, artistname, albumMBID);
+                MPDInterface.playSongIndex(mMPDConnection, 0);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST) {
                 String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
                 MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder = MPDAlbum.MPD_ALBUM_SORT_ORDER.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER)];
 
-                mMPDConnection.addArtist(artistname, sortOrder);
+                MPDInterface.addArtist(mMPDConnection, artistname, sortOrder);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST) {
                 String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
                 MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder = MPDAlbum.MPD_ALBUM_SORT_ORDER.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SORT_ORDER)];
 
-                mMPDConnection.clearPlaylist();
-                mMPDConnection.addArtist(artistname, sortOrder);
-                mMPDConnection.playSongIndex(0);
+                MPDInterface.clearPlaylist(mMPDConnection);
+                MPDInterface.addArtist(mMPDConnection, artistname, sortOrder);
+                MPDInterface.playSongIndex(mMPDConnection, 0);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_PATH) {
                 String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
-                mMPDConnection.addSong(url);
+                MPDInterface.addSong(mMPDConnection, url);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG_NEXT) {
                 String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
 
 
-                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                mMPDConnection.addSongatIndex(url, status.getCurrentSongIndex() + 1);
+                MPDCurrentStatus status = MPDInterface.getCurrentServerStatus(mMPDConnection);
+                MPDInterface.addSongatIndex(mMPDConnection, url, status.getCurrentSongIndex() + 1);
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
                 String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
@@ -379,37 +380,37 @@ public class MPDQueryHandler extends MPDGenericHandler {
                  *
                  * Otherwise add it to the last playlist position and jump there.
                  */
-                List<MPDFileEntry> playlistFindTracks = mMPDConnection.getPlaylistFindTrack(url);
+                List<MPDFileEntry> playlistFindTracks = MPDInterface.getPlaylistFindTrack(mMPDConnection, url);
                 if (playlistFindTracks.size() > 0) {
                     // Song already found in the playlist. Jump there.
-                    mMPDConnection.playSongIndex(((MPDTrack) playlistFindTracks.get(0)).getSongPosition());
+                    MPDInterface.playSongIndex(mMPDConnection, ((MPDTrack) playlistFindTracks.get(0)).getSongPosition());
                 } else {
                     // Not part of the current playlist. Add it at the end of the playlist and play it from there.
-                    mMPDConnection.addSong(url);
-                    MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
-                    mMPDConnection.playSongIndex(status.getPlaylistLength() - 1);
+                    MPDInterface.addSong(mMPDConnection, url);
+                    MPDCurrentStatus status = MPDInterface.getCurrentServerStatus(mMPDConnection);
+                    MPDInterface.playSongIndex(mMPDConnection, status.getPlaylistLength() - 1);
                 }
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CLEAR_CURRENT_PLAYLIST) {
-                mMPDConnection.clearPlaylist();
+                MPDInterface.clearPlaylist(mMPDConnection);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SHUFFLE_CURRENT_PLAYLIST) {
-                mMPDConnection.shufflePlaylist();
+                MPDInterface.shufflePlaylist(mMPDConnection);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_MOVE_SONG_AFTER_CURRENT) {
 
-                MPDCurrentStatus status = mMPDConnection.getCurrentServerStatus();
+                MPDCurrentStatus status = MPDInterface.getCurrentServerStatus(mMPDConnection);
                 int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
                 if (index < status.getCurrentSongIndex()) {
-                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex());
+                    MPDInterface.moveSongFromTo(mMPDConnection, index, status.getCurrentSongIndex());
                 } else if (index > status.getCurrentSongIndex()) {
-                    mMPDConnection.moveSongFromTo(index, status.getCurrentSongIndex() + 1);
+                    MPDInterface.moveSongFromTo(mMPDConnection, index, status.getCurrentSongIndex() + 1);
                 }
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_SONG_FROM_CURRENT_PLAYLIST) {
                 int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
-                mMPDConnection.removeIndex(index);
+                MPDInterface.removeIndex(mMPDConnection, index);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_REMOVE_RANGE_FROM_CURRENT_PLAYLIST) {
                 int start = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_START);
                 int end = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_WINDOW_END);
 
-                mMPDConnection.removeRange(start, end);
+                MPDInterface.removeRange(mMPDConnection, start, end);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_FILES) {
                 String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
@@ -418,7 +419,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> fileList = mMPDConnection.getFiles(path);
+                List<MPDFileEntry> fileList = MPDInterface.getFiles(mMPDConnection, path);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = fileList;
@@ -426,13 +427,13 @@ public class MPDQueryHandler extends MPDGenericHandler {
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_DIRECTORY) {
                 String path = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
-                mMPDConnection.clearPlaylist();
-                mMPDConnection.addSong(path);
-                mMPDConnection.playSongIndex(0);
+                MPDInterface.clearPlaylist(mMPDConnection);
+                MPDInterface.addSong(mMPDConnection, path);
+                MPDInterface.playSongIndex(mMPDConnection, 0);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_OUTPUTS) {
                 responseHandler = mpdAction.getResponseHandler();
 
-                List<MPDOutput> outputList = mMPDConnection.getOutputs();
+                List<MPDOutput> outputList = MPDInterface.getOutputs(mMPDConnection);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = outputList;
@@ -441,7 +442,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                 responseHandler = mpdAction.getResponseHandler();
 
                 MPDStatistics stats = null;
-                stats = mMPDConnection.getServerStatistics();
+                stats = MPDInterface.getServerStatistics(mMPDConnection);
 
 
                 Message responseMessage = this.obtainMessage();
@@ -451,7 +452,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
                 String updatePath = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_PATH);
 
-                mMPDConnection.updateDatabase(updatePath);
+                MPDInterface.updateDatabase(mMPDConnection, updatePath);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SEARCH_FILES) {
                 String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
                 MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
@@ -461,7 +462,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                     return;
                 }
 
-                List<MPDFileEntry> fileList = mMPDConnection.getSearchedFiles(term, type);
+                List<MPDFileEntry> fileList = MPDInterface.getSearchedFiles(mMPDConnection, term, type);
 
                 Message responseMessage = this.obtainMessage();
                 responseMessage.obj = fileList;
@@ -474,28 +475,28 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
                 // Check if server has the add search result capability
                 if (null != caps && caps.hasSearchAdd()) {
-                    mMPDConnection.addSearchedFiles(term, type);
+                    MPDInterface.addSearchedFiles(mMPDConnection, term, type);
                 } else {
                     // Fetch search results and add them
-                    List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term, type);
-                    mMPDConnection.addTrackList(searchResults);
+                    List<MPDFileEntry> searchResults = MPDInterface.getSearchedFiles(mMPDConnection, term, type);
+                    MPDInterface.addTrackList(mMPDConnection, searchResults);
                 }
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SEARCH_FILES) {
                 String term = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SEARCH_TERM);
                 MPDCommands.MPD_SEARCH_TYPE type = MPDCommands.MPD_SEARCH_TYPE.values()[mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEARCH_TYPE)];
 
-                mMPDConnection.clearPlaylist();
+                MPDInterface.clearPlaylist(mMPDConnection);
 
                 // Check if server has the add search result capability
                 if (mMPDConnection.getServerCapabilities().hasSearchAdd()) {
-                    mMPDConnection.addSearchedFiles(term, type);
+                    MPDInterface.addSearchedFiles(mMPDConnection, term, type);
                 } else {
                     // Fetch search results and add them
-                    List<MPDFileEntry> searchResults = mMPDConnection.getSearchedFiles(term, type);
-                    mMPDConnection.addTrackList(searchResults);
+                    List<MPDFileEntry> searchResults = MPDInterface.getSearchedFiles(mMPDConnection, term, type);
+                    MPDInterface.addTrackList(mMPDConnection, searchResults);
                 }
 
-                mMPDConnection.playSongIndex(0);
+                MPDInterface.playSongIndex(mMPDConnection, 0);
             }
         } catch (MPDException e) {
             handleMPDError();

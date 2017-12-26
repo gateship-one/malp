@@ -37,6 +37,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
@@ -188,7 +189,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         MPDCurrentStatus status = null;
         try {
-            status = mMPDConnection.getCurrentServerStatus();
+            status = MPDInterface.getCurrentServerStatus(mMPDConnection);
         } catch (MPDException e) {
             handleMPDError();
         }
@@ -197,7 +198,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         if (status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex() || status.getPlaylistVersion() != mLastStatus.getPlaylistVersion()) {
             // New track started playing. Get it and inform the listener.
             try {
-                mLastFile = mMPDConnection.getCurrentSong();
+                mLastFile = MPDInterface.getCurrentSong(mMPDConnection);
             } catch (MPDException e) {
                 handleMPDError();
             }

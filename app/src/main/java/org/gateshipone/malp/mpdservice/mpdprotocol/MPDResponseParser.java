@@ -51,7 +51,7 @@ public class MPDResponseParser {
      * @return List of MPDAlbum objects
      * @throws IOException
      */
-    static ArrayList<MPDAlbum> parseMPDAlbums(final MPDConnection connection) throws IOException, MPDException {
+    static ArrayList<MPDAlbum> parseMPDAlbums(final MPDConnection connection) throws MPDException {
         ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
         if (!connection.isConnected()) {
             return albumList;
@@ -109,7 +109,7 @@ public class MPDResponseParser {
      * @return List of MPDArtists objects
      * @throws IOException
      */
-    static ArrayList<MPDArtist> parseMPDArtists(final MPDConnection connection, final boolean hasMusicBrainz, final boolean hasListGroup) throws IOException, MPDException {
+    static ArrayList<MPDArtist> parseMPDArtists(final MPDConnection connection, final boolean hasMusicBrainz, final boolean hasListGroup) throws MPDException {
         ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
         if (!connection.isConnected()) {
             return artistList;
@@ -202,7 +202,7 @@ public class MPDResponseParser {
      * @return List of MPDFileEntry objects
      * @throws IOException
      */
-    static ArrayList<MPDFileEntry> parseMPDTracks(final MPDConnection connection, final String filterArtist, final String filterAlbumMBID) throws IOException, MPDException {
+    static ArrayList<MPDFileEntry> parseMPDTracks(final MPDConnection connection, final String filterArtist, final String filterAlbumMBID) throws MPDException {
         ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
         if (!connection.isConnected()) {
             return trackList;
@@ -356,7 +356,7 @@ public class MPDResponseParser {
         return trackList;
     }
 
-    static MPDCurrentStatus parseMPDCurrentStatus(final MPDConnection connection) throws IOException, MPDException {
+    static MPDCurrentStatus parseMPDCurrentStatus(final MPDConnection connection) throws MPDException {
         MPDCurrentStatus status = new MPDCurrentStatus();
         if (!connection.isConnected()) {
             return status;
@@ -473,7 +473,7 @@ public class MPDResponseParser {
      * @throws IOException  Thrown if an IO error occured
      * @throws MPDException Thrown if MPD throws an error
      */
-    static MPDStatistics parseMPDStatistic(final MPDConnection connection) throws IOException, MPDException {
+    static MPDStatistics parseMPDStatistic(final MPDConnection connection) throws MPDException {
         MPDStatistics stats = new MPDStatistics();
 
         /* Response line from MPD */
@@ -560,7 +560,7 @@ public class MPDResponseParser {
      * @return A list of MPDOutput objects with name,active,id values if successful. Otherwise empty list.
      * @throws IOException
      */
-    static List<MPDOutput> parseMPDOutputs(final MPDConnection connection) throws IOException, MPDException {
+    static List<MPDOutput> parseMPDOutputs(final MPDConnection connection) throws MPDException {
         ArrayList<MPDOutput> outputList = new ArrayList<>();
         // Parse outputs
         String outputName = null;
