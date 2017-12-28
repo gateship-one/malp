@@ -191,7 +191,8 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         try {
             status = MPDInterface.getCurrentServerStatus(mMPDConnection);
         } catch (MPDException e) {
-            handleMPDError();
+            handleMPDError(e);
+            return;
         }
 
 
@@ -200,7 +201,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             try {
                 mLastFile = MPDInterface.getCurrentSong(mMPDConnection);
             } catch (MPDException e) {
-                handleMPDError();
+                handleMPDError(e);
             }
             distributeNewTrack(mLastFile);
         }
@@ -348,7 +349,8 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         }
     }
 
-    private void handleMPDError() {
+    private void handleMPDError(MPDException e) {
         // FIXME empty stub
+        Log.e(TAG,"MPD error: " + e.getError());
     }
 }

@@ -69,6 +69,8 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_UPDATING_DB = "updating_db: ";
     public static final String MPD_RESPONSE_ERROR = "error: ";
 
+    public static final String MPD_RESPONSE_CHANGED = "changed: ";
+
     public static final String MPD_RESPONSE_PLAYBACK_STATE = "state: ";
     public static final String MPD_PLAYBACK_STATE_RESPONSE_PLAY = "play";
     public static final String MPD_PLAYBACK_STATE_RESPONSE_PAUSE = "pause";

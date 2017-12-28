@@ -26,11 +26,6 @@ import android.util.Log;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,15 +36,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Semaphore;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This is the main MPDConnection class. It will connect to an MPD server via an java TCP socket.
@@ -76,7 +66,7 @@ public class MPDConnection {
     /**
      * Set this flag to enable debugging in this class. DISABLE before releasing
      */
-    private static final boolean DEBUG_ENABLED = false;
+    private static final boolean DEBUG_ENABLED = true;
 
     /**
      * Timeout to wait for socket operations (time in ms)
@@ -124,6 +114,9 @@ public class MPDConnection {
     /* MPD server properties */
     private MPDCapabilities mServerCapabilities;
 
+    private final Timer mIDLETimer;
+    private TimerTask mIDLETask;
+
     /**
      * Only get the server capabilities if server parameters changed
      */
@@ -132,14 +125,14 @@ public class MPDConnection {
     /**
      * One listener for the state of the connection (connected, disconnected)
      */
-    private ArrayList<MPDConnectionStateChangeListener> mStateListeners = null;
+    private final ArrayList<MPDConnectionStateChangeListener> mStateListeners;
 
     /**
      * One listener for the idle state of the connection. Can be used to react
      * to changes to the server from other clients. When the server is deidled (from outside)
      * it will notify this listener.
      */
-    private ArrayList<MPDConnectionIdleChangeListener> mIdleListeners = null;
+    private final ArrayList<MPDConnectionIdleChangeListener> mIdleListeners;
 
     /**
      * Thread that will spawn when the server is not requested at the moment. Will start an
@@ -148,40 +141,13 @@ public class MPDConnection {
     private Thread mIdleThread = null;
 
     /**
-     * Timeout to start the actual idling thread. It will start after IDLE_WAIT_TIME milliseconds
-     * passed. To prevent interfering with possible handler calls at the same time
-     * all the methods that could be called from outside are synchronized to this MPDConnection class.
-     * This means that you have to be careful when calling these functions to prevent deadlocks.
-     */
-    private Timer mIdleWait = null;
-
-    /**
-     * Semaphore lock used by the deidling process. Necessary to guarantee the correct order of
-     * deidling write / read operations.
-     */
-    private Semaphore mIdleWaitLock;
-
-    /**
      * Singleton instance
      */
     private static MPDConnection mInstance;
 
-    /**
-     * Set if deidling was aborted. Used by IdleWaitThread
-     */
-    private boolean mDeIdlingTimedOut;
 
-    /**
-     * Semaphore to ensure correct deidle timeout execution order (TimeoutTimerTask -> IdleWaitThread)
-     */
-    private Semaphore mDeidleTimeoutLock;
+    private ConnectionSemaphore mConnectionLock;
 
-    /**
-     * Time to cancel deidling after a short period to prevent deadlocking
-     */
-    private Timer mDeidleTimeoutTimer;
-
-    private ReentrantLock mDeIdleTimerLock;
 
     public static synchronized MPDConnection getInstance() {
         if (null == mInstance) {
@@ -196,13 +162,13 @@ public class MPDConnection {
     private MPDConnection() {
         mSocket = null;
         mReader = null;
-        mIdleWaitLock = new Semaphore(1);
-        mDeidleTimeoutLock = new Semaphore(1);
         mServerCapabilities = new MPDCapabilities("", null, null);
         mIdleListeners = new ArrayList<>();
         mStateListeners = new ArrayList<>();
 
-        mDeIdleTimerLock = new ReentrantLock();
+        mConnectionLock = new ConnectionSemaphore(1);
+
+        mIDLETimer = new Timer();
     }
 
     /**
@@ -252,13 +218,22 @@ public class MPDConnection {
      * @param password Password for the server to authenticate with. Can be left empty.
      * @param port     TCP port to connect to.
      */
-    public synchronized void setServerParameters(String hostname, String password, int port) {
+    public void setServerParameters(String hostname, String password, int port) {
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         mHostname = hostname;
         if (!password.equals("")) {
             mPassword = password;
         }
         mPort = port;
         mCapabilitiesChanged = true;
+        if(DEBUG_ENABLED) {
+            Log.v(TAG,"Connection parameters changed");
+        }
+        mConnectionLock.release();
     }
 
     /**
@@ -266,12 +241,20 @@ public class MPDConnection {
      * and initiates the connection to the address and the configured tcp-port.
      */
     public synchronized void connectToServer() throws MPDException {
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         /* If a socket is already open, close it and destroy it. */
         if ((null != mSocket) && (mSocket.isConnected())) {
+            mConnectionLock.release();
             disconnectFromServer();
         }
 
         if ((null == mHostname) || mHostname.equals("")) {
+            mConnectionLock.release();
             return;
         }
         mMPDConnectionIdle = false;
@@ -282,6 +265,7 @@ public class MPDConnection {
             mSocket.connect(new InetSocketAddress(mHostname, mPort), SOCKET_TIMEOUT);
         } catch (IOException e) {
             handleSocketError();
+            mConnectionLock.release();
             return;
         }
 
@@ -295,6 +279,7 @@ public class MPDConnection {
                     mReader = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
                 } catch (IOException e) {
                     handleSocketError();
+                    mConnectionLock.release();
                     return;
                 }
             }
@@ -305,6 +290,7 @@ public class MPDConnection {
                     mWriter = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
                 } catch (IOException e) {
                     handleSocketError();
+                    mConnectionLock.release();
                     return;
                 }
             }
@@ -313,6 +299,7 @@ public class MPDConnection {
                 waitForResponse();
             } catch (IOException e) {
                 handleSocketError();
+                mConnectionLock.release();
                 return;
             }
 
@@ -338,32 +325,42 @@ public class MPDConnection {
                 }
             }
 
-            mMPDConnectionReady = true;
-
             if (mPassword != null && !mPassword.equals("")) {
                 /* Authenticate with server because password is set. */
-                boolean authenticated = authenticateMPDServer();
+                authenticateMPDServer();
             }
-
 
             if (mCapabilitiesChanged) {
                 // Get available commands
-                sendMPDCommand(MPDCommands.MPD_COMMAND_GET_COMMANDS);
+                writeLine(MPDCommands.MPD_COMMAND_GET_COMMANDS);
+
+                try {
+                    waitForResponse();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 List<String> commands = null;
                 try {
                     commands = MPDResponseParser.parseMPDCommands(this);
-                } catch (IOException | MPDException e) {
+                } catch (IOException e) {
                     handleSocketError();
+                    mConnectionLock.release();
                     return;
                 }
                 // Get list of supported tags
-                sendMPDCommand(MPDCommands.MPD_COMMAND_GET_TAGS);
+                writeLine(MPDCommands.MPD_COMMAND_GET_TAGS);
+                try {
+                    waitForResponse();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 List<String> tags = null;
                 try {
                     tags = MPDResponseParser.parseMPDTagTypes(this);
-                } catch (IOException | MPDException e) {
+                } catch (IOException e) {
                     handleSocketError();
+                    mConnectionLock.release();
                     return;
                 }
 
@@ -376,7 +373,13 @@ public class MPDConnection {
                 mSocket.setSoTimeout(SOCKET_TIMEOUT);
             } catch (SocketException e) {
                 handleSocketError();
+                mConnectionLock.release();
                 return;
+            }
+            mMPDConnectionReady = true;
+            mConnectionLock.release();
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Connection successfully established");
             }
 
             // Notify listener
@@ -389,18 +392,18 @@ public class MPDConnection {
      * If the password for the MPDConnection is set then the client should
      * try to authenticate with the server
      */
-    private boolean authenticateMPDServer() {
-        /* Check if connection really is good to go. */
-        if (!mMPDConnectionReady || mMPDConnectionIdle) {
-            return false;
-        }
+    private boolean authenticateMPDServer() throws MPDException {
+        writeLine(MPDCommands.MPD_COMMAND_PASSWORD(mPassword));
 
-        sendMPDCommand(MPDCommands.MPD_COMMAND_PASSWORD(mPassword));
+        try {
+            waitForResponse();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         /* Check if the result was positive or negative */
         String readString = null;
         boolean success = false;
-        try {
             while (readyRead()) {
                 readString = readLine();
                 if (readString.startsWith("OK")) {
@@ -412,9 +415,6 @@ public class MPDConnection {
                     }
                 }
             }
-        } catch (MPDException e) {
-            handleSocketError();
-        }
 
         return success;
     }
@@ -424,14 +424,19 @@ public class MPDConnection {
      * After this call it should be safe to reconnect to another server. If this connection is
      * currently in idle state, then it will be deidled before.
      */
-    public synchronized void disconnectFromServer() {
-        // Stop possible timers waiting for the timeout to go idle
-        stopIdleWait();
+    public void disconnectFromServer() {
 
         // Check if the connection is currently idling, if then deidle.
         if (mMPDConnectionIdle) {
-            stopIdleing();
+            stopIDLE();
         }
+
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
         // Close connection gracefully
         sendMPDRAWCommand(MPDCommands.MPD_COMMAND_CLOSE);
@@ -464,6 +469,12 @@ public class MPDConnection {
 
         // Notify listener
         notifyDisconnect();
+
+        if(DEBUG_ENABLED) {
+            Log.v(TAG,"Disconnected");
+        }
+
+        mConnectionLock.release();
     }
 
     /**
@@ -474,8 +485,9 @@ public class MPDConnection {
     public MPDCapabilities getServerCapabilities() {
         if (isConnected()) {
             return mServerCapabilities;
+        } else {
+            return new MPDCapabilities("",null, null);
         }
-        return null;
     }
 
     /**
@@ -484,28 +496,36 @@ public class MPDConnection {
      *
      * @param command
      */
-    void sendMPDCommand(String command) {
+    synchronized void sendMPDCommand(String command) {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Send command: " + command);
         }
-        // Stop possible idling timeout tasks.
-        stopIdleWait();
 
 
         /* Check if the server is connected. */
         if (mMPDConnectionReady) {
-
             /*
              * Check if server is in idling mode, this needs unidling first,
              * otherwise the server will disconnect the client.
              */
             if (mMPDConnectionIdle) {
-                stopIdleing();
+                stopIDLE();
             }
 
             // During deidle a disconnect could happen, check again if connection is ready
             if (!mMPDConnectionReady) {
                 return;
+            }
+
+            // Acquire lock
+            try {
+                mConnectionLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            if (DEBUG_ENABLED) {
+                Log.v(TAG, "Connection lock acquired: " + command);
             }
 
             /*
@@ -522,6 +542,7 @@ public class MPDConnection {
             try {
                 waitForResponse();
             } catch (IOException e) {
+                mConnectionLock.release();
                 handleSocketError();
             }
             if (DEBUG_ENABLED) {
@@ -531,6 +552,7 @@ public class MPDConnection {
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "Connection not ready, command not sent");
             }
+            mConnectionLock.release();
         }
     }
 
@@ -551,7 +573,6 @@ public class MPDConnection {
              * FIXME Should be validated in the future.
              */
             writeLine(command);
-
         }
     }
 
@@ -561,13 +582,18 @@ public class MPDConnection {
      * before starting a command list.
      */
     void startCommandList() {
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         /* Check if the server is connected. */
         if (mMPDConnectionReady) {
             /* Check if server is in idling mode, this needs unidling first,
             otherwise the server will disconnect the client.
              */
             if (mMPDConnectionIdle) {
-                stopIdleing();
+                stopIDLE();
             }
 
             /*
@@ -575,8 +601,8 @@ public class MPDConnection {
              * FIXME Should be validated in the future.
              */
             writeLine(MPDCommands.MPD_START_COMMAND_LIST);
-
-
+        } else {
+            mConnectionLock.release();
         }
     }
 
@@ -607,7 +633,11 @@ public class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    private void stopIdleing() {
+    private void stopIDLE() {
+        if(DEBUG_ENABLED) {
+            Log.v(TAG,"Stop Idling");
+        }
+
         /* Check if server really is in idling mode */
         if (!mMPDConnectionIdle || !mMPDConnectionReady) {
             return;
@@ -619,37 +649,12 @@ public class MPDConnection {
             handleSocketError();
         }
 
-        mDeIdleTimerLock.lock();
-        // Set timeout task for deidling.
-        if (mDeidleTimeoutTimer != null) {
-            mDeidleTimeoutTimer.cancel();
-            mDeidleTimeoutTimer.purge();
-        }
-        mDeidleTimeoutTimer = new Timer();
-        mDeidleTimeoutTimer.schedule(new DeIdleTimeoutTask(), DEIDLE_TIMEOUT);
-        if(DEBUG_ENABLED) {
-            Log.v(TAG,"DeIdle Timeout scheduled");
-        }
-        mDeIdleTimerLock.unlock();
-
         /* Send the "noidle" command to the server to initiate noidle */
         writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
 
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Sent deidle request");
         }
-
-        /* Wait for idle thread to release the lock, which means we are finished waiting */
-        try {
-            mIdleWaitLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Deidle lock acquired, server usage allowed again");
-        }
-
-        mIdleWaitLock.release();
     }
 
     /**
@@ -657,13 +662,14 @@ public class MPDConnection {
      * for a deidle from the MPD host. Otherwise it is impossible to get notified on changes
      * from other mpd clients (eg. volume change)
      */
-    private synchronized void startIdleing() {
+    private synchronized void startIDLE() {
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Start IDLE mode");
+        }
+
         /* Check if server really is in idling mode */
         if (!mMPDConnectionReady || mMPDConnectionIdle) {
             return;
-        }
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Start idle mode");
         }
 
         // Set the timeout to zero to block when no data is available
@@ -673,7 +679,6 @@ public class MPDConnection {
             e.printStackTrace();
         }
 
-        mDeIdlingTimedOut = false;
 
         // This will send the idle command to the server. From there on we need to deidle before
         // sending new requests.
@@ -681,13 +686,6 @@ public class MPDConnection {
 
         // Technically we are in idle mode now, set boolean
         mMPDConnectionIdle = true;
-
-        // Get the lock to prevent the handler thread from (stopIdling) to interfere with deidling sequence.
-        try {
-            mIdleWaitLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 
         mIdleThread = new IdleThread();
         mIdleThread.start();
@@ -772,15 +770,6 @@ public class MPDConnection {
         }
     }
 
-    /*
-     * *******************************
-     * * Response handling functions *
-     * *******************************
-     */
-
-
-
-
 
     /**
      * Checks if the socket is ready for read operations
@@ -863,12 +852,12 @@ public class MPDConnection {
     private String waitForIdleResponse() throws IOException {
         if (null != mReader) {
             if (DEBUG_ENABLED) {
-                Log.v(TAG, "Waiting for input from server");
+                Log.v(TAG, "Listening for server-side changes");
             }
             // Set thread to sleep, because there should be no line available to read.
             String response = null;
             try {
-                response = readLine();
+                response = readLineInternal();
             } catch (MPDException e) {
                 handleSocketError();
             }
@@ -887,230 +876,46 @@ public class MPDConnection {
     private class IdleThread extends Thread {
         @Override
         public void run() {
-            /* Try to read here. This should block this separate thread because
-               readLine() inside waitForIdleResponse is blocking.
-               If the response was not "OK" it means idling was stopped by us.
-               If the response starts with "changed" we know, that the MPD state was altered from somewhere
-               else and we need to update our status.
-             */
-            boolean externalDeIdle = false;
-
-            // This will block this thread until the server has some data available to read again.
-            String response = null;
+            String response;
+            // Wait for noidle. This should block until the server is ready for commands again
             try {
                 response = waitForIdleResponse();
-                if(DEBUG_ENABLED) {
-                    Log.v(TAG, "waitForIdleResponse returned");
-                }
-
-                // Wait for possible deidle lock
-                try {
-                    mDeidleTimeoutLock.acquire();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
-                mDeIdleTimerLock.lock();
-                // Clear possible timeout tasks
-                if (mDeidleTimeoutTimer != null) {
-                    mDeidleTimeoutTimer.cancel();
-                    mDeidleTimeoutTimer.purge();
-                    mDeidleTimeoutTimer = null;
-                    if(DEBUG_ENABLED) {
-                        Log.v(TAG,"Cancelled deIdle timeout");
-                    }
-                }
-                mDeIdleTimerLock.unlock();
-
-                // If deidling already timed out we don't need to take care here. Its already done by
-                // the timeout thread.
-                if (mDeIdlingTimedOut) {
-                    // Release held locks
-                    mDeidleTimeoutLock.release();
-                    mIdleWaitLock.release();
-                    return;
-                }
-                mDeidleTimeoutLock.release();
             } catch (IOException e) {
-                Log.v(TAG, "Read error exception. Disconnecting and cleaning up");
-
-                mDeIdleTimerLock.lock();
-                // Clear possible timeout tasks
-                if (mDeidleTimeoutTimer != null) {
-                    mDeidleTimeoutTimer.cancel();
-                    mDeidleTimeoutTimer.purge();
-                    mDeidleTimeoutTimer = null;
-                    if(DEBUG_ENABLED) {
-                        Log.v(TAG,"Stop deidle timeout");
-                    }
-                }
-                mDeIdleTimerLock.unlock();
-
-                // If deidling already timed out we don't need to take care here. Its already done by
-                // the timeout thread.
-                if (mDeIdlingTimedOut) {
-                    Log.v(TAG, "Deidle timed out, cancel normal deidling");
-                    mDeidleTimeoutLock.release();
-                    mIdleWaitLock.release();
-                    return;
-                }
-                mDeidleTimeoutLock.release();
-
-                try {
-                    /* Clear reader/writer up */
-                    if (null != mReader) {
-                        mReader = null;
-                    }
-                    if (null != mWriter) {
-                        mWriter = null;
-                    }
-
-                    /* Clear TCP-Socket up */
-                    if (null != mSocket && mSocket.isConnected()) {
-                        mSocket.setSoTimeout(500);
-                        mSocket.close();
-                    }
-                    mSocket = null;
-                } catch (IOException e2) {
-                    Log.v(TAG, "Error during read error handling");
-                }
-
-                /* Clear up connection state variables */
-                mMPDConnectionIdle = false;
-                mMPDConnectionReady = false;
-
-
-                // Notify listener
-                notifyDisconnect();
-
-                // Release the idle mode
-                mIdleWaitLock.release();
-                return;
-            }
-
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Idle over with response: " + response);
-            }
-
-            // This happens when disconnected
-            if (null == response || response.isEmpty()) {
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Probably disconnected during idling");
-                }
-                // First handle the disconnect, then allow further action
+                e.printStackTrace();
                 handleSocketError();
-
-                // Release the idle mode
-                mIdleWaitLock.release();
                 return;
             }
-            /**
-             * At this position idling is over. Check if we were the reason to deidle or if the
-             * server initiated the deidling. If it was done by the server we will trigger
-             * the idle again.
-             */
-            if (response.startsWith("changed")) {
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Externally deidled!");
-                }
-                externalDeIdle = true;
-                try {
-                    while (readyRead()) {
-                        response = readLine();
-                        if (response.startsWith("OK")) {
-                            if (DEBUG_ENABLED) {
-                                Log.v(TAG, "Deidled with status ok");
-                            }
-                        } else if (response.startsWith("ACK")) {
-                            if (DEBUG_ENABLED) {
-                                Log.v(TAG, "Server response error: " + response);
-                            }
+
+            // Check if noidle was sent or if server changed externally
+            if(response.startsWith(MPDResponses.MPD_RESPONSE_CHANGED)) {
+                // External change
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG,"External changes");
+                    mMPDConnectionIdle = false;
+
+                    while(!response.equals("OK")) {
+                        try {
+                            response = readLineInternal();
+                        } catch (MPDException e) {
+                            e.printStackTrace();
                         }
                     }
-                } catch (MPDException e) {
-                    handleSocketError();
+
+                    mConnectionLock.release();
+                    notifyIdleListener();
+
+                    scheduleIDLE();
                 }
             } else {
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Deidled on purpose");
+                // Noidle sent
+                // Release connection
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG,"No external change, response: " + response);
                 }
-            }
-            // Set the connection as non-idle again.
-            mMPDConnectionIdle = false;
-
-            // Reset the timeout again
-            try {
-                if (mSocket != null) {
-                    mSocket.setSoTimeout(SOCKET_TIMEOUT);
-                }
-            } catch (SocketException e) {
-                handleSocketError();
-            }
-
-            // Release the lock for possible threads waiting from outside this idling thread (handler thread).
-            mIdleWaitLock.release();
-
-            // Notify a possible listener for deidling.
-            for (MPDConnectionIdleChangeListener listener : mIdleListeners) {
-                listener.onNonIdle();
-            }
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Idling over");
-            }
-
-            // Start the idle clock again, but only if we were deidled from the server. Otherwise we let the
-            // active command deidle when finished.
-            if (externalDeIdle) {
-                startIdleWait();
+                mMPDConnectionIdle = false;
+                mConnectionLock.release();
             }
         }
-    }
-
-
-    /**
-     * This will start the timeout to set the connection tto the idle state after use.
-     */
-    private synchronized void startIdleWait() {
-        /**
-         * Check if a timer was running and then remove it.
-         * This will reset the timeout.
-         */
-        if (null != mIdleWait) {
-            mIdleWait.cancel();
-            mIdleWait.purge();
-        }
-        // Start the new timer with a new Idle Task.
-        mIdleWait = new Timer();
-        mIdleWait.schedule(new IdleWaitTimeoutTask(), IDLE_WAIT_TIME);
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "IdleWait scheduled");
-        }
-    }
-
-    /**
-     * This will stop a potential running timeout task.
-     */
-    private synchronized void stopIdleWait() {
-        if (null != mIdleWait) {
-            mIdleWait.cancel();
-            mIdleWait.purge();
-            mIdleWait = null;
-        }
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "IdleWait terminated");
-        }
-    }
-
-    /**
-     * Task that will trigger the idle state of this MPDConnection.
-     */
-    private class IdleWaitTimeoutTask extends TimerTask {
-
-        @Override
-        public void run() {
-            startIdleing();
-        }
-
     }
 
     /**
@@ -1120,29 +925,56 @@ public class MPDConnection {
      */
     String readLine() throws MPDException {
         if (mReader != null) {
-            String line = "";
+            String line;
             try {
                 line = mReader.readLine();
             } catch (IOException e) {
                 handleSocketError();
+                return "";
+            }
+            if(DEBUG_ENABLED) {
+                //Log.v(TAG,"Read line: " + line);
             }
             if (line.startsWith("ACK")) {
                 if (line.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
+                    mConnectionLock.release();
                     enableMopidyWorkaround();
                     return null;
                 }
+
                 throw new MPDException(line);
             } else if (line.startsWith("OK")) {
-                if(DEBUG_ENABLED) {
-                    Log.v(TAG,"OK read, starting idle wait");
+                if(mMPDConnectionReady) {
+                    if(DEBUG_ENABLED) {
+                        Log.v(TAG,"OK read, releasing connection");
+                    }
+                    mConnectionLock.release();
+                    scheduleIDLE();
                 }
-                // Request is handled. Go idle
-                startIdleWait();
             }
-            //Log.v(TAG,"Read line: " + line);
             return line;
         }
-        return null;
+        return "";
+    }
+
+    private String readLineInternal() throws MPDException {
+        if (mReader != null) {
+            String line;
+            try {
+                line = mReader.readLine();
+            } catch (IOException e) {
+                handleSocketError();
+                return "";
+            }
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Read line internal: " + line);
+            }
+            if (line.startsWith("ACK")) {
+                throw new MPDException(line);
+            }
+            return line;
+        }
+        return "";
     }
 
     /**
@@ -1170,6 +1002,14 @@ public class MPDConnection {
         }
     }
 
+    private void notifyIdleListener() {
+        synchronized (mIdleListeners) {
+            for (MPDConnectionIdleChangeListener listener: mIdleListeners) {
+                listener.onNonIdle();
+            }
+        }
+    }
+
     /**
      * This is called if an parse list args error occurs during the parsing
      * of {@link MPDAlbum} or {@link MPDArtist} objects. This probably indicates
@@ -1189,71 +1029,68 @@ public class MPDConnection {
         }
     }
 
-    /**
-     * Private class that aborts the idle even if the server does not respond.
-     * This is necessary as the IdleWaitThread will not timeout on its on when it
-     * is blocked in a read operation.
-     */
-    private class DeIdleTimeoutTask extends TimerTask {
+    private void scheduleIDLE() {
+        if(DEBUG_ENABLED) {
+            Log.v(TAG,"Schedule IDLE");
+        }
 
-        @Override
-        public void run() {
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Deidling timeout!");
+        synchronized (mIDLETimer) {
+            if(mIDLETask != null) {
+                mIDLETask.cancel();
             }
-            // Disconnect here because deidling took to long
-
-            // Acquire lock to prevent the IdleWaitThread from
-            // doing its work first.
-            try {
-                mDeidleTimeoutLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            /* Cleanup reader/writer */
-            try {
-            /* Clear reader/writer up */
-                if (null != mReader) {
-                    mReader = null;
-                }
-                if (null != mWriter) {
-                    mWriter = null;
-                }
-
-            /* Clear TCP-Socket up */
-                if (null != mSocket && mSocket.isConnected()) {
-                    mSocket.setSoTimeout(500);
-                    mSocket.close();
-                    mSocket = null;
-                }
-            } catch (IOException e) {
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Error during disconnecting:" + e.toString());
-                }
-            }
-
-            /* Clear up connection state variables */
-            mMPDConnectionIdle = false;
-            mMPDConnectionReady = false;
-
-            // Notify listener
-            notifyDisconnect();
-
-            mDeIdleTimerLock.lock();
-            // Set timeout task for deidling.
-            if (mDeidleTimeoutTimer != null) {
-                mDeidleTimeoutTimer.cancel();
-                mDeidleTimeoutTimer.purge();
-                mDeidleTimeoutTimer = null;
-            }
-            mDeIdleTimerLock.unlock();
-
-            // Now let the the IdleWaitThread continue
-            mDeidleTimeoutLock.release();
-
-            // Set to indicate an aborted deidling.
-            mDeIdlingTimedOut = true;
+            mIDLETask = new StartIDLETask();
+            mIDLETimer.schedule(mIDLETask, IDLE_WAIT_TIME);
         }
     }
+
+    private class StartIDLETask extends TimerTask {
+        @Override
+        public void run() {
+            boolean locked = mConnectionLock.tryAcquire();
+            if (locked) {
+                startIDLE();
+            } else {
+                scheduleIDLE();
+            }
+        }
+    }
+
+    private class ConnectionSemaphore extends Semaphore {
+
+        public ConnectionSemaphore(int permits) {
+            super(permits);
+        }
+
+        @Override
+        public void release() {
+            super.release();
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Semaphore released: " + availablePermits());
+            }
+        }
+
+        @Override
+        public void acquire() throws InterruptedException {
+            super.acquire();
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Semaphore acquired: " + availablePermits());
+            }
+        }
+
+        @Override
+        public boolean tryAcquire() {
+            boolean retVal = super.tryAcquire();
+            if (retVal) {
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG, "Semaphore acquired: " + availablePermits());
+                }
+            } else {
+                if (DEBUG_ENABLED) {
+                    Log.v(TAG, "Semaphore NOT acquired: " + availablePermits());
+                }
+            }
+            return retVal;
+        }
+    }
+
 }

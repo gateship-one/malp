@@ -510,9 +510,9 @@ public class MPDResponseParser {
         ArrayList<String> commandList = new ArrayList<>();
         // Parse outputs
         String commandName = null;
-        if (!connection.isConnected()) {
+        /*if (!connection.isConnected()) {
             return commandList;
-        }
+        }*/
 
         /* Response line from MPD */
         String response = connection.readLine();
@@ -537,9 +537,9 @@ public class MPDResponseParser {
         ArrayList<String> tagList = new ArrayList<>();
         // Parse outputs
         String tagName = null;
-        if (!connection.isConnected()) {
+        /*if (!connection.isConnected()) {
             return tagList;
-        }
+        }*/
 
         /* Response line from MPD */
         String response = connection.readLine();
