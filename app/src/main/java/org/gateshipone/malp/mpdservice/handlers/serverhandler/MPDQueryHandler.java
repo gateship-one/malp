@@ -373,15 +373,18 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
                 String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
-
+                MPDCapabilities caps = mMPDConnection.getServerCapabilities();
                 /**
-                 * Check if song is already enqueud in the current playlist. If it is get the position
+                 * Check if song is already enqueued in the current playlist. If it is get the position
                  * and just jump to the song position.
                  *
                  * Otherwise add it to the last playlist position and jump there.
                  */
-                List<MPDFileEntry> playlistFindTracks = MPDInterface.getPlaylistFindTrack(mMPDConnection, url);
-                if (playlistFindTracks.size() > 0) {
+                List<MPDFileEntry> playlistFindTracks = null;
+                if(caps != null && caps.hasPlaylistFind()) {
+                    playlistFindTracks = MPDInterface.getPlaylistFindTrack(mMPDConnection, url);
+                }
+                if (playlistFindTracks != null && playlistFindTracks.size() > 0) {
                     // Song already found in the playlist. Jump there.
                     MPDInterface.playSongIndex(mMPDConnection, ((MPDTrack) playlistFindTracks.get(0)).getSongPosition());
                 } else {

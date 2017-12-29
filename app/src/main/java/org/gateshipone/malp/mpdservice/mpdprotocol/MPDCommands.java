@@ -276,6 +276,8 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_GET_TAGS = "tagtypes";
 
+    public static final String MPD_COMMAND_PLAYLIST_FIND = "playlistfind";
+
     /**
      * Searches the song of an given URL in the current playlist. MPD will respond by
      * returning a track object if found or nothing else.

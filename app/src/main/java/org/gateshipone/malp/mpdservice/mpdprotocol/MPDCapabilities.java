@@ -55,6 +55,8 @@ public class MPDCapabilities {
     private boolean mTagAlbumArtist;
     private boolean mTagDate;
 
+    private boolean mHasPlaylistFind;
+
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
@@ -85,17 +87,11 @@ public class MPDCapabilities {
 
 
         if (null != commands) {
-            if (commands.contains(MPDCommands.MPD_COMMAND_START_IDLE)) {
-                mHasIdle = true;
-            } else {
-                mHasIdle = false;
-            }
+            mHasIdle = commands.contains(MPDCommands.MPD_COMMAND_START_IDLE);
 
-            if (commands.contains(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME)) {
-                mHasSearchAdd = true;
-            } else {
-                mHasSearchAdd = false;
-            }
+            mHasSearchAdd = commands.contains(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME);
+
+            mHasPlaylistFind = commands.contains(MPDCommands.MPD_COMMAND_PLAYLIST_FIND);
         }
 
 
@@ -162,6 +158,10 @@ public class MPDCapabilities {
         return mHasToggleOutput;
     }
 
+    public boolean hasPlaylistFind() {
+        return mHasPlaylistFind;
+    }
+
     public String getServerFeatures() {
         return "MPD protocol version: " + mMajorVersion + '.' + mMinorVersion + '\n'
                 + "TAGS:" + '\n'
@@ -182,5 +182,8 @@ public class MPDCapabilities {
         mHasListGroup = false;
         mHasListFiltering = false;
         mMopidyDetected = true;
+
+        // Command is listed in "commands" but mopidy returns "not implemented"
+        mHasPlaylistFind = false;
     }
 }
