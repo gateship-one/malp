@@ -242,5 +242,6 @@
     <string name="contributor_translator_korean">Koreanische Übersetzung</string>
     <string name="notification_channel_name_playback">Wiedergabe</string>
     <string name="notification_channel_name_bulk_download">Downloader</string>
-    <string name="snackbar_error_format">Fehler %d/%d: %s</string>
+    <string name="snackbar_mpd_server_error_format">Fehler %d/%d: %s</string>
+    <string name="snackbar_mpd_connection_error_format">Fehler: %s</string>
 </resources>

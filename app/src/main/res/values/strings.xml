@@ -188,7 +188,8 @@
     <string name="server_statistic_updateing_database">Server is updating its database, please wait!</string>
 
     <!-- Snackbar text -->
-    <string name="snackbar_error_format">Error %d/%d: %s</string>
+    <string name="snackbar_mpd_server_error_format">Error %d/%d: %s</string>
+    <string name="snackbar_mpd_connection_error_format">Error: %s</string>
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>

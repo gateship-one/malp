@@ -22,7 +22,6 @@
 
 package org.gateshipone.malp.application.activities;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -33,7 +32,6 @@ import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -476,7 +474,7 @@ public class MainActivity extends GenericActivity
     protected void onMPDError(MPDException.MPDServerException e) {
         View layout = findViewById(R.id.drawer_layout);
         if (layout != null) {
-            String errorText = getString(R.string.snackbar_error_format,e.getErrorCode(), e.getCommandOffset(), e.getServerMessage());
+            String errorText = getString(R.string.snackbar_mpd_server_error_format,e.getErrorCode(), e.getCommandOffset(), e.getServerMessage());
             Snackbar sb = Snackbar.make(layout, errorText, Snackbar.LENGTH_LONG);
 
             // style the snackbar text
@@ -490,7 +488,9 @@ public class MainActivity extends GenericActivity
     protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
         View layout = findViewById(R.id.drawer_layout);
         if (layout != null) {
-            Snackbar sb = Snackbar.make(layout, e.getError(), Snackbar.LENGTH_LONG);
+            String errorText = getString(R.string.snackbar_mpd_connection_error_format,e.getError());
+
+            Snackbar sb = Snackbar.make(layout, errorText, Snackbar.LENGTH_LONG);
 
             // style the snackbar text
             TextView sbText = sb.getView().findViewById(android.support.design.R.id.snackbar_text);
