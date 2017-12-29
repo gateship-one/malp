@@ -231,8 +231,8 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
         /* Register callback handlers to MPD service handlers */
         MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
-        MPDStateMonitoringHandler.setRefreshInterval(60 * 1000);
-        MPDStateMonitoringHandler.registerStatusListener(mServerStatusListener);
+        MPDStateMonitoringHandler.getHandler().setRefreshInterval(60 * 1000);
+        MPDStateMonitoringHandler.getHandler().registerStatusListener(mServerStatusListener);
 
         mNotificationManager = new NotificationManager(this);
 
@@ -249,7 +249,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
         /* Unregister MPD service handlers */
         MPDCommandHandler.unregisterConnectionStateListener(mServerConnectionStateListener);
-        MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusListener);
+        MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mServerStatusListener);
         notifyDisconnected();
 
         mNotificationManager.hideNotification();

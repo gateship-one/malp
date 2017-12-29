@@ -114,7 +114,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     protected void onResume() {
         super.onResume();
 
-        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
+        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
 
         ConnectionManager.getInstance(getApplicationContext()).registerMPDUse(getApplicationContext());
 
@@ -151,7 +151,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
-        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionCallback);
+        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
 
         getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
     }

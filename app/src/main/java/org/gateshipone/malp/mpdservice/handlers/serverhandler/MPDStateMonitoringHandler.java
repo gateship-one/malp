@@ -65,15 +65,19 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     /**
      * Callback handler for the GUI to get notified on updates
      */
-    private static ArrayList<MPDStatusChangeHandler> mStatusListeners;
+    private final ArrayList<MPDStatusChangeHandler> mStatusListeners;
 
     /**
      * Timer used to periodically resync the state with the mpd server between interpolating
      * the time values.
      */
-    private Timer mResyncTimer = null;
+    private final Timer mResyncTimer;
 
-    private Timer mInterpolateTimer = null;
+    private ResynchronizationTask mResynchronizationTask;
+
+    private final Timer mInterpolateTimer;
+
+    private InterpolateTask mInterpolateTask;
 
     /**
      * Last unix time used to interpolate the time as accurate as possible
@@ -95,6 +99,15 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     private MPDStateMonitoringHandler(Looper looper) {
         super(looper);
         mLastStatus = new MPDCurrentStatus();
+
+        mResyncTimer = new Timer();
+        mInterpolateTimer = new Timer();
+
+        mStatusListeners = new ArrayList<>();
+
+        mMPDConnection.setIdleListener(this);
+
+        mLastStatus = new MPDCurrentStatus();
     }
 
     /**
@@ -103,18 +116,12 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
      *
      * @return
      */
-    private synchronized static MPDStateMonitoringHandler getHandler() {
+    public synchronized static MPDStateMonitoringHandler getHandler() {
         if (null == mHandlerSingleton) {
-            Log.v(TAG, "Creating singleton");
             mHandlerThread = new HandlerThread(THREAD_NAME);
             mHandlerThread.start();
             mHandlerSingleton = new MPDStateMonitoringHandler(mHandlerThread.getLooper());
 
-            mStatusListeners = new ArrayList<>();
-
-            mHandlerSingleton.mMPDConnection.setIdleListener(mHandlerSingleton);
-
-            mHandlerSingleton.mLastStatus = new MPDCurrentStatus();
         }
         return mHandlerSingleton;
     }
@@ -150,7 +157,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
      * @param password Password that is used to authenticate with the server. Can be left empty.
      * @param port     Port to use for the connection. (Default: 6600)
      */
-    public static void setServerParameters(String hostname, String password, int port) {
+    public void setServerParameters(String hostname, String password, int port) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SERVER_PARAMETERS);
         Message msg = Message.obtain();
         if (msg == null) {
@@ -160,31 +167,39 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_PASSWORD, password);
         action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT, port);
         msg.obj = action;
-        MPDStateMonitoringHandler.getHandler().sendMessage(msg);
+        sendMessage(msg);
     }
 
-    public static void updateStatus() {
-        getHandler().resyncState();
+    public void updateStatus() {
+        resynchronizeState();
     }
 
-    private void resyncState() {
-        synchronized (this) {
-
-            // Stop the interpolation
-            if (null != mInterpolateTimer) {
-                mInterpolateTimer.cancel();
-                mInterpolateTimer.purge();
-                mInterpolateTimer = null;
-            }
-
-            // If a resync timer is running kill it also. It will be restarted when idling again
-
-            if (null != mResyncTimer) {
-                mResyncTimer.cancel();
-                mResyncTimer.purge();
-                mResyncTimer = null;
+    private void stopInterpolation() {
+        synchronized (mInterpolateTimer) {
+            if (mInterpolateTask != null) {
+                mInterpolateTask.cancel();
+                mInterpolateTask = null;
             }
         }
+    }
+
+    private void stopResynchronization() {
+        synchronized (mResyncTimer) {
+            if (mResynchronizationTask != null) {
+                mResynchronizationTask.cancel();
+                mResynchronizationTask = null;
+            }
+        }
+    }
+
+    private void resynchronizeState() {
+
+        // Stop the interpolation
+        stopInterpolation();
+
+        // If a resync timer is running kill it also. It will be restarted when idling again
+        stopResynchronization();
+
         mLastTimeBase = System.nanoTime();
 
         MPDCurrentStatus status = null;
@@ -194,7 +209,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             handleMPDError(e);
             return;
         }
-
 
         if (status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex() || status.getPlaylistVersion() != mLastStatus.getPlaylistVersion()) {
             // New track started playing. Get it and inform the listener.
@@ -219,7 +233,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             long timeDiff = (System.nanoTime() - mLastTimeBase) / (1000 * 1000 * 1000);
 
             // FIXME move timestamp to MPDConnection and MPDCurrentStatus (more precise, less time until saved)
-
             status.setElapsedTime(mLastStatus.getElapsedTime() + (int) timeDiff);
             distributeNewStatus(status);
         }
@@ -228,64 +241,63 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     private synchronized void startInterpolation() {
         if (mMPDConnection.isConnected()) {
             if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                if (null != mInterpolateTimer) {
-                    mInterpolateTimer.cancel();
-                    mInterpolateTimer.purge();
-                    mInterpolateTimer = null;
-                }
-                mInterpolateTimer = new Timer();
+                stopInterpolation();
 
-                mInterpolateTimer.schedule(new InterpolateTask(), 0, mRefreshInterval);
+                mInterpolateTask = new InterpolateTask();
+                mInterpolateTimer.schedule(mInterpolateTask, 0, mRefreshInterval);
             }
 
-            if (null != mResyncTimer) {
-                mResyncTimer.cancel();
-                mResyncTimer.purge();
-                mResyncTimer = null;
-            }
+            stopResynchronization();
 
-            mResyncTimer = new Timer();
-            mResyncTimer.schedule(new ResyncTask(), IDLE_TIME);
+            mResynchronizationTask = new ResynchronizationTask();
+            mResyncTimer.schedule(mResynchronizationTask, IDLE_TIME);
         }
     }
 
-    public static MPDCurrentStatus getLastStatus() {
-        return getHandler().mLastStatus;
+    public MPDCurrentStatus getLastStatus() {
+        return mLastStatus;
     }
 
-    public static void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        getHandler().internalRegisterConnectionStateListener(stateHandler);
+    public void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        internalRegisterConnectionStateListener(stateHandler);
     }
 
-    public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        getHandler().internalUnregisterConnectionStateListener(stateHandler);
+    public void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
+        internalUnregisterConnectionStateListener(stateHandler);
     }
 
 
-    public static void registerStatusListener(MPDStatusChangeHandler handler) {
+    public void registerStatusListener(MPDStatusChangeHandler handler) {
         if (null != handler) {
-            getHandler().mStatusListeners.add(handler);
-            handler.newMPDTrackReady(getHandler().mLastFile);
+            synchronized (mStatusListeners) {
+                mStatusListeners.add(handler);
+                handler.newMPDTrackReady(mLastFile);
+            }
         }
     }
 
-    public static void unregisterStatusListener(MPDStatusChangeHandler handler) {
+    public void unregisterStatusListener(MPDStatusChangeHandler handler) {
         if (null != handler) {
-            getHandler().mStatusListeners.remove(handler);
+            synchronized (mStatusListeners) {
+                mStatusListeners.remove(handler);
+            }
         }
     }
 
 
     private void distributeNewStatus(MPDCurrentStatus status) {
-        //Log.v(TAG, "Distribute status: " + status.printStatus());
-        for (MPDStatusChangeHandler handler : mStatusListeners) {
-            handler.newMPDStatusReady(status);
+        synchronized (mStatusListeners) {
+            for (MPDStatusChangeHandler handler : mStatusListeners) {
+                handler.newMPDStatusReady(status);
+            }
         }
     }
 
     private void distributeNewTrack(MPDTrack track) {
-        for (MPDStatusChangeHandler handler : mStatusListeners) {
-            handler.newMPDTrackReady(track);
+        synchronized (mStatusListeners) {
+            for (MPDStatusChangeHandler handler : mStatusListeners) {
+                handler.newMPDTrackReady(track);
+            }
         }
     }
 
@@ -296,24 +308,16 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         mLastFile = new MPDTrack("");
         distributeNewStatus(mLastStatus);
         distributeNewTrack(mLastFile);
-        resyncState();
+        resynchronizeState();
     }
 
     @Override
     public void onDisconnected() {
         super.onDisconnected();
         synchronized (this) {
-            // Stop the interpolation
-            if (null != mInterpolateTimer) {
-                mInterpolateTimer.cancel();
-                mInterpolateTimer = null;
-            }
+            stopInterpolation();
 
-            // Stop the resync timeout timer
-            if (null != mResyncTimer) {
-                mResyncTimer.cancel();
-                mResyncTimer = null;
-            }
+            stopResynchronization();
         }
     }
 
@@ -325,19 +329,19 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
     @Override
     public void onNonIdle() {
         // Server idle is over (reason unclear), resync the state
-        resyncState();
+        resynchronizeState();
     }
 
-    public static void setRefreshInterval(int interval) {
-        getHandler().mRefreshInterval = interval;
+    public void setRefreshInterval(int interval) {
+        mRefreshInterval = interval;
     }
 
 
-    private class ResyncTask extends TimerTask {
+    private class ResynchronizationTask extends TimerTask {
 
         @Override
         public void run() {
-            resyncState();
+            resynchronizeState();
         }
     }
 
@@ -351,6 +355,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     private void handleMPDError(MPDException e) {
         // FIXME empty stub
-        Log.e(TAG,"MPD error: " + e.getError());
+        Log.e(TAG, "MPD error: " + e.getError());
     }
 }

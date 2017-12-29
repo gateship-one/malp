@@ -100,14 +100,14 @@ public class ServerStatisticFragment extends Fragment {
 
         MPDQueryHandler.getStatistics(new StatisticResponseHandler());
 
-        MPDStateMonitoringHandler.registerStatusListener(mServerStatusHandler);
+        MPDStateMonitoringHandler.getHandler().registerStatusListener(mServerStatusHandler);
     }
 
     @Override
     public synchronized void onPause() {
         super.onPause();
 
-        MPDStateMonitoringHandler.unregisterStatusListener(mServerStatusHandler);
+        MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mServerStatusHandler);
     }
 
     private synchronized void showDatabaseUpdating(final boolean show) {

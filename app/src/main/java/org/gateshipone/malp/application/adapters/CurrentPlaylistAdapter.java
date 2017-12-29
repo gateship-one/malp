@@ -518,14 +518,14 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
      */
     public void onResume() {
         // Register to the MPDStateNotifyHandler singleton
-        MPDStateMonitoringHandler.registerStatusListener(mStateListener);
-        MPDStateMonitoringHandler.registerConnectionStateListener(mConnectionListener);
+        MPDStateMonitoringHandler.getHandler().registerStatusListener(mStateListener);
+        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionListener);
 
 
         // Reset old states because it is not ensured that it has any meaning.
         mLastStatus = null;
         updatePlaylist();
-        mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getLastStatus());
+        mStateListener.onNewStatusReady(MPDStateMonitoringHandler.getHandler().getLastStatus());
         ArtworkManager.getInstance(mContext.getApplicationContext()).registerOnNewAlbumImageListener(this);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
@@ -537,8 +537,8 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
      */
     public void onPause() {
         // Unregister to the MPDStateNotifyHandler singleton
-        MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
-        MPDStateMonitoringHandler.unregisterConnectionStateListener(mConnectionListener);
+        MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mStateListener);
+        MPDStateMonitoringHandler.getHandler().unregisterConnectionStateListener(mConnectionListener);
 
         mPlaylist = null;
         ArtworkManager.getInstance(mContext.getApplicationContext()).unregisterOnNewAlbumImageListener(this);

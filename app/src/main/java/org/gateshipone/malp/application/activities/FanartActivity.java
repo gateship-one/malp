@@ -271,7 +271,7 @@ public class FanartActivity extends GenericActivity {
     protected void onResume() {
         super.onResume();
 
-        MPDStateMonitoringHandler.registerStatusListener(mStateListener);
+        MPDStateMonitoringHandler.getHandler().registerStatusListener(mStateListener);
         cancelSwitching();
         mSwitchTimer = new Timer();
         mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
@@ -289,13 +289,13 @@ public class FanartActivity extends GenericActivity {
     protected void onPause() {
         super.onPause();
 
-        MPDStateMonitoringHandler.unregisterStatusListener(mStateListener);
+        MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mStateListener);
         cancelSwitching();
     }
 
     @Override
     protected void onConnected() {
-        updateMPDStatus(MPDStateMonitoringHandler.getLastStatus());
+        updateMPDStatus(MPDStateMonitoringHandler.getHandler().getLastStatus());
     }
 
     @Override

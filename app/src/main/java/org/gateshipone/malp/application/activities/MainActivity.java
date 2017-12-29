@@ -271,7 +271,7 @@ public class MainActivity extends GenericActivity
             inflater.inflate(R.menu.context_menu_current_playlist_track, menu);
 
             // Check if the menu is created for the currently playing song. If this is the case, do not show play as next item.
-            MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
+            MPDCurrentStatus status = MPDStateMonitoringHandler.getHandler().getLastStatus();
             if (status != null && position == status.getCurrentSongIndex()) {
                 menu.findItem(R.id.action_song_play_next).setVisible(false);
             }

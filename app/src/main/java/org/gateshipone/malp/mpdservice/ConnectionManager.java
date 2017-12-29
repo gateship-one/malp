@@ -90,7 +90,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private Context mContext;
 
     private ConnectionManager(Context context) {
-        MPDStateMonitoringHandler.registerConnectionStateListener(this);
+        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(this);
         MPDQueryHandler.registerConnectionStateListener(this);
         MPDCommandHandler.registerConnectionStateListener(this);
         mHostname = null;
@@ -275,7 +275,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         }
         @Override
         public void run() {
-            MPDCurrentStatus status = MPDStateMonitoringHandler.getLastStatus();
+            MPDCurrentStatus status = MPDStateMonitoringHandler.getHandler().getLastStatus();
 
             // Notify the widget to also connect if possible
             Intent connectIntent = new Intent(mContext, BackgroundService.class);
