@@ -462,7 +462,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      * Ensures an MPD server is connected before performing an action.
      */
     private void checkMPDConnection() {
-        if (!MPDConnection.getInstance().isConnected() && !mConnecting) {
+        if (!MPDConnection.mInstance.isConnected() && !mConnecting) {
             mLastTrack = new MPDTrack("");
             mLastStatus = new MPDCurrentStatus();
             connectMPDServer();

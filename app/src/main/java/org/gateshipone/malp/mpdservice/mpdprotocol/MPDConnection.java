@@ -160,15 +160,10 @@ public class MPDConnection {
     /**
      * Singleton instance
      */
-    private final static MPDConnection mInstance = new MPDConnection();
+    public final static MPDConnection mInstance = new MPDConnection();
 
 
     private ConnectionSemaphore mConnectionLock;
-
-
-    public static synchronized MPDConnection getInstance() {
-        return mInstance;
-    }
 
     /**
      * Creates disconnected MPDConnection with following parameters
