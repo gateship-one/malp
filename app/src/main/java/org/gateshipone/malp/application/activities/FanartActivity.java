@@ -51,6 +51,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.responses.Fanart
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
+import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
@@ -372,7 +373,18 @@ public class FanartActivity extends GenericActivity {
      * @param track New {@link MPDTrack} that is playing
      */
     private void updateMPDCurrentTrack(final MPDTrack track) {
-        mTrackTitle.setText(track.getTrackTitle());
+        String title;
+        if(!(title = track.getTrackTitle()).isEmpty()) {
+
+        } else if (!(title = track.getTrackName()).isEmpty()) {
+
+        } else if (!track.getPath().isEmpty()) {
+            title = FormatHelper.getFilenameFromPath(track.getPath());
+        } else {
+            title = "";
+        }
+
+        mTrackTitle.setText(title);
         mTrackAlbum.setText(track.getTrackAlbum());
         mTrackArtist.setText(track.getTrackArtist());
         if (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist())) {
