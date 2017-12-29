@@ -39,8 +39,12 @@ import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
+import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 
 import java.lang.ref.WeakReference;
 
@@ -57,6 +61,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     private MPDConnectionStateCallbackHandler mConnectionCallback;
 
     private StreamingStatusReceiver mStreamingStatusReceiver;
+
+    private MPDErrorListener mErrorListener;
 
 
     @Override
@@ -108,11 +114,17 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
             setTheme(R.style.AppTheme_oledDark);
         }
         mConnectionCallback = new MPDConnectionStateCallbackHandler(this);
+        mErrorListener = new MPDErrorListener(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Add error listener
+        MPDStateMonitoringHandler.getHandler().addErrorListener(mErrorListener);
+        MPDCommandHandler.getHandler().addErrorListener(mErrorListener);
+        MPDQueryHandler.getHandler().addErrorListener(mErrorListener);
 
         MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
 
@@ -154,6 +166,11 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
 
         getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
+
+        // Unregister error listeners
+        MPDStateMonitoringHandler.getHandler().removeErrorListener(mErrorListener);
+        MPDCommandHandler.getHandler().removeErrorListener(mErrorListener);
+        MPDQueryHandler.getHandler().removeErrorListener(mErrorListener);
     }
 
 
@@ -185,6 +202,10 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     protected abstract void onConnected();
 
     protected abstract void onDisconnected();
+
+    protected abstract void onMPDError(MPDException.MPDServerException e);
+
+    protected abstract void onMPDConnectionError(MPDException.MPDConnectionException e);
 
     private static class MPDConnectionStateCallbackHandler extends MPDConnectionStateChangeHandler {
         private WeakReference<GenericActivity> mActivity;
@@ -253,6 +274,25 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         @Override
         public void onDisconnected() {
 
+        }
+    }
+
+    private static class MPDErrorListener extends MPDConnectionErrorHandler {
+        private WeakReference<GenericActivity> mActivity;
+
+        public MPDErrorListener(GenericActivity activity) {
+            mActivity = new WeakReference<GenericActivity>(activity);
+        }
+
+
+        @Override
+        protected void onMPDError(MPDException.MPDServerException e) {
+            mActivity.get().onMPDError(e);
+        }
+
+        @Override
+        protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
+            mActivity.get().onMPDConnectionError(e);
         }
     }
 }

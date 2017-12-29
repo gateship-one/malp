@@ -32,6 +32,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -57,6 +58,7 @@ import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
@@ -302,6 +304,15 @@ public class FanartActivity extends GenericActivity {
     protected void onDisconnected() {
         updateMPDStatus(new MPDCurrentStatus());
         updateMPDCurrentTrack(new MPDTrack(""));
+    }
+
+    @Override
+    protected void onMPDError(MPDException.MPDServerException e) {
+
+    }
+
+    @Override
+    protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
     }
 
     @Override

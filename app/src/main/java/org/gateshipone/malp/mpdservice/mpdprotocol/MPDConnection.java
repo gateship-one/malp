@@ -226,12 +226,8 @@ public class MPDConnection {
      * @param password Password for the server to authenticate with. Can be left empty.
      * @param port     TCP port to connect to.
      */
-    public void setServerParameters(String hostname, String password, int port) {
-        try {
-            mConnectionLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public synchronized void setServerParameters(String hostname, String password, int port) {
+
         mHostname = hostname;
         if (!password.equals("")) {
             mPassword = password;
@@ -241,7 +237,6 @@ public class MPDConnection {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Connection parameters changed");
         }
-        mConnectionLock.release();
     }
 
     /**
@@ -280,7 +275,7 @@ public class MPDConnection {
         } catch (IOException e) {
             handleSocketError();
             mConnectionLock.release();
-            return;
+            throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
         }
 
         /* Check if the socket is connected */
@@ -294,7 +289,7 @@ public class MPDConnection {
                 } catch (IOException e) {
                     handleSocketError();
                     mConnectionLock.release();
-                    return;
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
             }
 
@@ -305,7 +300,7 @@ public class MPDConnection {
                 } catch (IOException e) {
                     handleSocketError();
                     mConnectionLock.release();
-                    return;
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
             }
 
@@ -314,7 +309,7 @@ public class MPDConnection {
             } catch (IOException e) {
                 handleSocketError();
                 mConnectionLock.release();
-                return;
+                throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
             }
 
             /* If connected try to get MPDs version */
@@ -360,7 +355,7 @@ public class MPDConnection {
                 } catch (IOException e) {
                     handleSocketError();
                     mConnectionLock.release();
-                    return;
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
                 // Get list of supported tags
                 writeLine(MPDCommands.MPD_COMMAND_GET_TAGS);
@@ -375,7 +370,7 @@ public class MPDConnection {
                 } catch (IOException e) {
                     handleSocketError();
                     mConnectionLock.release();
-                    return;
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
 
                 mServerCapabilities = new MPDCapabilities(versionString, commands, tags);
@@ -388,7 +383,7 @@ public class MPDConnection {
             } catch (SocketException e) {
                 handleSocketError();
                 mConnectionLock.release();
-                return;
+                throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
             }
             mMPDConnectionReady = true;
             mConnectionLock.release();
@@ -994,8 +989,8 @@ public class MPDConnection {
                     enableMopidyWorkaround();
                     return null;
                 }
-
-                throw new MPDException(line);
+                mConnectionLock.release();
+                throw new MPDException.MPDServerException(line);
             } else if (line.startsWith("OK")) {
                 if (mMPDConnectionReady) {
                     if (DEBUG_ENABLED) {
@@ -1025,7 +1020,7 @@ public class MPDConnection {
             if (line == null) {
                 return "";
             } else if (line.startsWith("ACK")) {
-                throw new MPDException(line);
+                throw new MPDException.MPDServerException(line);
             }
             return line;
         }

@@ -35,6 +35,7 @@ import android.widget.TextView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.fragments.LicensesDialog;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 
 public class AboutActivity extends GenericActivity {
     @Override
@@ -106,6 +107,16 @@ public class AboutActivity extends GenericActivity {
 
     @Override
     protected void onDisconnected() {
+
+    }
+
+    @Override
+    protected void onMPDError(MPDException.MPDServerException e) {
+
+    }
+
+    @Override
+    protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
 
     }
 }

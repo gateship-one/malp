@@ -187,6 +187,9 @@
     <string name="server_statistic_update_database">Update server database</string>
     <string name="server_statistic_updateing_database">Server is updating its database, please wait!</string>
 
+    <!-- Snackbar text -->
+    <string name="snackbar_error_format">Error %d/%d: %s</string>
+
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>
     <string name="dialog_action_cancel">Cancel</string>

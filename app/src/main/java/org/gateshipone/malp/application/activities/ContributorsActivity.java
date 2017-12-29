@@ -29,6 +29,7 @@ import android.widget.SimpleAdapter;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.utils.ThemeUtils;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -75,6 +76,16 @@ public class ContributorsActivity extends GenericActivity {
 
     @Override
     protected void onDisconnected() {
+
+    }
+
+    @Override
+    protected void onMPDError(MPDException.MPDServerException e) {
+
+    }
+
+    @Override
+    protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
 
     }
 }

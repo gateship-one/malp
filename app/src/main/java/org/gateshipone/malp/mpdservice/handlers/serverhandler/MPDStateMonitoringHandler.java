@@ -332,9 +332,4 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
             interpolateState();
         }
     }
-
-    private void handleMPDError(MPDException e) {
-        // FIXME empty stub
-        Log.e(TAG, "MPD error: " + e.getError());
-    }
 }

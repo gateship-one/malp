@@ -26,10 +26,12 @@ package org.gateshipone.malp.mpdservice.handlers.serverhandler;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
@@ -52,7 +54,7 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
  * an static method. Each handler has one MPDConnection object, that is used for talking to the mpd server.
  */
 public abstract class MPDGenericHandler extends Handler implements MPDConnection.MPDConnectionStateChangeListener {
-
+    private static final String TAG = MPDGenericHandler.class.getSimpleName();
     /**
      * MPDConnetion used for the communication to the MPD server.
      */
@@ -65,6 +67,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
      */
     protected final ArrayList<MPDConnectionStateChangeHandler> mConnectionStateListener;
 
+    protected final ArrayList<MPDConnectionErrorHandler> mErrorListeners;
 
     /**
      * Protected constructor that has to be called from subclasses. If it is not called
@@ -76,6 +79,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     protected MPDGenericHandler(Looper looper) {
         super(looper);
         mConnectionStateListener = new ArrayList<>();
+        mErrorListeners = new ArrayList<>();
         mMPDConnection = MPDConnection.mInstance;
 
         // Register all handlers as StateObservers with the MPDConnection. This ensures that all subclasses
@@ -129,7 +133,7 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
             try {
                 mMPDConnection.connectToServer();
             } catch (MPDException e) {
-                // FIXME error handling (feedback to user)
+                handleMPDError(e);
             }
 
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
@@ -155,6 +159,18 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         }
         synchronized (mConnectionStateListener) {
             mConnectionStateListener.remove(stateHandler);
+        }
+    }
+
+    public void addErrorListener(MPDConnectionErrorHandler errorListener) {
+        synchronized (mErrorListeners) {
+            mErrorListeners.add(errorListener);
+        }
+    }
+
+    public void removeErrorListener(MPDConnectionErrorHandler errorListener) {
+        synchronized (mErrorListeners) {
+            mErrorListeners.remove(errorListener);
         }
     }
 
@@ -209,4 +225,14 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         sendMessage(msg);
     }
 
+    protected void handleMPDError(MPDException e) {
+        Log.e(TAG,"MPD error: " + e.getError());
+
+        // Notify error listeners
+        synchronized (mErrorListeners) {
+            for(MPDConnectionErrorHandler handler : mErrorListeners) {
+                handler.newMPDError(e);
+            }
+        }
+    }
 }

@@ -200,7 +200,7 @@ public class MPDCommandHandler extends MPDGenericHandler {
                 MPDInterface.setVolume(mMPDConnection, targetVolume);
             }
         } catch (MPDException e) {
-            handleMPDError();
+            handleMPDError(e);
         }
     }
 
@@ -523,9 +523,5 @@ public class MPDCommandHandler extends MPDGenericHandler {
 
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         getHandler().internalUnregisterConnectionStateListener(stateHandler);
-    }
-
-    private void handleMPDError() {
-        // FIXME empty stub
     }
 }

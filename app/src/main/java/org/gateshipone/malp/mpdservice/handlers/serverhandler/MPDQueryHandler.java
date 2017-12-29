@@ -92,7 +92,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      *
      * @return
      */
-    private synchronized static MPDQueryHandler getHandler() {
+    public synchronized static MPDQueryHandler getHandler() {
         // Check if handler was accessed before. If not create the singleton object for the first
         // time.
         if (null == mHandlerSingleton) {
@@ -499,7 +499,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
                 MPDInterface.playSongIndex(mMPDConnection, 0);
             }
         } catch (MPDException e) {
-            handleMPDError();
+            handleMPDError(e);
         }
     }
 
@@ -1180,7 +1180,5 @@ public class MPDQueryHandler extends MPDGenericHandler {
     public static void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
         getHandler().internalUnregisterConnectionStateListener(stateHandler);
     }
-    private void handleMPDError() {
-        // FIXME empty stub
-    }
+
 }

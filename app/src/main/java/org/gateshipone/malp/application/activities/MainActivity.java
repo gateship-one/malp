@@ -22,6 +22,7 @@
 
 package org.gateshipone.malp.application.activities;
 
+import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -31,6 +32,8 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -80,6 +83,7 @@ import org.gateshipone.malp.application.views.CurrentPlaylistView;
 import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -466,6 +470,33 @@ public class MainActivity extends GenericActivity
     @Override
     protected void onDisconnected() {
         setNavbarHeader(getString(R.string.app_name_nice));
+    }
+
+    @Override
+    protected void onMPDError(MPDException.MPDServerException e) {
+        View layout = findViewById(R.id.drawer_layout);
+        if (layout != null) {
+            String errorText = getString(R.string.snackbar_error_format,e.getErrorCode(), e.getCommandOffset(), e.getServerMessage());
+            Snackbar sb = Snackbar.make(layout, errorText, Snackbar.LENGTH_LONG);
+
+            // style the snackbar text
+            TextView sbText = sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(this, R.attr.malp_color_text_accent));
+            sb.show();
+        }
+    }
+
+    @Override
+    protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
+        View layout = findViewById(R.id.drawer_layout);
+        if (layout != null) {
+            Snackbar sb = Snackbar.make(layout, e.getError(), Snackbar.LENGTH_LONG);
+
+            // style the snackbar text
+            TextView sbText = sb.getView().findViewById(android.support.design.R.id.snackbar_text);
+            sbText.setTextColor(ThemeUtils.getThemeColor(this, R.attr.malp_color_text_accent));
+            sb.show();
+        }
     }
 
     protected void onSaveInstanceState(Bundle savedInstanceState) {
