@@ -151,11 +151,6 @@ public class MPDConnection {
      */
     private final ArrayList<MPDConnectionIdleChangeListener> mIdleListeners;
 
-    /**
-     * Thread that will spawn when the server is not requested at the moment. Will start an
-     * blocking read operation on the socket reader.
-     */
-    private Thread mIdleThread = null;
 
     /**
      * Singleton instance
@@ -217,6 +212,7 @@ public class MPDConnection {
         mMPDConnectionIdle = false;
         mMPDConnectionReady = false;
 
+        cancelIDLEWait();
 
         // Notify listener
         notifyDisconnect();
@@ -492,6 +488,8 @@ public class MPDConnection {
             Log.v(TAG, "Disconnected");
         }
 
+        cancelIDLEWait();
+
         mConnectionLock.release();
     }
 
@@ -660,7 +658,7 @@ public class MPDConnection {
         } catch (SocketException e) {
             handleSocketError();
         }
-        
+
         // Start timeout task
         synchronized (mReadTimeoutTimer) {
             mReadTimeoutTask = new ReadTimeoutTask();
@@ -690,6 +688,8 @@ public class MPDConnection {
 
         /* Check if server really is in idling mode */
         if (!mMPDConnectionReady || mMPDConnectionIdle) {
+            // Release connection
+            mConnectionLock.release();
             return;
         }
 
@@ -708,8 +708,7 @@ public class MPDConnection {
         // Technically we are in idle mode now, set boolean
         mMPDConnectionIdle = true;
 
-        mIdleThread = new IdleThread();
-        mIdleThread.start();
+        new IdleThread().start();
 
         // Notify idle listeners
         for (MPDConnectionIdleChangeListener listener : mIdleListeners) {
@@ -1096,6 +1095,18 @@ public class MPDConnection {
             }
             mIDLETask = new StartIDLETask();
             mIDLETimer.schedule(mIDLETask, IDLE_WAIT_TIME);
+        }
+    }
+
+    private void cancelIDLEWait() {
+        if(DEBUG_ENABLED) {
+            Log.v(TAG, "Cancel IDLE wait");
+        }
+        synchronized (mIDLETimer) {
+            if(mIDLETask != null) {
+                mIDLETask.cancel();
+                mIDLETask = null;
+            }
         }
     }
 
