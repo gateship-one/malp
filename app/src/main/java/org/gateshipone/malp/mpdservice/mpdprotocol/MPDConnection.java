@@ -660,14 +660,7 @@ public class MPDConnection {
         } catch (SocketException e) {
             handleSocketError();
         }
-
-        /* Send the "noidle" command to the server to initiate noidle */
-        writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
-
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Sent deidle request");
-        }
-
+        
         // Start timeout task
         synchronized (mReadTimeoutTimer) {
             mReadTimeoutTask = new ReadTimeoutTask();
@@ -675,6 +668,13 @@ public class MPDConnection {
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "noidle read timeout scheduled");
             }
+        }
+
+        /* Send the "noidle" command to the server to initiate noidle */
+        writeLine(MPDCommands.MPD_COMMAND_STOP_IDLE);
+
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Sent deidle request");
         }
     }
 
