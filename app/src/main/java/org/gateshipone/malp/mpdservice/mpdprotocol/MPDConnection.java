@@ -229,9 +229,7 @@ public class MPDConnection {
     public synchronized void setServerParameters(String hostname, String password, int port) {
 
         mHostname = hostname;
-        if (!password.equals("")) {
-            mPassword = password;
-        }
+        mPassword = password;
         mPort = port;
         mCapabilitiesChanged = true;
         if (DEBUG_ENABLED) {
@@ -244,22 +242,15 @@ public class MPDConnection {
      * and initiates the connection to the address and the configured tcp-port.
      */
     public synchronized void connectToServer() throws MPDException {
+        /* If a socket is already open, close it and destroy it. */
+        if ((null != mSocket) && (mSocket.isConnected())) {
+            disconnectFromServer();
+        }
+
         try {
             mConnectionLock.acquire();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
-
-        /* If a socket is already open, close it and destroy it. */
-        if ((null != mSocket) && (mSocket.isConnected())) {
-            mConnectionLock.release();
-            disconnectFromServer();
-            // Reacquire the connection lock
-            try {
-                mConnectionLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
 
         if ((null == mHostname) || mHostname.equals("")) {
@@ -984,6 +975,7 @@ public class MPDConnection {
                 //Log.v(TAG,"Read line: " + line);
             }
             if (line.startsWith("ACK")) {
+                // Probably detected mopidy. Enable workaround
                 if (line.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
                     mConnectionLock.release();
                     enableMopidyWorkaround();
