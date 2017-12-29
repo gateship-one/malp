@@ -121,7 +121,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
         mConnectionManager.mServerProfile = profile;
 
-        MPDCommandHandler.setServerParameters(mHostname, mPassword, mPort);
+        MPDCommandHandler.getHandler().setServerParameters(mHostname, mPassword, mPort);
     }
 
     public void reconnectLastServer(Context context) {

@@ -149,26 +149,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
     }
 
-    /**
-     * Set the server parameters for the connection. MUST be called before trying to
-     * initiate a connection because it will fail otherwise.
-     *
-     * @param hostname Hostname or ip address to connect to.
-     * @param password Password that is used to authenticate with the server. Can be left empty.
-     * @param port     Port to use for the connection. (Default: 6600)
-     */
-    public void setServerParameters(String hostname, String password, int port) {
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_SERVER_PARAMETERS);
-        Message msg = Message.obtain();
-        if (msg == null) {
-            return;
-        }
-        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_HOSTNAME, hostname);
-        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SERVER_PASSWORD, password);
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SERVER_PORT, port);
-        msg.obj = action;
-        sendMessage(msg);
-    }
 
     public void updateStatus() {
         resynchronizeState();
