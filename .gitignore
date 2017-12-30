@@ -10,5 +10,7 @@
 /captures
 /keystore.properties
 /app/*apk
+/app/release
 /gradle
 /gradlew*
+/doc
