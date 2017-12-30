@@ -480,7 +480,13 @@ public class MPDConnection {
      * This functions sends the command to the MPD server.
      * If the server is currently idling then it will deidle it first.
      *
-     * @param command
+     * CAUTION: After using this command it is important to clear the input buffer and read until
+     * either "OK" or "ACK ..." is sent. Otherwise the connection will remain in an undefined state.
+     *
+     * If you want to submit a simple command (without a response other than OK/ACK)
+     * like pause/play use sendSimpleMPDCommand.
+     *
+     * @param command Command string to send to the MPD server
      */
     synchronized void sendMPDCommand(String command) {
         if (DEBUG_ENABLED) {
@@ -534,6 +540,21 @@ public class MPDConnection {
                 Log.v(TAG, "Sent command, got response");
             }
         }
+    }
+
+    /**
+     * Sends a simple command to the MPD server. This method automatically handles the response
+     * from the server.
+     *
+     * @param command Command string sent to the server
+     * @throws MPDException
+     */
+    synchronized void sendSimpleMPDCommand(String command) throws MPDException {
+        // Send the command to the server
+        sendMPDCommand(command);
+
+        // Read until either OK or ACK is received
+        checkResponse();
     }
 
     /**
@@ -591,7 +612,7 @@ public class MPDConnection {
      * checkResponse to clear the possible response in the read buffer. There should be at
      * least one "OK" or "ACK" from the mpd server.
      */
-    void endCommandList() {
+    void endCommandList() throws MPDException {
         /* Check if the server is connected. */
         if (mMPDConnectionReady) {
             /*
@@ -605,6 +626,9 @@ public class MPDConnection {
                 handleSocketError();
                 mConnectionLock.release();
             }
+
+            // Commandlist is finished. Check for servers response
+            checkResponse();
         }
     }
 
