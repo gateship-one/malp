@@ -22,6 +22,7 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import org.gateshipone.malp.BuildConfig;
@@ -89,7 +90,7 @@ public class MPDConnection {
      * Time to sleep the process waiting for a server response. This reduces the busy-waiting to
      * a bit more efficent sleep/check pattern.
      */
-    private static int RESPONSE_WAIT_SLEEP_TIME = 250;
+    private static int RESPONSE_WAIT_SLEEP_TIME = 100;
 
     private static final int IDLE_WAIT_TIME = 500;
 
@@ -303,7 +304,7 @@ public class MPDConnection {
             }
 
             /* If connected try to get MPDs version */
-            String readString = null;
+            String readString;
 
             String versionString = "";
 
@@ -339,7 +340,7 @@ public class MPDConnection {
                     e.printStackTrace();
                 }
 
-                List<String> commands = null;
+                List<String> commands;
                 try {
                     commands = MPDResponseParser.parseMPDCommands(this);
                 } catch (IOException e) {
@@ -354,7 +355,7 @@ public class MPDConnection {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                List<String> tags = null;
+                List<String> tags;
                 try {
                     tags = MPDResponseParser.parseMPDTagTypes(this);
                 } catch (IOException e) {
@@ -466,7 +467,8 @@ public class MPDConnection {
     /**
      * Access to the currently server capabilities
      *
-     * @return
+     * @return Returns the {@link MPDCapabilities} object of the current connected server
+     * or a dummy object.
      */
     public MPDCapabilities getServerCapabilities() {
         if (isConnected()) {
@@ -546,8 +548,8 @@ public class MPDConnection {
      * Sends a simple command to the MPD server. This method automatically handles the response
      * from the server.
      *
-     * @param command Command string sent to the server
-     * @throws MPDException
+     * @param command Command string to send to the server
+     * @throws MPDException if an error during communication with the server occurs.
      */
     synchronized void sendSimpleMPDCommand(String command) throws MPDException {
         // Send the command to the server
@@ -564,7 +566,7 @@ public class MPDConnection {
      * Also it will not wait for a response because this would only deadlock, because the mpd server
      * waits until the end_command is received.
      *
-     * @param command
+     * @param command Command string to send to the server
      */
     void sendMPDRAWCommand(String command) {
         /* Check if the server is connected. */
@@ -732,9 +734,9 @@ public class MPDConnection {
                     printStackTrace();
                     throw new IOException();
                 }
-//                if ( compareTime > 500L * 1000L * 1000L ) {
-//                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
-//                }
+                if ( compareTime > 500L * 1000L * 1000L ) {
+                    SystemClock.sleep(RESPONSE_WAIT_SLEEP_TIME);
+                }
             }
         } else {
             throw new IOException();
@@ -745,44 +747,22 @@ public class MPDConnection {
      * Checks if a simple command was successful or not (OK vs. ACK)
      * <p>
      * This should only be used for simple commands like play,pause, setVolume, ...
-     *
-     * @return True if command was successfully executed, false otherwise.
      */
-    public boolean checkResponse() throws MPDException {
-        boolean success = false;
-        String response;
-
+    private void checkResponse() throws MPDException {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Check response");
         }
 
         // Wait for data to be available to read. MPD communication could take some time.
         while (readyRead()) {
-            response = readLine();
-            if (response.startsWith("OK")) {
-                success = true;
-            } else if (response.startsWith("ACK")) {
-                success = false;
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Server response error: " + response);
-                }
-            }
+            // It is enough to flush the buffer. readLine will parse the line for OK/ACK and throw an
+            // exception.
+            readLine();
         }
-
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Response: " + success);
-        }
-
-        // Return if successful or not.
-        return success;
     }
 
     public boolean isConnected() {
-        if (null != mSocket && mSocket.isConnected() && mMPDConnectionReady) {
-            return true;
-        } else {
-            return false;
-        }
+        return null != mSocket && mSocket.isConnected() && mMPDConnectionReady;
     }
 
 
@@ -830,7 +810,7 @@ public class MPDConnection {
     /**
      * Registers a listener to be notified about changes in idle state of this connection.
      *
-     * @param listener
+     * @param listener Listener to register to this connection
      */
     public void setIdleListener(MPDConnectionIdleChangeListener listener) {
         mIdleListeners.add(listener);
@@ -862,7 +842,7 @@ public class MPDConnection {
      * that the read of this waiting thread is always finished before the other handler thread tries
      * to read it.
      *
-     * @return
+     * @return String that was sent by the MPD server after idling is over
      */
     private String waitForIdleResponse() throws IOException {
         if (null != mReader) {
@@ -980,9 +960,7 @@ public class MPDConnection {
                 handleSocketError();
                 return "";
             }
-            if (DEBUG_ENABLED) {
-                //Log.v(TAG,"Read line: " + line);
-            }
+
             if (line.startsWith("ACK")) {
                 // Probably detected mopidy. Enable workaround
                 if (line.contains(MPDResponses.MPD_PARSE_ARGS_LIST_ERROR)) {
@@ -1151,7 +1129,7 @@ public class MPDConnection {
 
     private class ConnectionSemaphore extends Semaphore {
 
-        public ConnectionSemaphore(int permits) {
+        private ConnectionSemaphore(int permits) {
             super(permits);
         }
 
