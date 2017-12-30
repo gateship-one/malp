@@ -182,7 +182,7 @@ public class MPDConnection {
      * Private function to handle read error. Try to disconnect and remove old sockets.
      * Clear up connection state variables.
      */
-    private void handleSocketError() {
+    private synchronized void handleSocketError() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Read error exception. Disconnecting and cleaning up");
         }
@@ -227,7 +227,6 @@ public class MPDConnection {
      * @param port     TCP port to connect to.
      */
     public synchronized void setServerParameters(String hostname, String password, int port) {
-
         mHostname = hostname;
         mPassword = password;
         mPort = port;
@@ -392,7 +391,7 @@ public class MPDConnection {
      * If the password for the MPDConnection is set then the client should
      * try to authenticate with the server
      */
-    private boolean authenticateMPDServer() throws MPDException {
+    private void authenticateMPDServer() throws MPDException {
         writeLine(MPDCommands.MPD_COMMAND_PASSWORD(mPassword));
 
         try {
@@ -401,22 +400,7 @@ public class MPDConnection {
             e.printStackTrace();
         }
 
-        /* Check if the result was positive or negative */
-        String readString = null;
-        boolean success = false;
-        while (readyRead()) {
-            readString = readLine();
-            if (readString.startsWith("OK")) {
-                success = true;
-            } else if (readString.startsWith("ACK")) {
-                success = false;
-                if (DEBUG_ENABLED) {
-                    Log.v(TAG, "Could not successfully authenticate with mpd server");
-                }
-            }
-        }
-
-        return success;
+        checkResponse();
     }
 
     /**
@@ -543,8 +527,8 @@ public class MPDConnection {
             try {
                 waitForResponse();
             } catch (IOException e) {
-                mConnectionLock.release();
                 handleSocketError();
+                mConnectionLock.release();
             }
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "Sent command, got response");
@@ -619,6 +603,7 @@ public class MPDConnection {
                 waitForResponse();
             } catch (IOException e) {
                 handleSocketError();
+                mConnectionLock.release();
             }
         }
     }
