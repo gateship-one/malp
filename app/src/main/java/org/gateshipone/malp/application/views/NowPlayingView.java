@@ -1357,7 +1357,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mTrackAdditionalInfo.setText(track.getPath());
         }
 
-        if (null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum())) {
+        if (null == mLastTrack || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum()) || !track.getTrackAlbumMBID().equals(mLastTrack.getTrackAlbumMBID())) {
             // get tint color
             int tintColor = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_background_primary);
 
@@ -1381,7 +1381,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mCoverLoader.getImage(track, true, mCoverImage.getWidth(), mCoverImage.getHeight());
         }
 
-        if (mShowArtistImage && (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist()))) {
+        if (mShowArtistImage && (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist()) || !track.getTrackArtistMBID().equals(mLastTrack.getTrackAlbumArtistMBID()) )) {
             mCoverImage.clearArtistImage();
 
             mCoverLoader.getArtistImage(track, true, mCoverImage.getWidth(), mCoverImage.getHeight());
