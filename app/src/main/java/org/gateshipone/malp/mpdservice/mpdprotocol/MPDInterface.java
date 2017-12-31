@@ -33,12 +33,14 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
 
 public class MPDInterface {
+    private static final String TAG = MPDInterface.class.getSimpleName();
 
     /*
      * **********************
@@ -145,10 +147,34 @@ public class MPDInterface {
      * @return List of MPDArtist objects
      */
     public static List<MPDArtist> getAlbumArtists(final MPDConnection connection) throws MPDException {
-        // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
-        connection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(connection.getServerCapabilities().hasListGroup() && connection.getServerCapabilities().hasMusicBrainzTags()));
+        // Get list of artists for MBID correction
+        List<MPDArtist> normalArtists = getArtists(connection);
 
-        List<MPDArtist> artists = MPDResponseParser.parseMPDArtists(connection, connection.getServerCapabilities().hasMusicBrainzTags(), connection.getServerCapabilities().hasListGroup());
+        MPDCapabilities capabilities = connection.getServerCapabilities();
+
+        // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
+        connection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(capabilities.hasListGroup() && capabilities.hasMusicBrainzTags()));
+
+        List<MPDArtist> artists = MPDResponseParser.parseMPDArtists(connection, capabilities.hasMusicBrainzTags(), capabilities.hasListGroup());
+
+        // If MusicBrainz support is present, try to correct the MBIDs
+        if (capabilities.hasMusicBrainzTags()) {
+            // Merge normalArtists MBIDs with album artists MBIDs
+            HashMap<String, MPDArtist> normalArtistsHashed = new HashMap<>();
+            for (MPDArtist artist : normalArtists) {
+                normalArtistsHashed.put(artist.getArtistName(), artist);
+            }
+
+            // For every albumartist try to get normal artistMBID
+            for (MPDArtist artist : artists) {
+                MPDArtist hashedArtist = normalArtistsHashed.get(artist.getArtistName());
+                if (hashedArtist != null && hashedArtist.getMBIDCount() > 0) {
+                    artist.setMBID(hashedArtist.getMBID(0));
+                }
+            }
+        }
+
+        // Remove first empty artist if present.
         if (artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
             artists.remove(0);
         }

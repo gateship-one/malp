@@ -161,7 +161,7 @@ public class MPDResponseParser {
         // Sort the artists for later sectioning.
         Collections.sort(artistList);
 
-        // If we used MBID filtering, it could happen that a user as an artist in the list multiple times,
+        // If we used MBID filtering, it could happen that a user has an artist in the list multiple times,
         // once with and once without MBID. Try to filter this by sorting the list first by name and mbid count
         // and then remove duplicates.
         if (hasMusicBrainz && hasListGroup) {
@@ -173,13 +173,17 @@ public class MPDResponseParser {
                 MPDArtist artist = artistList.get(i);
                 if (i + 1 != artistListSize) {
                     MPDArtist nextArtist = artistList.get(i + 1);
+                    // Next artist is different, add this one (the one with most MBIDs)
                     if (!artist.getArtistName().equals(nextArtist.getArtistName())) {
                         clearedList.add(artist);
                     }
                 } else {
+                    // Last artist in list -> add
                     clearedList.add(artist);
                 }
             }
+
+
             return clearedList;
         } else {
             return artistList;

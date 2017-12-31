@@ -76,6 +76,11 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         pMBIDs.add(mbid);
     }
 
+    public void setMBID(String mbid) {
+        pMBIDs.clear();
+        pMBIDs.add(mbid);
+    }
+
 
     @Override
     public String getSectionTitle() {
