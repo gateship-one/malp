@@ -283,7 +283,7 @@
     </string-array>
 
     <string name="preference_use_album_artists_title">Use AlbumArtist tag</string>
-    <string name="preference_use_album_artists_text">Use the "AlbumArtist" tag for the artist list.</string>
+    <string name="preference_use_album_artists_text">Use the AlbumArtisttag for the artist list (This method is slower and may result in erroneous artist images).</string>
 
     <string name="preference_volume_control_title">Select volume control view</string>
     <string name="preference_volume_control_message">Select volume control view</string>

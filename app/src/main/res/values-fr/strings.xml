@@ -185,7 +185,6 @@
     <string name="preference_library_view_list">Liste</string>
     <string name="preference_library_view_grid">Grille</string>
     <string name="preference_use_album_artists_title">Utiliser le tag AlbumArtist</string>
-    <string name="preference_use_album_artists_text">Utiliser le tag AlbumArtist pour la liste d\'artistes.</string>
     <string name="preference_volume_control_title">Choisir la vue du contrôle de volume</string>
     <string name="preference_volume_control_message">Choisir la vue du contrôle de volume</string>
     <string name="preference_volume_control_summary">Choisir le type de vue utilisé pour contrôler le volume de la musique</string>

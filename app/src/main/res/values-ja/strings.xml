@@ -228,7 +228,6 @@
     </string-array>
 
     <string name="preference_use_album_artists_title">アルバムアーティストタグを使用する</string>
-    <string name="preference_use_album_artists_text">アーティストのリストに "アルバムアーティスト" タグを使用します。</string>
 
     <string name="preference_volume_control_title">ボリュームコントロールビューを選択</string>
     <string name="preference_volume_control_message">ボリュームコントロールビューを選択</string>

@@ -221,7 +221,6 @@
     <string name="preference_library_view_grid">Cuadrícula</string>
 
     <string name="preference_use_album_artists_title">Usar etiqueta DiscoArtista</string>
-    <string name="preference_use_album_artists_text">Usar la etiqueta "DiscoArtista" para la lista del artista.</string>
 
     <string name="preference_volume_control_title">Seleccione vista del control de volúmen</string>
     <string name="preference_volume_control_message">Seleccione vista del control de volúmen</string>

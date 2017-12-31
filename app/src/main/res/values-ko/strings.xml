@@ -258,7 +258,6 @@
     </string-array>
 
     <string name="preference_use_album_artists_title">음반 연주자 태그 사용</string>
-    <string name="preference_use_album_artists_text">연주자 항목에서 음반 연주자 태그를 씁니다.</string>
 
     <string name="preference_volume_control_title">음량 컨트롤 보기</string>
     <string name="preference_volume_control_message">음량 컨트롤 보기 선택</string>
