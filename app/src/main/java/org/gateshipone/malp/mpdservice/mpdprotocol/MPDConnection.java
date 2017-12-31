@@ -183,7 +183,7 @@ public class MPDConnection {
      * Private function to handle read error. Try to disconnect and remove old sockets.
      * Clear up connection state variables.
      */
-    private synchronized void handleSocketError() {
+    private void handleSocketError() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Read error exception. Disconnecting and cleaning up");
         }
@@ -876,7 +876,9 @@ public class MPDConnection {
             try {
                 response = waitForIdleResponse();
             } catch (IOException e) {
-                e.printStackTrace();
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG,"IOException on waitforIdleResponse!: " + e.getMessage());
+                }
                 handleSocketError();
                 return;
             }
@@ -900,6 +902,9 @@ public class MPDConnection {
 
             // Check if a timeout occurred
             if (mSocket == null) {
+                if(DEBUG_ENABLED) {
+                    Log.w(TAG,"Timeout during deidle, releasing connection");
+                }
                 mTimeoutSemaphore.release();
                 // Timeout, abort!
                 mConnectionLock.release();
@@ -984,7 +989,7 @@ public class MPDConnection {
         return "";
     }
 
-    private String readLineInternal() throws MPDException {
+    private String  readLineInternal() throws MPDException {
         if (mReader != null) {
             String line;
             try {
