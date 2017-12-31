@@ -25,7 +25,6 @@ package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -112,11 +111,14 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
             //Log.v(MPDArtist.class.getSimpleName(),"another mbids: " + another.pMBIDs.size() + "self mbids:" + pMBIDs.size());
             // Try to position artists with one mbid at the end
 
-            // Use MBID as sort criteria, without MBID before the ones with
-            if ( (another.pMBIDs.size() > pMBIDs.size()) || another.pMBIDs.size() == 1 ) {
-                return -1;
-            } else if ((another.pMBIDs.size() < pMBIDs.size()) || pMBIDs.size() == 1 ){
+            int size = pMBIDs.size();
+            int anotherSize = pMBIDs.size();
+            if(size > anotherSize) {
+                // This object is "greater" than another
                 return 1;
+            } else if (size < anotherSize) {
+                // This object is "less" than another
+                return -1;
             } else {
                 return 0;
             }
@@ -136,6 +138,15 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        String retVal = this.pArtistName + "_";
+        for(String mbid : pMBIDs ) {
+            retVal += "_" + mbid;
+        }
+        return retVal;
     }
 
     @Override
