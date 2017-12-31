@@ -409,7 +409,7 @@ public class MPDConnection {
      * After this call it should be safe to reconnect to another server. If this connection is
      * currently in idle state, then it will be deidled before.
      */
-    public void disconnectFromServer() {
+    public synchronized void disconnectFromServer() {
 
         // Check if the connection is currently idling, if then deidle.
         if (mMPDConnectionIdle) {
