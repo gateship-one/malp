@@ -1,7 +1,7 @@
 ![Logo](https://raw.githubusercontent.com/gateship-one/malp/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
 # M.A.L.P. - Android MPD Client #
 
-[<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="60">](https://f-droid.org/app/org.gateshipone.malp)<a href="https://play.google.com/store/apps/details?id=org.gateshipone.malp"><img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" height="60"></a>
+[<img src="https://f-droid.org/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/app/org.gateshipone.malp)
 
 This whole project is licensed under the  **GPLv3 or later** license (see LICENSE)
 
