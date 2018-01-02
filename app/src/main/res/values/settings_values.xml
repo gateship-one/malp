@@ -34,6 +34,9 @@
     <string name="pref_use_album_artists_key" translatable="false">pref_use_album_artists_key</string>
     <bool name="pref_use_album_artists_default" translatable="false">false</bool>
 
+    <string name="pref_use_tags_in_filebrowser_key" translatable="false">pref_use_tags_in_filebrowser_key</string>
+    <bool name="pref_use_tags_in_filebrowser_default" translatable="false">true</bool>
+
     <string name="pref_use_english_wikipedia_key" translatable="false">pref_use_english_wikipedia_key</string>
     <bool name="pref_use_english_wikipedia_default" translatable="false">false</bool>
 

@@ -292,20 +292,22 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             if (type == VIEW_TYPES.TYPE_TRACK_ITEM) {
                 if ( convertView == null ) {
                     // If not create a new Listitem
-                    convertView = new FileListItem(mContext, track, position + 1, false);
+                    convertView = new FileListItem(mContext, false);
+                    ((FileListItem)convertView).setTrack(track, true, mContext);
                 } else {
                     FileListItem tracksListViewItem = (FileListItem) convertView;
-                    tracksListViewItem.setTrack(track, mContext);
+                    tracksListViewItem.setTrack(track, true, mContext);
                     tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
             } else if (type == VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) { // Section track type.
                 if ( convertView == null ) {
                     // If not create a new Listitem
-                    convertView = new FileListItem(mContext, track, position + 1, false, trackAlbum, this);
+                    convertView = new FileListItem(mContext, trackAlbum, false, this);
+                    ((FileListItem)convertView).setTrack(track, true, mContext);
                 } else {
                     FileListItem tracksListViewItem = (FileListItem) convertView;
                     tracksListViewItem.setSectionHeader(trackAlbum);
-                    tracksListViewItem.setTrack(track, mContext);
+                    tracksListViewItem.setTrack(track, true, mContext);
                     tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
@@ -330,10 +332,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
             // the running fetch.
             if ( convertView == null ) {
                 // If not create a new Listitem
-                convertView = new FileListItem(mContext, null, position + 1, false);
+                convertView = new FileListItem(mContext, false);
             } else {
                 FileListItem tracksListViewItem = (FileListItem) convertView;
-                tracksListViewItem.setTrack(null, mContext);
+                tracksListViewItem.setTrack(null, true, mContext);
             }
         }
 

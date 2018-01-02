@@ -285,6 +285,9 @@
     <string name="preference_use_album_artists_title">Use AlbumArtist tag</string>
     <string name="preference_use_album_artists_text">Use the AlbumArtist tag for the artist list (This method is slower and may result in erroneous artist images).</string>
 
+    <string name="preference_use_tags_in_filebrowser_title">Use tags in file browser</string>
+    <string name="preference_use_tags_in_filebrowser_text">Use tags in file browser instead of filenames if available. Disable this option to show filenames in file browser.</string>
+
     <string name="preference_volume_control_title">Select volume control view</string>
     <string name="preference_volume_control_message">Select volume control view</string>
     <string name="preference_volume_control_summary">Select the type of view that is used to control the volume of music playback</string>

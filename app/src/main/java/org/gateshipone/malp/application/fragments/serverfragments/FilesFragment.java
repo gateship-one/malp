@@ -23,8 +23,10 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -102,6 +104,9 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        boolean useTags = sharedPref.getBoolean(getString(R.string.pref_use_tags_in_filebrowser_key), getResources().getBoolean(R.bool.pref_use_tags_in_filebrowser_default));
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
@@ -114,7 +119,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         }
 
         // Create the needed adapter for the ListView
-        mAdapter = new FileAdapter(getActivity(), true, true);
+        mAdapter = new FileAdapter(getActivity(), true, true, false, useTags);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mAdapter);

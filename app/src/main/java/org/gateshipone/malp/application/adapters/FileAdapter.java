@@ -45,14 +45,16 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
     /**
      * Defines if items show an icon for their corresponding type
      */
-    private boolean mShowIcons;
+    private final boolean mShowIcons;
 
     /**
      * Defines if tracks show their tracknumber or their position in the list
      */
-    private boolean mShowTrackNumbers;
+    private final boolean mShowTrackNumbers;
 
     private boolean mShowSectionItems;
+
+    private final boolean mUseTags;
 
     private enum VIEW_TYPES {
         TYPE_FILE_ITEM,
@@ -68,7 +70,7 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
      * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
      */
     public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers) {
-        this(context, showIcons, showTrackNumbers, false);
+        this(context, showIcons, showTrackNumbers, false, true);
     }
 
     /**
@@ -78,7 +80,7 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
      * @param showIcons        If icons should be shown in view (e.g. for FileExplorer)
      * @param showTrackNumbers If track numbers should be used for index or the position (Albums: tracknumbers, playlists: indices)
      */
-    public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers, boolean showSectionItems) {
+    public FileAdapter(Context context, boolean showIcons, boolean showTrackNumbers, boolean showSectionItems, boolean useTags) {
         super();
 
         mShowIcons = showIcons;
@@ -86,6 +88,8 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
         mShowTrackNumbers = showTrackNumbers;
 
         mShowSectionItems = showSectionItems;
+
+        mUseTags = useTags;
 
         // Disable sections as they cause troubles for directories,files,playlists order and repeating starting letters
         enableSections(false);
@@ -106,21 +110,20 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
         if (file instanceof MPDTrack) {
             boolean newAlbum = false;
             MPDTrack track = (MPDTrack) file;
-            if (file != null) {
-                MPDFileEntry previousFile;
+            MPDFileEntry previousFile;
 
-                if (position > 0) {
-                    previousFile = (MPDFileEntry) getItem(position - 1);
-                    if (previousFile != null) {
-                        if (previousFile instanceof MPDTrack) {
-                            MPDTrack previousTrack = (MPDTrack) previousFile;
-                            newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
-                        }
+            if (position > 0) {
+                previousFile = (MPDFileEntry) getItem(position - 1);
+                if (previousFile != null) {
+                    if (previousFile instanceof MPDTrack) {
+                        MPDTrack previousTrack = (MPDTrack) previousFile;
+                        newAlbum = !previousTrack.getTrackAlbum().equals(track.getTrackAlbum());
                     }
-                } else {
-                    return VIEW_TYPES.TYPE_SECTION_FILE_ITEM.ordinal();
                 }
+            } else {
+                return VIEW_TYPES.TYPE_SECTION_FILE_ITEM.ordinal();
             }
+
             return newAlbum ? VIEW_TYPES.TYPE_SECTION_FILE_ITEM.ordinal() : VIEW_TYPES.TYPE_FILE_ITEM.ordinal();
         } else {
             return VIEW_TYPES.TYPE_FILE_ITEM.ordinal();
@@ -156,32 +159,36 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
 
         if (file instanceof MPDTrack) {
             MPDTrack track = (MPDTrack) file;
+            // Normal file entry
             if (!mShowSectionItems || (VIEW_TYPES.values()[getItemViewType(position)] == VIEW_TYPES.TYPE_FILE_ITEM)) {
                 if (null != convertView) {
-                    ((FileListItem) convertView).setTrack(track, mContext);
+                    ((FileListItem) convertView).setTrack(track, mUseTags, mContext);
                     if (!mShowTrackNumbers) {
                         ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
                     }
+
                     return convertView;
                 } else {
-                    if (mShowTrackNumbers) {
-                        return new FileListItem(mContext, track, mShowIcons);
-                    } else {
-                        return new FileListItem(mContext, track, position + 1, mShowIcons);
+                    FileListItem item = new FileListItem(mContext, mShowIcons);
+                    item.setTrack(track, mUseTags, mContext);
+                    if (!mShowTrackNumbers) {
+                        item.setTrackNumber(String.valueOf(position + 1));
                     }
+                    return item;
                 }
             } else {
+                // Section items
                 if (convertView == null) {
                     // If not create a new Listitem
-                    if ( !mShowTrackNumbers) {
-                        convertView = new FileListItem(mContext, track, position + 1, false, track.getTrackAlbum(), this);
-                    } else {
-                        convertView = new FileListItem(mContext, track, false, track.getTrackAlbum(), this);
+                    convertView = new FileListItem(mContext, track.getTrackAlbum(), mShowIcons, this);
+                    ((FileListItem) convertView).setTrack(track, mUseTags, mContext);
+                    if (!mShowTrackNumbers) {
+                        ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
                     }
                 } else {
                     FileListItem tracksListViewItem = (FileListItem) convertView;
                     tracksListViewItem.setSectionHeader(track.getTrackAlbum());
-                    tracksListViewItem.setTrack(track, mContext);
+                    tracksListViewItem.setTrack(track, mUseTags, mContext);
                     if (!mShowTrackNumbers) {
                         tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                     }
@@ -204,14 +211,18 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
                 ((FileListItem) convertView).setDirectory((MPDDirectory) file, mContext);
                 return convertView;
             } else {
-                return new FileListItem(mContext, (MPDDirectory) file, mShowIcons);
+                FileListItem item = new FileListItem(mContext, mShowIcons);
+                item.setDirectory((MPDDirectory) file, mContext);
+                return item;
             }
         } else if (file instanceof MPDPlaylist) {
             if (null != convertView) {
                 ((FileListItem) convertView).setPlaylist((MPDPlaylist) file, mContext);
                 return convertView;
             } else {
-                return new FileListItem(mContext, (MPDPlaylist) file, mShowIcons);
+                FileListItem item = new FileListItem(mContext, mShowIcons);
+                item.setPlaylist((MPDPlaylist) file, mContext);
+                return item;
             }
         }
         return new FileListItem(mContext, mShowIcons);

@@ -58,7 +58,7 @@ public class FileListItem extends AbsImageListViewItem {
 
     private ImageView mItemIcon;
 
-    private boolean mShowIcon;
+    private final boolean mShowIcon;
 
     /**
      * Base constructor to create a not section-type element
@@ -132,131 +132,6 @@ public class FileListItem extends AbsImageListViewItem {
     }
 
     /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * Constructor that shows a item for a track, overrides the track number (useful for playlists) and shows a section
-     * header.
-     *
-     * @param context Context used for creation of View
-     * @param track Track to show the view for
-     * @param trackNo Overridden track number
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     * @param sectionTitle Title of the section (album title for example)
-     */
-    public FileListItem(Context context, MPDTrack track, int trackNo, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
-        this(context, sectionTitle, false, adapter);
-        setTrack(track, context);
-        mNumberView.setText(String.valueOf(trackNo));
-        if (showIcon) {
-            Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
-            if (icon != null) {
-                // get tint color
-                int tintColor = ThemeUtils.getThemeColor(context, android.R.attr.textColor);
-                // tint the icon
-                DrawableCompat.setTint(icon, tintColor);
-            }
-            mItemIcon.setImageDrawable(icon);
-        }
-    }
-
-    /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * Constructor that shows a item for a track, overrides the track number (useful for playlists) and shows a section
-     * header.
-     *
-     * @param context Context used for creation of View
-     * @param track Track to show the view for
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     * @param sectionTitle Title of the section (album title for example)
-     */
-    public FileListItem(Context context, MPDTrack track, boolean showIcon, String sectionTitle, ScrollSpeedAdapter adapter) {
-        this(context, sectionTitle, false, adapter);
-        setTrack(track, context);
-
-        if (showIcon) {
-            Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
-            if (icon != null) {
-                // get tint color
-                int tintColor = ThemeUtils.getThemeColor(context, android.R.attr.textColor);
-                // tint the icon
-                DrawableCompat.setTint(icon, tintColor);
-            }
-            mItemIcon.setImageDrawable(icon);
-        }
-    }
-
-
-    /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * Generic Track Item constructor
-     *
-     * @param context Context used for creation of View
-     * @param file Track that is used for this view
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     */
-    public FileListItem(Context context, MPDTrack file, boolean showIcon) {
-        this(context,showIcon);
-        setTrack(file, context);
-
-        if (showIcon) {
-            Drawable icon = context.getDrawable(R.drawable.ic_file_48dp);
-
-            if (icon != null) {
-                // get tint color
-                int tintColor = ThemeUtils.getThemeColor(context, android.R.attr.textColor);
-                // tint the icon
-                DrawableCompat.setTint(icon, tintColor);
-            }
-            mItemIcon.setImageDrawable(icon);
-        }
-    }
-
-
-    /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * Constructor that shows a item for a track, overrides the track number (useful for playlists).
-     *
-     * @param context Context used for creation of View
-     * @param track Track to show the view for
-     * @param trackNo Overridden track number
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     */
-    public FileListItem(Context context, MPDTrack track, int trackNo, boolean showIcon) {
-        this(context, track, showIcon);
-        mNumberView.setText(String.valueOf(trackNo));
-    }
-
-
-    /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * @param context Context used for creation of View
-     * @param directory Directory to show the view for
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     */
-    public FileListItem(Context context, MPDDirectory directory, boolean showIcon) {
-        this(context,showIcon);
-        mSeparator.setVisibility(GONE);
-        setDirectory(directory, context);
-
-    }
-
-    /**
-     * Derived constructor to increase speed by directly selecting the right methods for the need of the using adapter.
-     *
-     * @param context Context used for creation of View
-     * @param playlist Playlist to show the view for
-     * @param showIcon If left file/dir icon should be shown. It is not changeable after creation.
-     */
-    public FileListItem(Context context, MPDPlaylist playlist, boolean showIcon) {
-        this(context,showIcon);
-        setPlaylist(playlist, context);
-    }
-
-    /**
      * Simple setter for the title (top line)
      *
      * @param title Title to use
@@ -283,66 +158,83 @@ public class FileListItem extends AbsImageListViewItem {
         mNumberView.setText(number);
     }
 
+    public void showTrackNumber(boolean enable) {
+        if (enable) {
+            mNumberView.setVisibility(VISIBLE);
+        } else {
+            mNumberView.setVisibility(GONE);
+        }
+    }
+
     /**
      * Extracts the information from a MPDTrack.
      * @param track Track to show the view for.
      * @param context Context used for String extraction
      */
-    public void setTrack(MPDTrack track, Context context) {
+    public void setTrack(MPDTrack track, boolean useTags, Context context) {
         if ( track != null ) {
             String trackNumber;
 
-            if (track.getAlbumDiscCount() > 0) {
-                trackNumber = String.valueOf(track.getDiscNumber()) + '-' + String.valueOf(track.getTrackNumber());
-            } else {
-                trackNumber = String.valueOf(track.getTrackNumber());
-            }
+            if(useTags) {
+                if (track.getAlbumDiscCount() > 0) {
+                    trackNumber = String.valueOf(track.getDiscNumber()) + '-' + String.valueOf(track.getTrackNumber());
+                } else {
+                    trackNumber = String.valueOf(track.getTrackNumber());
+                }
 
-        /* Extract the information from the track */
-            mNumberView.setText(trackNumber);
+                // Extract the information from the track
+                mNumberView.setText(trackNumber);
 
-            int trackLength = track.getLength();
-            if (trackLength > 0) {
-                // Get the preformatted duration of the track.
-                mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
-                mDurationView.setVisibility(VISIBLE);
+                int trackLength = track.getLength();
+                if (trackLength > 0) {
+                    // Get the preformatted duration of the track.
+                    mDurationView.setText(FormatHelper.formatTracktimeFromS(track.getLength()));
+                    mDurationView.setVisibility(VISIBLE);
+                } else {
+                    mDurationView.setVisibility(GONE);
+                }
+                // Get track title
+                String trackTitle = track.getTrackTitle();
+
+                // Check for track name
+                if (null == trackTitle || trackTitle.isEmpty()) {
+                    trackTitle = track.getTrackName();
+                }
+
+                // If no track title is available (e.g. streaming URLs) show path
+                if (null == trackTitle || trackTitle.isEmpty()) {
+                    trackTitle = FormatHelper.getFilenameFromPath(track.getPath());
+                }
+                mTitleView.setText(trackTitle);
+
+                // additional information (artist + album)
+                String trackInformation;
+
+                String trackAlbum = track.getTrackAlbum();
+
+                // Check which information is available and set the separator accordingly.
+                if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                    trackInformation = track.getTrackArtist() + context.getResources().getString(R.string.track_item_separator) + trackAlbum;
+                } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
+                    trackInformation = trackAlbum;
+                } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
+                    trackInformation = track.getTrackArtist();
+                } else {
+                    trackInformation = track.getPath();
+                }
+
+                mAdditionalInfoView.setText(trackInformation);
+                mSeparator.setVisibility(VISIBLE);
+                mAdditionalInfoView.setVisibility(VISIBLE);
+                mNumberView.setVisibility(VISIBLE);
             } else {
+                mTitleView.setText(track.getFilename());
+                mAdditionalInfoView.setText(track.getLastModifiedString());
+
+                mSeparator.setVisibility(GONE);
+                mNumberView.setVisibility(GONE);
                 mDurationView.setVisibility(GONE);
             }
-            // Get track title
-            String trackTitle = track.getTrackTitle();
-
-            // Check for track name
-            if (null == trackTitle || trackTitle.isEmpty()) {
-                trackTitle = track.getTrackName();
-            }
-
-            // If no track title is available (e.g. streaming URLs) show path
-            if (null == trackTitle || trackTitle.isEmpty()) {
-                trackTitle = FormatHelper.getFilenameFromPath(track.getPath());
-            }
-            mTitleView.setText(trackTitle);
-
-            // additional information (artist + album)
-            String trackInformation;
-
-            String trackAlbum = track.getTrackAlbum();
-
-            // Check which information is available and set the separator accordingly.
-            if (!track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = track.getTrackArtist() + context.getResources().getString(R.string.track_item_separator) + trackAlbum;
-            } else if (track.getTrackArtist().isEmpty() && !track.getTrackAlbum().isEmpty()) {
-                trackInformation = trackAlbum;
-            } else if (track.getTrackAlbum().isEmpty() && !track.getTrackArtist().isEmpty()) {
-                trackInformation = track.getTrackArtist();
-            } else {
-                trackInformation = track.getPath();
-            }
-
-            mAdditionalInfoView.setText(trackInformation);
-            mSeparator.setVisibility(VISIBLE);
-            mAdditionalInfoView.setVisibility(VISIBLE);
-            mNumberView.setVisibility(VISIBLE);
         } else {
             /* Show loading text */
             mSeparator.setVisibility(GONE);

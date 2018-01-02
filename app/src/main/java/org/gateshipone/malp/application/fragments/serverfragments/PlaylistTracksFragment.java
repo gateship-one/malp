@@ -97,7 +97,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         boolean showVisibleSections = sharedPref.getBoolean(getContext().getString(R.string.pref_show_playlist_sections_key), getContext().getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
 
         // Create the needed adapter for the ListView
-        mFileAdapter = new FileAdapter(getActivity(), false, false, showVisibleSections);
+        mFileAdapter = new FileAdapter(getActivity(), false, false, showVisibleSections, true);
 
         // Combine the two to a happy couple
         mListView.setAdapter(mFileAdapter);

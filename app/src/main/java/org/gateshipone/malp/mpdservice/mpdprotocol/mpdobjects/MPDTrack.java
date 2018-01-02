@@ -332,6 +332,10 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pImageFetching = fetching;
     }
 
+    public String getFilename() {
+        return mPath.substring(mPath.lastIndexOf('/') + 1);
+    }
+
     /**
      * @return String that is used for section based scrolling
      */
@@ -442,8 +446,8 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
             return -1;
         }
 
-        String title = mPath.substring(mPath.lastIndexOf('/') + 1);
-        String anotherTitle = another.mPath.substring(another.mPath.lastIndexOf('/') + 1);
+        String title = getFilename();
+        String anotherTitle = another.getFilename();
 
         return title.toLowerCase().compareTo(anotherTitle.toLowerCase());
     }

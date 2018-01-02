@@ -71,6 +71,12 @@
             android:summary="@string/preference_library_view_summary"
             android:title="@string/preference_library_view_title" />
         <CheckBoxPreference
+            android:defaultValue="@bool/pref_use_tags_in_filebrowser_default"
+            android:key="@string/pref_use_tags_in_filebrowser_key"
+            android:persistent="true"
+            android:summary="@string/preference_use_tags_in_filebrowser_text"
+            android:title="@string/preference_use_tags_in_filebrowser_title" />
+        <CheckBoxPreference
             android:defaultValue="@bool/pref_use_album_artists_default"
             android:key="@string/pref_use_album_artists_key"
             android:persistent="true"
