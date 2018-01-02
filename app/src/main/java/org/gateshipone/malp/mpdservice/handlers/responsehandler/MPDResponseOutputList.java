@@ -46,10 +46,19 @@ public abstract class MPDResponseOutputList extends MPDResponseHandler {
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
 
-
         /* Call album response handler */
         List<MPDOutput> outputList = (List<MPDOutput>)msg.obj;
         handleOutputs(outputList);
+    }
+
+    /**
+     * Sends the list of outputs to the receiving handler looper
+     * @param outputList
+     */
+    public void sendOutputs(List<MPDOutput> outputList) {
+        Message responseMessage = this.obtainMessage();
+        responseMessage.obj = outputList;
+        sendMessage(responseMessage);
     }
 
     /**

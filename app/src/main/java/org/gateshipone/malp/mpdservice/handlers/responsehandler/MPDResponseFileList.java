@@ -56,11 +56,27 @@ public abstract class MPDResponseFileList extends MPDResponseHandler {
         handleTracks(trackList, windowStart, windowEnd);
     }
 
+    public void sendFileList(List<MPDFileEntry> fileList) {
+        Message responseMessage = this.obtainMessage();
+        responseMessage.obj = fileList;
+        sendMessage(responseMessage);
+    }
+
+    public void sendFileList(List<MPDFileEntry> fileList, int windowStart, int windowEnd) {
+        Message responseMessage = this.obtainMessage();
+        responseMessage.obj = fileList;
+        Bundle data = new Bundle();
+        data.putInt(MPDResponseFileList.EXTRA_WINDOW_START, windowStart);
+        data.putInt(MPDResponseFileList.EXTRA_WINDOW_END, windowEnd);
+        responseMessage.setData(data);
+        sendMessage(responseMessage);
+    }
+
     /**
      * Abstract method to be implemented by the user of the MPD implementation.
      * This should be a callback for the UI thread and run in the UI thread.
      * This can be used for updating lists of adapters and views.
-     * @param trackList List of MPDTrack objects containing a list of mpds tracks response.
+     * @param fileList List of MPDTrack objects containing a list of mpds tracks response.
      */
     abstract public void handleTracks(List<MPDFileEntry> fileList, int windowstart, int windowend);
 }

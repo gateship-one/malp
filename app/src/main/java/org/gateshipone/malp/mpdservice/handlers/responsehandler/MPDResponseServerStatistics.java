@@ -52,6 +52,16 @@ public abstract class MPDResponseServerStatistics extends MPDResponseHandler {
     }
 
     /**
+     * Send statistics to the receiving handler
+     * @param statistics Object to send
+     */
+    public void sendServerStatistics(MPDStatistics statistics) {
+        Message responseMessage = this.obtainMessage();
+        responseMessage.obj = statistics;
+        sendMessage(responseMessage);
+    }
+
+    /**
      * Abstract method to be implemented by the user of the MPD implementation.
      * This should be a callback for the UI thread and run in the UI thread.
      * This can be used for updating lists of adapters and views.

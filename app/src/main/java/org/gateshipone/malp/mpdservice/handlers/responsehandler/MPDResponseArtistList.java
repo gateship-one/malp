@@ -53,6 +53,16 @@ public abstract class MPDResponseArtistList extends MPDResponseHandler {
     }
 
     /**
+     * Sends the artist list to the receiving handler
+     * @param artistList List to send
+     */
+    public void sendArtists(List<MPDArtist> artistList) {
+        Message message = obtainMessage();
+        message.obj = artistList;
+        sendMessage(message);
+    }
+
+    /**
      * Abstract method to be implemented by the user of the MPD implementation.
      * This should be a callback for the UI thread and run in the UI thread.
      * This can be used for updating lists of adapters and views.
