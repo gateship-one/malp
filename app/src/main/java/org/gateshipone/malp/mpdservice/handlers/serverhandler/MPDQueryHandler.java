@@ -59,8 +59,8 @@ import java.util.List;
  * <p/>
  * Requests should look like this:
  * <p/>
- * UI-Thread --> QueryHandler |(send message to another thread)-->    MPDConnection
- * <--(send message to another thread)<--ResponseHandler<-- MPDConnection
+ * UI-Thread --> QueryHandler |(send message to another thread)-->    {@link MPDInterface}
+ * UI-Thread<--(send message to another thread)<--ResponseHandler <-- {@link MPDInterface}
  */
 public class MPDQueryHandler extends MPDGenericHandler {
     private static final String TAG = "MPDQueryHandler";
@@ -90,7 +90,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
      * Private method to ensure that the singleton runs in a separate thread.
      * Otherwise android will deny network access because of UI blocks.
      *
-     * @return
+     * @return Singleton instance
      */
     public synchronized static MPDQueryHandler getHandler() {
         // Check if handler was accessed before. If not create the singleton object for the first
@@ -133,7 +133,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
         // ResponseHandler used to return the requested items to the caller
         MPDResponseHandler responseHandler;
 
-        /**
+        /*
          * All messages are handled the same way:
          *  * Check which action was requested
          *  * Check if a ResponseHandler is necessary and also provided. (If not just abort here)
@@ -341,7 +341,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_SONG) {
                 String url = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_SONG_URL);
                 MPDCapabilities caps = mMPDConnection.getServerCapabilities();
-                /**
+                /*
                  * Check if song is already enqueued in the current playlist. If it is get the position
                  * and just jump to the song position.
                  *
@@ -464,7 +464,7 @@ public class MPDQueryHandler extends MPDGenericHandler {
     }
 
 
-    /**
+    /*
      * These static methods provide the only interface to outside classes.
      * They should not be allowed to interact with the instance itself.
      *
