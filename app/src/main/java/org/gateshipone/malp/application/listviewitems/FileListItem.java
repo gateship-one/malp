@@ -104,11 +104,10 @@ public class FileListItem extends AbsImageListViewItem {
         mIsSectionHeader = true;
 
         // Inflate the view with the given layout
-        if (mIsSectionHeader) {
-            mSectionHeader = (TextView) findViewById(R.id.section_header_text);
-            mSectionHeaderLayout = (LinearLayout) findViewById(R.id.section_header);
-            setSectionHeader(sectionTitle);
-        }
+        mSectionHeader = (TextView) findViewById(R.id.section_header_text);
+        mSectionHeaderLayout = (LinearLayout) findViewById(R.id.section_header);
+        setSectionHeader(sectionTitle);
+
 
         mTitleView = (TextView) findViewById(R.id.track_title);
         mAdditionalInfoView = (TextView) findViewById(R.id.track_additional_information);
