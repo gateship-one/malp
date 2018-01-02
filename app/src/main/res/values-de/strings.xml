@@ -244,4 +244,10 @@
     <string name="notification_channel_name_bulk_download">Downloader</string>
     <string name="snackbar_mpd_server_error_format">Fehler %d/%d: %s</string>
     <string name="snackbar_mpd_connection_error_format">Fehler: %s</string>
+    <string name="action_switch_to_output">Wechsel zu Audioausgang</string>
+    <string name="action_toggle_outputs">Audioausgang umschalten</string>
+    <string name="fragment_profile_http_cover_enabled">Bevorzuge HTTP-basierte Albenbilder</string>
+    <string name="fragment_profile_http_cover_regex">Bilderpfad (%d wird mit dem Ordnerpfad des aktuell gespielten Liedes ersetzt)</string>
+    <string name="preference_use_tags_in_filebrowser_title">Verwende Tags im Dateibrowser</string>
+    <string name="preference_use_tags_in_filebrowser_text">Im Dateibrowser Tags anstelle von Dateinamen verwenden. Das Deaktivieren dieser Option zeigt im Dateibrowser Dateinamen anstelle der Tags an.</string>
 </resources>
