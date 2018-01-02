@@ -253,9 +253,7 @@ public class FileListItem extends AbsImageListViewItem {
      */
     public FileListItem(Context context, MPDPlaylist playlist, boolean showIcon) {
         this(context,showIcon);
-        mSeparator.setVisibility(GONE);
         setPlaylist(playlist, context);
-
     }
 
     /**
@@ -399,6 +397,10 @@ public class FileListItem extends AbsImageListViewItem {
     public void setPlaylist(MPDPlaylist playlist, Context context) {
         mTitleView.setText(playlist.getSectionTitle());
         mAdditionalInfoView.setText(playlist.getLastModifiedString());
+
+        mSeparator.setVisibility(GONE);
+        mNumberView.setVisibility(GONE);
+        mDurationView.setVisibility(GONE);
 
         if (mShowIcon) {
             Drawable icon = context.getDrawable(R.drawable.ic_queue_music_black_48dp);
