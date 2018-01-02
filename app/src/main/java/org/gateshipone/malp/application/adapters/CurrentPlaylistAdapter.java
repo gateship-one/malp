@@ -293,23 +293,20 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
                 if ( convertView == null ) {
                     // If not create a new Listitem
                     convertView = new FileListItem(mContext, false);
-                    ((FileListItem)convertView).setTrack(track, true, mContext);
-                } else {
-                    FileListItem tracksListViewItem = (FileListItem) convertView;
-                    tracksListViewItem.setTrack(track, true, mContext);
-                    tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setTrack(track, true, mContext);
+                tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
             } else if (type == VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) { // Section track type.
                 if ( convertView == null ) {
                     // If not create a new Listitem
                     convertView = new FileListItem(mContext, trackAlbum, false, this);
-                    ((FileListItem)convertView).setTrack(track, true, mContext);
-                } else {
-                    FileListItem tracksListViewItem = (FileListItem) convertView;
-                    tracksListViewItem.setSectionHeader(trackAlbum);
-                    tracksListViewItem.setTrack(track, true, mContext);
-                    tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
                 }
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setSectionHeader(trackAlbum);
+                tracksListViewItem.setTrack(track, true, mContext);
+                tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 ((FileListItem) convertView).prepareArtworkFetching(mArtworkManager, track);
 

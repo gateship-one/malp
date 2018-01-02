@@ -161,38 +161,29 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
             MPDTrack track = (MPDTrack) file;
             // Normal file entry
             if (!mShowSectionItems || (VIEW_TYPES.values()[getItemViewType(position)] == VIEW_TYPES.TYPE_FILE_ITEM)) {
-                if (null != convertView) {
-                    ((FileListItem) convertView).setTrack(track, mUseTags, mContext);
-                    if (!mShowTrackNumbers) {
-                        ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
-                    }
-
-                    return convertView;
-                } else {
-                    FileListItem item = new FileListItem(mContext, mShowIcons);
-                    item.setTrack(track, mUseTags, mContext);
-                    if (!mShowTrackNumbers) {
-                        item.setTrackNumber(String.valueOf(position + 1));
-                    }
-                    return item;
+                if (convertView == null) {
+                    convertView = new FileListItem(mContext, mShowIcons);
                 }
+                ((FileListItem) convertView).setTrack(track, mUseTags, mContext);
+                if (!mShowTrackNumbers) {
+                    ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
+                }
+
+                return convertView;
             } else {
                 // Section items
                 if (convertView == null) {
                     // If not create a new Listitem
                     convertView = new FileListItem(mContext, track.getTrackAlbum(), mShowIcons, this);
-                    ((FileListItem) convertView).setTrack(track, mUseTags, mContext);
-                    if (!mShowTrackNumbers) {
-                        ((FileListItem) convertView).setTrackNumber(String.valueOf(position + 1));
-                    }
-                } else {
-                    FileListItem tracksListViewItem = (FileListItem) convertView;
-                    tracksListViewItem.setSectionHeader(track.getTrackAlbum());
-                    tracksListViewItem.setTrack(track, mUseTags, mContext);
-                    if (!mShowTrackNumbers) {
-                        tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
-                    }
                 }
+
+                FileListItem tracksListViewItem = (FileListItem) convertView;
+                tracksListViewItem.setSectionHeader(track.getTrackAlbum());
+                tracksListViewItem.setTrack(track, mUseTags, mContext);
+                if (!mShowTrackNumbers) {
+                    tracksListViewItem.setTrackNumber(String.valueOf(position + 1));
+                }
+
                 // This will prepare the view for fetching the image from the internet if not already saved in local database.
                 // Dummy MPDAlbum
                 MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
@@ -207,23 +198,19 @@ public class FileAdapter extends GenericSectionAdapter<MPDFileEntry> {
                 return convertView;
             }
         } else if (file instanceof MPDDirectory) {
-            if (null != convertView) {
-                ((FileListItem) convertView).setDirectory((MPDDirectory) file, mContext);
-                return convertView;
-            } else {
-                FileListItem item = new FileListItem(mContext, mShowIcons);
-                item.setDirectory((MPDDirectory) file, mContext);
-                return item;
+            if (convertView == null) {
+                convertView = new FileListItem(mContext, mShowIcons);
             }
+
+            ((FileListItem) convertView).setDirectory((MPDDirectory) file, mContext);
+            return convertView;
         } else if (file instanceof MPDPlaylist) {
-            if (null != convertView) {
-                ((FileListItem) convertView).setPlaylist((MPDPlaylist) file, mContext);
-                return convertView;
-            } else {
-                FileListItem item = new FileListItem(mContext, mShowIcons);
-                item.setPlaylist((MPDPlaylist) file, mContext);
-                return item;
+            if (convertView == null) {
+                convertView = new FileListItem(mContext, mShowIcons);
             }
+            
+            ((FileListItem) convertView).setPlaylist((MPDPlaylist) file, mContext);
+            return convertView;
         }
         return new FileListItem(mContext, mShowIcons);
     }
