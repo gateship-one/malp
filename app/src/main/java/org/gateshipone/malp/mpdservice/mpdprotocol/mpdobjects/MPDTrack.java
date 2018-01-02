@@ -431,23 +431,20 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         }
     }
 
+    /**
+     * Compares the file names of two tracks with each other. The prefix path is discarded before
+     * comparing.
+     * @param another {@link MPDTrack} to compare
+     * @return see super class
+     */
     public int compareTo(MPDTrack another) {
         if (another == null) {
             return -1;
         }
 
-        String title = mPath;
-        String[] pathSplit = title.split("/");
-        if (pathSplit.length > 0) {
-            title = pathSplit[pathSplit.length - 1];
-        }
+        String title = mPath.substring(mPath.lastIndexOf('/') + 1);
+        String anotherTitle = another.mPath.substring(another.mPath.lastIndexOf('/') + 1);
 
-
-        String titleAnother = mPath;
-        String[] pathSplitAnother = title.split("/");
-        if (pathSplit.length > 0) {
-            titleAnother = pathSplit[pathSplit.length - 1];
-        }
-        return title.toLowerCase().compareTo(titleAnother.toLowerCase());
+        return title.toLowerCase().compareTo(anotherTitle.toLowerCase());
     }
 }

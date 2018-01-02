@@ -31,12 +31,7 @@ public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
 
     @Override
     public String getSectionTitle() {
-        String title = mPath;
-        String[] pathSplit = title.split("/");
-        if ( pathSplit.length > 0 ) {
-            title = pathSplit[pathSplit.length - 1];
-        }
-        return title;
+        return mPath.substring(mPath.lastIndexOf('/') + 1);
     }
 
     public int compareTo(MPDDirectory another) {
