@@ -26,22 +26,22 @@ package org.gateshipone.malp.mpdservice.handlers.serverhandler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
+import org.gateshipone.malp.mpdservice.handlers.MPDIdleChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
-public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDConnection.MPDConnectionIdleChangeListener {
+public class MPDStateMonitoringHandler extends MPDGenericHandler {
     private static final String THREAD_NAME = "MPDStatusHandler";
     private static final String TAG = "StateMonitoring";
 
@@ -105,7 +105,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
 
         mStatusListeners = new ArrayList<>();
 
-        mMPDConnection.setIdleListener(this);
+        mMPDConnection.setIdleListener(new IdleStateListener(this, looper));
 
         mLastStatus = new MPDCurrentStatus();
     }
@@ -301,13 +301,12 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         }
     }
 
-    @Override
+
     public void onIdle() {
 
     }
 
-    @Override
-    public void onNonIdle() {
+    public void onNoIdle() {
         // Server idle is over (reason unclear), resync the state
         resynchronizeState();
     }
@@ -330,6 +329,25 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler implements MPDC
         @Override
         public void run() {
             interpolateState();
+        }
+    }
+
+    private static class IdleStateListener extends MPDIdleChangeHandler {
+        WeakReference<MPDStateMonitoringHandler> mParent;
+
+        public IdleStateListener(MPDStateMonitoringHandler parentHandler, Looper looper) {
+            super(looper);
+            mParent = new WeakReference<MPDStateMonitoringHandler>(parentHandler);
+        }
+
+        @Override
+        protected void onIdle() {
+            mParent.get().onIdle();
+        }
+
+        @Override
+        protected void onNoIdle() {
+            mParent.get().onNoIdle();
         }
     }
 }

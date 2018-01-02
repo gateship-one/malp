@@ -26,6 +26,7 @@ import android.os.SystemClock;
 import android.util.Log;
 
 import org.gateshipone.malp.BuildConfig;
+import org.gateshipone.malp.mpdservice.handlers.MPDIdleChangeHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 
@@ -150,7 +151,7 @@ public class MPDConnection {
      * to changes to the server from other clients. When the server is deidled (from outside)
      * it will notify this listener.
      */
-    private final ArrayList<MPDConnectionIdleChangeListener> mIdleListeners;
+    private final ArrayList<MPDIdleChangeHandler> mIdleListeners;
 
 
     /**
@@ -716,8 +717,8 @@ public class MPDConnection {
         new IdleThread().start();
 
         // Notify idle listeners
-        for (MPDConnectionIdleChangeListener listener : mIdleListeners) {
-            listener.onIdle();
+        for (MPDIdleChangeHandler listener : mIdleListeners) {
+            listener.idle();
         }
     }
 
@@ -822,7 +823,7 @@ public class MPDConnection {
      *
      * @param listener Listener to register to this connection
      */
-    public void setIdleListener(MPDConnectionIdleChangeListener listener) {
+    public void setIdleListener(MPDIdleChangeHandler listener) {
         synchronized (mIdleListeners) {
             mIdleListeners.add(listener);
         }
@@ -836,16 +837,6 @@ public class MPDConnection {
 
         void onDisconnected();
     }
-
-    /**
-     * Interface to be used to be informed about connection idle state changes.
-     */
-    public interface MPDConnectionIdleChangeListener {
-        void onIdle();
-
-        void onNonIdle();
-    }
-
 
     /**
      * This method should only be used by the idling mechanism.
@@ -1050,8 +1041,8 @@ public class MPDConnection {
 
     private void notifyIdleListener() {
         synchronized (mIdleListeners) {
-            for (MPDConnectionIdleChangeListener listener : mIdleListeners) {
-                listener.onNonIdle();
+            for (MPDIdleChangeHandler listener : mIdleListeners) {
+                listener.noIdle();
             }
         }
     }
