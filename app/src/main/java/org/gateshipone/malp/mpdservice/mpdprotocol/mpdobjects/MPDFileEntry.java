@@ -46,6 +46,10 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
         return mPath;
     }
 
+    public String getFilename() {
+        return mPath.substring(mPath.lastIndexOf('/') + 1);
+    }
+
     public void setLastModified(String lastModified) {
         // Try to parse date
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.ROOT);

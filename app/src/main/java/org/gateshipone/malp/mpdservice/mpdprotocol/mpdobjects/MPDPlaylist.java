@@ -32,10 +32,9 @@ public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
     }
 
 
-
     @Override
     public String getSectionTitle() {
-        return mPath;
+        return getFilename();
     }
 
     public int compareTo(MPDPlaylist another) {
@@ -43,18 +42,9 @@ public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
             return -1;
         }
 
-        String title = mPath;
-        String[] pathSplit = title.split("/");
-        if ( pathSplit.length > 0 ) {
-            title = pathSplit[pathSplit.length - 1];
-        }
+        String title = getFilename();
+        String anotherTitle = another.getFilename();
 
-
-        String titleAnother = another.mPath;
-        String[] pathSplitAnother = titleAnother.split("/");
-        if ( pathSplitAnother.length > 0 ) {
-            titleAnother = pathSplitAnother[pathSplitAnother.length - 1];
-        }
-        return title.toLowerCase().compareTo(titleAnother.toLowerCase());
+        return title.toLowerCase().compareTo(anotherTitle.toLowerCase());
     }
 }

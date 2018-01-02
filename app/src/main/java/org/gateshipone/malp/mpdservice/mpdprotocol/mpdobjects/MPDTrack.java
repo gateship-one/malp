@@ -332,10 +332,6 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pImageFetching = fetching;
     }
 
-    public String getFilename() {
-        return mPath.substring(mPath.lastIndexOf('/') + 1);
-    }
-
     /**
      * @return String that is used for section based scrolling
      */
