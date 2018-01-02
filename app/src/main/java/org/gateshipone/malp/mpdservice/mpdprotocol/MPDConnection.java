@@ -503,12 +503,18 @@ public class MPDConnection {
 
         /* Check if the server is connected. */
         if (mMPDConnectionReady) {
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Connection ready for: " + command);
+            }
             /*
              * Check if server is in idling mode, this needs unidling first,
              * otherwise the server will disconnect the client.
              */
             synchronized (this) {
                 if (mMPDConnectionIdle) {
+                    if(DEBUG_ENABLED) {
+                        Log.v(TAG,"Connection idle: " + command);
+                    }
                     stopIDLE();
                 }
             }
@@ -517,6 +523,11 @@ public class MPDConnection {
             if (!mMPDConnectionReady) {
                 return;
             }
+
+            if(DEBUG_ENABLED) {
+                Log.v(TAG,"Connection ready: " + command);
+            }
+
 
             // Acquire lock
             try {
@@ -547,7 +558,7 @@ public class MPDConnection {
                 mConnectionLock.release();
             }
             if (DEBUG_ENABLED) {
-                Log.v(TAG, "Sent command, got response");
+                Log.v(TAG, "Sent command, got response: " + command);
             }
         }
     }
@@ -559,7 +570,7 @@ public class MPDConnection {
      * @param command Command string to send to the server
      * @throws MPDException if an error during communication with the server occurs.
      */
-    synchronized void sendSimpleMPDCommand(String command) throws MPDException {
+    void sendSimpleMPDCommand(String command) throws MPDException {
         // Send the command to the server
         sendMPDCommand(command);
 
