@@ -81,6 +81,9 @@
     <string name="action_wikipedia_album">음반 열기</string>
     <string name="action_wikipedia_artist">연주자 열기</string>
 
+    <string name="action_switch_to_output">출력 바꾸기</string>
+    <string name="action_toggle_outputs">출력 토글</string>
+
     <!-- Menu entries -->
     <string name="menu_library">라이브러리</string>
     <string name="menu_settings">설정</string>
@@ -123,6 +126,9 @@
     <string name="fragment_profile_port">포트:</string>
     <string name="fragment_profile_streaming_url">스트리밍 url:</string>
     <string name="fragment_profile_streaming_enabled">서버로부터 스트리밍하기</string>
+
+    <string name="fragment_profile_http_cover_enabled">HTTP 음반표지 우선</string>
+    <string name="fragment_profile_http_cover_regex">음반표지 경로 (%d는 파일 디렉토리로 바꿈)</string>
 
     <string name="fragment_profile_default_name">새 프로필</string>
 
@@ -258,6 +264,7 @@
     </string-array>
 
     <string name="preference_use_album_artists_title">음반 연주자 태그 사용</string>
+    <string name="preference_use_album_artists_text">연주자 항목에서 음반 연주자 태그를 씁니다.</string>
 
     <string name="preference_volume_control_title">음량 컨트롤 보기</string>
     <string name="preference_volume_control_message">음량 컨트롤 보기 선택</string>
@@ -281,6 +288,10 @@
 
     <string name="preference_use_english_wikipedia_title">영문 위키피디아 사용</string>
     <string name="preference_use_english_wikipedia_text">페이지를 찾기위해 영문 위키피디아를 사용합니다</string>
+
+
+    <string name="preference_show_playlist_sections_title">연주순서에 분할 보기</string>
+    <string name="preference_show_playlist_sections_text">연주순서 보기에 음반표지 분할 보기</string>
 
     <string name="preference_category_design">디자인</string>
     <string name="preference_category_library">라이브러리</string>
@@ -360,6 +371,9 @@
     <!-- Bulk downloader service -->
     <string name="downloader_notification_title">대규모로 내려받는 중</string>
     <string name="downloader_notification_remaining_images">내려받은 이미지:</string>
+
+    <string name="notification_channel_name_playback">연주</string>
+    <string name="notification_channel_name_bulk_download">대규모 내려받기</string>
 
     <!-- Widget -->
     <string name="widget_disconnected">끊어짐</string>
