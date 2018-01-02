@@ -241,10 +241,16 @@ public class MPDConnection {
      * This is the actual start of the connection. It tries to resolve the hostname
      * and initiates the connection to the address and the configured tcp-port.
      */
-    public synchronized void connectToServer() throws MPDException {
+    public void connectToServer() throws MPDException {
         /* If a socket is already open, close it and destroy it. */
         if ((null != mSocket) && (mSocket.isConnected())) {
             disconnectFromServer();
+        }
+
+        synchronized (this) {
+            if ((null == mHostname) || mHostname.isEmpty()) {
+                return;
+            }
         }
 
         try {
@@ -253,10 +259,6 @@ public class MPDConnection {
             e.printStackTrace();
         }
 
-        if ((null == mHostname) || mHostname.equals("")) {
-            mConnectionLock.release();
-            return;
-        }
         mMPDConnectionIdle = false;
         mMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
@@ -384,6 +386,9 @@ public class MPDConnection {
 
             // Notify listener
             notifyConnected();
+        } else {
+            // Connection not established
+            mConnectionLock.release();
         }
     }
 
@@ -409,11 +414,12 @@ public class MPDConnection {
      * After this call it should be safe to reconnect to another server. If this connection is
      * currently in idle state, then it will be deidled before.
      */
-    public synchronized void disconnectFromServer() {
-
-        // Check if the connection is currently idling, if then deidle.
-        if (mMPDConnectionIdle) {
-            stopIDLE();
+    public void disconnectFromServer() {
+        synchronized (this) {
+            // Check if the connection is currently idling, if then deidle.
+            if (mMPDConnectionIdle) {
+                stopIDLE();
+            }
         }
 
         try {
@@ -421,7 +427,6 @@ public class MPDConnection {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
 
         // Close connection gracefully
         sendMPDRAWCommand(MPDCommands.MPD_COMMAND_CLOSE);
@@ -470,7 +475,7 @@ public class MPDConnection {
      * @return Returns the {@link MPDCapabilities} object of the current connected server
      * or a dummy object.
      */
-    public MPDCapabilities getServerCapabilities() {
+    public synchronized MPDCapabilities getServerCapabilities() {
         if (isConnected()) {
             return mServerCapabilities;
         } else {
@@ -490,7 +495,7 @@ public class MPDConnection {
      *
      * @param command Command string to send to the MPD server
      */
-    synchronized void sendMPDCommand(String command) {
+    void sendMPDCommand(String command) {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Send command: " + command);
         }
@@ -501,8 +506,10 @@ public class MPDConnection {
              * Check if server is in idling mode, this needs unidling first,
              * otherwise the server will disconnect the client.
              */
-            if (mMPDConnectionIdle) {
-                stopIDLE();
+            synchronized (this) {
+                if (mMPDConnectionIdle) {
+                    stopIDLE();
+                }
             }
 
             // During deidle a disconnect could happen, check again if connection is ready
@@ -585,18 +592,21 @@ public class MPDConnection {
      * before starting a command list.
      */
     void startCommandList() {
-        try {
-            mConnectionLock.acquire();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         /* Check if the server is connected. */
         if (mMPDConnectionReady) {
             /* Check if server is in idling mode, this needs unidling first,
             otherwise the server will disconnect the client.
              */
-            if (mMPDConnectionIdle) {
-                stopIDLE();
+            synchronized (this) {
+                if (mMPDConnectionIdle) {
+                    stopIDLE();
+                }
+            }
+
+            try {
+                mConnectionLock.acquire();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
             /*
@@ -604,8 +614,6 @@ public class MPDConnection {
              * FIXME Should be validated in the future.
              */
             writeLine(MPDCommands.MPD_START_COMMAND_LIST);
-        } else {
-            mConnectionLock.release();
         }
     }
 
@@ -761,7 +769,7 @@ public class MPDConnection {
         }
     }
 
-    public boolean isConnected() {
+    public synchronized boolean isConnected() {
         return null != mSocket && mSocket.isConnected() && mMPDConnectionReady;
     }
 
@@ -804,7 +812,9 @@ public class MPDConnection {
      * @param listener Listener to be connected
      */
     public void setStateListener(MPDConnectionStateChangeListener listener) {
-        mStateListeners.add(listener);
+        synchronized (mStateListeners) {
+            mStateListeners.add(listener);
+        }
     }
 
     /**
@@ -813,7 +823,9 @@ public class MPDConnection {
      * @param listener Listener to register to this connection
      */
     public void setIdleListener(MPDConnectionIdleChangeListener listener) {
-        mIdleListeners.add(listener);
+        synchronized (mIdleListeners) {
+            mIdleListeners.add(listener);
+        }
     }
 
     /**
