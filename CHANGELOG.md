@@ -1,3 +1,10 @@
+### Version: 1.1.12 Tag: release-21 (2017-12-31) ###
+* Experimental feature: local HTTP cover download (see [FAQ](https://github.com/gateship-one/malp/wiki/FAQ))
+* Minor bug fixes
+* Restructure cover art storage to support larger images (previous downloaded cover art will be lost)
+* Improve image processing (scaling and caching)
+* Happy new year!
+
 ### Version: 1.1.11 Tag: release-20 (2017-11-13) ###
  * Hotfix for: https://issuetracker.google.com/issues/64434571
 
