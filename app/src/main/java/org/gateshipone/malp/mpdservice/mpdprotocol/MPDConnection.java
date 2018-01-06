@@ -64,7 +64,51 @@ import java.util.concurrent.Semaphore;
  */
 
 public class MPDConnection {
+    enum CONNECTION_STATES {
+        /**
+         * Obvious
+         */
+        CONNECTING,
+        /**
+         * During disconnecting
+         */
+        DISCONNECTING,
+        /**
+         * When disconnected
+         */
+        DISCONNECTED,
+        /**
+         * When IDLE state is prepared
+         */
+        GOING_IDLE,
+        /**
+         * AFTER "IDLE" command is sent to MPD
+         */
+        IDLE,
+        /**
+         * Directly when a command is requested to be sent
+         */
+        GOING_NOIDLE,
+        /**
+         * State in which the connection to MPD is ready to receive commands (after noidle)
+         */
+        READY_FOR_COMMANDS,
+        /**
+         * After sending a command to MPD the connection waits for a response
+         */
+        WAITING_FOR_RESPONSE,
+        /**
+         * When receiving a response of any kind until either OK or ACK is received.
+         */
+        RECEIVING,
+    }
+
     private static final String TAG = MPDConnection.class.getSimpleName();
+
+    /**
+     * State variable for this object. For coordinating actions on the socket
+     */
+    private CONNECTION_STATES mConnectionState = CONNECTION_STATES.DISCONNECTED;
 
     /**
      * Set this flag to enable debugging in this class. DISABLE before releasing
@@ -107,12 +151,6 @@ public class MPDConnection {
 
     /* PrintWriter for all writing to the socket */
     private PrintWriter mWriter;
-
-    /* True only if server is ready to receive commands */
-    private boolean mMPDConnectionReady = false;
-
-    /* True if server connection is in idleing state. Needs to be deidled before sending command */
-    private boolean mMPDConnectionIdle = false;
 
     /* MPD server properties */
     private MPDCapabilities mServerCapabilities;
@@ -178,6 +216,8 @@ public class MPDConnection {
         mIDLETimer = new Timer();
 
         mReadTimeoutTimer = new Timer();
+
+        changeState(CONNECTION_STATES.DISCONNECTED);
     }
 
     /**
@@ -211,8 +251,7 @@ public class MPDConnection {
         }
 
         /* Clear up connection state variables */
-        mMPDConnectionIdle = false;
-        mMPDConnectionReady = false;
+        mConnectionState = CONNECTION_STATES.DISCONNECTED;
 
         cancelIDLEWait();
 
@@ -249,9 +288,10 @@ public class MPDConnection {
         }
 
         synchronized (this) {
-            if ((null == mHostname) || mHostname.isEmpty()) {
+            if (mConnectionState == CONNECTION_STATES.CONNECTING || (null == mHostname) || mHostname.isEmpty()) {
                 return;
             }
+            changeState(CONNECTION_STATES.CONNECTING);
         }
 
         try {
@@ -260,8 +300,6 @@ public class MPDConnection {
             e.printStackTrace();
         }
 
-        mMPDConnectionIdle = false;
-        mMPDConnectionReady = false;
         /* Create a new socket used for the TCP-connection. */
         mSocket = new Socket();
         try {
@@ -379,11 +417,13 @@ public class MPDConnection {
                 mConnectionLock.release();
                 throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
             }
-            mMPDConnectionReady = true;
+
             mConnectionLock.release();
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "Connection successfully established");
             }
+
+            changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
 
             // Notify listener
             notifyConnected();
@@ -418,7 +458,7 @@ public class MPDConnection {
     public void disconnectFromServer() {
         synchronized (this) {
             // Check if the connection is currently idling, if then deidle.
-            if (mMPDConnectionIdle) {
+            if (mConnectionState == CONNECTION_STATES.IDLE) {
                 stopIDLE();
             }
         }
@@ -455,8 +495,7 @@ public class MPDConnection {
         }
 
         /* Clear up connection state variables */
-        mMPDConnectionIdle = false;
-        mMPDConnectionReady = false;
+        changeState(CONNECTION_STATES.DISCONNECTED);
 
         // Notify listener
         notifyDisconnect();
@@ -501,66 +540,69 @@ public class MPDConnection {
             Log.v(TAG, "Send command: " + command);
         }
 
-        /* Check if the server is connected. */
-        if (mMPDConnectionReady) {
-            if(DEBUG_ENABLED) {
-                Log.v(TAG,"Connection ready for: " + command);
-            }
-            /*
-             * Check if server is in idling mode, this needs unidling first,
-             * otherwise the server will disconnect the client.
-             */
-            synchronized (this) {
-                if (mMPDConnectionIdle) {
-                    if(DEBUG_ENABLED) {
-                        Log.v(TAG,"Connection idle: " + command);
-                    }
-                    stopIDLE();
+        /*
+         * Check if server is in idling mode, this needs unidling first,
+         * otherwise the server will disconnect the client.
+         */
+        synchronized (this) {
+            if (mConnectionState == CONNECTION_STATES.IDLE) {
+                if(DEBUG_ENABLED) {
+                    Log.v(TAG,"Connection idle: " + command);
                 }
-            }
-
-            // During deidle a disconnect could happen, check again if connection is ready
-            if (!mMPDConnectionReady) {
+                stopIDLE();
+            } else if (mConnectionState == CONNECTION_STATES.DISCONNECTED || mConnectionState == CONNECTION_STATES.DISCONNECTING) {
+                // Connection is not ready
+                if(DEBUG_ENABLED) {
+                    Log.e(TAG, "Tried to send command to not ready connection");
+                }
                 return;
             }
+        }
 
-            if(DEBUG_ENABLED) {
-                Log.v(TAG,"Connection ready: " + command);
-            }
+        // Acquire lock
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Connection lock acquired: " + command);
+        }
 
-            // Acquire lock
-            try {
-                mConnectionLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Connection lock acquired: " + command);
-            }
-
-            /*
-             * Send the command to the server
-             *
-             */
-            writeLine(command);
-
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Sent command: " + command);
-            }
-
-            // This waits until the server sends a response (OK,ACK(failure) or the requested data)
-            try {
-                waitForResponse();
-            } catch (IOException e) {
-                handleSocketError();
+        synchronized (this) {
+            if (mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS) {
+                Log.e(TAG, "Trying to send a command to MPD in wrong state: " + mConnectionState);
                 mConnectionLock.release();
-            }
-            if (DEBUG_ENABLED) {
-                Log.v(TAG, "Sent command, got response: " + command);
+                return;
             }
         }
+
+        /*
+         * Send the command to the server
+         *
+         */
+        writeLine(command);
+
+
+        changeState(CONNECTION_STATES.WAITING_FOR_RESPONSE);
+
+
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Sent command: " + command);
+        }
+
+        // This waits until the server sends a response (OK,ACK(failure) or the requested data)
+        try {
+            waitForResponse();
+        } catch (IOException e) {
+            handleSocketError();
+            mConnectionLock.release();
+        }
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Sent command, got response: " + command);
+        }
+
     }
 
     /**
@@ -588,14 +630,17 @@ public class MPDConnection {
      * @param command Command string to send to the server
      */
     void sendMPDRAWCommand(String command) {
-        /* Check if the server is connected. */
-        if (mMPDConnectionReady) {
-            /*
-             * Send the command to the server
-             * FIXME Should be validated in the future.
-             */
-            writeLine(command);
+        synchronized (this) {
+            if(mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS) {
+                return;
+            }
         }
+
+        /* Send the command to the server
+         * FIXME Should be validated in the future.
+         */
+        writeLine(command);
+
     }
 
     /**
@@ -604,29 +649,32 @@ public class MPDConnection {
      * before starting a command list.
      */
     void startCommandList() {
-        /* Check if the server is connected. */
-        if (mMPDConnectionReady) {
-            /* Check if server is in idling mode, this needs unidling first,
-            otherwise the server will disconnect the client.
-             */
-            synchronized (this) {
-                if (mMPDConnectionIdle) {
-                    stopIDLE();
+        /* Check if server is in idling mode, this needs unidling first,
+        otherwise the server will disconnect the client.
+         */
+        synchronized (this) {
+            if (mConnectionState == CONNECTION_STATES.IDLE) {
+                stopIDLE();
+            } else if (mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS && mConnectionState != CONNECTION_STATES.GOING_NOIDLE) {
+                // Connection is not ready
+                if (DEBUG_ENABLED) {
+                    Log.e(TAG, "Tried to send command to not ready connection");
                 }
+                return;
             }
-
-            try {
-                mConnectionLock.acquire();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-
-            /*
-             * Send the command to the server
-             * FIXME Should be validated in the future.
-             */
-            writeLine(MPDCommands.MPD_START_COMMAND_LIST);
         }
+
+        try {
+            mConnectionLock.acquire();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        /*
+         * Send the command to the server
+         * FIXME Should be validated in the future.
+         */
+        writeLine(MPDCommands.MPD_START_COMMAND_LIST);
     }
 
     /**
@@ -635,23 +683,29 @@ public class MPDConnection {
      * least one "OK" or "ACK" from the mpd server.
      */
     void endCommandList() throws MPDException {
-        /* Check if the server is connected. */
-        if (mMPDConnectionReady) {
-            /*
-             * Send the command to the server
-             * FIXME Should be validated in the future.
-             */
-            writeLine(MPDCommands.MPD_END_COMMAND_LIST);
-            try {
-                waitForResponse();
-            } catch (IOException e) {
-                handleSocketError();
-                mConnectionLock.release();
+        synchronized (this) {
+            if(mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS) {
+                return;
             }
-
-            // Commandlist is finished. Check for servers response
-            checkResponse();
         }
+
+        /*
+         * Send the command to the server
+         * FIXME Should be validated in the future.
+         */
+        writeLine(MPDCommands.MPD_END_COMMAND_LIST);
+        changeState(CONNECTION_STATES.WAITING_FOR_RESPONSE);
+        try {
+            waitForResponse();
+        } catch (IOException e) {
+            handleSocketError();
+            mConnectionLock.release();
+        }
+
+
+
+        // Commandlist is finished. Check for servers response
+        checkResponse();
     }
 
 
@@ -661,13 +715,18 @@ public class MPDConnection {
      * the disobeying client.
      */
     private void stopIDLE() {
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Stop Idling");
+        synchronized (this) {
+            // Check if state is idle, otherwise nothing to do
+            if(mConnectionState != CONNECTION_STATES.IDLE) {
+                // Abort
+                return;
+            } else {
+                changeState(CONNECTION_STATES.GOING_NOIDLE);
+            }
         }
 
-        /* Check if server really is in idling mode */
-        if (!mMPDConnectionIdle || !mMPDConnectionReady) {
-            return;
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Stop Idling");
         }
 
         try {
@@ -678,6 +737,10 @@ public class MPDConnection {
 
         // Start timeout task
         synchronized (mReadTimeoutTimer) {
+            if(mReadTimeoutTask != null) {
+                // Another deidling is already running, abort
+                return;
+            }
             mReadTimeoutTask = new ReadTimeoutTask();
             mReadTimeoutTimer.schedule(mReadTimeoutTask, DEIDLE_TIMEOUT);
             if (DEBUG_ENABLED) {
@@ -698,16 +761,18 @@ public class MPDConnection {
      * for a deidle from the MPD host. Otherwise it is impossible to get notified on changes
      * from other mpd clients (eg. volume change)
      */
-    private synchronized void startIDLE() {
+    private void startIDLE() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Start IDLE mode");
         }
 
-        /* Check if server really is in idling mode */
-        if (!mMPDConnectionReady || mMPDConnectionIdle) {
-            // Release connection
-            mConnectionLock.release();
-            return;
+        synchronized (this) {
+            if(mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS) {
+                // This shouldn't happen, print warning
+                Log.e(TAG,"startIDLE called from wrong state:" + mConnectionState);
+            } else {
+                changeState(CONNECTION_STATES.GOING_IDLE);
+            }
         }
 
         // Set the timeout to zero to block when no data is available
@@ -722,8 +787,9 @@ public class MPDConnection {
         // sending new requests.
         writeLine(MPDCommands.MPD_COMMAND_START_IDLE);
 
-        // Technically we are in idle mode now, set boolean
-        mMPDConnectionIdle = true;
+        synchronized (this) {
+            changeState(CONNECTION_STATES.IDLE);
+        }
 
         new IdleThread().start();
 
@@ -761,6 +827,9 @@ public class MPDConnection {
         } else {
             throw new IOException();
         }
+        if(mConnectionState != CONNECTION_STATES.CONNECTING) {
+            changeState(CONNECTION_STATES.RECEIVING);
+        }
     }
 
     /**
@@ -782,7 +851,7 @@ public class MPDConnection {
     }
 
     public synchronized boolean isConnected() {
-        return null != mSocket && mSocket.isConnected() && mMPDConnectionReady;
+        return null != mSocket && mSocket.isConnected();
     }
 
 
@@ -931,7 +1000,6 @@ public class MPDConnection {
                 // External change
                 if (DEBUG_ENABLED) {
                     Log.v(TAG, "External changes");
-                    mMPDConnectionIdle = false;
 
                     while (!response.equals("OK")) {
                         try {
@@ -940,6 +1008,8 @@ public class MPDConnection {
                             e.printStackTrace();
                         }
                     }
+
+                    changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
 
                     mConnectionLock.release();
                     notifyIdleListener();
@@ -958,7 +1028,7 @@ public class MPDConnection {
                 if (DEBUG_ENABLED) {
                     Log.v(TAG, "No external change, response: " + response);
                 }
-                mMPDConnectionIdle = false;
+                changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
                 mConnectionLock.release();
             }
             mTimeoutSemaphore.release();
@@ -988,11 +1058,16 @@ public class MPDConnection {
                     return null;
                 }
                 mConnectionLock.release();
+                changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
+                scheduleIDLE();
                 throw new MPDException.MPDServerException(line);
             } else if (line.startsWith("OK")) {
-                if (mMPDConnectionReady) {
+                if (mConnectionState == CONNECTION_STATES.RECEIVING) {
                     if (DEBUG_ENABLED) {
                         Log.v(TAG, "OK read, releasing connection");
+                    }
+                    synchronized (this) {
+                        changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
                     }
                     mConnectionLock.release();
                     scheduleIDLE();
@@ -1103,6 +1178,64 @@ public class MPDConnection {
         }
     }
 
+    private synchronized void changeState(CONNECTION_STATES newState) {
+        if(DEBUG_ENABLED) {
+            Log.v(TAG, "Changing state: " + mConnectionState.name() + " to " + newState.name());
+
+            // Sanity checks
+            switch(mConnectionState) {
+                case CONNECTING:
+                    if(newState != CONNECTION_STATES.DISCONNECTED && newState != CONNECTION_STATES.READY_FOR_COMMANDS) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case DISCONNECTING:
+                    if (newState != CONNECTION_STATES.DISCONNECTED) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case DISCONNECTED:
+                    if (newState != CONNECTION_STATES.CONNECTING && newState != CONNECTION_STATES.DISCONNECTED) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case GOING_IDLE:
+                    if (newState != CONNECTION_STATES.IDLE) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case IDLE:
+                    if (newState != CONNECTION_STATES.GOING_IDLE) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case GOING_NOIDLE:
+                    if (newState != CONNECTION_STATES.READY_FOR_COMMANDS && newState != CONNECTION_STATES.DISCONNECTED) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case READY_FOR_COMMANDS:
+                    if (newState != CONNECTION_STATES.WAITING_FOR_RESPONSE && newState != CONNECTION_STATES.DISCONNECTING && newState != CONNECTION_STATES.GOING_IDLE) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case WAITING_FOR_RESPONSE:
+                    if (newState != CONNECTION_STATES.RECEIVING && newState != CONNECTION_STATES.DISCONNECTED) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+                case RECEIVING:
+                    if (newState != CONNECTION_STATES.READY_FOR_COMMANDS && newState != CONNECTION_STATES.DISCONNECTED) {
+                        Log.e(TAG,"Invalid transition");
+                    }
+                    break;
+            }
+        }
+
+
+        mConnectionState = newState;
+    }
+
     private class StartIDLETask extends TimerTask {
         @Override
         public void run() {
@@ -1110,7 +1243,8 @@ public class MPDConnection {
             if (locked) {
                 startIDLE();
             } else {
-                scheduleIDLE();
+                // FIXME Should not be necessary
+                //scheduleIDLE();
             }
         }
     }
@@ -1132,7 +1266,7 @@ public class MPDConnection {
 
             // Check if no successful noidle took place due to almost simultaneous scheduling of
             // this Task and a possible server response
-            if (!mMPDConnectionIdle) {
+            if (mConnectionState != CONNECTION_STATES.IDLE) {
                 if (DEBUG_ENABLED) {
                     Log.w(TAG, "Connection not idle anymore");
                 }
