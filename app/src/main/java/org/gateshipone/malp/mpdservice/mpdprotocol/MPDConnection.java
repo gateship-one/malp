@@ -469,6 +469,8 @@ public class MPDConnection {
             e.printStackTrace();
         }
 
+        changeState(CONNECTION_STATES.DISCONNECTING);
+
         // Close connection gracefully
         sendMPDRAWCommand(MPDCommands.MPD_COMMAND_CLOSE);
 
@@ -1205,7 +1207,7 @@ public class MPDConnection {
                     }
                     break;
                 case IDLE:
-                    if (newState != CONNECTION_STATES.GOING_IDLE) {
+                    if (newState != CONNECTION_STATES.READY_FOR_COMMANDS && newState != CONNECTION_STATES.GOING_NOIDLE && newState != CONNECTION_STATES.DISCONNECTED) {
                         Log.e(TAG,"Invalid transition");
                     }
                     break;
