@@ -197,7 +197,7 @@ public class MPDConnection {
     public final static MPDConnection mInstance = new MPDConnection();
 
 
-    private ConnectionSemaphore mConnectionLock;
+    private final ConnectionSemaphore mConnectionLock;
 
     /**
      * Creates disconnected MPDConnection with following parameters
@@ -303,8 +303,6 @@ public class MPDConnection {
             }
             changeState(CONNECTION_STATES.CONNECTING);
         }
-
-
 
         /* Create a new socket used for the TCP-connection. */
         mSocket = new Socket();
@@ -543,21 +541,8 @@ public class MPDConnection {
             Log.v(TAG, "Send command: " + command);
         }
 
-        /*
-         * Check if server is in idling mode, this needs unidling first,
-         * otherwise the server will disconnect the client.
-         */
+        // Ensures that the server is not idling before sending the command
         stopIDLE();
-
-        synchronized (this) {
-            if (mConnectionState == CONNECTION_STATES.DISCONNECTED || mConnectionState == CONNECTION_STATES.DISCONNECTING) {
-                // Connection is not ready
-                if (DEBUG_ENABLED) {
-                    Log.w(TAG, "Tried to send command to not ready connection");
-                }
-                return;
-            }
-        }
 
         // Acquire lock
         try {
@@ -578,12 +563,8 @@ public class MPDConnection {
             }
         }
 
-        /*
-         * Send the command to the server
-         *
-         */
+        // Send the MPD command to the server
         writeLine(command);
-
 
         changeState(CONNECTION_STATES.WAITING_FOR_RESPONSE);
 
@@ -649,20 +630,9 @@ public class MPDConnection {
      * before starting a command list.
      */
     void startCommandList() {
-        /* Check if server is in idling mode, this needs unidling first,
-        otherwise the server will disconnect the client.
-         */
+        // Ensures that the server is not idling before sending the command
         stopIDLE();
 
-        synchronized (this) {
-            if (mConnectionState != CONNECTION_STATES.READY_FOR_COMMANDS && mConnectionState != CONNECTION_STATES.GOING_NOIDLE) {
-                // Connection is not ready
-                if (DEBUG_ENABLED) {
-                    Log.e(TAG, "Tried to send command to not ready connection");
-                }
-                return;
-            }
-        }
 
         try {
             mConnectionLock.acquire();
@@ -678,10 +648,7 @@ public class MPDConnection {
             }
         }
 
-        /*
-         * Send the command to the server
-         * FIXME Should be validated in the future.
-         */
+        // Start the command list by sending the first command to the server
         writeLine(MPDCommands.MPD_START_COMMAND_LIST);
     }
 
@@ -789,7 +756,9 @@ public class MPDConnection {
 
         // Set the timeout to zero to block when no data is available
         try {
-            mSocket.setSoTimeout(0);
+            if(mSocket != null) {
+                mSocket.setSoTimeout(0);
+            }
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -862,6 +831,10 @@ public class MPDConnection {
         }
     }
 
+    /**
+     *
+     * @return True if connected to MPD server, false otherwise
+     */
     public synchronized boolean isConnected() {
         return null != mSocket && mSocket.isConnected();
     }
@@ -1074,6 +1047,11 @@ public class MPDConnection {
         return "";
     }
 
+    /**
+     * Internal readLine without unlocking of the connection or state changes
+     * @return Line that was read from the server
+     * @throws MPDException on server-side errors
+     */
     private String readLineInternal() throws MPDException {
         if (mReader != null) {
             String line;
@@ -1112,6 +1090,9 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Debug method to print a stack trace
+     */
     private void printStackTrace() {
         StackTraceElement[] st = new Exception().getStackTrace();
         for (StackTraceElement el : st) {
@@ -1148,6 +1129,10 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Schedule to go IDLE after IDLE_WAIT_TIME. This is necessary to hold the TCP connection
+     * to MPD and to react to server-side changes.
+     */
     private void scheduleIDLE() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Schedule IDLE");
@@ -1162,6 +1147,9 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Cancels the scheduled IDLE command after IDLE_WAIT_TIME
+     */
     private void cancelIDLEWait() {
         synchronized (mIDLETimer) {
             if (mIDLETask != null) {
@@ -1174,6 +1162,9 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Cancels the timeout mechanism for the noidle command
+     */
     private void cancelReadTimeoutWait() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Cancel Read timeout");
@@ -1186,6 +1177,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Helper method to debug state changes. This will print an error on state changes
+     * that should not occur.
+     * @param newState State to set as current
+     */
     private synchronized void changeState(CONNECTION_STATES newState) {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Changing state: " + mConnectionState.name() + " to " + newState.name());
@@ -1213,7 +1209,7 @@ public class MPDConnection {
                     }
                     break;
                 case IDLE:
-                    if (newState != CONNECTION_STATES.READY_FOR_COMMANDS && newState != CONNECTION_STATES.GOING_NOIDLE && newState != CONNECTION_STATES.DISCONNECTED) {
+                    if (newState != CONNECTION_STATES.READY_FOR_COMMANDS && newState != CONNECTION_STATES.GOING_NOIDLE && newState != CONNECTION_STATES.DISCONNECTING) {
                         Log.e(TAG, "Invalid transition");
                     }
                     break;
@@ -1259,6 +1255,11 @@ public class MPDConnection {
         }
     }
 
+    /**
+     * Helper class for a task that terminates the noidle command if no response is received from
+     * the MPD server. This is necessary as the socket is set to an indefinite timeout before
+     * blocking on the readLine method.
+     */
     private class ReadTimeoutTask extends TimerTask {
 
         @Override
@@ -1282,6 +1283,7 @@ public class MPDConnection {
         }
     }
 
+    // FIXME remove when stable. Only a helper class to ensure correct locking order
     private class ConnectionSemaphore extends Semaphore {
 
         private ConnectionSemaphore(int permits) {
@@ -1292,9 +1294,11 @@ public class MPDConnection {
         public void release() {
             super.release();
             if (DEBUG_ENABLED) {
-                Log.v(TAG, "Semaphore released: " + availablePermits());
-                if (availablePermits() > 1) {
-                    Log.e(TAG, "More than 1 permit");
+                synchronized (this) {
+                    Log.v(TAG, "Semaphore released: " + availablePermits());
+                    if (availablePermits() > 1) {
+                        Log.e(TAG, "More than 1 permit");
+                    }
                 }
             }
         }
@@ -1303,7 +1307,9 @@ public class MPDConnection {
         public void acquire() throws InterruptedException {
             super.acquire();
             if (DEBUG_ENABLED) {
-                Log.v(TAG, "Semaphore acquired: " + availablePermits());
+                synchronized (this) {
+                    Log.v(TAG, "Semaphore acquired: " + availablePermits());
+                }
             }
         }
 
