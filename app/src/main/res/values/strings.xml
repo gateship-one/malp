@@ -108,7 +108,9 @@
     <string name="menu_search">Search</string>
 
     <string name="menu_albums">Albums</string>
+    <string name="menu_album">Album</string>
     <string name="menu_artists">Artists</string>
+    <string name="menu_artist">Artist</string>
     <string name="artwork_settings">Artwork settings</string>
 
     <!-- seperator -->

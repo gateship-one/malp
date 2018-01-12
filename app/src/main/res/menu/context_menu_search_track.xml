@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~  Copyright (C) 2018 Team Gateship-One
   ~  (Hendrik Borghorst & Frederik Luetkes)
   ~
@@ -27,47 +26,64 @@
     <item
         android:id="@+id/action_song_play"
         android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_play_song"/>
+        android:title="@string/action_play_song"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_song_enqueue"
         android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_enqueue"/>
+        android:title="@string/action_enqueue"
+        app:showAsAction="never" />
+
+
+    <item
+        android:id="@+id/action_add_to_saved_playlist"
+        android:orderInCategory="100"
+        android:title="@string/action_add_to_saved_playlist"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_show_details"
+        android:orderInCategory="100"
+        android:title="@string/action_show_details"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_song_play_next"
         android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_enqueue_as_next"/>
+        android:title="@string/action_enqueue_as_next"
+        app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_add_album"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_add_album"/>
-    <item
-        android:id="@+id/action_play_album"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_play_album"/>
+        android:orderInCategory="101"
+        android:title="@string/menu_album">
+        <menu>
+            <item
+                android:id="@+id/action_add_album"
+                android:orderInCategory="100"
+                android:title="@string/action_add_album"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/action_play_album"
+                android:orderInCategory="100"
+                android:title="@string/action_play_album"
+                app:showAsAction="never" />
+        </menu>
+    </item>
 
     <item
-        android:id="@+id/action_add_artist"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_add_artist"/>
+        android:orderInCategory="102"
+        android:title="@string/menu_artist">
+        <menu>
+            <item
+                android:id="@+id/action_add_artist"
+                android:orderInCategory="100"
+                android:title="@string/action_add_artist"
+                app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_play_artist"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_play_artist"/>
-    <item
-        android:id="@+id/action_add_to_saved_playlist"
-        android:orderInCategory="100"
-        app:showAsAction="never"
-        android:title="@string/action_add_to_saved_playlist"/>
-
-
+            <item
+                android:id="@+id/action_play_artist"
+                android:orderInCategory="100"
+                android:title="@string/action_play_artist"
+                app:showAsAction="never" />
+        </menu>
+    </item>
 </menu>

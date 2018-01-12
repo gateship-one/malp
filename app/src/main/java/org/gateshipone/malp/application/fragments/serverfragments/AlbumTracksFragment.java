@@ -287,7 +287,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             case R.id.action_song_play_next:
                 playNext(info.position);
                 return true;
-            case R.id.action_add_to_saved_playlist:
+            case R.id.action_add_to_saved_playlist: {
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
@@ -296,6 +296,16 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
+            }
+            case R.id.action_show_details: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(info.position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return true;
+            }
             default:
                 return super.onContextItemSelected(item);
         }
