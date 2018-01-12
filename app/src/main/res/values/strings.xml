@@ -294,9 +294,9 @@
     <string name="preference_library_click_action_summary">Select action for tracks in library</string>
     <string name="preference_library_click_action_message">Select the default action to take if you click on a track in the library views</string>
 
-    <string name="preference_library_click_action_details">@string/action_show_details</string>
-    <string name="preference_library_click_action_add">@string/action_add</string>
-    <string name="preference_library_click_action_play">@string/action_play_song</string>
+    <string name="preference_library_click_action_details" translatable="false">@string/action_show_details</string>
+    <string name="preference_library_click_action_add" translatable="false">@string/action_add</string>
+    <string name="preference_library_click_action_play" translatable="false">@string/action_play_song</string>
 
     <string-array name="preference_library_click">
         <item>@string/preference_library_click_action_details</item>

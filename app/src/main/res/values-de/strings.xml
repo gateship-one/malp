@@ -250,4 +250,9 @@
     <string name="fragment_profile_http_cover_regex">Bilderpfad (%d wird mit dem Ordnerpfad des aktuell gespielten Liedes ersetzt)</string>
     <string name="preference_use_tags_in_filebrowser_title">Verwende Tags im Dateibrowser</string>
     <string name="preference_use_tags_in_filebrowser_text">Im Dateibrowser Tags anstelle von Dateinamen verwenden. Das Deaktivieren dieser Option zeigt im Dateibrowser Dateinamen anstelle der Tags an.</string>
+    <string name="menu_album">Album</string>
+    <string name="menu_artist">Interpret</string>
+    <string name="preference_library_click_action_title">Aktion bei Liedauswahl</string>
+    <string name="preference_library_click_action_summary">Standardaktion für Liedauswahl</string>
+    <string name="preference_library_click_action_message">Wählen Sie die Standardaktion die ausgeführt wird, wenn ein Lied in der Bibliothek ausgewählt wird.</string>
 </resources>
