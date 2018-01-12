@@ -91,6 +91,8 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     private MPDAlbum.MPD_ALBUM_SORT_ORDER mAlbumSortOrder;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -142,6 +144,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         // Get album sort order
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         mAlbumSortOrder = PreferenceHelper.getMPDAlbumSortOrder(sharedPref, getContext());
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -347,12 +350,29 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.addPath(track.getPath());
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.playSong(track.getPath());
+                return;
+            }
+        }
     }
 
     private void showFAB(boolean active) {

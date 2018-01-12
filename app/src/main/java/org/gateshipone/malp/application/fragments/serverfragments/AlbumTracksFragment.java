@@ -23,9 +23,11 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -49,6 +51,7 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -88,6 +91,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     private CoverBitmapLoader mBitmapLoader;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -126,6 +131,9 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             }
         });
 
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         setHasOptionsMenu(true);
 
@@ -245,12 +253,25 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                enqueueTrack(position);
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                play(position);
+                return;
+            }
+        }
     }
 
     /**

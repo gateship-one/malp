@@ -290,6 +290,21 @@
     <string name="preference_use_tags_in_filebrowser_title">Use tags in file browser</string>
     <string name="preference_use_tags_in_filebrowser_text">Use tags in file browser instead of filenames if available. Disable this option to show filenames in file browser.</string>
 
+    <string name="preference_library_click_action_title">Track click action</string>
+    <string name="preference_library_click_action_summary">Select action for tracks in library</string>
+    <string name="preference_library_click_action_message">Select the default action to take if you click on a track in the library views</string>
+
+    <string name="preference_library_click_action_details">@string/action_show_details</string>
+    <string name="preference_library_click_action_add">@string/action_add</string>
+    <string name="preference_library_click_action_play">@string/action_play_song</string>
+
+    <string-array name="preference_library_click">
+        <item>@string/preference_library_click_action_details</item>
+        <item>@string/preference_library_click_action_add</item>
+        <item>@string/preference_library_click_action_play</item>
+    </string-array>
+
+
     <string name="preference_volume_control_title">Select volume control view</string>
     <string name="preference_volume_control_message">Select volume control view</string>
     <string name="preference_volume_control_summary">Select the type of view that is used to control the volume of music playback</string>

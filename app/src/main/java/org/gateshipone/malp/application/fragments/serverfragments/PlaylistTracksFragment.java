@@ -50,6 +50,7 @@ import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -78,6 +79,8 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
     private FABFragmentCallback mFABCallback = null;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,6 +98,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         // Check if sections should be shown
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean showVisibleSections = sharedPref.getBoolean(getContext().getString(R.string.pref_show_playlist_sections_key), getContext().getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Create the needed adapter for the ListView
         mFileAdapter = new FileAdapter(getActivity(), false, false, showVisibleSections, true);
@@ -334,12 +338,25 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                enqueueTrack(position);
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                play(position);
+                return;
+            }
+        }
     }
 
     private class FABOnClickListener implements View.OnClickListener {

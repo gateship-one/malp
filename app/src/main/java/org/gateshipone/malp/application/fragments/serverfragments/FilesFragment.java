@@ -51,6 +51,7 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
 import org.gateshipone.malp.application.loaders.FilesLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -98,6 +99,8 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
      */
     public final static String FILESFRAGMENT_SAVED_INSTANCE_SEARCH_STRING = "FilesFragment.SearchString";
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -107,6 +110,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         boolean useTags = sharedPref.getBoolean(getString(R.string.pref_use_tags_in_filebrowser_key), getResources().getBoolean(R.bool.pref_use_tags_in_filebrowser_default));
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Get the main ListView of this fragment
         mListView = (ListView) rootView.findViewById(R.id.main_listview);
@@ -411,22 +415,39 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mLastPosition = i;
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+        mLastPosition = position;
 
-        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(i);
+        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(position);
 
         if (file instanceof MPDDirectory) {
             mCallback.openPath(file.getPath());
         } else if (file instanceof MPDPlaylist) {
             mPlaylistCallback.openPlaylist(file.getPath());
         } else if (file instanceof MPDTrack) {
-            // Open song details dialog
-            SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-            Bundle args = new Bundle();
-            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack)file);
-            songDetailsDialog.setArguments(args);
-            songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+            switch (mClickAction) {
+                case ACTION_SHOW_DETAILS: {
+                    // Open song details dialog
+                    SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                    Bundle args = new Bundle();
+                    args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mAdapter.getItem(position));
+                    songDetailsDialog.setArguments(args);
+                    songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                    return;
+                }
+                case ACTION_ADD_SONG:{
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.addPath(track.getPath());
+                    return;
+                }
+                case ACTION_PLAY_SONG: {
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.playSong(track.getPath());
+                    return;
+                }
+            }
         }
     }
 
