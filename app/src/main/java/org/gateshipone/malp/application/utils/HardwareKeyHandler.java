@@ -68,10 +68,11 @@ public class HardwareKeyHandler {
                     return false;
                 }
                 if (action == KeyEvent.ACTION_DOWN) {
+                    MPDCommandHandler.increaseVolume(mVolumeStepSize);
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
-                        mRepeatTimer.scheduleAtFixedRate(new IncreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
+                        mRepeatTimer.scheduleAtFixedRate(new IncreaseVolumeTask(), VOLUME_CONTROL_REPEAT_PERIOD, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
                     // Key is released. Stop running timer.
@@ -87,10 +88,11 @@ public class HardwareKeyHandler {
                     return false;
                 }
                 if (action == KeyEvent.ACTION_DOWN) {
+                    MPDCommandHandler.decreaseVolume(mVolumeStepSize);
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
-                        mRepeatTimer.scheduleAtFixedRate(new DecreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
+                        mRepeatTimer.scheduleAtFixedRate(new DecreaseVolumeTask(), VOLUME_CONTROL_REPEAT_PERIOD, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
                     // Key is released. Stop running timmer.
