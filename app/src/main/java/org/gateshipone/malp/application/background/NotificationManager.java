@@ -564,9 +564,9 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         @Override
         public void onAdjustVolume(int direction) {
             if (direction == 1) {
-                MPDCommandHandler.increaseVolume();
+                MPDCommandHandler.increaseVolume(1);
             } else if (direction == -1) {
-                MPDCommandHandler.decreaseVolume();
+                MPDCommandHandler.decreaseVolume(1);
             }
         }
     }

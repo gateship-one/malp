@@ -31,6 +31,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 
 import org.gateshipone.malp.R;
@@ -148,6 +149,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+        HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPref.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
     }
 
     @Override
@@ -178,6 +180,9 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_hardware_controls_key))) {
             mHardwareControls = sharedPreferences.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+        } else if (key.equals(getString(R.string.pref_volume_steps_key))) {
+            // Set the hardware key handler to the new value
+            HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPreferences.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
         }
     }
 

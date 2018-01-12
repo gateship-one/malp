@@ -54,12 +54,6 @@ public class MPDCommandHandler extends MPDGenericHandler {
     private static final String THREAD_NAME = "NetCommandHandler";
 
     /**
-     * Value to step the volume. Used for increase/decreaseVolume method.
-     */
-    private static final int VOLUME_STEP_SIZE = 1;
-
-
-    /**
      * HandlerThread that is used by the looper. This ensures that all requests to this handler
      * are done multi-threaded and do not block the UI.
      */
@@ -183,8 +177,11 @@ public class MPDCommandHandler extends MPDGenericHandler {
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME) {
                 MPDCurrentStatus status = MPDInterface.getCurrentServerStatus(mMPDConnection);
 
+                // Get step size from message
+                int stepSize = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
+
                 // Limit the volume value to 100(%)
-                int targetVolume = status.getVolume() + VOLUME_STEP_SIZE;
+                int targetVolume = status.getVolume() + stepSize;
                 if (targetVolume > 100) {
                     targetVolume = 100;
                 }
@@ -192,8 +189,11 @@ public class MPDCommandHandler extends MPDGenericHandler {
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME) {
                 MPDCurrentStatus status = MPDInterface.getCurrentServerStatus(mMPDConnection);
 
+                // Get step size from message
+                int stepSize = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
+
                 // Limit the volume value to 0(%)
-                int targetVolume = status.getVolume() - VOLUME_STEP_SIZE;
+                int targetVolume = status.getVolume() - stepSize;
                 if (targetVolume < 0) {
                     targetVolume = 0;
                 }
@@ -441,12 +441,14 @@ public class MPDCommandHandler extends MPDGenericHandler {
     /**
      * Increases the volume a notch
      * */
-    public static void increaseVolume() {
+    public static void increaseVolume(int stepSize) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_UP_VOLUME);
         Message msg = Message.obtain();
         if (msg == null) {
             return;
         }
+
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME, stepSize);
 
         msg.obj = action;
         MPDCommandHandler.getHandler().sendMessage(msg);
@@ -455,12 +457,14 @@ public class MPDCommandHandler extends MPDGenericHandler {
     /**
      * Decreases the volume a notch
      * */
-    public static void decreaseVolume() {
+    public static void decreaseVolume(int stepSize) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DOWN_VOLUME);
         Message msg = Message.obtain();
         if (msg == null) {
             return;
         }
+
+        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME, stepSize);
 
         msg.obj = action;
         MPDCommandHandler.getHandler().sendMessage(msg);

@@ -119,6 +119,10 @@
             android:persistent="true"
             android:summary="@string/preference_generic_hardware_keys_text"
             android:title="@string/preference_generic_hardware_keys_title" />
+        <Preference
+            android:key="@string/pref_volume_steps_dialog_key"
+            android:title="@string/preference_volume_step_title"
+            android:summary="@string/preference_volume_step_text"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_category_other">
         <CheckBoxPreference

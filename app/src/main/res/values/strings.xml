@@ -322,6 +322,12 @@
     <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
     <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>
 
+    <string name="preference_volume_step_title">Volume step size</string>
+    <string name="preference_volume_step_text">The size of volume steps of the hardware and software volume buttons.</string>
+
+    <string name="volume_step_size_dialog_title">Step size: %d%%</string>
+    <string name="volume_step_size_dialog_warning">You are selecting a high value for your volume step size. Be careful not to harm your ears or your equipment!</string>
+
     <string name="preference_show_notification_title">Show notification</string>
     <string name="preference_show_notification_text">Show a notification when leaving the main user interface.</string>
 

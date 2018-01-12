@@ -121,6 +121,9 @@ public class FanartActivity extends GenericActivity {
     private ImageButton mVolumeMinus;
     private ImageButton mVolumePlus;
 
+    private VolumeButtonLongClickListener mPlusListener;
+    private VolumeButtonLongClickListener mMinusListener;
+
     private LinearLayout mHeaderTextLayout;
 
     private LinearLayout mVolumeSeekbarLayout;
@@ -128,6 +131,8 @@ public class FanartActivity extends GenericActivity {
 
 
     private FanartCacheManager mFanartCache;
+
+    private int mVolumeStepSize = 1;
 
 
     View mDecorView;
@@ -240,7 +245,7 @@ public class FanartActivity extends GenericActivity {
         mVolumeMinus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MPDCommandHandler.decreaseVolume();
+                MPDCommandHandler.decreaseVolume(mVolumeStepSize);
             }
         });
 
@@ -248,20 +253,20 @@ public class FanartActivity extends GenericActivity {
         mVolumePlus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MPDCommandHandler.increaseVolume();
+                MPDCommandHandler.increaseVolume(mVolumeStepSize);
             }
         });
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
-        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP);
-        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN);
+        mPlusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP,mVolumeStepSize);
+        mMinusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN,mVolumeStepSize);
 
         /* Set the listener to the plus/minus button */
-        mVolumeMinus.setOnLongClickListener(minusListener);
-        mVolumeMinus.setOnTouchListener(minusListener);
+        mVolumeMinus.setOnLongClickListener(mMinusListener);
+        mVolumeMinus.setOnTouchListener(mMinusListener);
 
-        mVolumePlus.setOnLongClickListener(plusListener);
-        mVolumePlus.setOnTouchListener(plusListener);
+        mVolumePlus.setOnLongClickListener(mPlusListener);
+        mVolumePlus.setOnTouchListener(mPlusListener);
 
         mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
         mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
@@ -774,6 +779,10 @@ public class FanartActivity extends GenericActivity {
             mVolumeSeekbarLayout.setVisibility(View.GONE);
             mVolumeButtonLayout.setVisibility(View.VISIBLE);
         }
+
+        mVolumeStepSize = sharedPref.getInt(getString(R.string.pref_volume_steps_key), getResources().getInteger(R.integer.pref_volume_steps_default));
+        mPlusListener.setVolumeStepSize(mVolumeStepSize);
+        mMinusListener.setVolumeStepSize(mVolumeStepSize);
     }
 
 }

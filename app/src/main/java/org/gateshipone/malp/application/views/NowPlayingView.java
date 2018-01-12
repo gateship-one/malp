@@ -30,7 +30,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -38,17 +37,14 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -78,18 +74,14 @@ import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
-import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
-import java.lang.ref.WeakReference;
-import java.util.List;
 import java.util.Locale;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener, ArtworkManager.onNewArtistImageListener,
@@ -209,10 +201,15 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     private ImageButton mVolumeMinus;
     private ImageButton mVolumePlus;
 
+    private VolumeButtonLongClickListener mPlusListener;
+    private VolumeButtonLongClickListener mMinusListener;
+
     private LinearLayout mHeaderTextLayout;
 
     private LinearLayout mVolumeSeekbarLayout;
     private LinearLayout mVolumeButtonLayout;
+
+    private int mVolumeStepSize;
 
     /**
      * Various textviews for track information
@@ -521,6 +518,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 // Hide artist image
                 mCoverImage.clearArtistImage();
             }
+        } else if (key.equals(getContext().getString(R.string.pref_volume_steps_key))) {
+            setVolumeControlSetting();
         }
     }
 
@@ -550,6 +549,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             mVolumeSeekbarLayout.setVisibility(GONE);
             mVolumeButtonLayout.setVisibility(VISIBLE);
         }
+
+        mVolumeStepSize = sharedPref.getInt(getContext().getString(R.string.pref_volume_steps_key), getResources().getInteger(R.integer.pref_volume_steps_default));
+        mPlusListener.setVolumeStepSize(mVolumeStepSize);
+        mMinusListener.setVolumeStepSize(mVolumeStepSize);
     }
 
     @Override
@@ -920,7 +923,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mVolumeMinus.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                MPDCommandHandler.decreaseVolume();
+                MPDCommandHandler.decreaseVolume(mVolumeStepSize);
             }
         });
 
@@ -928,20 +931,20 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mVolumePlus.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                MPDCommandHandler.increaseVolume();
+                MPDCommandHandler.increaseVolume(mVolumeStepSize);
             }
         });
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
-        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP);
-        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN);
+        mPlusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP, mVolumeStepSize);
+        mMinusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN, mVolumeStepSize);
 
         /* Set the listener to the plus/minus button */
-        mVolumeMinus.setOnLongClickListener(minusListener);
-        mVolumeMinus.setOnTouchListener(minusListener);
+        mVolumeMinus.setOnLongClickListener(mMinusListener);
+        mVolumeMinus.setOnTouchListener(mMinusListener);
 
-        mVolumePlus.setOnLongClickListener(plusListener);
-        mVolumePlus.setOnTouchListener(plusListener);
+        mVolumePlus.setOnLongClickListener(mPlusListener);
+        mVolumePlus.setOnTouchListener(mPlusListener);
 
         mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
         mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
