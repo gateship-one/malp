@@ -682,18 +682,16 @@ class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    private void stopIDLE() {
+    private synchronized void stopIDLE() {
         cancelIDLEWait();
-
-        synchronized (this) {
-            // Check if state is idle, otherwise nothing to do
-            if (mConnectionState != CONNECTION_STATES.IDLE) {
-                // Abort
-                return;
-            } else {
-                changeState(CONNECTION_STATES.GOING_NOIDLE);
-            }
+        // Check if state is idle, otherwise nothing to do
+        if (mConnectionState != CONNECTION_STATES.IDLE) {
+            // Abort
+            return;
+        } else {
+            changeState(CONNECTION_STATES.GOING_NOIDLE);
         }
+
 
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Stop Idling");
@@ -734,7 +732,7 @@ class MPDConnection {
      * Important: This method should only be called with the mConnectionLock acquired. Otherwise
      * undefined behaviour will occur.
      */
-    private void startIDLE() {
+    private synchronized void startIDLE() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Start IDLE mode");
         }
@@ -852,8 +850,10 @@ class MPDConnection {
      * Will notify a connected listener that the connection is now ready to be used.
      */
     private void notifyConnected() {
-        for (MPDConnectionStateChangeHandler listener : mStateListeners) {
-            listener.connected();
+        synchronized (mStateListeners) {
+            for (MPDConnectionStateChangeHandler listener : mStateListeners) {
+                listener.connected();
+            }
         }
     }
 
@@ -861,8 +861,10 @@ class MPDConnection {
      * Will notify a connected listener that the connection is disconnect and not ready for use.
      */
     private void notifyDisconnect() {
-        for (MPDConnectionStateChangeHandler listener : mStateListeners) {
-            listener.disconnected();
+        synchronized (mStateListeners) {
+            for (MPDConnectionStateChangeHandler listener : mStateListeners) {
+                listener.disconnected();
+            }
         }
     }
 
@@ -1241,6 +1243,13 @@ class MPDConnection {
     private class StartIDLETask extends TimerTask {
         @Override
         public void run() {
+            synchronized (mIDLETimer) {
+                if(mIDLETask == null) {
+                    // Wait was cancelled.
+                    return;
+                }
+            }
+
             boolean locked = mConnectionLock.tryAcquire();
             if (locked) {
                 startIDLE();
