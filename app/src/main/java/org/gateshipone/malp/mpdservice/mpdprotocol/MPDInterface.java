@@ -59,11 +59,11 @@ public class MPDInterface {
         mConnection.setServerParameters(hostname, password, port);
     }
 
-    public void connect() throws MPDException {
+    public synchronized void connect() throws MPDException {
         mConnection.connectToServer();
     }
 
-    public void disconnect() {
+    public synchronized void disconnect() {
         mConnection.disconnectFromServer();
     }
 
@@ -102,11 +102,14 @@ public class MPDInterface {
      * @return List of MPDAlbum
      */
     public List<MPDAlbum> getAlbums() throws MPDException {
-        // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mConnection.getServerCapabilities()));
+        List<MPDAlbum> albums;
+        synchronized (this) {
+            // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS(mConnection.getServerCapabilities()));
 
-        // Remove empty albums at beginning of the list
-        List<MPDAlbum> albums = MPDResponseParser.parseMPDAlbums(mConnection);
+            // Remove empty albums at beginning of the list
+            albums = MPDResponseParser.parseMPDAlbums(mConnection);
+        }
         ListIterator<MPDAlbum> albumIterator = albums.listIterator();
         while (albumIterator.hasNext()) {
             MPDAlbum album = albumIterator.next();
@@ -125,11 +128,14 @@ public class MPDInterface {
      * @return List of MPDAlbum
      */
     public List<MPDAlbum> getAlbumsInPath(String path) throws MPDException {
-        // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mConnection.getServerCapabilities()));
+        List<MPDAlbum> albums;
+        synchronized (this) {
+            // Get a list of albums. Check if server is new enough for MB and AlbumArtist filtering
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(path, mConnection.getServerCapabilities()));
 
-        // Remove empty albums at beginning of the list
-        List<MPDAlbum> albums = MPDResponseParser.parseMPDAlbums(mConnection);
+            // Remove empty albums at beginning of the list
+            albums = MPDResponseParser.parseMPDAlbums(mConnection);
+        }
         ListIterator<MPDAlbum> albumIterator = albums.listIterator();
         while (albumIterator.hasNext()) {
             MPDAlbum album = albumIterator.next();
@@ -149,17 +155,22 @@ public class MPDInterface {
      * @return List of MPDAlbum objects
      */
     public List<MPDAlbum> getArtistAlbums(String artistName) throws MPDException {
-        // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, mConnection.getServerCapabilities()));
+        MPDCapabilities capabilities = mConnection.getServerCapabilities();
 
-        if (mConnection.getServerCapabilities().hasTagAlbumArtist() && mConnection.getServerCapabilities().hasListGroup()) {
-            // Use a hashset for the results, to filter duplicates that will exist.
-            Set<MPDAlbum> result = new HashSet<>(MPDResponseParser.parseMPDAlbums(mConnection));
 
-            // Also get the list where artistName matches on AlbumArtist
-            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName, mConnection.getServerCapabilities()));
+        if (capabilities.hasTagAlbumArtist() && capabilities.hasListGroup()) {
+            Set<MPDAlbum> result;
+            synchronized (this) {
+                // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, capabilities));
+                // Use a hashset for the results, to filter duplicates that will exist.
+                result = new HashSet<>(MPDResponseParser.parseMPDAlbums(mConnection));
 
-            result.addAll(MPDResponseParser.parseMPDAlbums(mConnection));
+                // Also get the list where artistName matches on AlbumArtist
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(artistName, capabilities));
+
+                result.addAll(MPDResponseParser.parseMPDAlbums(mConnection));
+            }
 
             List<MPDAlbum> resultList = new ArrayList<>(result);
 
@@ -167,7 +178,11 @@ public class MPDInterface {
             Collections.sort(resultList);
             return resultList;
         } else {
-            return MPDResponseParser.parseMPDAlbums(mConnection);
+            synchronized (this) {
+                // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, capabilities));
+                return MPDResponseParser.parseMPDAlbums(mConnection);
+            }
         }
     }
 
@@ -176,7 +191,7 @@ public class MPDInterface {
      *
      * @return List of MPDArtist objects
      */
-    public List<MPDArtist> getArtists() throws MPDException {
+    public synchronized List<MPDArtist> getArtists() throws MPDException {
         // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS(mConnection.getServerCapabilities().hasListGroup() && mConnection.getServerCapabilities().hasMusicBrainzTags()));
 
@@ -200,10 +215,14 @@ public class MPDInterface {
 
         MPDCapabilities capabilities = mConnection.getServerCapabilities();
 
-        // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(capabilities.hasListGroup() && capabilities.hasMusicBrainzTags()));
+        List<MPDArtist> artists;
+        synchronized (this) {
 
-        List<MPDArtist> artists = MPDResponseParser.parseMPDArtists(mConnection, capabilities.hasMusicBrainzTags(), capabilities.hasListGroup());
+            // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS(capabilities.hasListGroup() && capabilities.hasMusicBrainzTags()));
+
+            artists = MPDResponseParser.parseMPDArtists(mConnection, capabilities.hasMusicBrainzTags(), capabilities.hasListGroup());
+        }
 
         // If MusicBrainz support is present, try to correct the MBIDs
         if (capabilities.hasMusicBrainzTags()) {
@@ -235,8 +254,11 @@ public class MPDInterface {
      * @return List of MPDArtist objects
      */
     public List<MPDFileEntry> getPlaylists() throws MPDException {
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
-        List<MPDFileEntry> playlists = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        List<MPDFileEntry> playlists;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
+            playlists = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        }
         Collections.sort(playlists);
         return playlists;
     }
@@ -246,7 +268,7 @@ public class MPDInterface {
      *
      * @return A list of all tracks in MPDTrack objects
      */
-    public List<MPDFileEntry> getAllTracks() throws MPDException {
+    public synchronized List<MPDFileEntry> getAllTracks() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
 
         return MPDResponseParser.parseMPDTracks(mConnection, "", "");
@@ -260,9 +282,12 @@ public class MPDInterface {
      * @return List of MPDTrack track objects
      */
     public List<MPDFileEntry> getAlbumTracks(String albumName, String mbid) throws MPDException {
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+        List<MPDFileEntry> result;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
-        List<MPDFileEntry> result = MPDResponseParser.parseMPDTracks(mConnection, "", mbid);
+            result = MPDResponseParser.parseMPDTracks(mConnection, "", mbid);
+        }
         MPDSortHelper.sortFileListNumeric(result);
         return result;
     }
@@ -277,10 +302,13 @@ public class MPDInterface {
      * @return List of MPDTrack track objects
      */
     public List<MPDFileEntry> getArtistAlbumTracks(String albumName, String artistName, String mbid) throws MPDException {
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+        List<MPDFileEntry> result;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
-        /* Filter tracks with artistName */
-        List<MPDFileEntry> result = MPDResponseParser.parseMPDTracks(mConnection, artistName, mbid);
+            // Filter tracks with artistName
+            result = MPDResponseParser.parseMPDTracks(mConnection, artistName, mbid);
+        }
         // Sort with disc & track number
         MPDSortHelper.sortFileListNumeric(result);
         return result;
@@ -291,7 +319,7 @@ public class MPDInterface {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public List<MPDFileEntry> getCurrentPlaylist() throws MPDException {
+    public synchronized List<MPDFileEntry> getCurrentPlaylist() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
 
         /* Parse the return */
@@ -303,7 +331,7 @@ public class MPDInterface {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) throws MPDException {
+    public synchronized List<MPDFileEntry> getCurrentPlaylistWindow(int start, int end) throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
 
         /* Parse the return */
@@ -315,7 +343,7 @@ public class MPDInterface {
      *
      * @return List of MPDTrack items with all tracks of the current playlist
      */
-    public List<MPDFileEntry> getSavedPlaylist(String playlistName) throws MPDException {
+    public synchronized List<MPDFileEntry> getSavedPlaylist(String playlistName) throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
 
         /* Parse the return */
@@ -328,10 +356,13 @@ public class MPDInterface {
      * @return List of MPDTrack items with all tracks of the current playlist
      */
     public List<MPDFileEntry> getFiles(String path) throws MPDException {
-        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
+        List<MPDFileEntry> retList;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
 
-        /* Parse the return */
-        List<MPDFileEntry> retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+            // Parse the return
+            retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        }
         Collections.sort(retList);
         return retList;
     }
@@ -343,7 +374,7 @@ public class MPDInterface {
      * @param type The type of items to search
      * @return List of MPDTrack items with all tracks matching the search
      */
-    public List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException {
+    public synchronized List<MPDFileEntry> getSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
 
         /* Parse the return */
@@ -356,7 +387,7 @@ public class MPDInterface {
      * @param url URL to search in the current playlist.
      * @return List with one entry or none.
      */
-    public List<MPDFileEntry> getPlaylistFindTrack(String url) throws MPDException {
+    public synchronized List<MPDFileEntry> getPlaylistFindTrack(String url) throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_PLAYLIST_FIND_URI(url));
 
         /* Parse the return */
@@ -368,7 +399,7 @@ public class MPDInterface {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public MPDCurrentStatus getCurrentServerStatus() throws MPDException {
+    public synchronized MPDCurrentStatus getCurrentServerStatus() throws MPDException {
         /* Request status */
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_STATUS);
         return MPDResponseParser.parseMPDCurrentStatus(mConnection);
@@ -379,7 +410,7 @@ public class MPDInterface {
      *
      * @return The CurrentStatus object with all gathered information.
      */
-    public MPDStatistics getServerStatistics() throws MPDException {
+    public synchronized MPDStatistics getServerStatistics() throws MPDException {
         /* Request status */
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_STATISTICS);
 
@@ -391,7 +422,7 @@ public class MPDInterface {
      *
      * @return MPDTrack entry for the song playing.
      */
-    public MPDTrack getCurrentSong() throws MPDException {
+    public synchronized MPDTrack getCurrentSong() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_SONG);
 
         // Reuse the parsing function for tracks here.
@@ -422,28 +453,28 @@ public class MPDInterface {
      *
      * @param pause 1 if playback should be paused, 0 if resumed
      */
-    public void pause(boolean pause) throws MPDException {
+    public synchronized void pause(boolean pause) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_PAUSE(pause));
     }
 
     /**
      * Jumps to the next song
      */
-    public void nextSong() throws MPDException {
+    public synchronized void nextSong() throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_NEXT);
     }
 
     /**
      * Jumps to the previous song
      */
-    public void previousSong() throws MPDException {
+    public synchronized void previousSong() throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_PREVIOUS);
     }
 
     /**
      * Stops playback
      */
-    public void stopPlayback() throws MPDException {
+    public synchronized void stopPlayback() throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_STOP);
     }
 
@@ -452,7 +483,7 @@ public class MPDInterface {
      *
      * @param random If random should be set (true) or not (false)
      */
-    public void setRandom(boolean random) throws MPDException {
+    public synchronized void setRandom(boolean random) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SET_RANDOM(random));
     }
 
@@ -461,7 +492,7 @@ public class MPDInterface {
      *
      * @param repeat If repeat should be set (true) or not (false)
      */
-    public void setRepeat(boolean repeat) throws MPDException {
+    public synchronized void setRepeat(boolean repeat) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SET_REPEAT(repeat));
     }
 
@@ -479,7 +510,7 @@ public class MPDInterface {
      *
      * @param consume True if yes and false if not.
      */
-    public void setConsume(boolean consume) throws MPDException {
+    public synchronized void setConsume(boolean consume) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SET_CONSUME(consume));
     }
 
@@ -488,7 +519,7 @@ public class MPDInterface {
      *
      * @param index Index of the song that should be played.
      */
-    public void playSongIndex(int index) throws MPDException {
+    public synchronized void playSongIndex(int index) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_PLAY_SONG_INDEX(index));
     }
 
@@ -497,7 +528,7 @@ public class MPDInterface {
      *
      * @param seconds Position in seconds to which a seek is requested to.
      */
-    public void seekSeconds(int seconds) throws MPDException {
+    public synchronized void seekSeconds(int seconds) throws MPDException {
         MPDCurrentStatus status;
 
         status = getCurrentServerStatus();
@@ -510,7 +541,7 @@ public class MPDInterface {
      *
      * @param volume Volume to set to the server.
      */
-    public void setVolume(int volume) throws MPDException {
+    public synchronized void setVolume(int volume) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SET_VOLUME(volume));
     }
 
@@ -525,7 +556,7 @@ public class MPDInterface {
      *
      * @param tracks List of MPDFileEntry objects to add to the current playlist.
      */
-    public void addTrackList(List<MPDFileEntry> tracks) throws MPDException {
+    public synchronized void addTrackList(List<MPDFileEntry> tracks) throws MPDException {
         if (null == tracks) {
             return;
         }
@@ -547,7 +578,7 @@ public class MPDInterface {
      *                   allows filtering of album tracks to a specified artist. Can also
      *                   be left empty then all tracks from the album will be added.
      */
-    public void addAlbumTracks(String albumname, String artistname, String mbid) throws MPDException {
+    public synchronized void addAlbumTracks(String albumname, String artistname, String mbid) throws MPDException {
         List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname, mbid);
         addTrackList(tracks);
     }
@@ -558,7 +589,7 @@ public class MPDInterface {
      *
      * @param artistname Name of the artist to enqueue the albums from.
      */
-    public void addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) throws MPDException {
+    public synchronized void addArtist(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) throws MPDException {
         List<MPDAlbum> albums = getArtistAlbums(artistname);
         if (null == albums) {
             return;
@@ -581,7 +612,7 @@ public class MPDInterface {
      *
      * @param url URL of the file or directory! to add to the current playlist.
      */
-    public void addSong(String url) throws MPDException {
+    public synchronized void addSong(String url) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE(url));
     }
 
@@ -592,7 +623,7 @@ public class MPDInterface {
      * @param url   URL to add to the playlist.
      * @param index Index at which the item should be added.
      */
-    public void addSongatIndex(String url, int index) throws MPDException {
+    public synchronized void addSongatIndex(String url, int index) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_ADD_FILE_AT_INDEX(url, index));
     }
 
@@ -602,21 +633,21 @@ public class MPDInterface {
      * @param term The search term to use
      * @param type The type of items to search
      */
-    public void addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException {
+    public synchronized void addSearchedFiles(String term, MPDCommands.MPD_SEARCH_TYPE type) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_ADD_SEARCH_FILES(term, type));
     }
 
     /**
      * Instructs the mpd server to clear its current playlist.
      */
-    public void clearPlaylist() throws MPDException {
+    public synchronized void clearPlaylist() throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_CLEAR_PLAYLIST);
     }
 
     /**
      * Instructs the mpd server to shuffle its current playlist.
      */
-    public void shufflePlaylist() throws MPDException {
+    public synchronized void shufflePlaylist() throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SHUFFLE_PLAYLIST);
     }
 
@@ -625,7 +656,7 @@ public class MPDInterface {
      *
      * @param index Position of the item to remove from current playlist.
      */
-    public void removeIndex(int index) throws MPDException {
+    public synchronized void removeIndex(int index) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(index));
     }
 
@@ -635,7 +666,7 @@ public class MPDInterface {
      * @param start Start of songs to remoge
      * @param end   End of the range
      */
-    public void removeRange(int start, int end) throws MPDException {
+    public synchronized void removeRange(int start, int end) throws MPDException {
         // Check capabilities if removal with one command is possible
         if (mConnection.getServerCapabilities().hasCurrentPlaylistRemoveRange()) {
             mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_RANGE_FROM_CURRENT_PLAYLIST(start, end + 1));
@@ -656,7 +687,7 @@ public class MPDInterface {
      * @param from Item to move from.
      * @param to   Position to enter item
      */
-    public void moveSongFromTo(int from, int to) throws MPDException {
+    public synchronized void moveSongFromTo(int from, int to) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_MOVE_SONG_FROM_INDEX_TO_INDEX(from, to));
     }
 
@@ -665,7 +696,7 @@ public class MPDInterface {
      *
      * @param name Name of the playlist to save to.
      */
-    public void savePlaylist(String name) throws MPDException {
+    public synchronized void savePlaylist(String name) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SAVE_PLAYLIST(name));
     }
 
@@ -675,7 +706,7 @@ public class MPDInterface {
      * @param playlistName Name of the playlist to add the url to.
      * @param url          URL to add to the saved playlist
      */
-    public void addSongToPlaylist(String playlistName, String url) throws MPDException {
+    public synchronized void addSongToPlaylist(String playlistName, String url) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(playlistName, url));
     }
 
@@ -685,7 +716,7 @@ public class MPDInterface {
      * @param playlistName Name of the playlist of which the song should be removed from
      * @param position     Index of the song to remove from the lits
      */
-    public void removeSongFromPlaylist(String playlistName, int position) throws MPDException {
+    public synchronized void removeSongFromPlaylist(String playlistName, int position) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_TRACK_FROM_PLAYLIST(playlistName, position));
     }
 
@@ -694,7 +725,7 @@ public class MPDInterface {
      *
      * @param name Name of the playlist to remove.
      */
-    public void removePlaylist(String name) throws MPDException {
+    public synchronized void removePlaylist(String name) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_REMOVE_PLAYLIST(name));
     }
 
@@ -703,7 +734,7 @@ public class MPDInterface {
      *
      * @param name Of the playlist to add to.
      */
-    public void loadPlaylist(String name) throws MPDException {
+    public synchronized void loadPlaylist(String name) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_LOAD_PLAYLIST(name));
     }
 
@@ -713,7 +744,7 @@ public class MPDInterface {
      *
      * @return List of MPDOutput objects or null in case of error.
      */
-    public List<MPDOutput> getOutputs() throws MPDException {
+    public synchronized List<MPDOutput> getOutputs() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_OUTPUTS);
 
         return MPDResponseParser.parseMPDOutputs(mConnection);
@@ -724,7 +755,7 @@ public class MPDInterface {
      *
      * @param id Id of the output to toggle (active/deactive)
      */
-    public void toggleOutput(int id) throws MPDException {
+    public synchronized void toggleOutput(int id) throws MPDException {
         if (mConnection.getServerCapabilities().hasToggleOutput()) {
             mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_TOGGLE_OUTPUT(id));
         } else {
@@ -745,7 +776,7 @@ public class MPDInterface {
      *
      * @param id Id of the output to enable (active/deactive)
      */
-    public void enableOutput(int id) throws MPDException {
+    public synchronized void enableOutput(int id) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_ENABLE_OUTPUT(id));
     }
 
@@ -754,7 +785,7 @@ public class MPDInterface {
      *
      * @param id Id of the output to disable (active/deactive)
      */
-    public void disableOutput(int id) throws MPDException {
+    public synchronized void disableOutput(int id) throws MPDException {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_DISABLE_OUTPUT(id));
     }
 
@@ -763,7 +794,7 @@ public class MPDInterface {
      *
      * @param path Path to update
      */
-    public void updateDatabase(String path) throws MPDException {
+    public synchronized void updateDatabase(String path) throws MPDException {
         // Update root directory
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE(path));
     }
