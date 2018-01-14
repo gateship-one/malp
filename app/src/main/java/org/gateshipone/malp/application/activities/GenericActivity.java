@@ -116,7 +116,6 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         if (themePref.equals(getString(R.string.pref_oleddark_key))) {
             setTheme(R.style.AppTheme_oledDark);
         }
-        mConnectionCallback = new MPDConnectionStateCallbackHandler(this, getMainLooper());
         mErrorListener = new MPDErrorListener(this);
     }
 
@@ -129,6 +128,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         MPDCommandHandler.getHandler().addErrorListener(mErrorListener);
         MPDQueryHandler.getHandler().addErrorListener(mErrorListener);
 
+        mConnectionCallback = new MPDConnectionStateCallbackHandler(this, getMainLooper());
         MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionCallback);
 
         ConnectionManager.getInstance(getApplicationContext()).registerMPDUse(getApplicationContext());
@@ -167,7 +167,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
-        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionCallback);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionCallback);
+        mConnectionCallback = null;
 
         getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
 
