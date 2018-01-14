@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MPDResponseParser {
+class MPDResponseParser {
     private static final String TAG = MPDResponseParser.class.getSimpleName();
 
     /**

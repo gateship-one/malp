@@ -24,6 +24,7 @@ package org.gateshipone.malp.mpdservice.handlers;
 
 
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 
 public abstract class MPDConnectionStateChangeHandler extends Handler {
@@ -32,6 +33,10 @@ public abstract class MPDConnectionStateChangeHandler extends Handler {
         DISCONNECTED
     }
 
+
+    public MPDConnectionStateChangeHandler(Looper looper) {
+        super(looper);
+    }
 
     /**
      * Handles the change of the connection of the MPDConnection. Can be used
@@ -53,6 +58,18 @@ public abstract class MPDConnectionStateChangeHandler extends Handler {
                 break;
         }
 
+    }
+
+    public void connected() {
+        Message msg = obtainMessage();
+        msg.obj = CONNECTION_STATE_CHANGE.CONNECTED;
+        sendMessage(msg);
+    }
+
+    public void disconnected() {
+        Message msg = obtainMessage();
+        msg.obj = CONNECTION_STATE_CHANGE.DISCONNECTED;
+        sendMessage(msg);
     }
 
     abstract public void onConnected();

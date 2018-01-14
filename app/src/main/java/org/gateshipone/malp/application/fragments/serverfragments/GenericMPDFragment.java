@@ -23,6 +23,8 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 
+import android.app.Activity;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -34,6 +36,7 @@ import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 public abstract class GenericMPDFragment<T extends Object> extends DialogFragment implements LoaderManager.LoaderCallbacks<T> {
@@ -44,15 +47,17 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
     protected SwipeRefreshLayout mSwipeRefreshLayout = null;
 
     protected GenericMPDFragment() {
-        mConnectionStateListener = new ConnectionStateListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         refreshContent();
-        MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
-
+        Activity activity = getActivity();
+        if (activity != null) {
+            mConnectionStateListener = new ConnectionStateListener(this, activity.getMainLooper());
+            MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionStateListener);
+        }
     }
 
     @Override
@@ -60,7 +65,8 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
         super.onPause();
         synchronized (this) {
             getLoaderManager().destroyLoader(0);
-            MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
+            MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionStateListener);
+            mConnectionStateListener = null;
         }
     }
 
@@ -83,7 +89,8 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
     private static class ConnectionStateListener extends MPDConnectionStateChangeHandler {
         private WeakReference<GenericMPDFragment> pFragment;
 
-        public ConnectionStateListener(GenericMPDFragment fragment) {
+        public ConnectionStateListener(GenericMPDFragment fragment, Looper looper) {
+            super(looper);
             pFragment = new WeakReference<GenericMPDFragment>(fragment);
         }
 

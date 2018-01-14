@@ -41,8 +41,8 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDGenericHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
@@ -93,9 +93,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private Context mContext;
 
     private ConnectionManager(Context context) {
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(this);
-        MPDQueryHandler.registerConnectionStateListener(this);
-        MPDCommandHandler.registerConnectionStateListener(this);
+        super(context.getMainLooper());
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(this);
         mHostname = null;
         mPassword = null;
         mUseCounter = 0;

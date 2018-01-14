@@ -105,7 +105,8 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
 
         mStatusListeners = new ArrayList<>();
 
-        mMPDConnection.setIdleListener(new IdleStateListener(this, looper));
+        MPDInterface.mInstance.addMPDIdleChangeHandler(new IdleStateListener(this, looper));
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(new ConnectionStateListener(this, looper));
 
         mLastStatus = new MPDCurrentStatus();
     }
@@ -184,7 +185,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
 
         MPDCurrentStatus status = null;
         try {
-            status = MPDInterface.getCurrentServerStatus(mMPDConnection);
+            status = MPDInterface.mInstance.getCurrentServerStatus();
         } catch (MPDException e) {
             handleMPDError(e);
             return;
@@ -193,7 +194,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
         if (status.getCurrentSongIndex() != mLastStatus.getCurrentSongIndex() || status.getPlaylistVersion() != mLastStatus.getPlaylistVersion()) {
             // New track started playing. Get it and inform the listener.
             try {
-                mLastFile = MPDInterface.getCurrentSong(mMPDConnection);
+                mLastFile = MPDInterface.mInstance.getCurrentSong();
             } catch (MPDException e) {
                 handleMPDError(e);
             }
@@ -219,7 +220,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
     }
 
     private synchronized void startInterpolation() {
-        if (mMPDConnection.isConnected()) {
+        if (MPDInterface.mInstance.isConnected()) {
             if (mLastStatus.getPlaybackState() == MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 stopInterpolation();
 
@@ -236,14 +237,6 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
 
     public MPDCurrentStatus getLastStatus() {
         return mLastStatus;
-    }
-
-    public void registerConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        internalRegisterConnectionStateListener(stateHandler);
-    }
-
-    public void unregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        internalUnregisterConnectionStateListener(stateHandler);
     }
 
 
@@ -281,9 +274,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
         }
     }
 
-    @Override
-    public void onConnected() {
-        super.onConnected();
+    private void onConnected() {
         mLastStatus = new MPDCurrentStatus();
         mLastFile = new MPDTrack("");
         distributeNewStatus(mLastStatus);
@@ -291,9 +282,7 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
         resynchronizeState();
     }
 
-    @Override
-    public void onDisconnected() {
-        super.onDisconnected();
+    private void onDisconnected() {
         synchronized (this) {
             stopInterpolation();
 
@@ -348,6 +337,25 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
         @Override
         protected void onNoIdle() {
             mParent.get().onNoIdle();
+        }
+    }
+
+    private static class ConnectionStateListener extends MPDConnectionStateChangeHandler {
+        WeakReference<MPDStateMonitoringHandler> mParent;
+
+        public ConnectionStateListener(MPDStateMonitoringHandler parentHandler, Looper looper) {
+            super(looper);
+            mParent = new WeakReference<MPDStateMonitoringHandler>(parentHandler);
+        }
+
+        @Override
+        public void onConnected() {
+            mParent.get().onConnected();
+        }
+
+        @Override
+        public void onDisconnected() {
+            mParent.get().onDisconnected();
         }
     }
 }

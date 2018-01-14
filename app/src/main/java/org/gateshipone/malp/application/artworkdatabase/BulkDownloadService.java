@@ -39,6 +39,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
@@ -54,6 +55,9 @@ import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTP
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
+
+import java.lang.ref.WeakReference;
 
 public class BulkDownloadService extends Service implements ArtworkManager.BulkLoadingProgressCallback {
     private static final String TAG = BulkDownloadService.class.getSimpleName();
@@ -97,9 +101,9 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         super.onCreate();
         mNotificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         if ( null == mConnectionHandler ) {
-            mConnectionHandler = new ConnectionStateHandler(this);
+            mConnectionHandler = new ConnectionStateHandler(this, getMainLooper());
             Log.v(TAG, "Registering connection state listener");
-            MPDQueryHandler.registerConnectionStateListener(mConnectionHandler);
+            MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionHandler);
         }
 
         mSumImageDownloads = 0;
@@ -266,7 +270,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
     public void finishedLoading() {
         mNotificationManager.cancel(NOTIFICATION_ID);
         stopForeground(true);
-        MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionHandler);
         stopSelf();
         if ( mWakelock.isHeld() ) {
             mWakelock.release();
@@ -282,21 +286,21 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
         }
     }
 
-    private class ConnectionStateHandler extends MPDConnectionStateChangeHandler {
+    private static class ConnectionStateHandler extends MPDConnectionStateChangeHandler {
+        private final WeakReference<BulkDownloadService> mService;
 
-        BulkDownloadService mService;
-
-        public ConnectionStateHandler(BulkDownloadService service) {
-            mService = service;
+        private ConnectionStateHandler(BulkDownloadService service, Looper looper) {
+            super(looper);
+            mService = new WeakReference<BulkDownloadService>(service);
         }
 
         @Override
         public void onConnected() {
             Log.v(TAG, "Connected to mpd host");
-            mSumImageDownloads = 0;
-            mRemainingArtists = 0;
-            mRemainingAlbums = 0;
-            ArtworkManager.getInstance(getApplicationContext()).bulkLoadImages(mService);
+            mService.get().mSumImageDownloads = 0;
+            mService.get().mRemainingArtists = 0;
+            mService.get().mRemainingAlbums = 0;
+            ArtworkManager.getInstance(mService.get().getApplicationContext()).bulkLoadImages(mService.get());
         }
 
         @Override
@@ -315,7 +319,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 ArtworkManager.getInstance(getApplicationContext()).cancelAllRequests();
                 mNotificationManager.cancel(NOTIFICATION_ID);
                 stopForeground(true);
-                MPDQueryHandler.unregisterConnectionStateListener(mConnectionHandler);
+                MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionHandler);
                 stopSelf();
             }
         }

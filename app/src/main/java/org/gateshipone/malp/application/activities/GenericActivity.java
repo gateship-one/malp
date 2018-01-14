@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -46,6 +47,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 
 import java.lang.ref.WeakReference;
 
@@ -114,7 +116,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         if (themePref.equals(getString(R.string.pref_oleddark_key))) {
             setTheme(R.style.AppTheme_oledDark);
         }
-        mConnectionCallback = new MPDConnectionStateCallbackHandler(this);
+        mConnectionCallback = new MPDConnectionStateCallbackHandler(this, getMainLooper());
         mErrorListener = new MPDErrorListener(this);
     }
 
@@ -127,7 +129,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         MPDCommandHandler.getHandler().addErrorListener(mErrorListener);
         MPDQueryHandler.getHandler().addErrorListener(mErrorListener);
 
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionCallback);
 
         ConnectionManager.getInstance(getApplicationContext()).registerMPDUse(getApplicationContext());
 
@@ -165,7 +167,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionCallback);
 
         getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
 
@@ -215,34 +217,19 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     private static class MPDConnectionStateCallbackHandler extends MPDConnectionStateChangeHandler {
         private WeakReference<GenericActivity> mActivity;
 
-        MPDConnectionStateCallbackHandler(GenericActivity activity) {
+        MPDConnectionStateCallbackHandler(GenericActivity activity, Looper looper) {
+            super(looper);
             mActivity = new WeakReference<GenericActivity>(activity);
         }
 
         @Override
         public void onConnected() {
-            final GenericActivity activity = mActivity.get();
-            if (null != activity) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.onConnected();
-                    }
-                });
-            }
+            mActivity.get().onConnected();
         }
 
         @Override
         public void onDisconnected() {
-            final GenericActivity activity = mActivity.get();
-            if (null != activity) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.onDisconnected();
-                    }
-                });
-            }
+            mActivity.get().onDisconnected();
         }
     }
 

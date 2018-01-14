@@ -34,6 +34,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -77,11 +78,13 @@ import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
+import java.lang.ref.WeakReference;
 import java.util.Locale;
 
 public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuItemClickListener, ArtworkManager.onNewAlbumImageListener, ArtworkManager.onNewArtistImageListener,
@@ -243,7 +246,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         super(context, attrs, defStyle);
         mDragHelper = ViewDragHelper.create(this, 1f, new BottomDragCallbackHelper());
         mStateListener = new ServerStatusListener();
-        mConnectionStateListener = new ServerConnectionListener();
+        mConnectionStateListener = new ServerConnectionListener(this, getContext().getMainLooper());
         mLastStatus = new MPDCurrentStatus();
         mLastTrack = new MPDTrack("");
     }
@@ -1170,7 +1173,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
     public void onPause() {
         // Unregister listener
         MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mStateListener);
-        MPDStateMonitoringHandler.getHandler().unregisterConnectionStateListener(mConnectionStateListener);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionStateListener);
         mPlaylistView.onPause();
 
         if (null != mBackgroundServiceConnection) {
@@ -1218,7 +1221,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Register with MPDStateMonitoring system
         MPDStateMonitoringHandler.getHandler().registerStatusListener(mStateListener);
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionStateListener);
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionStateListener);
 
         mPlaylistView.onResume();
         ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewAlbumImageListener(this);
@@ -1505,17 +1508,24 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         }
     }
 
-    private class ServerConnectionListener extends MPDConnectionStateChangeHandler {
+    private static class ServerConnectionListener extends MPDConnectionStateChangeHandler {
+
+        private WeakReference<NowPlayingView> mNPV;
+
+        ServerConnectionListener(NowPlayingView npv, Looper looper) {
+            super(looper);
+            mNPV = new WeakReference<NowPlayingView>(npv);
+        }
 
         @Override
         public void onConnected() {
-            updateMPDStatus(MPDStateMonitoringHandler.getHandler().getLastStatus());
+            mNPV.get().updateMPDStatus(MPDStateMonitoringHandler.getHandler().getLastStatus());
         }
 
         @Override
         public void onDisconnected() {
-            updateMPDStatus(new MPDCurrentStatus());
-            updateMPDCurrentTrack(new MPDTrack(""));
+            mNPV.get().updateMPDStatus(new MPDCurrentStatus());
+            mNPV.get().updateMPDCurrentTrack(new MPDTrack(""));
         }
     }
 

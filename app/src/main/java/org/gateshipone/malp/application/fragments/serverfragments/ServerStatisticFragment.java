@@ -41,6 +41,7 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServe
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
@@ -142,9 +143,9 @@ public class ServerStatisticFragment extends Fragment {
             mDBLength.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getAllSongDuration(),getContext()));
             mLastUpdate.setText(FormatHelper.formatTimeStampToString(statistics.getLastDBUpdate() * 1000));
 
-            MPDCapabilities capabilities = MPDQueryHandler.getServerCapabilities();
+            MPDCapabilities capabilities = MPDInterface.mInstance.getServerCapabilities();
             if (null != capabilities) {
-                mServerFeatures.setText(MPDQueryHandler.getServerCapabilities().getServerFeatures());
+                mServerFeatures.setText(capabilities.getServerFeatures());
             }
         }
     }

@@ -28,14 +28,11 @@ import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
-import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 
 /**
  * This class is a base class for all derived handlers that talk to the MPD server.
@@ -53,19 +50,14 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
  * All handlers are static singletons and run in a new spawned thread. You can get the singleton via
  * an static method. Each handler has one MPDConnection object, that is used for talking to the mpd server.
  */
-public abstract class MPDGenericHandler extends Handler implements MPDConnection.MPDConnectionStateChangeListener {
+public abstract class MPDGenericHandler extends Handler {
     private static final String TAG = MPDGenericHandler.class.getSimpleName();
-    /**
-     * MPDConnetion used for the communication to the MPD server.
-     */
-    protected MPDConnection mMPDConnection;
 
 
     /**
      * List of handlers that get notified when there is a change of state for the network connection
      * (connected, disconnected)
      */
-    protected final ArrayList<MPDConnectionStateChangeHandler> mConnectionStateListener;
 
     protected final ArrayList<MPDConnectionErrorHandler> mErrorListeners;
 
@@ -78,13 +70,11 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
      */
     protected MPDGenericHandler(Looper looper) {
         super(looper);
-        mConnectionStateListener = new ArrayList<>();
         mErrorListeners = new ArrayList<>();
-        mMPDConnection = MPDConnection.mInstance;
 
         // Register all handlers as StateObservers with the MPDConnection. This ensures that all subclasses
         // will get a notification about connection state changes.
-        mMPDConnection.setStateListener(this);
+
     }
 
 
@@ -127,40 +117,21 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
             if ((null == hostname) || (null == port)) {
                 return;
             }
-            mMPDConnection.setServerParameters(hostname, password, port);
+            MPDInterface.mInstance.setServerParameters(hostname, password, port);
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_CONNECT_MPD_SERVER) {
             // Connect to the mpd server. Server parameters have to be set before.
             try {
-                mMPDConnection.connectToServer();
+                MPDInterface.mInstance.connect();
             } catch (MPDException e) {
                 handleMPDError(e);
             }
 
         } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_DISCONNECT_MPD_SERVER) {
             // Disconnect from the mpd server.
-            mMPDConnection.disconnectFromServer();
+            MPDInterface.mInstance.disconnect();
         }
     }
 
-    // Internal class that registers observers to the state changes. This is only used by the subclasses.
-    protected void internalRegisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        if (null == stateHandler) {
-            return;
-        }
-        synchronized (mConnectionStateListener) {
-            mConnectionStateListener.add(stateHandler);
-        }
-    }
-
-    // Internal class that unregisters observers to the state changes. This is only used by the subclasses.
-    protected void internalUnregisterConnectionStateListener(MPDConnectionStateChangeHandler stateHandler) {
-        if (null == stateHandler) {
-            return;
-        }
-        synchronized (mConnectionStateListener) {
-            mConnectionStateListener.remove(stateHandler);
-        }
-    }
 
     public void addErrorListener(MPDConnectionErrorHandler errorListener) {
         synchronized (mErrorListeners) {
@@ -174,35 +145,6 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
         }
     }
 
-    /**
-     * This method will notify all registered observers about the connected state
-     */
-    @Override
-    public void onConnected() {
-        synchronized (mConnectionStateListener) {
-            // Send a message to all registered listen handlers.
-            for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
-                Message msg = handler.obtainMessage();
-                msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.CONNECTED;
-                handler.sendMessage(msg);
-            }
-        }
-    }
-
-    /**
-     * This method will notify all registered observers about the disconnected state
-     */
-    @Override
-    public void onDisconnected() {
-        // Send a message to all registered listen handlers.
-        synchronized (mConnectionStateListener) {
-            for (MPDConnectionStateChangeHandler handler : mConnectionStateListener) {
-                Message msg = handler.obtainMessage();
-                msg.obj = MPDConnectionStateChangeHandler.CONNECTION_STATE_CHANGE.DISCONNECTED;
-                handler.sendMessage(msg);
-            }
-        }
-    }
 
     /**
      * Set the server parameters for the connection. MUST be called before trying to
@@ -226,13 +168,32 @@ public abstract class MPDGenericHandler extends Handler implements MPDConnection
     }
 
     protected void handleMPDError(MPDException e) {
-        Log.e(TAG,"MPD error: " + e.getError());
+        Log.e(TAG, "MPD error: " + e.getError());
 
         // Notify error listeners
         synchronized (mErrorListeners) {
-            for(MPDConnectionErrorHandler handler : mErrorListeners) {
+            for (MPDConnectionErrorHandler handler : mErrorListeners) {
                 handler.newMPDError(e);
             }
         }
     }
+//
+//    private static class ConnectionStateListener extends MPDConnectionStateChangeHandler {
+//
+//        private final WeakReference<MPDGenericHandler> mParentHandler;
+//
+//        ConnectionStateListener(MPDGenericHandler handler) {
+//            mParentHandler = new WeakReference<MPDGenericHandler>(handler);
+//        }
+//
+//        @Override
+//        public void onConnected() {
+//            mParentHandler.get().onConnected();
+//        }
+//
+//        @Override
+//        public void onDisconnected() {
+//            mParentHandler.get().onDisconnected();
+//        }
+//    }
 }

@@ -56,6 +56,7 @@ import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -324,7 +325,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         DrawableCompat.setTint(drawable, tintColor);
         menu.findItem(R.id.action_search).setIcon(drawable);
 
-        MPDCapabilities serverCaps = MPDQueryHandler.getServerCapabilities();
+        MPDCapabilities serverCaps = MPDInterface.mInstance.getServerCapabilities();
         if ( null != serverCaps ) {
             if ( serverCaps.hasListFiltering()) {
                 menu.findItem(R.id.action_show_albums_from_here).setVisible(true);
