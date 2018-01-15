@@ -58,10 +58,14 @@ public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
 
         @Override
         public void handleTracks(List<MPDFileEntry> fileList, int start, int end) {
-            if ( mPlaylistsLoader.get().mAddHeader ) {
-                fileList.add(0, new MPDPlaylist(mPlaylistsLoader.get().getContext().getString(R.string.create_new_playlist)));
+            PlaylistsLoader loader = mPlaylistsLoader.get();
+
+            if (loader != null) {
+                if (loader.mAddHeader) {
+                    fileList.add(0, new MPDPlaylist(mPlaylistsLoader.get().getContext().getString(R.string.create_new_playlist)));
+                }
+                loader.deliverResult(fileList);
             }
-            mPlaylistsLoader.get().deliverResult(fileList);
         }
     }
 

@@ -86,7 +86,11 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
 
         @Override
         public void handleTracks(List<MPDFileEntry> trackList, int start, int end) {
-            mAlbumTracksLoader.get().deliverResult(trackList);
+            AlbumTracksLoader loader = mAlbumTracksLoader.get();
+
+            if (loader != null) {
+                loader.deliverResult(trackList);
+            }
         }
     }
 

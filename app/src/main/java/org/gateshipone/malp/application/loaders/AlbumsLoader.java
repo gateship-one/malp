@@ -71,11 +71,15 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
         @Override
         public void handleAlbums(List<MPDAlbum> albumList) {
-            // If artist albums and sort by year is active, resort the list
-            if ( mAlbumsLoader.get().mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == mAlbumsLoader.get().mArtistName) || mAlbumsLoader.get().mArtistName.isEmpty() ) ) {
-                Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
+            AlbumsLoader loader = mAlbumsLoader.get();
+
+            if (loader != null) {
+                // If artist albums and sort by year is active, resort the list
+                if (loader.mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == loader.mArtistName) || loader.mArtistName.isEmpty())) {
+                    Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
+                }
+                loader.deliverResult(albumList);
             }
-            mAlbumsLoader.get().deliverResult(albumList);
         }
     }
 

@@ -58,7 +58,11 @@ public class OutputsLoader extends Loader<List<MPDOutput>> {
 
         @Override
         public void handleOutputs(List<MPDOutput> outputList) {
-            mOutputsLoader.get().deliverResult(outputList);
+            OutputsLoader loader = mOutputsLoader.get();
+
+            if (loader != null) {
+               loader.deliverResult(outputList);
+            }
         }
     }
 

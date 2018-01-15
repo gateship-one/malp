@@ -56,7 +56,10 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
 
         @Override
         public void handleArtists(List<MPDArtist> artistList) {
-            mArtistsLoader.get().deliverResult(artistList);
+            ArtistsLoader loader = mArtistsLoader.get();
+            if (loader != null) {
+                loader.deliverResult(artistList);
+            }
         }
     }
 

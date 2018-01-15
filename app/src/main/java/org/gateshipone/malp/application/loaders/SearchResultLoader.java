@@ -78,7 +78,11 @@ public class SearchResultLoader extends Loader<List<MPDFileEntry>> {
 
         @Override
         public void handleTracks(List<MPDFileEntry> trackList, int start, int end) {
-            mSearchResultLoader.get().deliverResult(trackList);
+            SearchResultLoader loader = mSearchResultLoader.get();
+
+            if (loader != null) {
+                loader.deliverResult(trackList);
+            }
         }
     }
 
