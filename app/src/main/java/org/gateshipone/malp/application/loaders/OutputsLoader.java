@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.loaders;
 import android.content.Context;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.R;
@@ -41,19 +42,23 @@ public class OutputsLoader extends Loader<List<MPDOutput>> {
 
     private OutputResponseHandler mOutputResponseHandler;
 
-    Context mContext;
 
     public OutputsLoader(Context context) {
         super(context);
-        mContext = context;
-        mOutputResponseHandler = new OutputResponseHandler();
+        mOutputResponseHandler = new OutputResponseHandler(this);
     }
 
 
-    private class OutputResponseHandler extends MPDResponseOutputList {
+    private static class OutputResponseHandler extends MPDResponseOutputList {
+        private WeakReference<OutputsLoader> mOutputsLoader;
+
+        private OutputResponseHandler(OutputsLoader loader) {
+            mOutputsLoader = new WeakReference<OutputsLoader>(loader);
+        }
+
         @Override
         public void handleOutputs(List<MPDOutput> outputList) {
-            deliverResult(outputList);
+            mOutputsLoader.get().deliverResult(outputList);
         }
     }
 

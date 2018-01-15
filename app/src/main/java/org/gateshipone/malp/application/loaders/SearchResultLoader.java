@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.loaders;
 import android.content.Context;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
@@ -57,7 +58,7 @@ public class SearchResultLoader extends Loader<List<MPDFileEntry>> {
         super(context);
 
         // Create a new Handler for asynchronous callback
-        pTrackResponseHandler = new TrackResponseHandler();
+        pTrackResponseHandler = new TrackResponseHandler(this);
 
         // Set the playlist properties
         mSearchString = searchTerm;
@@ -68,10 +69,16 @@ public class SearchResultLoader extends Loader<List<MPDFileEntry>> {
     /**
      * Private class for the response handler.
      */
-    private class TrackResponseHandler extends MPDResponseFileList {
+    private static class TrackResponseHandler extends MPDResponseFileList {
+        private WeakReference<SearchResultLoader> mSearchResultLoader;
+
+        private TrackResponseHandler(SearchResultLoader loader) {
+            mSearchResultLoader = new WeakReference<SearchResultLoader>(loader);
+        }
+
         @Override
         public void handleTracks(List<MPDFileEntry> trackList, int start, int end) {
-            deliverResult(trackList);
+            mSearchResultLoader.get().deliverResult(trackList);
         }
     }
 

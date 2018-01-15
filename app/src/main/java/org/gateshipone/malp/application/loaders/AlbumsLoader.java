@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
@@ -51,7 +52,7 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     public AlbumsLoader(Context context, String artistName, String albumsPath) {
         super(context);
 
-        pAlbumsResponseHandler = new AlbumResponseHandler();
+        pAlbumsResponseHandler = new AlbumResponseHandler(this);
 
         mArtistName = artistName;
         mAlbumsPath = albumsPath;
@@ -61,16 +62,20 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     }
 
 
-    private class AlbumResponseHandler extends MPDResponseAlbumList {
+    private static class AlbumResponseHandler extends MPDResponseAlbumList {
+        private WeakReference<AlbumsLoader> mAlbumsLoader;
 
+        private AlbumResponseHandler(AlbumsLoader loader) {
+            mAlbumsLoader = new WeakReference<AlbumsLoader>(loader);
+        }
 
         @Override
         public void handleAlbums(List<MPDAlbum> albumList) {
             // If artist albums and sort by year is active, resort the list
-            if ( mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == mArtistName) || mArtistName.isEmpty() ) ) {
+            if ( mAlbumsLoader.get().mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == mAlbumsLoader.get().mArtistName) || mAlbumsLoader.get().mArtistName.isEmpty() ) ) {
                 Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
             }
-            deliverResult(albumList);
+            mAlbumsLoader.get().deliverResult(albumList);
         }
     }
 

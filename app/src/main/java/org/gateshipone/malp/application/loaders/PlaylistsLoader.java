@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.loaders;
 import android.content.Context;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.R;
@@ -39,24 +40,28 @@ public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
 
     private PlaylistResponseHandler mPlaylistResponseHandler;
 
-    Context mContext;
     boolean mAddHeader;
 
     public PlaylistsLoader(Context context, boolean addHeader) {
         super(context);
-        mContext = context;
         mAddHeader = addHeader;
-        mPlaylistResponseHandler = new PlaylistResponseHandler();
+        mPlaylistResponseHandler = new PlaylistResponseHandler(this, context);
     }
 
 
-    private class PlaylistResponseHandler extends MPDResponseFileList {
+    private static class PlaylistResponseHandler extends MPDResponseFileList {
+        private WeakReference<PlaylistsLoader> mPlaylistsLoader;
+
+        private PlaylistResponseHandler(PlaylistsLoader loader, Context context) {
+            mPlaylistsLoader = new WeakReference<PlaylistsLoader>(loader);
+        }
+
         @Override
         public void handleTracks(List<MPDFileEntry> fileList, int start, int end) {
-            if ( mAddHeader ) {
-                fileList.add(0, new MPDPlaylist(mContext.getString(R.string.create_new_playlist)));
+            if ( mPlaylistsLoader.get().mAddHeader ) {
+                fileList.add(0, new MPDPlaylist(mPlaylistsLoader.get().getContext().getString(R.string.create_new_playlist)));
             }
-            deliverResult(fileList);
+            mPlaylistsLoader.get().deliverResult(fileList);
         }
     }
 
