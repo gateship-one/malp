@@ -107,12 +107,14 @@
     <string name="pref_library_click_action_details_key" translatable="false">library_click_action_details</string>
     <string name="pref_library_click_action_add_key" translatable="false">library_click_action_add</string>
     <string name="pref_library_click_action_play_key" translatable="false">library_click_action_play</string>
+    <string name="pref_library_click_action_play_next_key" translatable="false">library_click_action_play_next</string>
     <string name="pref_library_click_action_default" translatable="false">@string/pref_library_click_action_add_key</string>
 
     <string-array name="preference_library_click_action_values" translatable="false">
         <item>@string/pref_library_click_action_details_key</item>
         <item>@string/pref_library_click_action_add_key</item>
         <item>@string/pref_library_click_action_play_key</item>
+        <item>@string/pref_library_click_action_play_next_key</item>
     </string-array>
 
     <string name="pref_volume_control_view_off_key" translatable="false">volume_control_off_key</string>

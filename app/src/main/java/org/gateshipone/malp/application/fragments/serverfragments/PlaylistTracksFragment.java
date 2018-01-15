@@ -356,6 +356,10 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
                 play(position);
                 return;
             }
+            case ACTION_PLAY_SONG_NEXT: {
+                playNext(position);
+                return;
+            }
         }
     }
 

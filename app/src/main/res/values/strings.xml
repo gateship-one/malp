@@ -297,11 +297,13 @@
     <string name="preference_library_click_action_details" translatable="false">@string/action_show_details</string>
     <string name="preference_library_click_action_add" translatable="false">@string/action_add</string>
     <string name="preference_library_click_action_play" translatable="false">@string/action_play_song</string>
+    <string name="preference_library_click_action_play_next" translatable="false">@string/action_enqueue_as_next</string>
 
     <string-array name="preference_library_click">
         <item>@string/preference_library_click_action_details</item>
         <item>@string/preference_library_click_action_add</item>
         <item>@string/preference_library_click_action_play</item>
+        <item>@string/preference_library_click_action_play_next</item>
     </string-array>
 
 

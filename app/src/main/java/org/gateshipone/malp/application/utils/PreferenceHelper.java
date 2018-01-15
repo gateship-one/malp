@@ -34,6 +34,7 @@ public class PreferenceHelper {
         ACTION_SHOW_DETAILS,
         ACTION_ADD_SONG,
         ACTION_PLAY_SONG,
+        ACTION_PLAY_SONG_NEXT,
     }
 
     public static MPDAlbum.MPD_ALBUM_SORT_ORDER getMPDAlbumSortOrder(SharedPreferences prefs, Context context) {
@@ -58,6 +59,8 @@ public class PreferenceHelper {
             return LIBRARY_TRACK_CLICK_ACTION.ACTION_ADD_SONG;
         } else if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_play_key))) {
             return LIBRARY_TRACK_CLICK_ACTION.ACTION_PLAY_SONG;
+        } else if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_play_next_key))) {
+            return LIBRARY_TRACK_CLICK_ACTION.ACTION_PLAY_SONG_NEXT;
         }
         return LIBRARY_TRACK_CLICK_ACTION.ACTION_ADD_SONG;
     }

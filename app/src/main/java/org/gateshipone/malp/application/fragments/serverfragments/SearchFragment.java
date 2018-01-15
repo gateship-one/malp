@@ -372,6 +372,12 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 MPDQueryHandler.playSong(track.getPath());
                 return;
             }
+            case ACTION_PLAY_SONG_NEXT: {
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.playSongNext(track.getPath());
+                return;
+            }
         }
     }
 

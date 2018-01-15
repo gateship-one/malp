@@ -448,6 +448,12 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                     MPDQueryHandler.playSong(track.getPath());
                     return;
                 }
+                case ACTION_PLAY_SONG_NEXT: {
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.playSongNext(track.getPath());
+                    return;
+                }
             }
         }
     }
