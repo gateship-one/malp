@@ -39,6 +39,7 @@ import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseHandl
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class MPDStateMonitoringHandler extends MPDGenericHandler {
@@ -275,8 +276,14 @@ public class MPDStateMonitoringHandler extends MPDGenericHandler {
     }
 
     private void onConnected() {
-        mLastStatus = new MPDCurrentStatus();
-        mLastFile = new MPDTrack("");
+        try {
+            mLastStatus = MPDInterface.mInstance.getCurrentServerStatus();
+            mLastFile = MPDInterface.mInstance.getCurrentSong();
+        } catch (MPDException e) {
+            mLastStatus = new MPDCurrentStatus();
+            mLastFile = new MPDTrack("");
+        }
+
         distributeNewStatus(mLastStatus);
         distributeNewTrack(mLastFile);
         resynchronizeState();

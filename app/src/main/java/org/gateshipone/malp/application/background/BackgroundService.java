@@ -266,7 +266,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
             Log.v(TAG, "Null intend in onStartCommand");
             shutdownService();
             // Something wrong here.
-            return START_STICKY;
+            return START_NOT_STICKY;
         }
         String action = intent.getAction();
         Log.v(TAG, "onStartCommand: " + action);
@@ -275,7 +275,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         }
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_MORE_FAVORABLE);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
