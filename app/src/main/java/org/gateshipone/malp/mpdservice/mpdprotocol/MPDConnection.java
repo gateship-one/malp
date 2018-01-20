@@ -970,22 +970,22 @@ class MPDConnection {
                 // External change
                 if (DEBUG_ENABLED) {
                     Log.v(TAG, "External changes");
-
-                    while (!response.equals("OK")) {
-                        try {
-                            response = readLineInternal();
-                        } catch (MPDException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
-
-                    mConnectionLock.release();
-                    notifyIdleListener();
-
-                    scheduleIDLE();
                 }
+
+                while (!response.equals("OK")) {
+                    try {
+                        response = readLineInternal();
+                    } catch (MPDException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
+
+                mConnectionLock.release();
+                notifyIdleListener();
+
+                scheduleIDLE();
             } else if (response.isEmpty()) {
                 if (DEBUG_ENABLED) {
                     Log.e(TAG, "Error during idling");
