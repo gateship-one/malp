@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~  Copyright (C) 2018 Team Gateship-One
   ~  (Hendrik Borghorst & Frederik Luetkes)
   ~
@@ -35,33 +34,37 @@
         <item
             android:id="@+id/nav_files"
             android:icon="@drawable/ic_folder_48dp"
-            android:title="@string/menu_files"/>
+            android:title="@string/menu_files" />
         <item
             android:id="@+id/nav_search"
             android:icon="@drawable/ic_search_black_24dp"
-            android:title="@string/menu_search"/>
+            android:title="@string/menu_search" />
     </group>
     <item
         android:id="@+id/nav_server_properties"
+        android:checkable="true"
         android:icon="@drawable/ic_server_properties_24dp"
-        android:title="@string/menu_server"
-        android:checkable="true"/>
-    <item android:title="@string/menu_settings"
-        android:checkable="true">
+        android:title="@string/menu_server" />
+    <item
+        android:checkable="true"
+        android:title="@string/menu_settings">
         <menu>
             <item
-                android:checkable="true"
                 android:id="@+id/nav_profiles"
+                android:checkable="true"
                 android:icon="@drawable/ic_settings_profiles_24dp"
                 android:title="@string/menu_profiles" />
             <item
-                android:checkable="true"
                 android:id="@+id/nav_app_settings"
+                android:checkable="true"
                 android:icon="@drawable/ic_settings_24dp"
                 android:title="@string/menu_app_settings" />
+            <item
+                android:id="@+id/nav_information"
+                android:icon="@drawable/ic_help_black_24dp"
+                android:title="@string/menu_information"/>
         </menu>
     </item>
-
 
 
 </menu>

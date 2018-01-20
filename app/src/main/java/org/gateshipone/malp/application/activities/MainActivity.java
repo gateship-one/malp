@@ -57,6 +57,7 @@ import android.widget.TextView;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.adapters.CurrentPlaylistAdapter;
 import org.gateshipone.malp.application.fragments.ArtworkSettingsFragment;
+import org.gateshipone.malp.application.fragments.InformationSettingsFragment;
 import org.gateshipone.malp.application.fragments.serverfragments.ServerPropertiesFragment;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
@@ -394,6 +395,9 @@ public class MainActivity extends GenericActivity
         } else if (id == R.id.nav_server_properties) {
             fragment = new ServerPropertiesFragment();
             fragmentTag = ServerPropertiesFragment.TAG;
+        } else if (id == R.id.nav_information) {
+            fragment = new InformationSettingsFragment();
+            fragmentTag = InformationSettingsFragment.class.getSimpleName();
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

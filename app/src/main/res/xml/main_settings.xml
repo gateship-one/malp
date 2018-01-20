@@ -133,11 +133,5 @@
         <Preference
             android:key="@string/pref_artwork_settings_key"
             android:title="@string/artwork_settings" />
-        <Preference android:title="@string/preference_launch_about">
-            <intent
-                android:action="android.intent.action.VIEW"
-                android:targetClass="org.gateshipone.malp.application.activities.AboutActivity"
-                android:targetPackage="org.gateshipone.malp" />
-        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

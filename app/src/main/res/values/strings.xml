@@ -104,6 +104,7 @@
     <string name="menu_files">Files</string>
     <string name="menu_statistic">Statistic</string>
     <string name="menu_app_settings">App settings</string>
+    <string name="menu_information">Information</string>
 
     <string name="menu_search">Search</string>
 
@@ -210,7 +211,10 @@
     <string name="default_playlist_title">New Playlist</string>
     <string name="create_new_playlist">Create new playlist</string>
 
+    <string name="preference_launch_faq">F.A.Q.</string>
+    <string name="preference_launch_faq_text">Information how to get help for this application</string>
     <string name="preference_launch_about">About</string>
+    <string name="preference_launch_about_text">Version, license and contributors information</string>
 
     <string name="preference_theme_title">Theme</string>
     <string name="preference_theme_summary">Select a different design for the application.</string>
@@ -421,6 +425,7 @@
     <string name="url_musicbrainz" translatable="false">https://www.musicbrainz.org</string>
     <string name="url_lastfm" translatable="false">https://www.last.fm</string>
     <string name="url_fanarttv" translatable="false">https://fanart.tv</string>
+    <string name="url_faq" translatable="false">https://github.com/gateship-one/malp/wiki/FAQ</string>
 
     <!-- Bulk downloader service -->
     <string name="downloader_notification_title">Bulk download running</string>
