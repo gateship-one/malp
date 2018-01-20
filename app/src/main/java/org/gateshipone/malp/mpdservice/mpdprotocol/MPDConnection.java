@@ -262,7 +262,7 @@ class MPDConnection {
      * @param password Password for the server to authenticate with. Can be left empty.
      * @param port     TCP port to connect to.
      */
-    synchronized void setServerParameters(String hostname, String password, int port) {
+    void setServerParameters(String hostname, String password, int port) {
         mHostname = hostname;
         mPassword = password;
         mPort = port;
@@ -294,6 +294,7 @@ class MPDConnection {
 
         synchronized (this) {
             if (mConnectionState == CONNECTION_STATES.CONNECTING || (null == mHostname) || mHostname.isEmpty()) {
+                mConnectionLock.release();
                 return;
             }
             changeState(CONNECTION_STATES.CONNECTING);
