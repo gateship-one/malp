@@ -22,6 +22,8 @@
 
 package org.gateshipone.malp.application.fragments.serverfragments;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -113,6 +115,42 @@ public class SongDetailsDialog extends DialogFragment {
             mTrackAlbumArtistMBID.setText(mFile.getTrackAlbumArtistMBID());
 
             mTrackURI.setText(mFile.getPath());
+
+            mTrackTitleMBID.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/recording/" + mFile.getTrackMBID()));
+                    startActivity(urlIntent);
+                }
+            });
+
+            mTrackAlbumMBID.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/release/" + mFile.getTrackAlbumMBID()));
+                    startActivity(urlIntent);
+                }
+            });
+
+            mTrackArtistMBID.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackArtistMBID()));
+                    startActivity(urlIntent);
+                }
+            });
+
+            mTrackAlbumArtistMBID.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackAlbumArtistMBID()));
+                    startActivity(urlIntent);
+                }
+            });
         }
 
         ((Button) rootView.findViewById(R.id.button_enqueue)).setOnClickListener(new View.OnClickListener() {
