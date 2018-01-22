@@ -61,6 +61,7 @@
                 android:title="@string/menu_app_settings" />
             <item
                 android:id="@+id/nav_information"
+                android:checkable="true"
                 android:icon="@drawable/ic_help_black_24dp"
                 android:title="@string/menu_information"/>
         </menu>
