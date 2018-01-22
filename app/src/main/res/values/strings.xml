@@ -94,6 +94,8 @@
     <string name="action_switch_to_output">Switch to Output</string>
     <string name="action_toggle_outputs">Toggle Outputs</string>
 
+    <string name="action_share_current_song">Share current song</string>
+
     <!-- Menu entries -->
     <string name="menu_library">Library</string>
     <string name="menu_settings">Settings</string>
@@ -192,7 +194,10 @@
 
     <!-- Snackbar text -->
     <string name="snackbar_mpd_server_error_format">Error %d/%d: %s</string>
-    <string name="snackbar_mpd_connection_error_format">Error: %s</string>
+    <string name="snackbar_mpd_connection_error_format">EtrackUrirror: %s</string>
+
+    <!-- Sharing text -->
+    <string name="sharing_song_details">I\'m listening to %s by %s from album %s</string>
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>
@@ -206,6 +211,8 @@
     <string name="dialog_message_overwrite_playlist">Do you want to overwrite the playlist:</string>
     <string name="dialog_message_delete_playlist">Do you want really want to delete the playlist:</string>
     <string name="dialog_message_delete_current_playlist">Do you want really want to delete the playlist?</string>
+
+    <string name="dialog_share_song_details">Share song details</string>
 
     <!-- dialog default names  -->
     <string name="default_playlist_title">New Playlist</string>

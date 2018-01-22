@@ -34,6 +34,11 @@
         android:orderInCategory="1"
         android:title="@string/action_toggle_consume_mode"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_share_current_song"
+        android:orderInCategory="6"
+        android:title="@string/action_share_current_song"
+        app:showAsAction="never"/>
     <group android:id="@+id/group_playlist_actions">
         <item
             android:id="@+id/action_save_playlist"
@@ -65,12 +70,12 @@
     <item
         android:id="@+id/action_open_fanart"
         android:icon="@drawable/ic_fullscreen_24dp"
-        android:orderInCategory="6"
+        android:orderInCategory="7"
         android:title="@string/action_open_fanart"
         app:showAsAction="never" />
     <item
         android:id="@+id/action_start_streaming"
-        android:orderInCategory="7"
+        android:orderInCategory="8"
         android:title="@string/action_start_streaming"
         app:showAsAction="never" />
     <item android:title="@string/action_wikipedia"

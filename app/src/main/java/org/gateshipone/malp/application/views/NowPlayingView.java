@@ -491,6 +491,10 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 }
                 return true;
             }
+            case R.id.action_share_current_song: {
+                shareCurrentTrack();
+                return true;
+            }
             default:
                 return false;
         }
@@ -1467,6 +1471,27 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mTopPlaylistButton.setImageTintList(ColorStateList.valueOf(color));
     }
 
+
+    /**
+     * Simple sharing for the current track.
+     * <p>
+     * This will only work if the track can be found in the mediastore.
+     */
+    private void shareCurrentTrack() {
+        if (null == mLastTrack) {
+            return;
+        }
+        String sharingText = getContext().getString(R.string.sharing_song_details, mLastTrack.getTrackTitle(), mLastTrack.getTrackArtist(), mLastTrack.getTrackAlbum());
+
+        // set up intent for sharing
+        Intent shareIntent = new Intent();
+        shareIntent.setAction(Intent.ACTION_SEND);
+        shareIntent.putExtra(Intent.EXTRA_TEXT, sharingText);
+        shareIntent.setType("text/plain");
+
+        // start sharing
+        getContext().startActivity(Intent.createChooser(shareIntent, getContext().getString(R.string.dialog_share_song_details)));
+    }
 
     /**
      * Public interface used by observers to be notified about a change in drag state or drag position.

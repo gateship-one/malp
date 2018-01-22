@@ -263,4 +263,7 @@
     <string name="preference_volume_step_text">Die Schrittweite der Lautstärkeänderung über Hardware- &amp; Software-Knöpfe.</string>
     <string name="volume_step_size_dialog_title">Schrittweite: %d%%</string>
     <string name="volume_step_size_dialog_warning">Sie haben einen hohen Wert für die Schrittweite ausgewählt. Bitte seien Sie vorsichtig, nicht ihre Ohren oder ihr Equipment zu beschädigen!</string>
+    <string name="action_share_current_song">Teile aktuelles Lied</string>
+    <string name="sharing_song_details">Ich höre gerade %s von %s von dem Album %s</string>
+    <string name="dialog_share_song_details">Teile Lieddetails</string>
 </resources>
