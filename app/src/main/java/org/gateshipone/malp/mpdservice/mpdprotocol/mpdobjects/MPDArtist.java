@@ -94,7 +94,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         }
 
         MPDArtist artist = (MPDArtist)object;
-        if ( !artist.pArtistName.equals(pArtistName) || artist.pMBIDs.size() !=  pMBIDs.size()) {
+        if ( !artist.pArtistName.toLowerCase().equals(pArtistName.toLowerCase()) || (artist.pMBIDs.size() !=  pMBIDs.size())) {
             return false;
         }
 
@@ -117,7 +117,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
             // Try to position artists with one mbid at the end
 
             int size = pMBIDs.size();
-            int anotherSize = pMBIDs.size();
+            int anotherSize = another.pMBIDs.size();
             if(size > anotherSize) {
                 // This object is "greater" than another
                 return 1;
@@ -125,7 +125,12 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
                 // This object is "less" than another
                 return -1;
             } else {
-                return 0;
+                // Create some random order for MBID arrays (must be consistent)
+                if(size > 0) {
+                    return pMBIDs.get(0).compareTo(another.pMBIDs.get(0));
+                } else {
+                    return 0;
+                }
             }
         }
 
