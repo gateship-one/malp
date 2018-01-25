@@ -27,8 +27,6 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
-
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
@@ -53,6 +51,12 @@ public class MPDCommandHandler extends MPDGenericHandler {
      */
     private static HandlerThread mHandlerThread = null;
     private static MPDCommandHandler mHandlerSingleton = null;
+
+    private boolean mSeekActive;
+    private int mRequestedSeekVal;
+
+    private boolean mSetVolumeActive;
+    private int mRequestVolume;
 
     /**
      * Private constructor for use in singleton. Called by the static singleton retrieval method.
@@ -154,11 +158,27 @@ public class MPDCommandHandler extends MPDGenericHandler {
                 int index = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SONG_INDEX);
                 MPDInterface.mInstance.playSongIndex(index);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS) {
-                int seconds = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEEK_TIME);
-                MPDInterface.mInstance.seekSeconds(seconds);
+                int seekTo = -1;
+
+                // Wait for mRequestedSeekVal to settle to the requested value.
+                // This is necessary to prevent a flood of seek commands to MPD which will
+                // queue up in this handler queue and block MPD for a long time with unnecessary
+                // seek operations.
+                while (seekTo != mRequestedSeekVal) {
+                    seekTo = mRequestedSeekVal;
+                    MPDInterface.mInstance.seekSeconds(seekTo);
+                }
+
+                mSeekActive = false;
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME) {
-                int volume = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME);
-                MPDInterface.mInstance.setVolume(volume);
+                int volume = -1;
+
+                while (volume != mRequestVolume) {
+                    volume = mRequestVolume;
+                    MPDInterface.mInstance.setVolume(volume);
+                }
+
+                mSetVolumeActive = false;
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_TOGGLE_OUTPUT) {
                 int outputID = mpdAction.getIntExtra(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_OUTPUT_ID);
                 MPDInterface.mInstance.toggleOutput(outputID);
@@ -403,16 +423,24 @@ public class MPDCommandHandler extends MPDGenericHandler {
      * @param seconds Position to seek to (in seconds)
      */
     public static void seekSeconds(int seconds) {
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS);
-        Message msg = Message.obtain();
-        if (msg == null) {
-            return;
+        MPDCommandHandler handler = getHandler();
+        if(!handler.mSeekActive) {
+            handler.mSeekActive = true;
+            MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_COMMAND_SEEK_SECONDS);
+            Message msg = Message.obtain();
+            if (msg == null) {
+                return;
+            }
+
+            handler.mRequestedSeekVal = seconds;
+
+            msg.obj = action;
+            MPDCommandHandler.getHandler().sendMessage(msg);
+        } else {
+            // If a seek operation is already ongoing, set the new requested volume. The handleMessage
+            // will seek to the last requested position until now further change is necessary.
+            handler.mRequestedSeekVal = seconds;
         }
-
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_SEEK_TIME, seconds);
-
-        msg.obj = action;
-        MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
     /**
@@ -420,16 +448,22 @@ public class MPDCommandHandler extends MPDGenericHandler {
      * @param volume Volume in percent (0-100)
      */
     public static void setVolume(int volume) {
-        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME);
-        Message msg = Message.obtain();
-        if (msg == null) {
-            return;
+        MPDCommandHandler handler = getHandler();
+        if(!handler.mSetVolumeActive) {
+            handler.mSetVolumeActive = true;
+            MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_SET_VOLUME);
+            Message msg = Message.obtain();
+            if (msg == null) {
+                return;
+            }
+
+            handler.mRequestVolume = volume;
+
+            msg.obj = action;
+            MPDCommandHandler.getHandler().sendMessage(msg);
+        } else {
+            handler.mRequestVolume = volume;
         }
-
-        action.setIntExtras(MPDHandlerAction.NET_HANDLER_EXTRA_INT.EXTRA_VOLUME, volume);
-
-        msg.obj = action;
-        MPDCommandHandler.getHandler().sendMessage(msg);
     }
 
     /**

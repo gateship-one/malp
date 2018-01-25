@@ -1288,14 +1288,18 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         // Update position seekbar & textviews
         mPositionSeekbar.setMax(status.getTrackLength());
-        mPositionSeekbar.setProgress(status.getElapsedTime());
+        if (!mPositionSeekbar.isPressed()) {
+            mPositionSeekbar.setProgress(status.getElapsedTime());
+        }
 
         mElapsedTime.setText(FormatHelper.formatTracktimeFromS(status.getElapsedTime()));
         mDuration.setText(FormatHelper.formatTracktimeFromS(status.getTrackLength()));
 
         // Update volume seekbar
         int volume = status.getVolume();
-        mVolumeSeekbar.setProgress(volume);
+        if (!mVolumeSeekbar.isPressed()) {
+            mVolumeSeekbar.setProgress(volume);
+        }
 
         if (volume >= 70) {
             mVolumeIcon.setImageResource(R.drawable.ic_volume_high_black_48dp);
