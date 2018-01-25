@@ -57,6 +57,8 @@ public class MPDCapabilities {
 
     private boolean mHasPlaylistFind;
 
+    private boolean mHasSeekCurrent;
+
     public MPDCapabilities(String version, List<String> commands, List<String> tags) {
         String[] versions = version.split("\\.");
         if (versions.length == 3) {
@@ -74,6 +76,11 @@ public class MPDCapabilities {
         if (mMinorVersion >= 16 || mMajorVersion > 0) {
             mHasCurrentPlaylistRemoveRange = true;
         }
+
+        if (mMinorVersion >= 17 || mMajorVersion > 0) {
+            mHasSeekCurrent = true;
+        }
+
 
         if (mMinorVersion >= 18 || mMajorVersion > 0) {
             mHasToggleOutput = true;
@@ -160,6 +167,10 @@ public class MPDCapabilities {
 
     public boolean hasPlaylistFind() {
         return mHasPlaylistFind;
+    }
+
+    public boolean hasSeekCurrent() {
+        return mHasSeekCurrent;
     }
 
     public String getServerFeatures() {

@@ -529,11 +529,15 @@ public class MPDInterface {
      * @param seconds Position in seconds to which a seek is requested to.
      */
     public synchronized void seekSeconds(int seconds) throws MPDException {
-        MPDCurrentStatus status;
+        if(mConnection.getServerCapabilities().hasSeekCurrent()) {
+            mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SEEK_CURRENT_SECONDS(seconds));
+        } else {
+            MPDCurrentStatus status;
 
-        status = getCurrentServerStatus();
+            status = getCurrentServerStatus();
 
-        mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(), seconds));
+            mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_SEEK_SECONDS(status.getCurrentSongIndex(), seconds));
+        }
     }
 
     /**

@@ -199,6 +199,10 @@ public class MPDCommands {
         return "seek " + String.valueOf(index) + ' ' + String.valueOf(seconds);
     }
 
+    public static String MPD_COMMAND_SEEK_CURRENT_SECONDS(int seconds) {
+        return "seekcur " + String.valueOf(seconds);
+    }
+
     public static String MPD_COMMAND_SET_VOLUME(int volume) {
         if ( volume > 100 ) {
             volume = 100;
