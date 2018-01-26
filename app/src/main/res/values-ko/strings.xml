@@ -23,6 +23,8 @@
 <resources>
     <string name="navigation_drawer_open">내비게이션 서랍 열기</string>
     <string name="navigation_drawer_close">내비게이션 서랍 닫기</string>
+
+    <!-- Actions -->
     <string name="action_settings">설정</string>
     <string name="action_edit_profile">프로필 수정</string>
     <string name="action_connect_profile">프로필 연결</string>
@@ -84,6 +86,8 @@
     <string name="action_switch_to_output">출력 바꾸기</string>
     <string name="action_toggle_outputs">출력 토글</string>
 
+    <string name="action_share_current_song">지금 곡 공유</string>
+
     <!-- Menu entries -->
     <string name="menu_library">라이브러리</string>
     <string name="menu_settings">설정</string>
@@ -94,11 +98,14 @@
     <string name="menu_files">파일</string>
     <string name="menu_statistic">정보</string>
     <string name="menu_app_settings">앱 설정</string>
+    <string name="menu_information">정보</string>
 
     <string name="menu_search">찾기</string>
 
     <string name="menu_albums">음반</string>
+    <string name="menu_album">음반</string>
     <string name="menu_artists">연주자</string>
+    <string name="menu_artist">연주자</string>
     <string name="artwork_settings">아트워크 설정</string>
 
     <!-- seperator -->
@@ -172,6 +179,13 @@
     <string name="server_statistic_update_database">서버 데이터베이스 업데이트</string>
     <string name="server_statistic_updateing_database">서버가 데이터베이스를 업데이트하는 동안 기다려 주셔요!</string>
 
+    <!-- Snackbar text -->
+    <string name="snackbar_error_format">오류 %d/%d: %s</string>
+    <string name="snackbar_mpd_connection_error_format">오류: %s</string>
+
+    <!-- Sharing text -->
+    <string name="sharing_song_details">지금 %s 곡을 듣는데, %s의 %s 음반입니다.</string>
+
     <!-- dialog titles -->
     <string name="dialog_save_playlist">연주목록 저장</string>
     <string name="dialog_action_cancel">취소</string>
@@ -185,11 +199,16 @@
     <string name="dialog_message_delete_playlist">연주목록을 지웁니다:</string>
     <string name="dialog_message_delete_current_playlist">연주목록을 지울까요?</string>
 
+    <string name="dialog_share_song_details">곡 정보 공유</string>
+
     <!-- dialog default names  -->
     <string name="default_playlist_title">새 연주목록</string>
     <string name="create_new_playlist">새 연주목록 만들기</string>
 
+    <string name="preference_launch_faq">자주 묻는 질문</string>
+    <string name="preference_launch_faq_text">이 앱의 도움을 얻는 방법</string>
     <string name="preference_launch_about">정보</string>
+    <string name="preference_launch_about_text">버전, 라이센스, 기여자 정보</string>
 
     <string name="preference_theme_title">테마</string>
     <string name="preference_theme_summary">앱에 다른 디자인을 적용합니다.</string>
@@ -205,29 +224,12 @@
     <string name="preference_theme_item_red">빨강</string>
     <string name="preference_theme_item_oled_dark">어두운 OLED</string>
 
-    <string-array name="preference_odyssey_styles">
-        <item>@string/preference_theme_item_indigo</item>
-        <item>@string/preference_theme_item_orange</item>
-        <item>@string/preference_theme_item_deep_orange</item>
-        <item>@string/preference_theme_item_blue</item>
-        <item>@string/preference_theme_item_dark_grey</item>
-        <item>@string/preference_theme_item_brown</item>
-        <item>@string/preference_theme_item_light_green</item>
-        <item>@string/preference_theme_item_red</item>
-        <item>@string/preference_theme_item_oled_dark</item>
-    </string-array>
-
     <string name="preference_album_sort_order_title">연주자 음반 정렬 순서</string>
     <string name="preference_album_sort_order_message">순서</string>
     <string name="preference_album_sort_order_summary">연주자의 음반을 정렬할 순서를 정합니다.</string>
 
     <string name="preference_album_sort_order_name">이름</string>
     <string name="preference_album_sort_order_year">연도</string>
-
-    <string-array name="preference_album_sort_orders">
-        <item>@string/preference_album_sort_order_name</item>
-        <item>@string/preference_album_sort_order_year</item>
-    </string-array>
 
     <string name="preference_dark_theme_title">어두운 테마</string>
     <string name="preference_dark_theme_message">어두운 테마를 씁니다</string>
@@ -243,14 +245,6 @@
     <string name="preference_default_view_my_music_albums">음반</string>
     <string name="preference_default_view_my_music_playlists">연주목록</string>
     <string name="preference_default_view_my_music_files">파일</string>
-
-    <string-array name="preference_default_views">
-        <item>@string/preference_default_view_my_music_artists</item>
-        <item>@string/preference_default_view_my_music_albums</item>
-        <item>@string/preference_default_view_my_music_playlists</item>
-        <item>@string/preference_default_view_my_music_files</item>
-    </string-array>
-
     <string name="preference_library_view_title">라이브러리 보기</string>
     <string name="preference_library_view_message">라이브러리 보기 고르기</string>
     <string name="preference_library_view_summary">음반과 연주자 보기에 사용될 형식을 고릅니다</string>
@@ -258,13 +252,15 @@
     <string name="preference_library_view_list">항목</string>
     <string name="preference_library_view_grid">격자</string>
 
-    <string-array name="preference_library_view">
-        <item>@string/preference_library_view_list</item>
-        <item>@string/preference_library_view_grid</item>
-    </string-array>
-
     <string name="preference_use_album_artists_title">음반 연주자 태그 사용</string>
-    <string name="preference_use_album_artists_text">연주자 항목에서 음반 연주자 태그를 씁니다.</string>
+    <string name="preference_use_album_artists_text">연주자 항목에서 음반 연주자 태그를 씁니다 (이 방법은 느리고 연주자 이미지가 잘 못 될 수 있습니다).</string>
+
+    <string name="preference_use_tags_in_filebrowser_title">파일 브라우저에서 태그를 씁니다</string>
+    <string name="preference_use_tags_in_filebrowser_text">파일 브라우저에서 가능하면 파일명 대신에 태그를 씁니다. 파일 브라우저에서 파일명을 보려면 이 옵션을 끕니다.</string>
+
+    <string name="preference_library_click_action_title">곡 클릭</string>
+    <string name="preference_library_click_action_summary">라이브러리의 곡 클릭 선택</string>
+    <string name="preference_library_click_action_message">라이브러리 보기에서 곡을 클릭할 때 기본 동작을 선택합니다</string>
 
     <string name="preference_volume_control_title">음량 컨트롤 보기</string>
     <string name="preference_volume_control_message">음량 컨트롤 보기 선택</string>
@@ -273,22 +269,20 @@
     <string name="preference_volume_control_off">끄기</string>
     <string name="preference_volume_control_seekbar">슬라이더</string>
     <string name="preference_volume_control_buttons">버튼</string>
-
-    <string-array name="preference_volume_control">
-        <item>@string/preference_volume_control_off</item>
-        <item>@string/preference_volume_control_seekbar</item>
-        <item>@string/preference_volume_control_buttons</item>
-    </string-array>
-
     <string name="preference_generic_hardware_keys_title">하드웨어 버튼 사용</string>
     <string name="preference_generic_hardware_keys_text">재생 컨트롤에 장치의 하드웨어 버튼을 사용합니다.</string>
+
+    <string name="preference_volume_step_title">음량 단위 크기</string>
+    <string name="preference_volume_step_text">하드웨어와 소프트웨어 음량 버튼의 단위 크기.</string>
+
+    <string name="volume_step_size_dialog_title">단위 크기: %d%%</string>
+    <string name="volume_step_size_dialog_warning">큰 음량 단위 크기를 선택합니다. 귀나 기기에 무리가 없도록 주의해야 합니다!</string>
 
     <string name="preference_show_notification_title">알림 보기</string>
     <string name="preference_show_notification_text">메인 사용자 인터페이스를 나갈 때 알림을 보여줍니다.</string>
 
     <string name="preference_use_english_wikipedia_title">영문 위키피디아 사용</string>
     <string name="preference_use_english_wikipedia_text">페이지를 찾기위해 영문 위키피디아를 사용합니다</string>
-
 
     <string name="preference_show_playlist_sections_title">연주순서에 분할 보기</string>
     <string name="preference_show_playlist_sections_text">연주순서 보기에 음반표지 분할 보기</string>
@@ -303,24 +297,11 @@
     <string name="preference_artwork_album_provider_summary">음반 이미지 제공자를 고릅니다.</string>
     <string name="preference_artwork_album_provider_message">음반 이미지를 보여 줄 제공자를 고릅니다.</string>
 
-    <string name="provider_off">끄기</string>
-
-    <string-array name="preference_artwork_album_provider_entries">
-        <item>@string/provider_off</item>
-        <item>@string/musicbrainz</item>
-        <item>@string/last_fm</item>
-    </string-array>
+   <string name="provider_off">끄기</string>
 
     <string name="preference_artwork_artist_provider_title">연주자 이미지 제공</string>
     <string name="preference_artwork_artist_provider_summary">연주자 이미지 제공자를 고릅니다.</string>
     <string name="preference_artwork_artist_provider_message">연주자 이미지를 보여 줄 제공자를 고릅니다.</string>
-
-    <string-array name="preference_artwork_artist_provider_entries">
-        <item>@string/provider_off</item>
-        <item>@string/last_fm</item>
-        <item>@string/fanart_tv</item>
-    </string-array>
-
     <string name="preference_artwork_clear_artist">연주자 이미지 정리</string>
     <string name="preference_artwork_clear_artist_summary">저장된 모든 연주자 이미지를 지웁니다.</string>
     <string name="preference_artwork_clear_album">음반 이미지 정리</string>
@@ -347,15 +328,6 @@
     <string name="search_choice_artist">연주자</string>
     <string name="search_choice_file">파일</string>
     <string name="search_choice_everything">모두</string>
-
-    <string-array name="server_search_choices">
-        <item>@string/search_choice_track</item>
-        <item>@string/search_choice_album</item>
-        <item>@string/search_choice_artist</item>
-        <item>@string/search_choice_file</item>
-        <item>@string/search_choice_everything</item>
-    </string-array>
-
     <string name="welcome_dialog_title">프로필 없음</string>
     <string name="welcome_dialog_text">이 앱은 MPD를 원격 제어합니다. MPD를 모르신다면 이 앱은 아마도 쓸모가 없을 것입니다. 죄송 :).\n\n이 앱을 쓰려면 위 오른쪽 모서리의 추가 단추로 새 프로필을 추가합니다.\n이 앱은 MPD 클라이언트로 Mopidy와 동작할 수도, 안 할 수도 있으며 Mopidy 지원이 제공되지 않습니다.\n\n동일한 인터페이스의 음악 플레이어를 원한다면, Odyssey (https://github.com/gateship-one/odyssey)를 써보시기 바랍니다.</string>
 
@@ -377,13 +349,15 @@
 
     <!-- Widget -->
     <string name="widget_disconnected">끊어짐</string>
-    <string name="widget_connect">연결됨</string>
+    <string name="widget_connect">연결</string>
 
     <!-- Contributors activity -->
     <string name="contributors_title">기여자</string>
+    <string name="contributor_team" translatable="false">Team Gateship One</string>
     <string name="contributor_translator_japanese">일본어 번역</string>
     <string name="contributor_translator_french">프랑스어 번역</string>
     <string name="contributor_translator_spanish">스페인어 번역</string>
+    <string name="contributor_translator_korean">한국어 번역</string>
 
     <!-- Thirdparty Licenses dialog -->
     <string name="thirdparty_licenses_dialog_title">제삼자 사용권</string>
