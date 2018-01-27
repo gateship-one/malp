@@ -124,12 +124,7 @@ class MPDResponseParser {
 
         MPDArtist tempArtist = null;
 
-        while (connection.isConnected() && response != null && !response.startsWith("OK")) {
-
-            if (response == null) {
-                /* skip this invalid (empty) response */
-                continue;
-            }
+        while (response != null && !response.startsWith("OK")) {
 
             if (response.startsWith(MPDResponses.MPD_RESPONSE_ARTIST_NAME)) {
                 if (null != tempArtist) {

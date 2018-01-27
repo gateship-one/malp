@@ -23,6 +23,7 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.gateshipone.malp.BuildConfig;
@@ -352,7 +353,7 @@ class MPDConnection {
             while (readyRead()) {
                 readString = readLine();
                     /* Look out for the greeting message */
-                if (readString.startsWith("OK MPD ")) {
+                if (readString != null && readString.startsWith("OK MPD ")) {
                     versionString = readString.substring(7);
 
                     String[] versions = versionString.split("\\.");
@@ -684,6 +685,10 @@ class MPDConnection {
      * the disobeying client.
      */
     private synchronized void stopIDLE() {
+        if (DEBUG_ENABLED) {
+            Log.v(TAG, "Stop Idling");
+        }
+
         cancelIDLEWait();
         // Check if state is idle, otherwise nothing to do
         if (mConnectionState != CONNECTION_STATES.IDLE) {
@@ -691,11 +696,6 @@ class MPDConnection {
             return;
         } else {
             changeState(CONNECTION_STATES.GOING_NOIDLE);
-        }
-
-
-        if (DEBUG_ENABLED) {
-            Log.v(TAG, "Stop Idling");
         }
 
         try {
@@ -1010,7 +1010,7 @@ class MPDConnection {
      *
      * @return The read string. null if no data is available.
      */
-    String readLine() throws MPDException {
+    @Nullable String readLine() throws MPDException {
         if (mReader != null) {
             String line;
             try {
@@ -1043,7 +1043,7 @@ class MPDConnection {
             }
             return line;
         }
-        return "";
+        return null;
     }
 
     /**
