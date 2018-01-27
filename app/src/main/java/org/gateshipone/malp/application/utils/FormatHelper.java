@@ -112,7 +112,7 @@ public class FormatHelper {
 
         if (days == 0 && hours == 0) {
             retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d", minutes, seconds);
-        } else if (days == 0 && hours != 0)  {
+        } else if (days == 0)  {
             retVal = String.format(Locale.getDefault(), "%02d" + ":" + "%02d" + ":" + "%02d", hours, minutes, seconds);
         } else {
             retVal = String.format(Locale.getDefault(), "%02d" + " " + context.getResources().getString(R.string.duration_days)+ " %02d" + ":" + "%02d" + ":" + "%02d", days, hours, minutes, seconds);
@@ -156,12 +156,8 @@ public class FormatHelper {
      * @param url URL to separate
      * @return Filename (last part behind a /)
      */
-    public static final String getFilenameFromPath(String url) {
-        String[] splitPath = url.split("/");
-        if ( splitPath.length > 0 ) {
-            return splitPath[splitPath.length - 1];
-        }
-        return url;
+    public static String getFilenameFromPath(String url) {
+        return url.substring(url.lastIndexOf('/'));
     }
 
     /**
@@ -170,12 +166,7 @@ public class FormatHelper {
      * @return Path without file
      */
     public static String getDirectoryFromPath(String url) {
-        String[] splitPath = url.split("/");
-        String result = "";
-        for (int i = 0; i < splitPath.length - 1; i++) {
-            result += splitPath[i] + '/';
-        }
-        return result;
+        return url.substring(0,url.lastIndexOf('/'));
     }
 
     /**
