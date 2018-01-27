@@ -25,7 +25,6 @@ package org.gateshipone.malp.application.background;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.PowerManager;
 import android.util.Log;
 
@@ -90,10 +89,7 @@ public class StreamPlaybackManager {
     }
 
     public boolean isPlaying() {
-        if (mPlayer != null) {
-            return mPlayer.isPlaying();
-        }
-        return false;
+        return mPlayer != null && mPlayer.isPlaying();
     }
 
     public void setVolume(float volume) {

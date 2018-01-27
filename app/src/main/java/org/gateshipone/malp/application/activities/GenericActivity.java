@@ -32,14 +32,12 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
-import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -199,9 +197,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean streamingActive = !(mStreamingStatus == BackgroundService.STREAMING_STATUS.STOPPED);
         if (mHardwareControls) {
-            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event,!streamingActive)) {
-                return super.dispatchKeyEvent(event);
-            } else return true;
+            return HardwareKeyHandler.getInstance().handleKeyEvent(event, !streamingActive) || super.dispatchKeyEvent(event);
         } else {
             return super.dispatchKeyEvent(event);
         }
@@ -220,7 +216,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         MPDConnectionStateCallbackHandler(GenericActivity activity, Looper looper) {
             super(looper);
-            mActivity = new WeakReference<GenericActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
@@ -274,7 +270,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         private WeakReference<GenericActivity> mActivity;
 
         public MPDErrorListener(GenericActivity activity) {
-            mActivity = new WeakReference<GenericActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
 

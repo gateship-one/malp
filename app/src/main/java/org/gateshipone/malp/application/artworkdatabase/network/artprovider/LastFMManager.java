@@ -24,12 +24,10 @@ package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 import android.content.Context;
 import android.net.Uri;
 import android.util.Log;
-import android.util.Pair;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;

@@ -24,7 +24,6 @@ package org.gateshipone.malp.application.artworkdatabase.network;
 
 
 import android.content.Context;
-import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;

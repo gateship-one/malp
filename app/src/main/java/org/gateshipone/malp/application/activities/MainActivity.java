@@ -22,7 +22,6 @@
 
 package org.gateshipone.malp.application.activities;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -133,11 +132,11 @@ public class MainActivity extends GenericActivity
         setContentView(R.layout.activity_main);
 
         // restore elevation behaviour as pre 24 support lib
-        AppBarLayout layout = (AppBarLayout) findViewById(R.id.appbar);
+        AppBarLayout layout = findViewById(R.id.appbar);
         layout.setStateListAnimator(null);
         ViewCompat.setElevation(layout, 0);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // enable back navigation
         final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
@@ -146,7 +145,7 @@ public class MainActivity extends GenericActivity
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer != null) {
             mDrawerToggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
             drawer.addDrawerListener(mDrawerToggle);
@@ -155,14 +154,14 @@ public class MainActivity extends GenericActivity
 
         int navId = getDefaultViewID();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         if (navigationView != null) {
             navigationView.setNavigationItemSelectedListener(this);
             navigationView.setCheckedItem(navId);
         }
 
 
-        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
+        mFAB = findViewById(R.id.andrompd_play_button);
 
 
 
@@ -213,14 +212,14 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
 
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
-            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -279,7 +278,7 @@ public class MainActivity extends GenericActivity
             }
 
 
-            CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
+            CurrentPlaylistView currentPlaylistView = findViewById(R.id.now_playing_playlist);
             if (currentPlaylistView.getItemViewType(position) == CurrentPlaylistAdapter.VIEW_TYPES.TYPE_SECTION_TRACK_ITEM) {
                 menu.findItem(R.id.action_remove_album).setVisible(true);
             }
@@ -295,7 +294,7 @@ public class MainActivity extends GenericActivity
             return super.onContextItemSelected(item);
         }
 
-        CurrentPlaylistView currentPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
+        CurrentPlaylistView currentPlaylistView = findViewById(R.id.now_playing_playlist);
 
         if (currentPlaylistView != null && mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
 
@@ -338,7 +337,7 @@ public class MainActivity extends GenericActivity
                     // Open song details dialog
                     SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
                     Bundle songArgs = new Bundle();
-                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) track);
+                    songArgs.putParcelable(SongDetailsDialog.EXTRA_FILE, track);
                     songDetailsDialog.setArguments(songArgs);
                     songDetailsDialog.show(getSupportFragmentManager(), "SongDetails");
                     return true;
@@ -355,7 +354,7 @@ public class MainActivity extends GenericActivity
         View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
         coordinatorLayout.setVisibility(View.VISIBLE);
 
-        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
             nowPlayingView.minimize();
         }
@@ -399,7 +398,7 @@ public class MainActivity extends GenericActivity
             fragmentTag = InformationSettingsFragment.class.getSimpleName();
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
 
 
@@ -414,7 +413,7 @@ public class MainActivity extends GenericActivity
     @Override
     protected void onResume() {
         super.onResume();
-        final NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        final NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
 
 
@@ -453,7 +452,7 @@ public class MainActivity extends GenericActivity
     protected void onPause() {
         super.onPause();
 
-        NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+        NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
         if (nowPlayingView != null) {
             nowPlayingView.registerDragStatusReceiver(null);
 
@@ -516,7 +515,7 @@ public class MainActivity extends GenericActivity
     public void onAlbumSelected(MPDAlbum album, Bitmap bitmap) {
 
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
-            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -544,7 +543,7 @@ public class MainActivity extends GenericActivity
         transaction.replace(R.id.fragment_container, newFragment, AlbumTracksFragment.TAG);
         transaction.addToBackStack("AlbumTracksFragment");
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_library);
 
         // Commit the transaction
@@ -554,7 +553,7 @@ public class MainActivity extends GenericActivity
     @Override
     public void onArtistSelected(MPDArtist artist, Bitmap bitmap) {
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
-            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -585,7 +584,7 @@ public class MainActivity extends GenericActivity
         transaction.replace(R.id.fragment_container, newFragment, AlbumsFragment.TAG);
         transaction.addToBackStack("ArtistAlbumsFragment");
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_library);
 
         // Commit the transaction
@@ -691,7 +690,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void setupFAB(boolean active, View.OnClickListener listener) {
-        mFAB = (FloatingActionButton) findViewById(R.id.andrompd_play_button);
+        mFAB = findViewById(R.id.andrompd_play_button);
         if (null == mFAB) {
             return;
         }
@@ -710,7 +709,7 @@ public class MainActivity extends GenericActivity
 
         RelativeLayout collapsingImageLayout = findViewById(R.id.appbar_image_layout);
 
-        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
+        ImageView collapsingImage = findViewById(R.id.collapsing_image);
 
         if (collapsingImage != null) {
             if (showImage) {
@@ -741,7 +740,7 @@ public class MainActivity extends GenericActivity
             getWindow().setStatusBarColor(ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark));
         }
         // set scrolling behaviour
-        CollapsingToolbarLayout toolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        CollapsingToolbarLayout toolbar = findViewById(R.id.collapsing_toolbar);
         AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
         params.height = -1;
 
@@ -764,7 +763,7 @@ public class MainActivity extends GenericActivity
     }
 
     public void setupToolbarImage(Bitmap bm) {
-        ImageView collapsingImage = (ImageView) findViewById(R.id.collapsing_image);
+        ImageView collapsingImage = findViewById(R.id.collapsing_image);
         if (collapsingImage != null) {
             collapsingImage.setImageBitmap(bm);
             
@@ -809,7 +808,7 @@ public class MainActivity extends GenericActivity
     @Override
     public void showAlbumsForPath(String path) {
         if (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
-            NowPlayingView nowPlayingView = (NowPlayingView) findViewById(R.id.now_playing_layout);
+            NowPlayingView nowPlayingView = findViewById(R.id.now_playing_layout);
             if (nowPlayingView != null) {
                 View coordinatorLayout = findViewById(R.id.main_coordinator_layout);
                 coordinatorLayout.setVisibility(View.VISIBLE);
@@ -834,7 +833,7 @@ public class MainActivity extends GenericActivity
         transaction.replace(R.id.fragment_container, newFragment, AlbumsFragment.TAG);
         transaction.addToBackStack("DirectoryAlbumsFragment");
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setCheckedItem(R.id.nav_library);
 
         // Commit the transaction
@@ -842,7 +841,7 @@ public class MainActivity extends GenericActivity
     }
 
     public void setNavbarHeader(String text) {
-        TextView header = (TextView) findViewById(R.id.navdrawer_header_text);
+        TextView header = findViewById(R.id.navdrawer_header_text);
         if (text == null) {
             header.setText("");
         }

@@ -24,7 +24,6 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -35,7 +34,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
@@ -72,20 +70,20 @@ public class ServerStatisticFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_server_statistic, container, false);
 
-        mArtistCount = (TextView) rootView.findViewById(R.id.server_statistic_artist_count);
-        mAlbumsCount = (TextView) rootView.findViewById(R.id.server_statistic_albums_count);
-        mSongsCount = (TextView) rootView.findViewById(R.id.server_statistic_songs_count);
+        mArtistCount = rootView.findViewById(R.id.server_statistic_artist_count);
+        mAlbumsCount = rootView.findViewById(R.id.server_statistic_albums_count);
+        mSongsCount = rootView.findViewById(R.id.server_statistic_songs_count);
 
-        mUptime = (TextView) rootView.findViewById(R.id.server_statistic_server_uptime);
-        mPlaytime = (TextView) rootView.findViewById(R.id.server_statistic_server_playtime);
-        mLastUpdate = (TextView) rootView.findViewById(R.id.server_statistic_db_update);
-        mDBLength = (TextView) rootView.findViewById(R.id.server_statistic_db_playtime);
+        mUptime = rootView.findViewById(R.id.server_statistic_server_uptime);
+        mPlaytime = rootView.findViewById(R.id.server_statistic_server_playtime);
+        mLastUpdate = rootView.findViewById(R.id.server_statistic_db_update);
+        mDBLength = rootView.findViewById(R.id.server_statistic_db_playtime);
 
-        mDBUpdating = (TextView) rootView.findViewById(R.id.server_statistic_updateing_db);
+        mDBUpdating = rootView.findViewById(R.id.server_statistic_updateing_db);
 
-        mServerFeatures = (TextView) rootView.findViewById(R.id.server_statistic_malp_server_information);
+        mServerFeatures = rootView.findViewById(R.id.server_statistic_malp_server_information);
 
-        ((Button) rootView.findViewById(R.id.server_statistic_update_db_btn)).setOnClickListener(new DBUpdateBtnListener());
+        rootView.findViewById(R.id.server_statistic_update_db_btn).setOnClickListener(new DBUpdateBtnListener());
 
         mServerStatusHandler = new ServerStatusHandler(this);
 
@@ -161,7 +159,7 @@ public class ServerStatisticFragment extends Fragment {
         WeakReference<ServerStatisticFragment> mFragment;
 
         public ServerStatusHandler(ServerStatisticFragment fragment) {
-            mFragment = new WeakReference<ServerStatisticFragment>(fragment);
+            mFragment = new WeakReference<>(fragment);
         }
 
 

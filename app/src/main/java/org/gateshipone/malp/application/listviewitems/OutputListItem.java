@@ -27,7 +27,6 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.widget.CheckedTextView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import org.gateshipone.malp.R;
 
@@ -41,7 +40,7 @@ public class OutputListItem extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.listview_item_output, this, true);
 
-        mMainView = (CheckedTextView) findViewById(R.id.item_output_name);
+        mMainView = findViewById(R.id.item_output_name);
         mMainView.setText(outputName);
 
         mMainView.setChecked(active);

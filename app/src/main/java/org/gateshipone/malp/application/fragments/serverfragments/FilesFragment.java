@@ -115,7 +115,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         Bundle args = getArguments();
         if (null != args) {
@@ -133,7 +133,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         registerForContextMenu(mListView);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));

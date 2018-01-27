@@ -32,7 +32,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -41,18 +40,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
@@ -63,7 +55,6 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.io.File;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -145,22 +136,22 @@ public class FanartActivity extends GenericActivity {
 
         setContentView(R.layout.activity_artist_fanart);
 
-        mInfoLayout = (LinearLayout) findViewById(R.id.information_layout);
+        mInfoLayout = findViewById(R.id.information_layout);
 
-        mTrackTitle = (TextView) findViewById(R.id.textview_track_title);
-        mTrackAlbum = (TextView) findViewById(R.id.textview_track_album);
-        mTrackArtist = (TextView) findViewById(R.id.textview_track_artist);
+        mTrackTitle = findViewById(R.id.textview_track_title);
+        mTrackAlbum = findViewById(R.id.textview_track_album);
+        mTrackArtist = findViewById(R.id.textview_track_artist);
 
-        mSwitcher = (ViewSwitcher) findViewById(R.id.fanart_switcher);
+        mSwitcher = findViewById(R.id.fanart_switcher);
 
-        mFanartView0 = (ImageView) findViewById(R.id.fanart_view_0);
-        mFanartView1 = (ImageView) findViewById(R.id.fanart_view_1);
+        mFanartView0 = findViewById(R.id.fanart_view_0);
+        mFanartView1 = findViewById(R.id.fanart_view_1);
 
 
-        mPreviousButton = (ImageButton) findViewById(R.id.button_previous_track);
-        mNextButton = (ImageButton) findViewById(R.id.button_next_track);
-        mStopButton = (ImageButton) findViewById(R.id.button_stop);
-        mPlayPauseButton = (ImageButton) findViewById(R.id.button_playpause);
+        mPreviousButton = findViewById(R.id.button_previous_track);
+        mNextButton = findViewById(R.id.button_next_track);
+        mStopButton = findViewById(R.id.button_stop);
+        mPlayPauseButton = findViewById(R.id.button_playpause);
 
 
         mPreviousButton.setOnClickListener(v -> MPDCommandHandler.previousSong());
@@ -189,26 +180,26 @@ public class FanartActivity extends GenericActivity {
         });
 
         // seekbar (position)
-        mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
+        mPositionSeekbar = findViewById(R.id.now_playing_seekBar);
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
-        mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
-        mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
+        mVolumeSeekbar = findViewById(R.id.volume_seekbar);
+        mVolumeIcon = findViewById(R.id.volume_icon);
         mVolumeIcon.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
         /* Volume control buttons */
-        mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons = findViewById(R.id.volume_icon_buttons);
         mVolumeIconButtons.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
-        mVolumeText = (TextView) findViewById(R.id.volume_button_text);
+        mVolumeText = findViewById(R.id.volume_button_text);
 
-        mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
+        mVolumeMinus = findViewById(R.id.volume_button_minus);
 
         mVolumeMinus.setOnClickListener(v -> MPDCommandHandler.decreaseVolume(mVolumeStepSize));
 
-        mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
+        mVolumePlus = findViewById(R.id.volume_button_plus);
         mVolumePlus.setOnClickListener(v -> MPDCommandHandler.increaseVolume(mVolumeStepSize));
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
@@ -222,8 +213,8 @@ public class FanartActivity extends GenericActivity {
         mVolumePlus.setOnLongClickListener(mPlusListener);
         mVolumePlus.setOnTouchListener(mPlusListener);
 
-        mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
-        mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
+        mVolumeSeekbarLayout = findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = findViewById(R.id.volume_button_layout);
 
         mFanartCache = new FanartCacheManager(getApplicationContext());
     }

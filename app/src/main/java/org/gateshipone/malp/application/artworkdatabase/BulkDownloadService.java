@@ -46,15 +46,11 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
-import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 
 import java.lang.ref.WeakReference;
@@ -291,7 +287,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
 
         private ConnectionStateHandler(BulkDownloadService service, Looper looper) {
             super(looper);
-            mService = new WeakReference<BulkDownloadService>(service);
+            mService = new WeakReference<>(service);
         }
 
         @Override

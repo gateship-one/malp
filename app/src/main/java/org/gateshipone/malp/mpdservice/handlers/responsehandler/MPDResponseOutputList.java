@@ -23,12 +23,10 @@
 package org.gateshipone.malp.mpdservice.handlers.responsehandler;
 
 
-import android.os.Bundle;
 import android.os.Message;
 
 import java.util.List;
 
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 
 public abstract class MPDResponseOutputList extends MPDResponseHandler {

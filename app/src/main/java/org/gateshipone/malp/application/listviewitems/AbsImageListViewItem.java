@@ -24,7 +24,6 @@ package org.gateshipone.malp.application.listviewitems;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.animation.AnimationUtils;
@@ -32,7 +31,6 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.ViewSwitcher;
 
-import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.AsyncLoader;
@@ -59,8 +57,8 @@ public abstract class AbsImageListViewItem extends RelativeLayout implements Cov
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(layoutID, this, true);
 
-        mImageView = (ImageView) findViewById(imageviewID);
-        mSwitcher = (ViewSwitcher) findViewById(switcherID);
+        mImageView = findViewById(imageviewID);
+        mSwitcher = findViewById(switcherID);
 
         mHolder = new AsyncLoader.CoverViewHolder();
         mHolder.coverLoadable = this;

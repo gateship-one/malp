@@ -27,7 +27,6 @@ import android.content.Context;
 import android.support.v4.content.Loader;
 
 import java.lang.ref.WeakReference;
-import java.nio.file.Files;
 import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
@@ -61,7 +60,7 @@ public class FilesLoader extends Loader<List<MPDFileEntry>> {
         private WeakReference<FilesLoader> mFilesLoader;
 
         private FilesResponseHandler(FilesLoader loader) {
-            mFilesLoader = new WeakReference<FilesLoader>(loader);
+            mFilesLoader = new WeakReference<>(loader);
         }
 
         @Override

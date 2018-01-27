@@ -25,9 +25,6 @@ package org.gateshipone.malp.mpdservice.handlers.responsehandler;
 
 import android.os.Message;
 
-import java.util.List;
-
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 
 public abstract class MPDResponseServerStatistics extends MPDResponseHandler {

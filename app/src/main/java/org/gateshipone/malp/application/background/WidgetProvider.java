@@ -39,7 +39,6 @@ import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
@@ -273,8 +272,8 @@ public class WidgetProvider extends AppWidgetProvider {
         WeakReference<WidgetProvider> mProvider;
 
         public CoverReceiver(Context context, WidgetProvider provider) {
-            mContext = new WeakReference<Context>(context);
-            mProvider = new WeakReference<WidgetProvider>(provider);
+            mContext = new WeakReference<>(context);
+            mProvider = new WeakReference<>(provider);
         }
 
         /**

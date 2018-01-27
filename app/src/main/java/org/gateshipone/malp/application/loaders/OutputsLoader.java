@@ -29,13 +29,9 @@ import android.support.v4.content.Loader;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import org.gateshipone.malp.R;
-import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
 public class OutputsLoader extends Loader<List<MPDOutput>> {
@@ -53,7 +49,7 @@ public class OutputsLoader extends Loader<List<MPDOutput>> {
         private WeakReference<OutputsLoader> mOutputsLoader;
 
         private OutputResponseHandler(OutputsLoader loader) {
-            mOutputsLoader = new WeakReference<OutputsLoader>(loader);
+            mOutputsLoader = new WeakReference<>(loader);
         }
 
         @Override

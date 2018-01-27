@@ -100,7 +100,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         View rootView = inflater.inflate(R.layout.fragment_server_search, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         // Create the needed adapter for the ListView
         mFileAdapter = new FileAdapter(getActivity(), false, true);
@@ -110,7 +110,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
 
-        mSelectSpinner = (Spinner) rootView.findViewById(R.id.search_criteria);
+        mSelectSpinner = rootView.findViewById(R.id.search_criteria);
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -121,13 +121,13 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         mSelectSpinner.setAdapter(adapter);
         mSelectSpinner.setOnItemSelectedListener(new SpinnerSelectListener());
 
-        mSearchView = (SearchView) rootView.findViewById(R.id.search_text);
+        mSearchView = rootView.findViewById(R.id.search_text);
         mSearchView.setOnQueryTextListener(new SearchViewQueryListener());
         mSearchView.setOnFocusChangeListener(this);
 
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));

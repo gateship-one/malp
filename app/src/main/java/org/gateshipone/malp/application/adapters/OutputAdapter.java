@@ -28,9 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import org.gateshipone.malp.application.listviewitems.OutputListItem;
-import org.gateshipone.malp.application.listviewitems.ProfileListItem;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
-import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 public class OutputAdapter extends GenericSectionAdapter<MPDOutput> {
     private Context mContext;

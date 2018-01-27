@@ -45,8 +45,8 @@ public class OutputResponseMenuHandler extends MPDResponseOutputList {
     private WeakReference<View> mView;
 
     public OutputResponseMenuHandler(Context context, View view) {
-        mContext = new WeakReference<Context>(context);
-        mView = new WeakReference<View>(view);
+        mContext = new WeakReference<>(context);
+        mView = new WeakReference<>(view);
     }
 
     @Override

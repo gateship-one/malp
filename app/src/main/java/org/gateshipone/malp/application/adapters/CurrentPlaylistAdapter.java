@@ -489,7 +489,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
 
         private ConnectionStateChangeListener(CurrentPlaylistAdapter adapter, Looper looper) {
             super(looper);
-            mAdapter = new WeakReference<CurrentPlaylistAdapter>(adapter);
+            mAdapter = new WeakReference<>(adapter);
         }
 
         /**

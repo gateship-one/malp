@@ -24,11 +24,9 @@ package org.gateshipone.malp.application.artworkdatabase.fanartcache;
 
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;

@@ -57,7 +57,7 @@ public class OutputsFragment extends GenericMPDFragment<List<MPDOutput>> impleme
         View rootView = inflater.inflate(R.layout.listview_layout, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
 
         // Create the needed adapter for the ListView

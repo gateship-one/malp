@@ -24,22 +24,10 @@ package org.gateshipone.malp.application.listviewitems;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.util.Pair;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.ViewSwitcher;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.adapters.GenericSectionAdapter;
 import org.gateshipone.malp.application.adapters.ScrollSpeedAdapter;
-import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
-import org.gateshipone.malp.application.utils.AsyncLoader;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDGenericItem;
 
 public class GenericGridItem extends AbsImageListViewItem {
 
@@ -50,7 +38,7 @@ public class GenericGridItem extends AbsImageListViewItem {
     public GenericGridItem(Context context, String labelText, ScrollSpeedAdapter adapter) {
         super(context,R.layout.gridview_item, R.id.item_artists_cover_image, R.id.item_grid_viewswitcher, adapter);
 
-        mTitleView = (TextView) findViewById(R.id.item_grid_text);
+        mTitleView = findViewById(R.id.item_grid_text);
 
         mTitleView.setText(labelText);
     }

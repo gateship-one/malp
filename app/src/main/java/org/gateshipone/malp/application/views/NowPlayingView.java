@@ -25,7 +25,6 @@ package org.gateshipone.malp.application.views;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
@@ -65,7 +64,6 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.callbacks.OnSaveDialogListener;
-import org.gateshipone.malp.application.callbacks.TextDialogCallback;
 import org.gateshipone.malp.application.fragments.TextDialog;
 import org.gateshipone.malp.application.fragments.serverfragments.ChoosePlaylistDialog;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
@@ -512,7 +510,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String volumeControlView = sharedPref.getString(getContext().getString(R.string.pref_volume_controls_key), getContext().getString(R.string.pref_volume_control_view_default));
 
-        LinearLayout volLayout = (LinearLayout) findViewById(R.id.volume_control_layout);
+        LinearLayout volLayout = findViewById(R.id.volume_control_layout);
 
         if (volumeControlView.equals(getContext().getString(R.string.pref_volume_control_view_off_key))) {
             if (volLayout != null) {
@@ -806,60 +804,60 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mMainView = findViewById(R.id.now_playing_bodyLayout);
 
         // header buttons
-        mTopPlayPauseButton = (ImageButton) findViewById(R.id.now_playing_topPlayPauseButton);
-        mTopPlaylistButton = (ImageButton) findViewById(R.id.now_playing_topPlaylistButton);
-        mTopMenuButton = (ImageButton) findViewById(R.id.now_playing_topMenuButton);
+        mTopPlayPauseButton = findViewById(R.id.now_playing_topPlayPauseButton);
+        mTopPlaylistButton = findViewById(R.id.now_playing_topPlaylistButton);
+        mTopMenuButton = findViewById(R.id.now_playing_topMenuButton);
 
         // bottom buttons
-        mBottomRepeatButton = (ImageButton) findViewById(R.id.now_playing_bottomRepeatButton);
-        mBottomPreviousButton = (ImageButton) findViewById(R.id.now_playing_bottomPreviousButton);
-        mBottomPlayPauseButton = (ImageButton) findViewById(R.id.now_playing_bottomPlayPauseButton);
-        mBottomStopButton = (ImageButton) findViewById(R.id.now_playing_bottomStopButton);
-        mBottomNextButton = (ImageButton) findViewById(R.id.now_playing_bottomNextButton);
-        mBottomRandomButton = (ImageButton) findViewById(R.id.now_playing_bottomRandomButton);
+        mBottomRepeatButton = findViewById(R.id.now_playing_bottomRepeatButton);
+        mBottomPreviousButton = findViewById(R.id.now_playing_bottomPreviousButton);
+        mBottomPlayPauseButton = findViewById(R.id.now_playing_bottomPlayPauseButton);
+        mBottomStopButton = findViewById(R.id.now_playing_bottomStopButton);
+        mBottomNextButton = findViewById(R.id.now_playing_bottomNextButton);
+        mBottomRandomButton = findViewById(R.id.now_playing_bottomRandomButton);
 
         // Main cover image
-        mCoverImage = (AlbumArtistView) findViewById(R.id.now_playing_cover);
+        mCoverImage = findViewById(R.id.now_playing_cover);
         // Small header cover image
-        mTopCoverImage = (ImageView) findViewById(R.id.now_playing_topCover);
+        mTopCoverImage = findViewById(R.id.now_playing_topCover);
 
         // View with the ListView of the playlist
-        mPlaylistView = (CurrentPlaylistView) findViewById(R.id.now_playing_playlist);
+        mPlaylistView = findViewById(R.id.now_playing_playlist);
 
         // view switcher for cover and playlist view
-        mViewSwitcher = (ViewSwitcher) findViewById(R.id.now_playing_view_switcher);
+        mViewSwitcher = findViewById(R.id.now_playing_view_switcher);
 
         // Button container for the buttons shown if dragged up
-        mDraggedUpButtons = (LinearLayout) findViewById(R.id.now_playing_layout_dragged_up);
+        mDraggedUpButtons = findViewById(R.id.now_playing_layout_dragged_up);
         // Button container for the buttons shown if dragged down
-        mDraggedDownButtons = (LinearLayout) findViewById(R.id.now_playing_layout_dragged_down);
+        mDraggedDownButtons = findViewById(R.id.now_playing_layout_dragged_down);
 
         // textviews
-        mTrackName = (TextView) findViewById(R.id.now_playing_trackName);
+        mTrackName = findViewById(R.id.now_playing_trackName);
         // For marquee scrolling the TextView need selected == true
         mTrackName.setSelected(true);
-        mTrackAdditionalInfo = (TextView) findViewById(R.id.now_playing_track_additional_info);
+        mTrackAdditionalInfo = findViewById(R.id.now_playing_track_additional_info);
         // For marquee scrolling the TextView need selected == true
         mTrackAdditionalInfo.setSelected(true);
 
-        mTrackNo = (TextView) findViewById(R.id.now_playing_text_track_no);
-        mPlaylistNo = (TextView) findViewById(R.id.now_playing_text_playlist_no);
-        mBitrate = (TextView) findViewById(R.id.now_playing_text_bitrate);
-        mAudioProperties = (TextView) findViewById(R.id.now_playing_text_audio_properties);
-        mTrackURI = (TextView) findViewById(R.id.now_playing_text_track_uri);
+        mTrackNo = findViewById(R.id.now_playing_text_track_no);
+        mPlaylistNo = findViewById(R.id.now_playing_text_playlist_no);
+        mBitrate = findViewById(R.id.now_playing_text_bitrate);
+        mAudioProperties = findViewById(R.id.now_playing_text_audio_properties);
+        mTrackURI = findViewById(R.id.now_playing_text_track_uri);
 
         // Textviews directly under the seekbar
-        mElapsedTime = (TextView) findViewById(R.id.now_playing_elapsedTime);
-        mDuration = (TextView) findViewById(R.id.now_playing_duration);
+        mElapsedTime = findViewById(R.id.now_playing_elapsedTime);
+        mDuration = findViewById(R.id.now_playing_duration);
 
-        mHeaderTextLayout = (LinearLayout) findViewById(R.id.now_playing_header_textLayout);
+        mHeaderTextLayout = findViewById(R.id.now_playing_header_textLayout);
 
         // seekbar (position)
-        mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
+        mPositionSeekbar = findViewById(R.id.now_playing_seekBar);
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
-        mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
-        mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
+        mVolumeSeekbar = findViewById(R.id.volume_seekbar);
+        mVolumeIcon = findViewById(R.id.volume_icon);
         mVolumeIcon.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
         mVolumeIcon.setOnLongClickListener(view -> {
@@ -874,7 +872,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
 
         /* Volume control buttons */
-        mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons = findViewById(R.id.volume_icon_buttons);
         mVolumeIconButtons.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
         mVolumeIconButtons.setOnLongClickListener(view -> {
@@ -884,13 +882,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
             return true;
         });
 
-        mVolumeText = (TextView) findViewById(R.id.volume_button_text);
+        mVolumeText = findViewById(R.id.volume_button_text);
 
-        mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
+        mVolumeMinus = findViewById(R.id.volume_button_minus);
 
         mVolumeMinus.setOnClickListener(v -> MPDCommandHandler.decreaseVolume(mVolumeStepSize));
 
-        mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
+        mVolumePlus = findViewById(R.id.volume_button_plus);
         mVolumePlus.setOnClickListener(v -> MPDCommandHandler.increaseVolume(mVolumeStepSize));
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
@@ -904,8 +902,8 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mVolumePlus.setOnLongClickListener(mPlusListener);
         mVolumePlus.setOnTouchListener(mPlusListener);
 
-        mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
-        mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
+        mVolumeSeekbarLayout = findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = findViewById(R.id.volume_button_layout);
 
         // set dragging part default to bottom
         mDragOffset = 1.0f;
@@ -1241,12 +1239,19 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         String sampleFormat = status.getBitDepth();
 
         // 16bit is the most probable sample format
-        if (sampleFormat.equals("16") || sampleFormat.equals("24")  || sampleFormat.equals("8") || sampleFormat.equals("32")) {
-            properties += sampleFormat + getResources().getString(R.string.bitcount_unit) + ' ';
-        } else if (sampleFormat.equals("f")) {
-            properties += "float ";
-        } else {
-            properties += sampleFormat + ' ';
+        switch (sampleFormat) {
+            case "16":
+            case "24":
+            case "8":
+            case "32":
+                properties += sampleFormat + getResources().getString(R.string.bitcount_unit) + ' ';
+                break;
+            case "f":
+                properties += "float ";
+                break;
+            default:
+                properties += sampleFormat + ' ';
+                break;
         }
 
 
@@ -1442,7 +1447,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         ServerConnectionListener(NowPlayingView npv, Looper looper) {
             super(looper);
-            mNPV = new WeakReference<NowPlayingView>(npv);
+            mNPV = new WeakReference<>(npv);
         }
 
         @Override

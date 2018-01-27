@@ -32,7 +32,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,8 +39,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
-import android.widget.NumberPicker;
 import android.widget.Switch;
 
 import org.gateshipone.malp.R;
@@ -92,16 +89,16 @@ public class EditProfileFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
 
-        mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
-        mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
-        mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
-        mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
+        mProfilenameView = rootView.findViewById(R.id.fragment_profile_profilename);
+        mHostnameView = rootView.findViewById(R.id.fragment_profile_hostname);
+        mPasswordView = rootView.findViewById(R.id.fragment_profile_password);
+        mPortView = rootView.findViewById(R.id.fragment_profile_port);
 
-        mStreamingURLView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_streaming_url);
-        mStreamingEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_streaming_enabled);
+        mStreamingURLView = rootView.findViewById(R.id.fragment_profile_streaming_url);
+        mStreamingEnabledView = rootView.findViewById(R.id.fragment_profile_streaming_enabled);
 
-        mHTTPCoverRegexView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_cover_regex);
-        mHTTPCoverEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
+        mHTTPCoverRegexView = rootView.findViewById(R.id.fragment_profile_cover_regex);
+        mHTTPCoverEnabledView = rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
 
 
         // Set to maximum tcp port

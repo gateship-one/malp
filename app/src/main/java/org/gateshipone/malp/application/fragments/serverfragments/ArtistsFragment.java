@@ -50,7 +50,6 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.listviewitems.AbsImageListViewItem;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
-import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -121,7 +120,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
@@ -140,14 +139,14 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
-        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener(mArtistAdapter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener(mArtistAdapter);
     }
 
     /**

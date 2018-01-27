@@ -51,7 +51,7 @@ public class ArtistsLoader extends Loader<List<MPDArtist>> {
         private WeakReference<ArtistsLoader> mArtistsLoader;
 
         private ArtistResponseHandler(ArtistsLoader loader) {
-            mArtistsLoader = new WeakReference<ArtistsLoader>(loader);
+            mArtistsLoader = new WeakReference<>(loader);
         }
 
         @Override

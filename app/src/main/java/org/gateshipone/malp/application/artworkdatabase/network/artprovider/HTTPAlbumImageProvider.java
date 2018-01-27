@@ -24,8 +24,6 @@ package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 
 
 import android.content.Context;
-import android.net.Uri;
-import android.util.Log;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
@@ -37,14 +35,10 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 
-import org.gateshipone.malp.application.artworkdatabase.network.requests.AlbumImageByteRequest;
 import org.gateshipone.malp.application.artworkdatabase.network.requests.TrackAlbumImageByteRequest;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumImageResponse;
 import org.gateshipone.malp.application.utils.FormatHelper;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {

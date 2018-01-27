@@ -52,7 +52,7 @@ class MPDResponseParser {
      * @throws IOException
      */
     static ArrayList<MPDAlbum> parseMPDAlbums(final MPDConnection connection) throws MPDException {
-        ArrayList<MPDAlbum> albumList = new ArrayList<MPDAlbum>();
+        ArrayList<MPDAlbum> albumList = new ArrayList<>();
         if (!connection.isConnected()) {
             return albumList;
         }
@@ -110,7 +110,7 @@ class MPDResponseParser {
      * @throws IOException
      */
     static ArrayList<MPDArtist> parseMPDArtists(final MPDConnection connection, final boolean hasMusicBrainz, final boolean hasListGroup) throws MPDException {
-        ArrayList<MPDArtist> artistList = new ArrayList<MPDArtist>();
+        ArrayList<MPDArtist> artistList = new ArrayList<>();
         if (!connection.isConnected()) {
             return artistList;
         }
@@ -207,7 +207,7 @@ class MPDResponseParser {
      * @throws IOException
      */
     static ArrayList<MPDFileEntry> parseMPDTracks(final MPDConnection connection, final String filterArtist, final String filterAlbumMBID) throws MPDException {
-        ArrayList<MPDFileEntry> trackList = new ArrayList<MPDFileEntry>();
+        ArrayList<MPDFileEntry> trackList = new ArrayList<>();
         if (!connection.isConnected()) {
             return trackList;
         }
@@ -407,12 +407,16 @@ class MPDResponseParser {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE)) {
                 String state = response.substring(MPDResponses.MPD_RESPONSE_PLAYBACK_STATE.length());
 
-                if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PLAY)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING);
-                } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PAUSE)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING);
-                } else if (state.equals(MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_STOP)) {
-                    status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED);
+                switch (state) {
+                    case MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PLAY:
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING);
+                        break;
+                    case MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_PAUSE:
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PAUSING);
+                        break;
+                    case MPDResponses.MPD_PLAYBACK_STATE_RESPONSE_STOP:
+                        status.setPlaybackState(MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED);
+                        break;
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX)) {
                 status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));

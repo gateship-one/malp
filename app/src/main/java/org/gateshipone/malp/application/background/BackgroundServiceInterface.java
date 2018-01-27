@@ -36,7 +36,7 @@ public class BackgroundServiceInterface extends IBackgroundService.Stub {
     WeakReference<BackgroundService> mService;
 
     public BackgroundServiceInterface(BackgroundService service) {
-        mService = new WeakReference<BackgroundService>(service);
+        mService = new WeakReference<>(service);
     }
 
     @Override

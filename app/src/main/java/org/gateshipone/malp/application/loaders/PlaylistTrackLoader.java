@@ -72,7 +72,7 @@ public class PlaylistTrackLoader extends Loader<List<MPDFileEntry>> {
         private WeakReference<PlaylistTrackLoader> mPlaylistTrackLoader;
 
         private TrackResponseHandler(PlaylistTrackLoader loader) {
-            mPlaylistTrackLoader = new WeakReference<PlaylistTrackLoader>(loader);
+            mPlaylistTrackLoader = new WeakReference<>(loader);
         }
 
         @Override

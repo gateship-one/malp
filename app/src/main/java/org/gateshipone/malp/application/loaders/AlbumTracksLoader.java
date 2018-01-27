@@ -80,7 +80,7 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
         private WeakReference<AlbumTracksLoader> mAlbumTracksLoader;
 
         private TrackResponseHandler(AlbumTracksLoader loader) {
-            mAlbumTracksLoader = new WeakReference<AlbumTracksLoader>(loader);
+            mAlbumTracksLoader = new WeakReference<>(loader);
         }
 
 

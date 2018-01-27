@@ -24,13 +24,9 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.DialogInterface;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 
 

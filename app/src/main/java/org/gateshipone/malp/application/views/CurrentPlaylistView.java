@@ -51,7 +51,7 @@ public class CurrentPlaylistView extends LinearLayout implements AdapterView.OnI
         LayoutInflater.from(context).inflate(R.layout.listview_layout, this, true);
 
         // Get the main ListView of this fragment
-        ListView listView = (ListView) this.findViewById(R.id.main_listview);
+        ListView listView = this.findViewById(R.id.main_listview);
 
         // Create the needed adapter for the ListView
         mPlaylistAdapter = new CurrentPlaylistAdapter(getContext(), listView);

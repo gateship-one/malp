@@ -32,7 +32,6 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
@@ -66,7 +65,7 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
         private WeakReference<AlbumsLoader> mAlbumsLoader;
 
         private AlbumResponseHandler(AlbumsLoader loader) {
-            mAlbumsLoader = new WeakReference<AlbumsLoader>(loader);
+            mAlbumsLoader = new WeakReference<>(loader);
         }
 
         @Override

@@ -35,27 +35,21 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.app.NotificationCompat.MediaStyle;
-import android.util.Log;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
-
-import java.util.concurrent.locks.ReentrantLock;
 
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = NotificationManager.class.getSimpleName();

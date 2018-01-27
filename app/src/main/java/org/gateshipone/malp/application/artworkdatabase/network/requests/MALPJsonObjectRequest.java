@@ -37,7 +37,7 @@ public class MALPJsonObjectRequest extends JsonObjectRequest{
 
     @Override
     public Map<String, String> getHeaders(){
-        Map<String, String> headers = new HashMap<String, String>();
+        Map<String, String> headers = new HashMap<>();
         headers.put("User-agent", "Application MALP/1.0 (https://github.com/gateship-one/malp)");
         return headers;
     }

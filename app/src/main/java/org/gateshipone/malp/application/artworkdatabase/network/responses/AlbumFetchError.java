@@ -23,8 +23,6 @@
 package org.gateshipone.malp.application.artworkdatabase.network.responses;
 
 
-import android.content.Context;
-
 import com.android.volley.VolleyError;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;

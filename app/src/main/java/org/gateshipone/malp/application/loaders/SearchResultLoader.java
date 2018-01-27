@@ -73,7 +73,7 @@ public class SearchResultLoader extends Loader<List<MPDFileEntry>> {
         private WeakReference<SearchResultLoader> mSearchResultLoader;
 
         private TrackResponseHandler(SearchResultLoader loader) {
-            mSearchResultLoader = new WeakReference<SearchResultLoader>(loader);
+            mSearchResultLoader = new WeakReference<>(loader);
         }
 
         @Override

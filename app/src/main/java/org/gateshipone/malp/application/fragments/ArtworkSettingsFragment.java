@@ -23,7 +23,6 @@
 package org.gateshipone.malp.application.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -38,7 +37,6 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.mpdservice.ConnectionManager;
 
 
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {

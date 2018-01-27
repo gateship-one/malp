@@ -23,13 +23,11 @@
 package org.gateshipone.malp.mpdservice.handlers.serverhandler;
 
 
-import android.os.Bundle;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseArtistList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;

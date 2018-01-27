@@ -35,7 +35,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -85,7 +84,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
 
         // create tabs
-        TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.my_music_tab_layout);
+        TabLayout tabLayout = rootView.findViewById(R.id.my_music_tab_layout);
 
         // Icons
         final ColorStateList tabColors = tabLayout.getTabTextColors();
@@ -105,7 +104,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        mViewPager = (ViewPager) rootView.findViewById(R.id.my_music_viewpager);
+        mViewPager = rootView.findViewById(R.id.my_music_viewpager);
         mMyMusicPagerAdapter = new MyMusicPagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(mMyMusicPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -149,7 +148,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
             }
 
 
-            ViewPager myMusicViewPager = (ViewPager) view.findViewById(R.id.my_music_viewpager);
+            ViewPager myMusicViewPager = view.findViewById(R.id.my_music_viewpager);
             myMusicViewPager.setCurrentItem(tab.getPosition());
         }
     }

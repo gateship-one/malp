@@ -44,16 +44,16 @@ public class ProfileListItem extends LinearLayout {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         inflater.inflate(R.layout.listview_item_profile, this, true);
 
-        mProfileNameView = (TextView) findViewById(R.id.item_profile_name);
+        mProfileNameView = findViewById(R.id.item_profile_name);
         mProfileNameView.setText(profilename);
 
-        mHostnameView = (TextView) findViewById(R.id.item_profile_hostname);
+        mHostnameView = findViewById(R.id.item_profile_hostname);
         mHostnameView.setText(hostname);
 
-        mPortView = (TextView) findViewById(R.id.item_profile_port);
+        mPortView = findViewById(R.id.item_profile_port);
         mPortView.setText(port);
 
-        mRadioButton = (RadioButton)findViewById(R.id.item_profile_radiobtn);
+        mRadioButton = findViewById(R.id.item_profile_radiobtn);
         mRadioButton.setChecked(checked);
     }
 

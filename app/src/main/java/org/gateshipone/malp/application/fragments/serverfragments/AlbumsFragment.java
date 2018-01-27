@@ -161,7 +161,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         setHasOptionsMenu(true);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
@@ -182,7 +182,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
 
         ArtworkManager.getInstance(getContext()).registerOnNewArtistImageListener(this);
-        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(mAlbumsAdapter);
     }
 
     /**
@@ -215,7 +215,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         super.onPause();
 
         ArtworkManager.getInstance(getContext()).unregisterOnNewArtistImageListener(this);
-        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener(mAlbumsAdapter);
     }
 
 

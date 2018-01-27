@@ -25,9 +25,7 @@ package org.gateshipone.malp.application.artworkdatabase.network.requests;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 
-import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.TrackAlbumImageResponse;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 

@@ -53,7 +53,7 @@ public class PlaylistsLoader extends Loader<List<MPDFileEntry>> {
         private WeakReference<PlaylistsLoader> mPlaylistsLoader;
 
         private PlaylistResponseHandler(PlaylistsLoader loader, Context context) {
-            mPlaylistsLoader = new WeakReference<PlaylistsLoader>(loader);
+            mPlaylistsLoader = new WeakReference<>(loader);
         }
 
         @Override

@@ -34,7 +34,6 @@ import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -100,7 +99,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
@@ -119,7 +118,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         mListView.setOnItemClickListener(this);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));

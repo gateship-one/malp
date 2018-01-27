@@ -89,7 +89,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         Bundle args = getArguments();
         if (null != args) {
@@ -110,7 +110,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         registerForContextMenu(mListView);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));

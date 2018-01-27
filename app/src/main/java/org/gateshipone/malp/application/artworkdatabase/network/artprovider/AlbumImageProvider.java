@@ -23,8 +23,6 @@
 package org.gateshipone.malp.application.artworkdatabase.network.artprovider;
 
 
-import android.util.Pair;
-
 import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
