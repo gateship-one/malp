@@ -279,15 +279,17 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         public void run() {
             MPDCurrentStatus status = MPDStateMonitoringHandler.getHandler().getLastStatus();
 
-            // Notify the widget to also connect if possible
-            Intent connectIntent = new Intent(mContext, BackgroundService.class);
-            connectIntent.setAction(BackgroundService.ACTION_CONNECT);
-            mContext.startService(connectIntent);
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-            // Check if the notification setting is enabled
+            // Check if the notification setting is enabled (necessary for both the widget and notification)
             boolean showNotification = sharedPref.getBoolean(mContext.getString(R.string.pref_show_notification_key), mContext.getResources().getBoolean(R.bool.pref_show_notification_default));
             if (showNotification && status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+
+                // Notify the widget to also connect if possible
+                Intent connectIntent = new Intent(mContext, BackgroundService.class);
+                connectIntent.setAction(BackgroundService.ACTION_CONNECT);
+                mContext.startService(connectIntent);
+
                 Intent showNotificationIntent = new Intent(mContext, BackgroundService.class);
                 showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
                 mContext.startService(showNotificationIntent);

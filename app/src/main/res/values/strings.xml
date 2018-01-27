@@ -342,7 +342,7 @@
     <string name="volume_step_size_dialog_warning">You are selecting a high value for your volume step size. Be careful not to harm your ears or your equipment!</string>
 
     <string name="preference_show_notification_title">Show notification</string>
-    <string name="preference_show_notification_text">Show a notification when leaving the main user interface.</string>
+    <string name="preference_show_notification_text">Show a notification when leaving the main user interface. This is necessary for the widget to work. If you click on \'connect\' on the widget, the notification will be shown in any case.</string>
 
     <string name="preference_use_english_wikipedia_title">Use English Wikipedia</string>
     <string name="preference_use_english_wikipedia_text">Use the English Wikipedia version to lookup pages</string>
