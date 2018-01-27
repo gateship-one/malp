@@ -37,6 +37,7 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.ViewDragHelper;
@@ -559,7 +560,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @return True if the view should be allowed to be used as dragging part, false otheriwse.
          */
         @Override
-        public boolean tryCaptureView(View child, int pointerId) {
+        public boolean tryCaptureView(@NonNull View child, int pointerId) {
             return child == mHeaderView;
         }
 
@@ -573,7 +574,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @param dy          Dimension of the height
          */
         @Override
-        public void onViewPositionChanged(View changedView, int left, int top, int dx, int dy) {
+        public void onViewPositionChanged(@NonNull View changedView, int left, int top, int dx, int dy) {
             // Save the heighest top position of this view.
             mTopPosition = top;
 
@@ -608,7 +609,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @param yvel          y position of the view
          */
         @Override
-        public void onViewReleased(View releasedChild, float xvel, float yvel) {
+        public void onViewReleased(@NonNull View releasedChild, float xvel, float yvel) {
             int top = getPaddingTop();
             if (yvel > 0 || (yvel == 0 && mDragOffset > 0.5f)) {
                 top += mDragRange;
@@ -625,7 +626,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @return Dragging range
          */
         @Override
-        public int getViewVerticalDragRange(View child) {
+        public int getViewVerticalDragRange(@NonNull View child) {
             return mDragRange;
         }
 
@@ -639,7 +640,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
          * @return The limited height value (or valid position inside the clamped range).
          */
         @Override
-        public int clampViewPositionVertical(View child, int top, int dy) {
+        public int clampViewPositionVertical(@NonNull View child, int top, int dy) {
             final int topBound = getPaddingTop();
             int bottomBound = getHeight() - mHeaderView.getHeight() - mHeaderView.getPaddingBottom();
 
@@ -1255,16 +1256,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
     private void updateMPDCurrentTrack(MPDTrack track) {
         // Check if track title is set, otherwise use track name, otherwise path
-        String title;
-        if(!(title = track.getTrackTitle()).isEmpty()) {
-
-        } else if (!(title = track.getTrackName()).isEmpty()) {
-
-        } else if (!track.getPath().isEmpty()) {
-            title = FormatHelper.getFilenameFromPath(track.getPath());
-        } else {
-            title = "";
-        }
+        String title = track.getVisibleTitle();
         mTrackName.setText(title);
 
 

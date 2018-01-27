@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -76,7 +77,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -181,7 +182,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save the already typed search string (or null if nothing is entered)
@@ -255,10 +256,11 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             return POSITION_NONE;
         }
 
+        @NonNull
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             GenericMPDFragment fragment = (GenericMPDFragment) super.instantiateItem(container, position);

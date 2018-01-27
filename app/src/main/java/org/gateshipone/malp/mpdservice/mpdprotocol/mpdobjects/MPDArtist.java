@@ -25,6 +25,7 @@ package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.util.ArrayList;
 
@@ -107,7 +108,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
     }
 
     @Override
-    public int compareTo(MPDArtist another) {
+    public int compareTo(@NonNull MPDArtist another) {
         if (another.equals(this)) {
             return 0;
         }
@@ -152,11 +153,11 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
 
     @Override
     public String toString() {
-        String retVal = this.pArtistName + "_";
+        StringBuilder retVal = new StringBuilder(this.pArtistName + "_");
         for(String mbid : pMBIDs ) {
-            retVal += "_" + mbid;
+            retVal.append("_").append(mbid);
         }
-        return retVal;
+        return retVal.toString();
     }
 
     @Override

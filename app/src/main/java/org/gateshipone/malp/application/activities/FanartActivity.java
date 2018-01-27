@@ -344,15 +344,8 @@ public class FanartActivity extends GenericActivity {
      */
     private void updateMPDCurrentTrack(final MPDTrack track) {
         String title;
-        if(!(title = track.getTrackTitle()).isEmpty()) {
 
-        } else if (!(title = track.getTrackName()).isEmpty()) {
-
-        } else if (!track.getPath().isEmpty()) {
-            title = FormatHelper.getFilenameFromPath(track.getPath());
-        } else {
-            title = "";
-        }
+        title = track.getVisibleTitle();
 
         mTrackTitle.setText(title);
         mTrackAlbum.setText(track.getTrackAlbum());

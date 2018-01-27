@@ -106,16 +106,7 @@ public class WidgetProvider extends AppWidgetProvider {
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
             // Check if track title is set, otherwise use track name, otherwise path
-            String title;
-            if(!(title = mLastTrack.getTrackTitle()).isEmpty()) {
-
-            } else if (!(title = mLastTrack.getTrackName()).isEmpty()) {
-
-            } else if (!mLastTrack.getPath().isEmpty()) {
-                title = FormatHelper.getFilenameFromPath(mLastTrack.getPath());
-            } else {
-                title = "";
-            }
+            String title = mLastTrack.getVisibleTitle();
             views.setTextViewText(R.id.widget_big_trackName, title);
 
             if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {

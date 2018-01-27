@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.views;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,7 +49,7 @@ public class VolumeStepPreferenceDialog extends DialogFragment implements SeekBa
     private int mVolumeStepSize;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.volume_step_preference_dialog, container, false);
 

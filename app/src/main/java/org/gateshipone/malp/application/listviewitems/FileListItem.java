@@ -193,17 +193,7 @@ public class FileListItem extends AbsImageListViewItem {
                     mDurationView.setVisibility(GONE);
                 }
                 // Get track title
-                String trackTitle = track.getTrackTitle();
-
-                // Check for track name
-                if (null == trackTitle || trackTitle.isEmpty()) {
-                    trackTitle = track.getTrackName();
-                }
-
-                // If no track title is available (e.g. streaming URLs) show path
-                if (null == trackTitle || trackTitle.isEmpty()) {
-                    trackTitle = FormatHelper.getFilenameFromPath(track.getPath());
-                }
+                String trackTitle = track.getVisibleTitle();
                 mTitleView.setText(trackTitle);
 
                 // additional information (artist + album)

@@ -150,23 +150,13 @@ public class FormatHelper {
         return DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM, Locale.getDefault()).format(date);
     }
 
-
-    /**
-     * Returns the last part of the complete filename URl
-     * @param url URL to separate
-     * @return Filename (last part behind a /)
-     */
-    public static String getFilenameFromPath(String url) {
-        return url.substring(url.lastIndexOf('/'));
-    }
-
     /**
      * Returns the path without the filename
      * @param url Path to use
      * @return Path without file
      */
     public static String getDirectoryFromPath(String url) {
-        return url.substring(0,url.lastIndexOf('/'));
+        return url.substring(0,url.lastIndexOf('/') + 1);
     }
 
     /**

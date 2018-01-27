@@ -25,6 +25,7 @@ package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 /**
  * This class represents an MPDTrack. This is the same type for tracks and files.
@@ -333,6 +334,19 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     }
 
     /**
+     * Returns either the track title, name or filename depending on which is set.
+     */
+    public String getVisibleTitle() {
+        if (!pTrackTitle.isEmpty()) {
+            return pTrackTitle;
+        } else if (!pTrackName.isEmpty()) {
+            return pTrackName;
+        } else {
+            return getFilename();
+        }
+    }
+
+    /**
      * @return String that is used for section based scrolling
      */
     @Override
@@ -437,11 +451,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
      * @param another {@link MPDTrack} to compare
      * @return see super class
      */
-    public int compareTo(MPDTrack another) {
-        if (another == null) {
-            return -1;
-        }
-
+    public int compareTo(@NonNull MPDTrack another) {
         String title = getFilename();
         String anotherTitle = another.getFilename();
 

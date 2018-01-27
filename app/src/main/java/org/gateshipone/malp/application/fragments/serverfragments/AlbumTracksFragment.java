@@ -28,6 +28,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -94,7 +95,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
