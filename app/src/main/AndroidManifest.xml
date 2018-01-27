@@ -34,7 +34,8 @@
         android:label="@string/app_name"
         android:largeHeap="true"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme.orange">
+        android:theme="@style/AppTheme.orange"
+        android:fullBackupContent="@xml/backup_descriptor">
         <activity
             android:name=".application.activities.SplashActivity"
             android:label="@string/app_name"
