@@ -148,21 +148,18 @@ public class EditProfileFragment extends Fragment {
 
         // Show/Hide streaming url view depending on state
         mStreamingEnabledView.setChecked(mStreamingEnabled);
-        mStreamingEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if ( mStreamingURLView.getText().toString().isEmpty()) {
-                        // Check if a text was already set otherwise show an example
-                        mStreamingURL = "http://" + mHostnameView.getText().toString() + ":8080";
-                        mStreamingURLView.setText(mStreamingURL);
-                    }
-                    mStreamingURLView.setVisibility(View.VISIBLE);
-                } else {
-                    mStreamingURLView.setVisibility(View.GONE);
+        mStreamingEnabledView.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if ( mStreamingURLView.getText().toString().isEmpty()) {
+                    // Check if a text was already set otherwise show an example
+                    mStreamingURL = "http://" + mHostnameView.getText().toString() + ":8080";
+                    mStreamingURLView.setText(mStreamingURL);
                 }
-
+                mStreamingURLView.setVisibility(View.VISIBLE);
+            } else {
+                mStreamingURLView.setVisibility(View.GONE);
             }
+
         });
 
         if (!mStreamingEnabled) {
@@ -172,17 +169,14 @@ public class EditProfileFragment extends Fragment {
 
         // Show/Hide HTTP cover regex view depending on state
         mHTTPCoverEnabledView.setChecked(mHTTPCoverEnabled);
-        mHTTPCoverEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    mHTTPCoverRegexView.setText(mHTTPCoverRegex);
-                    mHTTPCoverRegexView.setVisibility(View.VISIBLE);
-                } else {
-                    mHTTPCoverRegexView.setVisibility(View.GONE);
-                }
-
+        mHTTPCoverEnabledView.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mHTTPCoverRegexView.setText(mHTTPCoverRegex);
+                mHTTPCoverRegexView.setVisibility(View.VISIBLE);
+            } else {
+                mHTTPCoverRegexView.setVisibility(View.GONE);
             }
+
         });
         if (!mHTTPCoverEnabled) {
             mHTTPCoverRegexView.setVisibility(View.GONE);

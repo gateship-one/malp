@@ -77,28 +77,21 @@ public class TextDialog extends DialogFragment {
         editTextTitle.setText(mText);
 
         // Add a listener that just removes the text on first clicking
-        editTextTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if ( !mFirstClick ) {
-                    editTextTitle.setText("");
-                    mFirstClick = true;
-                }
+        editTextTitle.setOnClickListener(v -> {
+            if ( !mFirstClick ) {
+                editTextTitle.setText("");
+                mFirstClick = true;
             }
         });
         builder.setView(editTextTitle);
 
-        builder.setMessage(mTitle).setPositiveButton(R.string.dialog_action_save, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // accept title and call callback method
-                String objectTitle = editTextTitle.getText().toString();
-                mSaveCallback.onFinished(objectTitle);
-            }
-        }).setNegativeButton(R.string.dialog_action_cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog don't save object
-                getDialog().cancel();
-            }
+        builder.setMessage(mTitle).setPositiveButton(R.string.dialog_action_save, (dialog, id) -> {
+            // accept title and call callback method
+            String objectTitle = editTextTitle.getText().toString();
+            mSaveCallback.onFinished(objectTitle);
+        }).setNegativeButton(R.string.dialog_action_cancel, (dialog, id) -> {
+            // User cancelled the dialog don't save object
+            getDialog().cancel();
         });
         // Create the AlertDialog object and return it
         return builder.create();

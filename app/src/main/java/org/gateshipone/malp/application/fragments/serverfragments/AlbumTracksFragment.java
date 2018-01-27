@@ -123,13 +123,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
@@ -159,12 +153,9 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         if (mAlbum != null && mBitmap == null) {
             final View rootView = getView();
             if (rootView != null) {
-                getView().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        int width = rootView.getWidth();
-                        mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
-                    }
+                getView().post(() -> {
+                    int width = rootView.getWidth();
+                    mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
                 });
             }
         } else if (mAlbum != null) {
@@ -173,14 +164,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             mFABCallback.setupToolbarImage(mBitmap);
             final View rootView = getView();
             if (rootView != null) {
-                getView().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        int width = rootView.getWidth();
-                        // Image too small
-                        if(mBitmap.getWidth() < width) {
-                            mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
-                        }
+                getView().post(() -> {
+                    int width = rootView.getWidth();
+                    // Image too small
+                    if(mBitmap.getWidth() < width) {
+                        mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
                     }
                 });
             }
@@ -428,13 +416,10 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && null != mFABCallback && bm != null) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
-                        mFABCallback.setupToolbarImage(bm);
-                        getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
-                    }
+                activity.runOnUiThread(() -> {
+                    mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
+                    mFABCallback.setupToolbarImage(bm);
+                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
                 });
             }
         }

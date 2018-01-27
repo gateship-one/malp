@@ -347,17 +347,9 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 final AlertDialog.Builder removeListBuilder = new AlertDialog.Builder(getContext());
                 removeListBuilder.setTitle(getContext().getString(R.string.action_delete_playlist));
                 removeListBuilder.setMessage(getContext().getString(R.string.dialog_message_delete_current_playlist));
-                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MPDQueryHandler.clearPlaylist();
-                    }
-                });
-                removeListBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, (dialog, which) -> MPDQueryHandler.clearPlaylist());
+                removeListBuilder.setNegativeButton(R.string.dialog_action_no, (dialog, which) -> {
 
-                    }
                 });
                 removeListBuilder.create().show();
                 break;
@@ -371,18 +363,12 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                         AlertDialog.Builder overWriteBuilder = new AlertDialog.Builder(getContext());
                         overWriteBuilder.setTitle(getContext().getString(R.string.action_overwrite_playlist));
                         overWriteBuilder.setMessage(getContext().getString(R.string.dialog_message_overwrite_playlist) + ' ' + title + '?');
-                        overWriteBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                MPDQueryHandler.removePlaylist(title);
-                                MPDQueryHandler.savePlaylist(title);
-                            }
+                        overWriteBuilder.setPositiveButton(R.string.dialog_action_yes, (dialog, which) -> {
+                            MPDQueryHandler.removePlaylist(title);
+                            MPDQueryHandler.savePlaylist(title);
                         });
-                        overWriteBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
+                        overWriteBuilder.setNegativeButton(R.string.dialog_action_no, (dialog, which) -> {
 
-                            }
                         });
                         overWriteBuilder.create().show();
 
@@ -396,12 +382,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                         args.putString(TextDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.dialog_save_playlist));
                         args.putString(TextDialog.EXTRA_DIALOG_TEXT, getResources().getString(R.string.default_playlist_title));
 
-                        textDialog.setCallback(new TextDialogCallback() {
-                            @Override
-                            public void onFinished(String text) {
-                                MPDQueryHandler.savePlaylist(text);
-                            }
-                        });
+                        textDialog.setCallback(MPDQueryHandler::savePlaylist);
                         textDialog.setArguments(args);
                         textDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SavePLTextDialog");
                     }
@@ -418,12 +399,7 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 break;
             case R.id.action_add_url:
                 TextDialog addURLDialog = new TextDialog();
-                addURLDialog.setCallback(new TextDialogCallback() {
-                    @Override
-                    public void onFinished(String text) {
-                        MPDQueryHandler.addPath(text);
-                    }
-                });
+                addURLDialog.setCallback(MPDQueryHandler::addPath);
                 Bundle textDialogArgs = new Bundle();
                 textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TEXT, "http://...");
                 textDialogArgs.putString(TextDialog.EXTRA_DIALOG_TITLE, getResources().getString(R.string.action_add_url));
@@ -883,21 +859,13 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
         mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
-        mVolumeIcon.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.setVolume(0);
-            }
-        });
+        mVolumeIcon.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
-        mVolumeIcon.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(final View view) {
+        mVolumeIcon.setOnLongClickListener(view -> {
 
-                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
+            MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
 
-                return true;
-            }
+            return true;
         });
 
         mVolumeSeekbar.setMax(100);
@@ -906,41 +874,23 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
 
         /* Volume control buttons */
         mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
-        mVolumeIconButtons.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.setVolume(0);
-            }
-        });
+        mVolumeIconButtons.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
-        mVolumeIconButtons.setOnLongClickListener(new OnLongClickListener() {
-            @Override
-            public boolean onLongClick(final View view) {
+        mVolumeIconButtons.setOnLongClickListener(view -> {
 
-                MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
+            MPDQueryHandler.getOutputs(new OutputResponseMenuHandler(getContext(), view));
 
-                return true;
-            }
+            return true;
         });
 
         mVolumeText = (TextView) findViewById(R.id.volume_button_text);
 
         mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
 
-        mVolumeMinus.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.decreaseVolume(mVolumeStepSize);
-            }
-        });
+        mVolumeMinus.setOnClickListener(v -> MPDCommandHandler.decreaseVolume(mVolumeStepSize));
 
         mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
-        mVolumePlus.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.increaseVolume(mVolumeStepSize);
-            }
-        });
+        mVolumePlus.setOnClickListener(v -> MPDCommandHandler.increaseVolume(mVolumeStepSize));
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
         mPlusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP, mVolumeStepSize);
@@ -963,121 +913,78 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
         mDraggedUpButtons.setAlpha(0.0f);
 
         // add listener to top playpause button
-        mTopPlayPauseButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                MPDCommandHandler.togglePause();
-            }
-        });
+        mTopPlayPauseButton.setOnClickListener(arg0 -> MPDCommandHandler.togglePause());
 
         // Add listeners to top playlist button
-        mTopPlaylistButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        mTopPlaylistButton.setOnClickListener(v -> {
 
-                // get color for playlist button
-                int color;
-                if (mViewSwitcher.getCurrentView() != mPlaylistView) {
-                    color = ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent);
+            // get color for playlist button
+            int color;
+            if (mViewSwitcher.getCurrentView() != mPlaylistView) {
+                color = ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent);
+            } else {
+                color = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
+            }
+
+            // tint the button
+            mTopPlaylistButton.setImageTintList(ColorStateList.valueOf(color));
+
+            // toggle between cover and playlistview
+            mViewSwitcher.showNext();
+
+            // report the change of the view
+            if (mDragStatusReceiver != null) {
+                // set view status
+                if (mViewSwitcher.getDisplayedChild() == 0) {
+                    // cover image is shown
+                    mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.COVER_VIEW);
                 } else {
-                    color = ThemeUtils.getThemeColor(getContext(), R.attr.malp_color_text_accent);
-                }
-
-                // tint the button
-                mTopPlaylistButton.setImageTintList(ColorStateList.valueOf(color));
-
-                // toggle between cover and playlistview
-                mViewSwitcher.showNext();
-
-                // report the change of the view
-                if (mDragStatusReceiver != null) {
-                    // set view status
-                    if (mViewSwitcher.getDisplayedChild() == 0) {
-                        // cover image is shown
-                        mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.COVER_VIEW);
-                    } else {
-                        // playlist view is shown
-                        mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.PLAYLIST_VIEW);
-                        mPlaylistView.jumpToCurrentSong();
-                    }
+                    // playlist view is shown
+                    mDragStatusReceiver.onSwitchedViews(NowPlayingDragStatusReceiver.VIEW_SWITCHER_STATUS.PLAYLIST_VIEW);
+                    mPlaylistView.jumpToCurrentSong();
                 }
             }
         });
 
         // Add listener to top menu button
-        mTopMenuButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showAdditionalOptionsMenu(v);
-            }
-        });
+        mTopMenuButton.setOnClickListener(this::showAdditionalOptionsMenu);
 
         // Add listener to bottom repeat button
-        mBottomRepeatButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                if (null != mLastStatus) {
-                    if (mLastStatus.getRepeat() == 0) {
-                        MPDCommandHandler.setRepeat(true);
-                    } else {
-                        MPDCommandHandler.setRepeat(false);
-                    }
+        mBottomRepeatButton.setOnClickListener(arg0 -> {
+            if (null != mLastStatus) {
+                if (mLastStatus.getRepeat() == 0) {
+                    MPDCommandHandler.setRepeat(true);
+                } else {
+                    MPDCommandHandler.setRepeat(false);
                 }
             }
         });
 
         // Add listener to bottom previous button
-        mBottomPreviousButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                MPDCommandHandler.previousSong();
-
-            }
-        });
+        mBottomPreviousButton.setOnClickListener(arg0 -> MPDCommandHandler.previousSong());
 
         // Add listener to bottom playpause button
-        mBottomPlayPauseButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                MPDCommandHandler.togglePause();
-            }
-        });
+        mBottomPlayPauseButton.setOnClickListener(arg0 -> MPDCommandHandler.togglePause());
 
-        mBottomStopButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.stop();
-            }
-        });
+        mBottomStopButton.setOnClickListener(view -> MPDCommandHandler.stop());
 
         // Add listener to bottom next button
-        mBottomNextButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                MPDCommandHandler.nextSong();
-            }
-        });
+        mBottomNextButton.setOnClickListener(arg0 -> MPDCommandHandler.nextSong());
 
         // Add listener to bottom random button
-        mBottomRandomButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                if (null != mLastStatus) {
-                    if (mLastStatus.getRandom() == 0) {
-                        MPDCommandHandler.setRandom(true);
-                    } else {
-                        MPDCommandHandler.setRandom(false);
-                    }
+        mBottomRandomButton.setOnClickListener(arg0 -> {
+            if (null != mLastStatus) {
+                if (mLastStatus.getRandom() == 0) {
+                    MPDCommandHandler.setRandom(true);
+                } else {
+                    MPDCommandHandler.setRandom(false);
                 }
             }
         });
 
-        mCoverImage.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getContext(), FanartActivity.class);
-                getContext().startActivity(intent);
-            }
+        mCoverImage.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), FanartActivity.class);
+            getContext().startActivity(intent);
         });
         mCoverImage.setVisibility(INVISIBLE);
 
@@ -1660,18 +1567,14 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 Activity activity = (Activity) getContext();
                 if (activity != null) {
                     // Run on the UI thread of the activity because we are modifying gui elements.
-                    activity.runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                            if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE) {
-                                // Set the main cover image
-                                mCoverImage.setAlbumImage(bm);
-                                // Set the small header image
-                                mTopCoverImage.setImageBitmap(bm);
-                            } else if (type == CoverBitmapLoader.IMAGE_TYPE.ARTIST_IMAGE) {
-                                mCoverImage.setArtistImage(bm);
-                            }
+                    activity.runOnUiThread(() -> {
+                        if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE) {
+                            // Set the main cover image
+                            mCoverImage.setAlbumImage(bm);
+                            // Set the small header image
+                            mTopCoverImage.setImageBitmap(bm);
+                        } else if (type == CoverBitmapLoader.IMAGE_TYPE.ARTIST_IMAGE) {
+                            mCoverImage.setArtistImage(bm);
                         }
                     });
                 }

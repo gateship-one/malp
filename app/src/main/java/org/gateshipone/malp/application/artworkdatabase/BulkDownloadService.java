@@ -344,12 +344,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
             if (wifiOnly && !isWifi) {
                 // Cancel all downloads
                 Log.v(TAG, "Cancel all downloads because of connection change");
-                MALPRequestQueue.getInstance(BulkDownloadService.this).cancelAll(new RequestQueue.RequestFilter() {
-                    @Override
-                    public boolean apply(Request<?> request) {
-                        return true;
-                    }
-                });
+                MALPRequestQueue.getInstance(BulkDownloadService.this).cancelAll(request -> true);
             }
 
         }

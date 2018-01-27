@@ -116,59 +116,39 @@ public class SongDetailsDialog extends DialogFragment {
 
             mTrackURI.setText(mFile.getPath());
 
-            mTrackTitleMBID.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/recording/" + mFile.getTrackMBID()));
-                    startActivity(urlIntent);
-                }
+            mTrackTitleMBID.setOnClickListener(v -> {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                urlIntent.setData(Uri.parse("https://www.musicbrainz.org/recording/" + mFile.getTrackMBID()));
+                startActivity(urlIntent);
             });
 
-            mTrackAlbumMBID.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/release/" + mFile.getTrackAlbumMBID()));
-                    startActivity(urlIntent);
-                }
+            mTrackAlbumMBID.setOnClickListener(v -> {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                urlIntent.setData(Uri.parse("https://www.musicbrainz.org/release/" + mFile.getTrackAlbumMBID()));
+                startActivity(urlIntent);
             });
 
-            mTrackArtistMBID.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackArtistMBID()));
-                    startActivity(urlIntent);
-                }
+            mTrackArtistMBID.setOnClickListener(v -> {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackArtistMBID()));
+                startActivity(urlIntent);
             });
 
-            mTrackAlbumArtistMBID.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                    urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackAlbumArtistMBID()));
-                    startActivity(urlIntent);
-                }
+            mTrackAlbumArtistMBID.setOnClickListener(v -> {
+                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+                urlIntent.setData(Uri.parse("https://www.musicbrainz.org/artist/" + mFile.getTrackAlbumArtistMBID()));
+                startActivity(urlIntent);
             });
         }
 
-        ((Button) rootView.findViewById(R.id.button_enqueue)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (null != mFile) {
-                    MPDQueryHandler.addPath(mFile.getPath());
-                }
-                dismiss();
+        ((Button) rootView.findViewById(R.id.button_enqueue)).setOnClickListener(view -> {
+            if (null != mFile) {
+                MPDQueryHandler.addPath(mFile.getPath());
             }
+            dismiss();
         });
 
-        ((Button) rootView.findViewById(R.id.button_cancel)).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+        ((Button) rootView.findViewById(R.id.button_cancel)).setOnClickListener(view -> dismiss());
 
         // Return the ready inflated and configured fragment view.
         return rootView;

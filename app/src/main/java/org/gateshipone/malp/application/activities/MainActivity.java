@@ -175,9 +175,7 @@ public class MainActivity extends GenericActivity
             builder.setMessage(getResources().getString(R.string.welcome_dialog_text));
 
 
-            builder.setPositiveButton(R.string.dialog_action_ok, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                }
+            builder.setPositiveButton(R.string.dialog_action_ok, (dialog, id) -> {
             });
             AlertDialog dialog = builder.create();
             dialog.show();

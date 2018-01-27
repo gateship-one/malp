@@ -132,22 +132,12 @@ public class HTTPAlbumImageProvider implements TrackAlbumImageProvider {
             for(String filename : COVER_FILENAMES) {
                 for (String fileextension: COVER_FILEEXTENSIIONS) {
                     String fileURL = url + filename + '.' + fileextension;
-                    getAlbumImage(fileURL, track, listener, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            multiRequest.increaseFailure(error);
-                        }
-                    });
+                    getAlbumImage(fileURL, track, listener, multiRequest::increaseFailure);
                 }
             }
         } else {
             // File, just check the file
-            getAlbumImage(url, track, listener, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    errorListener.fetchVolleyError(track,error);
-                }
-            });
+            getAlbumImage(url, track, listener, error -> errorListener.fetchVolleyError(track,error));
         }
     }
 

@@ -63,22 +63,14 @@ public class VolumeStepPreferenceDialog extends DialogFragment implements SeekBa
         mSeekBar.setProgress(mVolumeStepSize);
         mSeekBar.setOnSeekBarChangeListener(this);
 
-        rootView.findViewById(R.id.button_ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putInt(getString(R.string.pref_volume_steps_key), mVolumeStepSize == 0 ? 1 : mVolumeStepSize);
-                editor.apply();
-                dismiss();
-            }
+        rootView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(getString(R.string.pref_volume_steps_key), mVolumeStepSize == 0 ? 1 : mVolumeStepSize);
+            editor.apply();
+            dismiss();
         });
 
-        rootView.findViewById(R.id.button_cancel).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+        rootView.findViewById(R.id.button_cancel).setOnClickListener(v -> dismiss());
 
         updateLabels();
 

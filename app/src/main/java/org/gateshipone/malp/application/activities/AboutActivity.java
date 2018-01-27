@@ -56,48 +56,31 @@ public class AboutActivity extends GenericActivity {
 
         ((TextView)findViewById(R.id.activity_about_version)).setText(versionName);
 
-        findViewById(R.id.button_contributors).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent myIntent = new Intent(AboutActivity.this, ContributorsActivity.class);
+        findViewById(R.id.button_contributors).setOnClickListener(view -> {
+            Intent myIntent = new Intent(AboutActivity.this, ContributorsActivity.class);
 
-                startActivity(myIntent);
-            }
+            startActivity(myIntent);
         });
 
-        findViewById(R.id.logo_musicbrainz).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                urlIntent.setData(Uri.parse(getResources().getString(R.string.url_musicbrainz)));
-                startActivity(urlIntent);
-            }
+        findViewById(R.id.logo_musicbrainz).setOnClickListener(view -> {
+            Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+            urlIntent.setData(Uri.parse(getResources().getString(R.string.url_musicbrainz)));
+            startActivity(urlIntent);
         });
 
-        findViewById(R.id.logo_lastfm).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                urlIntent.setData(Uri.parse(getResources().getString(R.string.url_lastfm)));
-                startActivity(urlIntent);
-            }
+        findViewById(R.id.logo_lastfm).setOnClickListener(view -> {
+            Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+            urlIntent.setData(Uri.parse(getResources().getString(R.string.url_lastfm)));
+            startActivity(urlIntent);
         });
 
-        findViewById(R.id.logo_fanarttv).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent urlIntent = new Intent(Intent.ACTION_VIEW);
-                urlIntent.setData(Uri.parse(getResources().getString(R.string.url_fanarttv)));
-                startActivity(urlIntent);
-            }
+        findViewById(R.id.logo_fanarttv).setOnClickListener(view -> {
+            Intent urlIntent = new Intent(Intent.ACTION_VIEW);
+            urlIntent.setData(Uri.parse(getResources().getString(R.string.url_fanarttv)));
+            startActivity(urlIntent);
         });
 
-        findViewById(R.id.thirdparty_licenses).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LicensesDialog.newInstance().show(getFragmentManager(), LicensesDialog.class.getSimpleName());
-            }
-        });
+        findViewById(R.id.thirdparty_licenses).setOnClickListener(view -> LicensesDialog.newInstance().show(getFragmentManager(), LicensesDialog.class.getSimpleName()));
     }
 
     @Override

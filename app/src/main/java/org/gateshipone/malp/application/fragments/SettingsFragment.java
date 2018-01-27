@@ -47,22 +47,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         // add listener to open artwork settings
         Preference openArtwork = findPreference(getString(R.string.pref_artwork_settings_key));
-        openArtwork.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            public boolean onPreferenceClick(Preference preference) {
-                mArtworkCallback.openArtworkSettings();
-                return true;
-            }
+        openArtwork.setOnPreferenceClickListener(preference -> {
+            mArtworkCallback.openArtworkSettings();
+            return true;
         });
 
         Preference openVolumeStepDialog = findPreference(getString(R.string.pref_volume_steps_dialog_key));
-        openVolumeStepDialog.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-            @Override
-            public boolean onPreferenceClick(Preference preference) {
-                VolumeStepPreferenceDialog dialog = new VolumeStepPreferenceDialog();
-                dialog.show(getFragmentManager(), "Volume steps");
-                return true;
-            }
+        openVolumeStepDialog.setOnPreferenceClickListener(preference -> {
+            VolumeStepPreferenceDialog dialog = new VolumeStepPreferenceDialog();
+            dialog.show(getFragmentManager(), "Volume steps");
+            return true;
         });
     }
 

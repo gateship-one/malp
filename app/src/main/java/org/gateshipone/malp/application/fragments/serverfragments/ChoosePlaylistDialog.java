@@ -118,27 +118,22 @@ public class ChoosePlaylistDialog extends GenericMPDFragment<List<MPDFileEntry>>
 
         mPlaylistsListViewAdapter = new FileAdapter(getActivity(), false, false);
 
-        builder.setTitle(getString(R.string.dialog_choose_playlist)).setAdapter(mPlaylistsListViewAdapter, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if ( null == mSaveCallback ) {
-                    return;
-                }
-                if (which == 0) {
-                    // open save dialog to create a new playlist
-                    mSaveCallback.onCreateNewObject();
-                } else {
-                    // override existing playlist
-                    MPDPlaylist playlist = (MPDPlaylist) mPlaylistsListViewAdapter.getItem(which);
-                    String objectTitle = playlist.getPath();
-                    mSaveCallback.onSaveObject(objectTitle);
-                }
+        builder.setTitle(getString(R.string.dialog_choose_playlist)).setAdapter(mPlaylistsListViewAdapter, (dialog, which) -> {
+            if ( null == mSaveCallback ) {
+                return;
             }
-        }).setNegativeButton(R.string.dialog_action_cancel, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                // User cancelled the dialog don't save object
-                getDialog().cancel();
+            if (which == 0) {
+                // open save dialog to create a new playlist
+                mSaveCallback.onCreateNewObject();
+            } else {
+                // override existing playlist
+                MPDPlaylist playlist = (MPDPlaylist) mPlaylistsListViewAdapter.getItem(which);
+                String objectTitle = playlist.getPath();
+                mSaveCallback.onSaveObject(objectTitle);
             }
+        }).setNegativeButton(R.string.dialog_action_cancel, (dialog, id) -> {
+            // User cancelled the dialog don't save object
+            getDialog().cancel();
         });
 
         // Prepare loader ( start new one or reuse old )

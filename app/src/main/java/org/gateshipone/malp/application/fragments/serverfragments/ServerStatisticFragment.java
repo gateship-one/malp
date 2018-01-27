@@ -116,14 +116,11 @@ public class ServerStatisticFragment extends Fragment {
         if (null == activity) {
             return;
         }
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (show) {
-                    mDBUpdating.setVisibility(View.VISIBLE);
-                } else {
-                    mDBUpdating.setVisibility(View.GONE);
-                }
+        activity.runOnUiThread(() -> {
+            if (show) {
+                mDBUpdating.setVisibility(View.VISIBLE);
+            } else {
+                mDBUpdating.setVisibility(View.GONE);
             }
         });
 

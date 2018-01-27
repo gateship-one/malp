@@ -102,39 +102,26 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
 
         String artistURLName = Uri.encode(artist.getArtistName().replaceAll("/", " "));
 
-        getArtistImageURL(artistURLName, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONObject artistObj = response.getJSONObject("artist");
-                    // FIXME optionally get mbid here without aborting the image fetch
-                    JSONArray images = artistObj.getJSONArray("image");
-                    for (int i = 0; i < images.length(); i++) {
-                        JSONObject image = images.getJSONObject(i);
-                        if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
-                            String url = image.getString("#text");
-                            if (!url.isEmpty()) {
-                                getArtistImage(image.getString("#text"), artist, listener, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        errorListener.fetchVolleyError(artist, error);
-                                    }
-                                });
-                            } else {
-                                errorListener.fetchVolleyError(artist, null);
-                            }
+        getArtistImageURL(artistURLName, response -> {
+            try {
+                JSONObject artistObj = response.getJSONObject("artist");
+                // FIXME optionally get mbid here without aborting the image fetch
+                JSONArray images = artistObj.getJSONArray("image");
+                for (int i = 0; i < images.length(); i++) {
+                    JSONObject image = images.getJSONObject(i);
+                    if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
+                        String url = image.getString("#text");
+                        if (!url.isEmpty()) {
+                            getArtistImage(image.getString("#text"), artist, listener, error -> errorListener.fetchVolleyError(artist, error));
+                        } else {
+                            errorListener.fetchVolleyError(artist, null);
                         }
                     }
-                } catch (JSONException e) {
-                    errorListener.fetchJSONException(artist, e);
                 }
+            } catch (JSONException e) {
+                errorListener.fetchJSONException(artist, e);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                errorListener.fetchVolleyError(artist, error);
-            }
-        });
+        }, error -> errorListener.fetchVolleyError(artist, error));
 
     }
 
@@ -180,40 +167,27 @@ public class LastFMManager implements ArtistImageProvider, AlbumImageProvider {
      */
     @Override
     public void fetchAlbumImage(final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener) {
-        getAlbumImageURL(album, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    JSONObject albumObj = response.getJSONObject("album");
-                    JSONArray images = albumObj.getJSONArray("image");
-                    // FIXME optionally get mbid here without aborting the image fetch
-                    for (int i = 0; i < images.length(); i++) {
-                        JSONObject image = images.getJSONObject(i);
-                        if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
-                            String url = image.getString("#text");
-                            if (!url.isEmpty()) {
-                                getAlbumImage(image.getString("#text"), album, listener, new Response.ErrorListener() {
-                                    @Override
-                                    public void onErrorResponse(VolleyError error) {
-                                        errorListener.fetchVolleyError(album, error);
-                                    }
-                                });
-                            } else {
-                                errorListener.fetchVolleyError(album, null);
-                            }
-
+        getAlbumImageURL(album, response -> {
+            try {
+                JSONObject albumObj = response.getJSONObject("album");
+                JSONArray images = albumObj.getJSONArray("image");
+                // FIXME optionally get mbid here without aborting the image fetch
+                for (int i = 0; i < images.length(); i++) {
+                    JSONObject image = images.getJSONObject(i);
+                    if (image.getString("size").equals(LAST_FM_REQUESTED_IMAGE_SIZE)) {
+                        String url = image.getString("#text");
+                        if (!url.isEmpty()) {
+                            getAlbumImage(image.getString("#text"), album, listener, error -> errorListener.fetchVolleyError(album, error));
+                        } else {
+                            errorListener.fetchVolleyError(album, null);
                         }
+
                     }
-                } catch (JSONException e) {
-                    errorListener.fetchJSONException(album, e);
                 }
+            } catch (JSONException e) {
+                errorListener.fetchJSONException(album, e);
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                errorListener.fetchVolleyError(album, error);
-            }
-        });
+        }, error -> errorListener.fetchVolleyError(album, error));
     }
 
     /**

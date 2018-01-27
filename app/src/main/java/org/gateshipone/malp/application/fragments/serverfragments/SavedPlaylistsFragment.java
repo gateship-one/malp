@@ -95,13 +95,7 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
 
         // Return the ready inflated and configured fragment view.
@@ -180,20 +174,14 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
                 final AlertDialog.Builder removeListBuilder = new AlertDialog.Builder(getContext());
                 removeListBuilder.setTitle(getContext().getString(R.string.action_delete_playlist));
                 removeListBuilder.setMessage(getContext().getString(R.string.dialog_message_delete_playlist) + ' ' + playlist.getSectionTitle() + '?');
-                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MPDQueryHandler.removePlaylist(playlist.getPath());
-                        mPlaylistAdapter.swapModel(null);
-                        getLoaderManager().destroyLoader(0);
-                        getLoaderManager().initLoader(0, getArguments(), SavedPlaylistsFragment.this);
-                    }
+                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, (dialog, which) -> {
+                    MPDQueryHandler.removePlaylist(playlist.getPath());
+                    mPlaylistAdapter.swapModel(null);
+                    getLoaderManager().destroyLoader(0);
+                    getLoaderManager().initLoader(0, getArguments(), SavedPlaylistsFragment.this);
                 });
-                removeListBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                removeListBuilder.setNegativeButton(R.string.dialog_action_no, (dialog, which) -> {
 
-                    }
                 });
                 removeListBuilder.create().show();
 

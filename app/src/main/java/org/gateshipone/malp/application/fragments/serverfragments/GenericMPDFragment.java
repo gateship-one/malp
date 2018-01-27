@@ -73,12 +73,7 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
 
     protected void refreshContent() {
         if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
+            mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(true));
         }
         if ( !isDetached()) {
             getLoaderManager().restartLoader(0, getArguments(), this);
@@ -112,12 +107,7 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
 
     private void finishedLoading() {
         if (null != mSwipeRefreshLayout) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                }
-            });
+            mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(false));
         }
     }
 

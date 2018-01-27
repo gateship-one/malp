@@ -521,19 +521,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
 
         if (mArtistProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
-            LastFMManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
-                @Override
-                public void onResponse(ArtistImageResponse response) {
-                    new InsertArtistImageTask().execute(response);
-                }
-            }, this);
+            LastFMManager.getInstance(mContext).fetchArtistImage(artist, response -> new InsertArtistImageTask().execute(response), this);
         } else if (mArtistProvider.equals(mContext.getString(R.string.pref_artwork_provider_fanarttv_key))) {
-            FanartTVManager.getInstance(mContext).fetchArtistImage(artist, new Response.Listener<ArtistImageResponse>() {
-                @Override
-                public void onResponse(ArtistImageResponse response) {
-                    new InsertArtistImageTask().execute(response);
-                }
-            }, this);
+            FanartTVManager.getInstance(mContext).fetchArtistImage(artist, response -> new InsertArtistImageTask().execute(response), this);
         }
     }
 
@@ -557,19 +547,9 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         }
 
         if (mAlbumProvider.equals(mContext.getString(R.string.pref_artwork_provider_musicbrainz_key))) {
-            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
-                @Override
-                public void onResponse(AlbumImageResponse response) {
-                    new InsertAlbumImageTask().execute(response);
-                }
-            }, this);
+            MusicBrainzManager.getInstance(mContext).fetchAlbumImage(album, response -> new InsertAlbumImageTask().execute(response), this);
         } else if (mAlbumProvider.equals(mContext.getString(R.string.pref_artwork_provider_lastfm_key))) {
-            LastFMManager.getInstance(mContext).fetchAlbumImage(album, new Response.Listener<AlbumImageResponse>() {
-                @Override
-                public void onResponse(AlbumImageResponse response) {
-                    new InsertAlbumImageTask().execute(response);
-                }
-            }, this);
+            LastFMManager.getInstance(mContext).fetchAlbumImage(album, response -> new InsertAlbumImageTask().execute(response), this);
         }
     }
 
@@ -587,12 +567,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
 
         // Check if user-specified HTTP cover download is activated
         if (HTTPAlbumImageProvider.getInstance(mContext).getActive()) {
-            HTTPAlbumImageProvider.getInstance(mContext).fetchAlbumImage(track, new Response.Listener<TrackAlbumImageResponse>() {
-                @Override
-                public void onResponse(TrackAlbumImageResponse response) {
-                    new InsertTrackAlbumImageTask().execute(response);
-                }
-            }, new TrackAlbumFetchError() {
+            HTTPAlbumImageProvider.getInstance(mContext).fetchAlbumImage(track, response -> new InsertTrackAlbumImageTask().execute(response), new TrackAlbumFetchError() {
                 @Override
                 public void fetchJSONException(MPDTrack track, JSONException exception) {
 
@@ -1282,12 +1257,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
      */
     public void cancelAllRequests() {
         Log.v(TAG, "Cancel all download requests");
-        MALPRequestQueue.getInstance(mContext).cancelAll(new RequestQueue.RequestFilter() {
-            @Override
-            public boolean apply(Request<?> request) {
-                return true;
-            }
-        });
+        MALPRequestQueue.getInstance(mContext).cancelAll(request -> true);
 
         // Stop bulk loading as well
         synchronized (mAlbumList) {

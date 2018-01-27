@@ -91,12 +91,7 @@ public class FanartCacheManager {
         mLastAccessedMBIDs.remove(mbid);
         mLastAccessedMBIDs.add(0, mbid);
         File artistDir = new File(mCacheBasePath + "/" + mbid);
-        File[] subFiles = artistDir.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile();
-            }
-        });
+        File[] subFiles = artistDir.listFiles(File::isFile);
         return subFiles[index];
     }
 

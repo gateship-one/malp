@@ -64,55 +64,49 @@ public class OutputResponseMenuHandler extends MPDResponseOutputList {
                         .setCheckable(true)
                         .setChecked(output.getOutputState());
 
-                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        MPDOutput out = outputList.get(item.getItemId());
+                subMenuItem.setOnMenuItemClickListener(item -> {
+                    MPDOutput out = outputList.get(item.getItemId());
 
-                        if (out.getOutputState()) {
-                            MPDCommandHandler.disableOutput(out.getID());
-                        } else {
-                            MPDCommandHandler.enableOutput(out.getID());
-                        }
-                        out.setOutputState(!out.getOutputState());
-
-                        item.setChecked(out.getOutputState());
-                        // Keep the popup menu open
-                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                        item.setActionView(new View(mContext.get()));
-                        item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                            @Override
-                            public boolean onMenuItemActionExpand(MenuItem item) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onMenuItemActionCollapse(MenuItem item) {
-                                return false;
-                            }
-                        });
-                        return false;
+                    if (out.getOutputState()) {
+                        MPDCommandHandler.disableOutput(out.getID());
+                    } else {
+                        MPDCommandHandler.enableOutput(out.getID());
                     }
+                    out.setOutputState(!out.getOutputState());
+
+                    item.setChecked(out.getOutputState());
+                    // Keep the popup menu open
+                    item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                    item.setActionView(new View(mContext.get()));
+                    item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                        @Override
+                        public boolean onMenuItemActionExpand(MenuItem item) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onMenuItemActionCollapse(MenuItem item) {
+                            return false;
+                        }
+                    });
+                    return false;
                 });
 
                 subMenuItem = menuSwitch.add(0, menuId, 0, output.getOutputName());
-                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        MPDOutput selectedOut = outputList.get(item.getItemId());
+                subMenuItem.setOnMenuItemClickListener(item -> {
+                    MPDOutput selectedOut = outputList.get(item.getItemId());
 
-                        // first enable the selected output so we have always an active ones
-                        MPDCommandHandler.enableOutput(selectedOut.getID());
-                        selectedOut.setOutputState(true);
+                    // first enable the selected output so we have always an active ones
+                    MPDCommandHandler.enableOutput(selectedOut.getID());
+                    selectedOut.setOutputState(true);
 
-                        for(MPDOutput current: outputList) {
-                            if (current != selectedOut) {
-                                MPDCommandHandler.disableOutput(current.getID());
-                                current.setOutputState(false);
-                            }
+                    for(MPDOutput current: outputList) {
+                        if (current != selectedOut) {
+                            MPDCommandHandler.disableOutput(current.getID());
+                            current.setOutputState(false);
                         }
-                        return false;
                     }
+                    return false;
                 });
                 menuId++;
             }
@@ -128,35 +122,32 @@ public class OutputResponseMenuHandler extends MPDResponseOutputList {
                         .setCheckable(true)
                         .setChecked(output.getOutputState());
 
-                subMenuItem.setOnMenuItemClickListener(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        MPDOutput out = outputList.get(item.getItemId());
+                subMenuItem.setOnMenuItemClickListener(item -> {
+                    MPDOutput out = outputList.get(item.getItemId());
 
-                        if (out.getOutputState() == true) {
-                            MPDCommandHandler.disableOutput(out.getID());
-                        } else {
-                            MPDCommandHandler.enableOutput(out.getID());
-                        }
-                        out.setOutputState(!out.getOutputState());
-
-                        item.setChecked(out.getOutputState());
-                        // Keep the popup menu open
-                        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
-                        item.setActionView(new View(mContext.get()));
-                        item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
-                            @Override
-                            public boolean onMenuItemActionExpand(MenuItem item) {
-                                return false;
-                            }
-
-                            @Override
-                            public boolean onMenuItemActionCollapse(MenuItem item) {
-                                return false;
-                            }
-                        });
-                        return false;
+                    if (out.getOutputState() == true) {
+                        MPDCommandHandler.disableOutput(out.getID());
+                    } else {
+                        MPDCommandHandler.enableOutput(out.getID());
                     }
+                    out.setOutputState(!out.getOutputState());
+
+                    item.setChecked(out.getOutputState());
+                    // Keep the popup menu open
+                    item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW);
+                    item.setActionView(new View(mContext.get()));
+                    item.setOnActionExpandListener(new MenuItem.OnActionExpandListener() {
+                        @Override
+                        public boolean onMenuItemActionExpand(MenuItem item) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onMenuItemActionCollapse(MenuItem item) {
+                            return false;
+                        }
+                    });
+                    return false;
                 });
 
             }

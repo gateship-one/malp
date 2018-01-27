@@ -127,57 +127,36 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             String artistURLName = Uri.encode(artist.getArtistName().replaceAll("/", " "));
 
             // Get the list of artists "matching" the name.
-            getArtists(artistURLName, new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    JSONArray artists = null;
-                    try {
-                        artists = response.getJSONArray("artists");
+            getArtists(artistURLName, response -> {
+                JSONArray artists = null;
+                try {
+                    artists = response.getJSONArray("artists");
 
-                        // Only check the first matching artist
-                        if (!artists.isNull(0)) {
-                            JSONObject artistObj = artists.getJSONObject(0);
-                            final String artistMBID = artistObj.getString("id");
+                    // Only check the first matching artist
+                    if (!artists.isNull(0)) {
+                        JSONObject artistObj = artists.getJSONObject(0);
+                        final String artistMBID = artistObj.getString("id");
 
-                            // Try to get information for this artist from fanart.tv
-                            queryArtistMBIDonFanartTV(artistMBID, new Response.Listener<JSONObject>() {
-                                @Override
-                                public void onResponse(JSONObject response) {
-                                    JSONArray thumbImages = null;
-                                    try {
-                                        thumbImages = response.getJSONArray("artistthumb");
+                        // Try to get information for this artist from fanart.tv
+                        queryArtistMBIDonFanartTV(artistMBID, response1 -> {
+                            JSONArray thumbImages = null;
+                            try {
+                                thumbImages = response1.getJSONArray("artistthumb");
 
-                                        JSONObject firstThumbImage = thumbImages.getJSONObject(0);
+                                JSONObject firstThumbImage = thumbImages.getJSONObject(0);
 
-                                        // Get the image for the artist.
-                                        getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
-                                            @Override
-                                            public void onErrorResponse(VolleyError error) {
-                                                errorListener.fetchVolleyError(artist, error);
-                                            }
-                                        });
+                                // Get the image for the artist.
+                                getArtistImage(firstThumbImage.getString("url"), artist, listener, error -> errorListener.fetchVolleyError(artist, error));
 
-                                    } catch (JSONException e) {
-                                        errorListener.fetchJSONException(artist, e);
-                                    }
-                                }
-                            }, new Response.ErrorListener() {
-                                @Override
-                                public void onErrorResponse(VolleyError error) {
-                                    errorListener.fetchVolleyError(artist, error);
-                                }
-                            });
-                        }
-                    } catch (JSONException e) {
-                        errorListener.fetchJSONException(artist, e);
+                            } catch (JSONException e) {
+                                errorListener.fetchJSONException(artist, e);
+                            }
+                        }, error -> errorListener.fetchVolleyError(artist, error));
                     }
+                } catch (JSONException e) {
+                    errorListener.fetchJSONException(artist, e);
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    errorListener.fetchVolleyError(artist, error);
-                }
-            });
+            }, error -> errorListener.fetchVolleyError(artist, error));
         }
     }
 
@@ -192,43 +171,32 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
         // Check if recursive call ends here.
         if (mbidIndex < artist.getMBIDCount()) {
             // Query fanart.tv for this MBID
-            queryArtistMBIDonFanartTV(artist.getMBID(0), new Response.Listener<JSONObject>() {
-                @Override
-                public void onResponse(JSONObject response) {
-                    JSONArray thumbImages = null;
-                    try {
-                        thumbImages = response.getJSONArray("artistthumb");
+            queryArtistMBIDonFanartTV(artist.getMBID(0), response -> {
+                JSONArray thumbImages = null;
+                try {
+                    thumbImages = response.getJSONArray("artistthumb");
 
-                        JSONObject firstThumbImage = thumbImages.getJSONObject(0);
-                        getArtistImage(firstThumbImage.getString("url"), artist, listener, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                // If we have multiple artist mbids try the next one
-                                if (mbidIndex + 1 < artist.getMBIDCount()) {
-                                    tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
-                                } else {
-                                    // All tried
-                                    errorListener.fetchVolleyError(artist, null);
-                                }
-                            }
-                        });
-
-                    } catch (JSONException e) {
+                    JSONObject firstThumbImage = thumbImages.getJSONObject(0);
+                    getArtistImage(firstThumbImage.getString("url"), artist, listener, error -> {
                         // If we have multiple artist mbids try the next one
                         if (mbidIndex + 1 < artist.getMBIDCount()) {
                             tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
                         } else {
                             // All tried
-                            errorListener.fetchJSONException(artist, e);
+                            errorListener.fetchVolleyError(artist, null);
                         }
+                    });
+
+                } catch (JSONException e) {
+                    // If we have multiple artist mbids try the next one
+                    if (mbidIndex + 1 < artist.getMBIDCount()) {
+                        tryArtistMBID(mbidIndex + 1, artist, listener, errorListener);
+                    } else {
+                        // All tried
+                        errorListener.fetchJSONException(artist, e);
                     }
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    errorListener.fetchVolleyError(artist, error);
-                }
-            });
+            }, error -> errorListener.fetchVolleyError(artist, error));
         }
     }
 
@@ -299,29 +267,21 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
             artist.addMBID(track.getTrackAlbumArtistMBID());
         }
 
-        getArtists(Uri.encode(artist.getArtistName()), new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                JSONArray artists = null;
-                try {
-                    artists = response.getJSONArray("artists");
+        getArtists(Uri.encode(artist.getArtistName()), response -> {
+            JSONArray artists = null;
+            try {
+                artists = response.getJSONArray("artists");
 
-                    if (!artists.isNull(0)) {
-                        JSONObject artistObj = artists.getJSONObject(0);
-                        final String artistMBID = artistObj.getString("id");
-                        artist.addMBID(artistMBID);
-                        listener.onResponse(artistMBID);
-                    }
-                } catch (JSONException e) {
-                    errorListener.fanartFetchError(track);
+                if (!artists.isNull(0)) {
+                    JSONObject artistObj = artists.getJSONObject(0);
+                    final String artistMBID = artistObj.getString("id");
+                    artist.addMBID(artistMBID);
+                    listener.onResponse(artistMBID);
                 }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
+            } catch (JSONException e) {
                 errorListener.fanartFetchError(track);
             }
-        });
+        }, error -> errorListener.fanartFetchError(track));
 
     }
 
@@ -333,32 +293,24 @@ public class FanartTVManager implements ArtistImageProvider, FanartProvider {
      */
     @Override
     public void getArtistFanartURLs(String mbid, final Response.Listener<List<String>> listener, final FanartFetchError errorListener) {
-        queryArtistMBIDonFanartTV(mbid, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                JSONArray backgroundImages = null;
-                try {
-                    backgroundImages = response.getJSONArray("artistbackground");
-                    if (backgroundImages.length() == 0) {
-                        errorListener.imageListFetchError();
-                    } else {
-                        ArrayList<String> urls = new ArrayList<>();
-                        for (int i = 0; i < backgroundImages.length() && i < FANART_COUNT_LIMIT; i++) {
-                            JSONObject image = backgroundImages.getJSONObject(i);
-                            urls.add(image.getString("url"));
-                        }
-                        listener.onResponse(urls);
+        queryArtistMBIDonFanartTV(mbid, response -> {
+            JSONArray backgroundImages = null;
+            try {
+                backgroundImages = response.getJSONArray("artistbackground");
+                if (backgroundImages.length() == 0) {
+                    errorListener.imageListFetchError();
+                } else {
+                    ArrayList<String> urls = new ArrayList<>();
+                    for (int i = 0; i < backgroundImages.length() && i < FANART_COUNT_LIMIT; i++) {
+                        JSONObject image = backgroundImages.getJSONObject(i);
+                        urls.add(image.getString("url"));
                     }
-                } catch (JSONException exception) {
-
+                    listener.onResponse(urls);
                 }
+            } catch (JSONException exception) {
+
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        });
+        }, Throwable::printStackTrace);
     }
 
     /**
