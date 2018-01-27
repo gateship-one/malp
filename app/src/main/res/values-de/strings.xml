@@ -202,7 +202,7 @@
     <string name="widget_connect">Verbinden</string>
     <string name="widget_disconnected">Nicht verbunden</string>
     <string name="preference_show_notification_title">Zeige Benachrichtigung</string>
-    <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird.</string>
+    <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird. Diese wird für das Widget benötigt. Wenn Sie im Widget auf \"verbinden\" clicken, wird die Benachrichtigung in jedem Fall angezeigt.</string>
     <string name="bulk_download_notice_title">Bilder-Download</string>
     <string name="bulk_download_notice_text">Das Herunterladen von vielen Bildern sorgt für eine hohe Serverauslastung beim Bilderanbieter. Es kann vorkommen, dass die Serverauslastung zu groß wird. In diesem Fall wird der Downloader seine Aktion abbrechen.\n\nBitte ziehen Sie eine Spende an die ausgewählten Bilderanbieter in Betracht.</string>
     <string name="thirdparty_licenses_dialog_title">Drittanbieterlizenzen</string>
