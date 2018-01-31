@@ -33,6 +33,7 @@ import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -93,6 +94,12 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
     private MPDAlbum.MPD_ALBUM_SORT_ORDER mAlbumSortOrder;
 
     private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
+    /**
+     * Hack variable to save the position of a opened context menu because menu info is null for
+     * submenus.
+     */
+    private int mContextMenuPosition;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -247,15 +254,21 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
+        int position;
         if (info == null) {
-            return super.onContextItemSelected(item);
+            if (mContextMenuPosition == -1 ) {
+                return super.onContextItemSelected(item);
+            }
+            position = mContextMenuPosition;
+            mContextMenuPosition = -1;
+        } else {
+            position = info.position;
         }
 
 
-        MPDTrack track = (MPDTrack) mFileAdapter.getItem(info.position);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
 
         mListView.requestFocus();
-
 
         switch (item.getItemId()) {
             case R.id.action_song_play:
@@ -272,7 +285,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
                 args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
-                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(info.position), getContext()));
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(position), getContext()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
@@ -281,7 +294,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
                 // Open song details dialog
                 SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
                 Bundle args = new Bundle();
-                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(info.position));
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
                 songDetailsDialog.setArguments(args);
                 songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
                 return true;
@@ -298,6 +311,10 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
             case R.id.action_play_artist:
                 MPDQueryHandler.playArtist(track.getTrackArtist(),mAlbumSortOrder);
                 return true;
+            case R.id.menu_group_album:
+            case R.id.menu_group_artist:
+                // Save position for later use
+                mContextMenuPosition = info.position;
             default:
                 return super.onContextItemSelected(item);
         }
@@ -334,6 +351,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.v(TAG,"onOptionsItemSelected: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.action_add_search_result:
                 MPDQueryHandler.searchAddFiles(mSearchText, mSearchType);

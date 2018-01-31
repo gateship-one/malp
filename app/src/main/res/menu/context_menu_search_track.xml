@@ -53,6 +53,7 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_group_album"
         android:orderInCategory="101"
         android:title="@string/menu_album">
         <menu>
@@ -70,6 +71,7 @@
     </item>
 
     <item
+        android:id="@+id/menu_group_artist"
         android:orderInCategory="102"
         android:title="@string/menu_artist">
         <menu>
