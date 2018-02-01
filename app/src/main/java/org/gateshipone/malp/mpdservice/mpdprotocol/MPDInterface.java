@@ -995,6 +995,9 @@ public class MPDInterface {
     }
 
     public synchronized byte[] getAlbumArt(String path) throws MPDException {
+        if (!mConnection.getServerCapabilities().hasAlbumArt()) {
+            throw new MPDException("Not implemented on this MPD server");
+        }
         int imageSize = 0;
         int dataToRead = -1;
 
