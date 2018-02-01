@@ -305,7 +305,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.setContentText(secondRow);
 
             // Remove unnecessary time info
-            mNotificationBuilder.setWhen(0);
+            mNotificationBuilder.setShowWhen(false);
 
             // Cover but only if changed
             if (mNotification == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum()) || !track.getTrackAlbumMBID().equals(mLastTrack.getTrackAlbumMBID())) {
