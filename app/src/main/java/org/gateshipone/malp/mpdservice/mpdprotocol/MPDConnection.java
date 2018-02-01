@@ -152,11 +152,7 @@ class MPDConnection {
 
     private Socket mSocket;
 
-    /* BufferedReader for all reading from the socket */
-    private BufferedReader mReader;
-
-    /* PrintWriter for all writing to the socket */
-    private PrintWriter mWriter;
+    private MPDSocketInterface mSocketInterface;
 
     /* MPD server properties */
     private MPDCapabilities mServerCapabilities;
@@ -200,7 +196,7 @@ class MPDConnection {
      */
     MPDConnection() {
         mSocket = null;
-        mReader = null;
+        mSocketInterface = null;
         mServerCapabilities = new MPDCapabilities("", null, null);
         mIdleListeners = new ArrayList<>();
         mStateListeners = new ArrayList<>();
@@ -227,11 +223,8 @@ class MPDConnection {
         new Exception().printStackTrace();
         try {
             /* Clear reader/writer up */
-            if (null != mReader) {
-                mReader = null;
-            }
-            if (null != mWriter) {
-                mWriter = null;
+            if (null != mSocketInterface) {
+                mSocketInterface = null;
             }
 
             /* Clear TCP-Socket up */
@@ -316,9 +309,9 @@ class MPDConnection {
             /* Try reading from the stream */
 
             /* Create the reader used for reading from the socket. */
-            if (mReader == null) {
+            if (mSocketInterface == null) {
                 try {
-                    mReader = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+                    mSocketInterface = new MPDSocketInterface(mSocket.getInputStream(), mSocket.getOutputStream());
                 } catch (IOException e) {
                     handleSocketError();
                     mConnectionLock.release();
@@ -326,16 +319,6 @@ class MPDConnection {
                 }
             }
 
-            /* Create the writer used for writing to the socket */
-            if (mWriter == null) {
-                try {
-                    mWriter = new PrintWriter(new OutputStreamWriter(mSocket.getOutputStream()));
-                } catch (IOException e) {
-                    handleSocketError();
-                    mConnectionLock.release();
-                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
-                }
-            }
 
             try {
                 waitForResponse();
@@ -477,11 +460,8 @@ class MPDConnection {
         /* Cleanup reader/writer */
         try {
             /* Clear reader/writer up */
-            if (null != mReader) {
-                mReader = null;
-            }
-            if (null != mWriter) {
-                mWriter = null;
+            if (null != mSocketInterface) {
+                mSocketInterface = null;
             }
 
             /* Clear TCP-Socket up */
@@ -785,7 +765,7 @@ class MPDConnection {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Waiting for response");
         }
-        if (null != mReader) {
+        if (null != mSocketInterface) {
             long currentTime = System.nanoTime();
 
             while (!readyRead()) {
@@ -844,7 +824,7 @@ class MPDConnection {
      */
     private boolean readyRead() {
         try {
-            return (null != mSocket) && (null != mReader) && mSocket.isConnected() && mReader.ready();
+            return (null != mSocket) && (null != mSocketInterface) && mSocket.isConnected() && mSocketInterface.readReady();
         } catch (IOException e) {
             handleSocketError();
             return false;
@@ -916,7 +896,7 @@ class MPDConnection {
      * @return String that was sent by the MPD server after idling is over
      */
     private String waitForIdleResponse() throws IOException {
-        if (null != mReader) {
+        if (null != mSocketInterface) {
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "Listening for server-side changes");
             }
@@ -1015,10 +995,10 @@ class MPDConnection {
      * @return The read string. null if no data is available.
      */
     @Nullable String readLine() throws MPDException {
-        if (mReader != null) {
+        if (mSocketInterface != null) {
             String line;
             try {
-                line = mReader.readLine();
+                line = mSocketInterface.readLine();
             } catch (IOException e) {
                 handleSocketError();
                 mConnectionLock.release();
@@ -1057,10 +1037,10 @@ class MPDConnection {
      * @throws MPDException on server-side errors
      */
     private String readLineInternal() throws MPDException {
-        if (mReader != null) {
+        if (mSocketInterface != null) {
             String line;
             try {
-                line = mReader.readLine();
+                line = mSocketInterface.readLine();
             } catch (IOException e) {
                 handleSocketError();
                 return "";
@@ -1085,9 +1065,8 @@ class MPDConnection {
      * @param line String to write to the socket.
      */
     private void writeLine(String line) {
-        if (mWriter != null) {
-            mWriter.println(line);
-            mWriter.flush();
+        if (mSocketInterface != null) {
+            mSocketInterface.writeLine(line);
             if (DEBUG_ENABLED) {
                 Log.v(TAG, "Write line: " + line);
             }
