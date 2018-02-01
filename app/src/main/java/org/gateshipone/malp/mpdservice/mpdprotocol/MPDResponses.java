@@ -50,6 +50,9 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_PLAYLIST = "playlist: ";
     public static final String MPD_RESPONSE_LAST_MODIFIED = "Last-Modified: ";
 
+    public static final String MPD_RESPONSE_SIZE = "size: ";
+    public static final String MPD_RESPONSE_BINARY_SIZE = "binary: ";
+
     /* MPD currentstatus responses */
     public static final String MPD_RESPONSE_VOLUME = "volume: ";
     public static final String MPD_RESPONSE_REPEAT = "repeat: ";

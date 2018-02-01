@@ -323,7 +323,12 @@ public class MPDCommands {
 
     public static final String MPD_COMMAND_SHUFFLE_PLAYLIST = "shuffle";
 
+
     private static String escapeString(String input) {
-        return input.replaceAll("\"","\\\\\"");
+        return input.replaceAll("\"", "\\\\\"");
+    }
+
+    public static String MPD_COMMAND_GET_ALBUMART(String url, int offset) {
+        return "albumart \"" + escapeString(url) + "\" " + String.valueOf(offset);
     }
 }

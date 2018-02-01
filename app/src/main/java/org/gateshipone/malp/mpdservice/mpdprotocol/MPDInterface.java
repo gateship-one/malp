@@ -23,6 +23,7 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -315,6 +316,7 @@ public class MPDInterface {
         if (artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
             artists.remove(0);
         }
+
         return artists;
     }
 
@@ -990,5 +992,51 @@ public class MPDInterface {
     public synchronized void updateDatabase(String path) throws MPDException {
         // Update root directory
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE(path));
+    }
+
+    public synchronized byte[] getAlbumArt(String path) throws MPDException {
+        int imageSize = 0;
+        int dataToRead = -1;
+
+        int chunkSize = 0;
+
+        byte imageData[] = null;
+
+
+        boolean firstRun = true;
+        String line;
+        while (dataToRead != 0) {
+            // Request the image
+            if (firstRun) {
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_ALBUMART(path, 0));
+            } else {
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_ALBUMART(path, (imageSize - dataToRead)));
+            }
+            line = mConnection.readLine();
+
+            while (!line.startsWith("OK")) {
+                if (line.startsWith("size")) {
+                    if (firstRun) {
+                        imageSize = Integer.valueOf(line.substring(MPDResponses.MPD_RESPONSE_SIZE.length()));
+                        imageData = new byte[imageSize];
+                        dataToRead = imageSize;
+                        firstRun = false;
+                    }
+                } else if (line.startsWith("binary")) {
+                    // This means that after this line a binary chunk is incoming
+                    chunkSize = Integer.valueOf(line.substring(MPDResponses.MPD_RESPONSE_BINARY_SIZE.length()));
+
+                    byte readData[] = mConnection.readBinary(chunkSize);
+
+                    // Copy chunk to final output array
+                    System.arraycopy(readData, 0, imageData, (imageSize - dataToRead), chunkSize);
+                    dataToRead -= chunkSize;
+                }
+
+                line = mConnection.readLine();
+            }
+        }
+
+        return imageData;
     }
 }

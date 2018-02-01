@@ -1031,6 +1031,18 @@ class MPDConnection {
         return null;
     }
 
+    byte[] readBinary(int size) throws MPDException {
+        if (mSocketInterface != null) {
+            try {
+                return mSocketInterface.readBinary(size);
+            } catch (IOException e) {
+                handleSocketError();
+                return null;
+            }
+        }
+        return new byte[0];
+    }
+
     /**
      * Internal readLine without unlocking of the connection or state changes
      * @return Line that was read from the server
