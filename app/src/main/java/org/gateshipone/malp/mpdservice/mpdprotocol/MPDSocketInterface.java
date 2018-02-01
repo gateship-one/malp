@@ -23,8 +23,8 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,16 +36,23 @@ import java.io.PrintWriter;
  * This class can be used to read Strings and binary data from MPD.
  */
 public class MPDSocketInterface {
-
+    private static final String TAG = MPDSocketInterface.class.getSimpleName();
     /**
      * Buffered input stream to improve the performance
      */
-    private BufferedInputStream mInputStream;
+    private InputStream mInputStream;
 
     /**
      * Object to write to the socket
      */
     private PrintWriter mWriter;
+
+    private static final int READ_BUFFER_SIZE = 512 * 1024; // 512kB
+
+    private byte[] mReadBuffer;
+
+    private int mReadBufferWritePos;
+    private int mReadBufferReadPos;
 
 
     /**
@@ -54,11 +61,34 @@ public class MPDSocketInterface {
      * @param outputStream Output stream from the socket to use
      */
     public MPDSocketInterface(InputStream inputStream, OutputStream outputStream) {
-        mInputStream = new BufferedInputStream(inputStream);
+        mInputStream = inputStream;
 
         mWriter = new PrintWriter(outputStream);
+        mReadBuffer = new byte[READ_BUFFER_SIZE];
+
+        mReadBufferReadPos = 0;
+        mReadBufferWritePos = 0;
     }
 
+
+    /**
+     * Reads as much as possible data from the socket into its buffer.
+     * Both pointers are reset, ensure to only call this on an empty buffer or data will
+     * be lost!
+     * @throws IOException
+     */
+    private void fillReadBuffer() throws IOException {
+
+        int readBytes = mInputStream.read(mReadBuffer, 0, READ_BUFFER_SIZE);
+
+       // Log.v(TAG,"Buffer fill read " + readBytes + " bytes");
+        mReadBufferWritePos = readBytes;
+        mReadBufferReadPos = 0;
+    }
+
+    private int dataReady() {
+        return mReadBufferWritePos - mReadBufferReadPos;
+    }
 
     /**
      * Reads a line from the buffered input
@@ -66,12 +96,31 @@ public class MPDSocketInterface {
      * @throws IOException Exception during read
      */
     public String readLine() throws IOException {
+        if (dataReady() == 0) {
+            fillReadBuffer();
+        }
+
         ByteArrayOutputStream readBuffer = new ByteArrayOutputStream();
 
-        int inputVal = mInputStream.read();
-        while (inputVal != '\n' && inputVal != -1) {
-            readBuffer.write(inputVal);
-            inputVal = mInputStream.read();
+        int localReadPos = mReadBufferReadPos;
+        // Read until newline
+        while (mReadBuffer[localReadPos] != '\n') {
+            localReadPos++;
+
+            if (localReadPos == mReadBufferWritePos) {
+                // End of filled buffer found, copy whats read so far
+                readBuffer.write(mReadBuffer, mReadBufferReadPos, mReadBufferWritePos-mReadBufferReadPos);
+                mReadBufferReadPos = mReadBufferWritePos;
+                fillReadBuffer();
+                localReadPos = 0;
+            }
+
+            // Found newline
+            if (mReadBuffer[localReadPos] == '\n') {
+                readBuffer.write(mReadBuffer, mReadBufferReadPos, localReadPos-mReadBufferReadPos);
+                mReadBufferReadPos = (localReadPos + 1);
+                break;
+            }
         }
 
         // Return the string data from MPD as UTF-8 (default charset on android) strings
@@ -83,22 +132,45 @@ public class MPDSocketInterface {
      * @throws IOException Exception during read
      */
     public boolean readReady() throws IOException {
-        return mInputStream.available() > 0;
+        return dataReady() > 0 || mInputStream.available() > 0;
     }
 
     /**
      * Reads binary data from the socket
      * @param size size to read from the socket in bytes
-     * @return byte array if data is correctly read, null otherwise.
+     * @return byte array if data is correctly read
      * @throws IOException Exception during read
      */
-    @Nullable public byte[] readBinary(int size) throws IOException {
+     public byte[] readBinary(int size) throws IOException {
         byte data[] = new byte[size];
-        mInputStream.read(data, 0, size);
+
+        int dataRead = 0;
+
+        int dataToRead = 0;
+        int readyData = 0;
+        while (dataRead < size) {
+            readyData = dataReady();
+
+            // Check how much data is necessary to read (do not read more data than requested!)
+            dataToRead = readyData > (size - dataRead) ? (size-dataRead) : readyData;
+
+            // Read data that is ready or requested
+            System.arraycopy(mReadBuffer, mReadBufferReadPos, data, dataRead, dataToRead);
+            dataRead += dataToRead;
+            mReadBufferReadPos += dataToRead;
+
+            // Check if the data buffer is depleted
+            if(dataReady() == 0 && dataRead != size) {
+                fillReadBuffer();
+            }
+        }
+
+        // Skip one byte to catch last newline
+        mReadBufferReadPos++;
 
         // Read last newline from MPD (s. https://www.musicpd.org/doc/protocol/database.html - command
         // albumart)
-        return mInputStream.read() == '\n' ? data : null;
+        return data;
     }
 
     /**
