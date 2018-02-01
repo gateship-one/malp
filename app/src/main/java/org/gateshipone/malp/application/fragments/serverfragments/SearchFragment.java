@@ -28,10 +28,12 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -91,13 +93,21 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     private MPDAlbum.MPD_ALBUM_SORT_ORDER mAlbumSortOrder;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
+    /**
+     * Hack variable to save the position of a opened context menu because menu info is null for
+     * submenus.
+     */
+    private int mContextMenuPosition;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_server_search, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         // Create the needed adapter for the ListView
         mFileAdapter = new FileAdapter(getActivity(), false, true);
@@ -107,7 +117,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         mListView.setOnItemClickListener(this);
         registerForContextMenu(mListView);
 
-        mSelectSpinner = (Spinner) rootView.findViewById(R.id.search_criteria);
+        mSelectSpinner = rootView.findViewById(R.id.search_criteria);
 
         // Create an ArrayAdapter using the string array and a default spinner layout
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getActivity(),
@@ -118,30 +128,25 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
         mSelectSpinner.setAdapter(adapter);
         mSelectSpinner.setOnItemSelectedListener(new SpinnerSelectListener());
 
-        mSearchView = (SearchView) rootView.findViewById(R.id.search_text);
+        mSearchView = rootView.findViewById(R.id.search_text);
         mSearchView.setOnQueryTextListener(new SearchViewQueryListener());
         mSearchView.setOnFocusChangeListener(this);
 
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         setHasOptionsMenu(true);
 
         // Get album sort order
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         mAlbumSortOrder = PreferenceHelper.getMPDAlbumSortOrder(sharedPref, getContext());
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Return the ready inflated and configured fragment view.
         return rootView;
@@ -249,15 +254,21 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
     public boolean onContextItemSelected(MenuItem item) {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
 
+        int position;
         if (info == null) {
-            return super.onContextItemSelected(item);
+            if (mContextMenuPosition == -1 ) {
+                return super.onContextItemSelected(item);
+            }
+            position = mContextMenuPosition;
+            mContextMenuPosition = -1;
+        } else {
+            position = info.position;
         }
 
 
-        MPDTrack track = (MPDTrack) mFileAdapter.getItem(info.position);
+        MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
 
         mListView.requestFocus();
-
 
         switch (item.getItemId()) {
             case R.id.action_song_play:
@@ -269,15 +280,25 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
             case R.id.action_song_play_next:
                 MPDQueryHandler.playSongNext(track.getPath());
                 return true;
-            case R.id.action_add_to_saved_playlist:
+            case R.id.action_add_to_saved_playlist:{
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
                 args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
-                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(info.position), getContext()));
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(position), getContext()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
+             }
+            case R.id.action_show_details: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return true;
+            }
             case R.id.action_add_album:
                 MPDQueryHandler.addArtistAlbum(track.getTrackAlbum(), "", track.getTrackAlbumMBID());
                 return true;
@@ -290,6 +311,10 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
             case R.id.action_play_artist:
                 MPDQueryHandler.playArtist(track.getTrackArtist(),mAlbumSortOrder);
                 return true;
+            case R.id.menu_group_album:
+            case R.id.menu_group_artist:
+                // Save position for later use
+                mContextMenuPosition = info.position;
             default:
                 return super.onContextItemSelected(item);
         }
@@ -326,6 +351,7 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.v(TAG,"onOptionsItemSelected: " + item.getTitle());
         switch (item.getItemId()) {
             case R.id.action_add_search_result:
                 MPDQueryHandler.searchAddFiles(mSearchText, mSearchType);
@@ -337,12 +363,35 @@ public class SearchFragment extends GenericMPDFragment<List<MPDFileEntry>> imple
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.addPath(track.getPath());
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.playSong(track.getPath());
+                return;
+            }
+            case ACTION_PLAY_SONG_NEXT: {
+                MPDTrack track = (MPDTrack) mFileAdapter.getItem(position);
+
+                MPDQueryHandler.playSongNext(track.getPath());
+                return;
+            }
+        }
     }
 
     private void showFAB(boolean active) {

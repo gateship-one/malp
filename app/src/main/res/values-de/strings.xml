@@ -202,7 +202,7 @@
     <string name="widget_connect">Verbinden</string>
     <string name="widget_disconnected">Nicht verbunden</string>
     <string name="preference_show_notification_title">Zeige Benachrichtigung</string>
-    <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird.</string>
+    <string name="preference_show_notification_text">Eine Benachrichtigung anzeigen, wenn die Hauptanwendung verlassen wird. Diese wird für das Widget benötigt. Wenn Sie im Widget auf \"verbinden\" clicken, wird die Benachrichtigung in jedem Fall angezeigt.</string>
     <string name="bulk_download_notice_title">Bilder-Download</string>
     <string name="bulk_download_notice_text">Das Herunterladen von vielen Bildern sorgt für eine hohe Serverauslastung beim Bilderanbieter. Es kann vorkommen, dass die Serverauslastung zu groß wird. In diesem Fall wird der Downloader seine Aktion abbrechen.\n\nBitte ziehen Sie eine Spende an die ausgewählten Bilderanbieter in Betracht.</string>
     <string name="thirdparty_licenses_dialog_title">Drittanbieterlizenzen</string>
@@ -250,4 +250,20 @@
     <string name="fragment_profile_http_cover_regex">Bilderpfad (%d wird mit dem Ordnerpfad des aktuell gespielten Liedes ersetzt)</string>
     <string name="preference_use_tags_in_filebrowser_title">Verwende Tags im Dateibrowser</string>
     <string name="preference_use_tags_in_filebrowser_text">Im Dateibrowser Tags anstelle von Dateinamen verwenden. Das Deaktivieren dieser Option zeigt im Dateibrowser Dateinamen anstelle der Tags an.</string>
+    <string name="menu_album">Album</string>
+    <string name="menu_artist">Interpret</string>
+    <string name="preference_library_click_action_title">Aktion bei Liedauswahl</string>
+    <string name="preference_library_click_action_summary">Standardaktion für Liedauswahl</string>
+    <string name="preference_library_click_action_message">Wählen Sie die Standardaktion die ausgeführt wird, wenn ein Lied in der Bibliothek ausgewählt wird.</string>
+    <string name="menu_information">Informationen</string>
+    <string name="preference_launch_faq">F.A.Q.</string>
+    <string name="preference_launch_faq_text">Hilfestellungen für diese Anwendung</string>
+    <string name="preference_launch_about_text">Informationen über die Version, Lizenz und die Mitwirkenden</string>
+    <string name="preference_volume_step_title">Lautstärkenschrittweite</string>
+    <string name="preference_volume_step_text">Die Schrittweite der Lautstärkenänderung über Hardware- &amp; Software-Knöpfe.</string>
+    <string name="volume_step_size_dialog_title">Schrittweite: %d%%</string>
+    <string name="volume_step_size_dialog_warning">Sie haben einen hohen Wert für die Schrittweite ausgewählt. Bitte seien Sie vorsichtig, nicht ihre Ohren oder ihr Equipment zu beschädigen!</string>
+    <string name="action_share_current_song">Teile aktuelles Lied</string>
+    <string name="sharing_song_details">Ich höre gerade %s von %s von dem Album %s</string>
+    <string name="dialog_share_song_details">Teile Lieddetails</string>
 </resources>

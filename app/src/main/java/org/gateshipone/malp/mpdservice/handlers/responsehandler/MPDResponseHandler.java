@@ -24,7 +24,6 @@ package org.gateshipone.malp.mpdservice.handlers.responsehandler;
 
 
 import android.os.Handler;
-import android.os.Message;
 
 /**
  * Parent class for all response handlers

@@ -24,8 +24,8 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.app.Activity;
-import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,13 +34,13 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
-import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseServerStatistics;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDStatistics;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
@@ -66,24 +66,24 @@ public class ServerStatisticFragment extends Fragment {
     private ServerStatusHandler mServerStatusHandler;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_server_statistic, container, false);
 
-        mArtistCount = (TextView) rootView.findViewById(R.id.server_statistic_artist_count);
-        mAlbumsCount = (TextView) rootView.findViewById(R.id.server_statistic_albums_count);
-        mSongsCount = (TextView) rootView.findViewById(R.id.server_statistic_songs_count);
+        mArtistCount = rootView.findViewById(R.id.server_statistic_artist_count);
+        mAlbumsCount = rootView.findViewById(R.id.server_statistic_albums_count);
+        mSongsCount = rootView.findViewById(R.id.server_statistic_songs_count);
 
-        mUptime = (TextView) rootView.findViewById(R.id.server_statistic_server_uptime);
-        mPlaytime = (TextView) rootView.findViewById(R.id.server_statistic_server_playtime);
-        mLastUpdate = (TextView) rootView.findViewById(R.id.server_statistic_db_update);
-        mDBLength = (TextView) rootView.findViewById(R.id.server_statistic_db_playtime);
+        mUptime = rootView.findViewById(R.id.server_statistic_server_uptime);
+        mPlaytime = rootView.findViewById(R.id.server_statistic_server_playtime);
+        mLastUpdate = rootView.findViewById(R.id.server_statistic_db_update);
+        mDBLength = rootView.findViewById(R.id.server_statistic_db_playtime);
 
-        mDBUpdating = (TextView) rootView.findViewById(R.id.server_statistic_updateing_db);
+        mDBUpdating = rootView.findViewById(R.id.server_statistic_updateing_db);
 
-        mServerFeatures = (TextView) rootView.findViewById(R.id.server_statistic_malp_server_information);
+        mServerFeatures = rootView.findViewById(R.id.server_statistic_malp_server_information);
 
-        ((Button) rootView.findViewById(R.id.server_statistic_update_db_btn)).setOnClickListener(new DBUpdateBtnListener());
+        rootView.findViewById(R.id.server_statistic_update_db_btn).setOnClickListener(new DBUpdateBtnListener());
 
         mServerStatusHandler = new ServerStatusHandler(this);
 
@@ -115,14 +115,11 @@ public class ServerStatisticFragment extends Fragment {
         if (null == activity) {
             return;
         }
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (show) {
-                    mDBUpdating.setVisibility(View.VISIBLE);
-                } else {
-                    mDBUpdating.setVisibility(View.GONE);
-                }
+        activity.runOnUiThread(() -> {
+            if (show) {
+                mDBUpdating.setVisibility(View.VISIBLE);
+            } else {
+                mDBUpdating.setVisibility(View.GONE);
             }
         });
 
@@ -142,9 +139,9 @@ public class ServerStatisticFragment extends Fragment {
             mDBLength.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getAllSongDuration(),getContext()));
             mLastUpdate.setText(FormatHelper.formatTimeStampToString(statistics.getLastDBUpdate() * 1000));
 
-            MPDCapabilities capabilities = MPDQueryHandler.getServerCapabilities();
+            MPDCapabilities capabilities = MPDInterface.mInstance.getServerCapabilities();
             if (null != capabilities) {
-                mServerFeatures.setText(MPDQueryHandler.getServerCapabilities().getServerFeatures());
+                mServerFeatures.setText(capabilities.getServerFeatures());
             }
         }
     }
@@ -162,7 +159,7 @@ public class ServerStatisticFragment extends Fragment {
         WeakReference<ServerStatisticFragment> mFragment;
 
         public ServerStatusHandler(ServerStatisticFragment fragment) {
-            mFragment = new WeakReference<ServerStatisticFragment>(fragment);
+            mFragment = new WeakReference<>(fragment);
         }
 
 

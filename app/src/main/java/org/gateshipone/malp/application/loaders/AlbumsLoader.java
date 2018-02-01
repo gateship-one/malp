@@ -28,10 +28,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
-import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
@@ -51,7 +51,7 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     public AlbumsLoader(Context context, String artistName, String albumsPath) {
         super(context);
 
-        pAlbumsResponseHandler = new AlbumResponseHandler();
+        pAlbumsResponseHandler = new AlbumResponseHandler(this);
 
         mArtistName = artistName;
         mAlbumsPath = albumsPath;
@@ -61,16 +61,24 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
     }
 
 
-    private class AlbumResponseHandler extends MPDResponseAlbumList {
+    private static class AlbumResponseHandler extends MPDResponseAlbumList {
+        private WeakReference<AlbumsLoader> mAlbumsLoader;
 
+        private AlbumResponseHandler(AlbumsLoader loader) {
+            mAlbumsLoader = new WeakReference<>(loader);
+        }
 
         @Override
         public void handleAlbums(List<MPDAlbum> albumList) {
-            // If artist albums and sort by year is active, resort the list
-            if ( mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == mArtistName) || mArtistName.isEmpty() ) ) {
-                Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
+            AlbumsLoader loader = mAlbumsLoader.get();
+
+            if (loader != null) {
+                // If artist albums and sort by year is active, resort the list
+                if (loader.mSortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE && !((null == loader.mArtistName) || loader.mArtistName.isEmpty())) {
+                    Collections.sort(albumList, new MPDAlbum.MPDAlbumDateComparator());
+                }
+                loader.deliverResult(albumList);
             }
-            deliverResult(albumList);
         }
     }
 

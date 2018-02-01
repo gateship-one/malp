@@ -26,34 +26,39 @@ package org.gateshipone.malp.application.loaders;
 import android.content.Context;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
-import org.gateshipone.malp.R;
-import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseOutputList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDOutput;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDPlaylist;
 
 
 public class OutputsLoader extends Loader<List<MPDOutput>> {
 
     private OutputResponseHandler mOutputResponseHandler;
 
-    Context mContext;
 
     public OutputsLoader(Context context) {
         super(context);
-        mContext = context;
-        mOutputResponseHandler = new OutputResponseHandler();
+        mOutputResponseHandler = new OutputResponseHandler(this);
     }
 
 
-    private class OutputResponseHandler extends MPDResponseOutputList {
+    private static class OutputResponseHandler extends MPDResponseOutputList {
+        private WeakReference<OutputsLoader> mOutputsLoader;
+
+        private OutputResponseHandler(OutputsLoader loader) {
+            mOutputsLoader = new WeakReference<>(loader);
+        }
+
         @Override
         public void handleOutputs(List<MPDOutput> outputList) {
-            deliverResult(outputList);
+            OutputsLoader loader = mOutputsLoader.get();
+
+            if (loader != null) {
+               loader.deliverResult(outputList);
+            }
         }
     }
 

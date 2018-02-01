@@ -53,4 +53,9 @@
         app:showAsAction="never"
         android:visible="false"
         android:title="@string/action_remove_from_list"/>
+    <item
+        android:id="@+id/action_show_details"
+        android:orderInCategory="100"
+        app:showAsAction="never"
+        android:title="@string/action_show_details"/>
 </menu>

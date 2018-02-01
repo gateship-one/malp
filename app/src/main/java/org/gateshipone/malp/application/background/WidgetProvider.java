@@ -39,7 +39,6 @@ import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
@@ -106,16 +105,7 @@ public class WidgetProvider extends AppWidgetProvider {
         // Check if valid object
         if (mLastStatus != null && mLastTrack != null) {
             // Check if track title is set, otherwise use track name, otherwise path
-            String title;
-            if(!(title = mLastTrack.getTrackTitle()).isEmpty()) {
-
-            } else if (!(title = mLastTrack.getTrackName()).isEmpty()) {
-
-            } else if (!mLastTrack.getPath().isEmpty()) {
-                title = FormatHelper.getFilenameFromPath(mLastTrack.getPath());
-            } else {
-                title = "";
-            }
+            String title = mLastTrack.getVisibleTitle();
             views.setTextViewText(R.id.widget_big_trackName, title);
 
             if (!mLastTrack.getTrackAlbum().isEmpty() && !mLastTrack.getTrackArtist().isEmpty()) {
@@ -282,8 +272,8 @@ public class WidgetProvider extends AppWidgetProvider {
         WeakReference<WidgetProvider> mProvider;
 
         public CoverReceiver(Context context, WidgetProvider provider) {
-            mContext = new WeakReference<Context>(context);
-            mProvider = new WeakReference<WidgetProvider>(provider);
+            mContext = new WeakReference<>(context);
+            mProvider = new WeakReference<>(provider);
         }
 
         /**

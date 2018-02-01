@@ -28,6 +28,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -52,7 +53,7 @@ public class ServerPropertiesFragment extends Fragment implements TabLayout.OnTa
     private ViewPager mViewPager;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -60,9 +61,9 @@ public class ServerPropertiesFragment extends Fragment implements TabLayout.OnTa
 
 
         // create tabs
-        TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.my_music_tab_layout);
+        TabLayout tabLayout = rootView.findViewById(R.id.my_music_tab_layout);
 
-        mViewPager = (ViewPager) rootView.findViewById(R.id.my_music_viewpager);
+        mViewPager = rootView.findViewById(R.id.my_music_viewpager);
         mTabAdapter = new ServerPropertiesTabAdapter(getChildFragmentManager());
         mViewPager.setAdapter(mTabAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -126,7 +127,7 @@ public class ServerPropertiesFragment extends Fragment implements TabLayout.OnTa
         View view = this.getView();
 
         if (view != null ) {
-            ViewPager myMusicViewPager = (ViewPager) view.findViewById(R.id.my_music_viewpager);
+            ViewPager myMusicViewPager = view.findViewById(R.id.my_music_viewpager);
             myMusicViewPager.setCurrentItem(tab.getPosition());
 
             if (null != mFABCallback) {
@@ -165,7 +166,7 @@ public class ServerPropertiesFragment extends Fragment implements TabLayout.OnTa
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             return POSITION_NONE;
         }
 

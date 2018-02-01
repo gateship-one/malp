@@ -40,13 +40,20 @@ public class VolumeButtonLongClickListener implements View.OnLongClickListener, 
         VOLUME_DOWN
     }
 
-    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 100;
+    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 200;
     private LISTENER_ACTION mAction;
 
     private Timer mRepeater = null;
 
-    public VolumeButtonLongClickListener(LISTENER_ACTION action) {
+    private int mVolumeStepSize;
+
+    public VolumeButtonLongClickListener(LISTENER_ACTION action, int volumeStepSize) {
         mAction = action;
+        mVolumeStepSize = volumeStepSize;
+    }
+
+    public void setVolumeStepSize(int stepSize) {
+        mVolumeStepSize = stepSize;
     }
 
     @Override
@@ -79,7 +86,7 @@ public class VolumeButtonLongClickListener implements View.OnLongClickListener, 
 
         @Override
         public void run() {
-            MPDCommandHandler.increaseVolume();
+            MPDCommandHandler.increaseVolume(mVolumeStepSize);
         }
     }
 
@@ -87,7 +94,7 @@ public class VolumeButtonLongClickListener implements View.OnLongClickListener, 
 
         @Override
         public void run() {
-            MPDCommandHandler.decreaseVolume();
+            MPDCommandHandler.decreaseVolume(mVolumeStepSize);
         }
     }
 }

@@ -28,21 +28,16 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-import java.lang.ref.WeakReference;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.background.BackgroundService;
-import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
-import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDGenericHandler;
-import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
@@ -93,9 +88,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     private Context mContext;
 
     private ConnectionManager(Context context) {
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(this);
-        MPDQueryHandler.registerConnectionStateListener(this);
-        MPDCommandHandler.registerConnectionStateListener(this);
+        super(context.getMainLooper());
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(this);
         mHostname = null;
         mPassword = null;
         mUseCounter = 0;
@@ -280,15 +274,17 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         public void run() {
             MPDCurrentStatus status = MPDStateMonitoringHandler.getHandler().getLastStatus();
 
-            // Notify the widget to also connect if possible
-            Intent connectIntent = new Intent(mContext, BackgroundService.class);
-            connectIntent.setAction(BackgroundService.ACTION_CONNECT);
-            mContext.startService(connectIntent);
             SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(mContext);
 
-            // Check if the notification setting is enabled
+            // Check if the notification setting is enabled (necessary for both the widget and notification)
             boolean showNotification = sharedPref.getBoolean(mContext.getString(R.string.pref_show_notification_key), mContext.getResources().getBoolean(R.bool.pref_show_notification_default));
             if (showNotification && status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_STOPPED) {
+
+                // Notify the widget to also connect if possible
+                Intent connectIntent = new Intent(mContext, BackgroundService.class);
+                connectIntent.setAction(BackgroundService.ACTION_CONNECT);
+                mContext.startService(connectIntent);
+
                 Intent showNotificationIntent = new Intent(mContext, BackgroundService.class);
                 showNotificationIntent.setAction(BackgroundService.ACTION_SHOW_NOTIFICATION);
                 mContext.startService(showNotificationIntent);

@@ -73,7 +73,7 @@
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:fontFamily="sans-serif-medium"
-                        android:marqueeRepeatLimit="marquee_forever"
+                        android:marqueeRepeatLimit="3"
                         android:scrollHorizontally="true"
                         android:textColor="?attr/malp_color_text_accent"
                         android:singleLine="true" />
@@ -92,7 +92,7 @@
                         android:ellipsize="marquee"
                         android:focusable="true"
                         android:fontFamily="sans-serif-regular"
-                        android:marqueeRepeatLimit="marquee_forever"
+                        android:marqueeRepeatLimit="3"
                         android:scrollHorizontally="true"
                         android:singleLine="true"
                         android:textColor="?attr/malp_color_text_accent" />

@@ -29,8 +29,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
-import android.net.Uri;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Process;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -40,7 +40,7 @@ import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.MPDConnection;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
@@ -227,10 +227,10 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
 
         // Create MPD callbacks
         mServerStatusListener = new BackgroundMPDStatusChangeListener(this);
-        mServerConnectionStateListener = new BackgroundMPDStateChangeListener(this);
+        mServerConnectionStateListener = new BackgroundMPDStateChangeListener(this, getMainLooper());
 
         /* Register callback handlers to MPD service handlers */
-        MPDCommandHandler.registerConnectionStateListener(mServerConnectionStateListener);
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mServerConnectionStateListener);
         MPDStateMonitoringHandler.getHandler().setRefreshInterval(60 * 1000);
         MPDStateMonitoringHandler.getHandler().registerStatusListener(mServerStatusListener);
 
@@ -248,7 +248,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         unregisterReceiver(mBroadcastReceiver);
 
         /* Unregister MPD service handlers */
-        MPDCommandHandler.unregisterConnectionStateListener(mServerConnectionStateListener);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mServerConnectionStateListener);
         MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mServerStatusListener);
         notifyDisconnected();
 
@@ -265,7 +265,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
             Log.v(TAG, "Null intend in onStartCommand");
             shutdownService();
             // Something wrong here.
-            return START_STICKY;
+            return START_NOT_STICKY;
         }
         String action = intent.getAction();
         Log.v(TAG, "onStartCommand: " + action);
@@ -274,7 +274,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         }
 
         Process.setThreadPriority(Process.THREAD_PRIORITY_MORE_FAVORABLE);
-        return START_STICKY;
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -462,7 +462,8 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      * Ensures an MPD server is connected before performing an action.
      */
     private void checkMPDConnection() {
-        if (!MPDConnection.mInstance.isConnected() && !mConnecting) {
+        if (!MPDInterface.mInstance.isConnected() && !mConnecting) {
+            mNotificationManager.showNotification();
             mLastTrack = new MPDTrack("");
             mLastStatus = new MPDCurrentStatus();
             connectMPDServer();
@@ -491,44 +492,58 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      */
     private void handleAction(String action) {
         Log.v(TAG, "Action: " + action);
-        if (action.equals(ACTION_PLAY)) {
-            onPlay();
-        } else if (action.equals(ACTION_PAUSE)) {
-            onPause();
-        } else if (action.equals(ACTION_STOP)) {
-            onStop();
-        } else if (action.equals(ACTION_PREVIOUS)) {
-            onPrevious();
-        } else if (action.equals(ACTION_NEXT)) {
-            onNext();
-        } else if (action.equals(ACTION_CONNECT)) {
-            onMPDConnect();
-        } else if (action.equals(ACTION_DISCONNECT)) {
-            onMPDDisconnect();
-        } else if (action.equals(ACTION_PROFILE_CHANGED)) {
-            onProfileChanged();
-        } else if (action.equals(ACTION_SHOW_NOTIFICATION)) {
-            mNotificationHidden = false;
-            checkMPDConnection();
-            mNotificationManager.showNotification();
-        } else if (action.equals(ACTION_HIDE_NOTIFICATION)) {
-            // Only hide notification if no playback is active
-            if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
-                mNotificationManager.hideNotification();
-            }
-            mNotificationHidden = true;
-        } else if (action.equals(ACTION_QUIT_BACKGROUND_SERVICE)) {
-            // Only quit service if no playback is active
-            if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
-                // Just disconnect from the server. Everything else happens when the connection is disconnected.
+        switch (action) {
+            case ACTION_PLAY:
+                onPlay();
+                break;
+            case ACTION_PAUSE:
+                onPause();
+                break;
+            case ACTION_STOP:
+                onStop();
+                break;
+            case ACTION_PREVIOUS:
+                onPrevious();
+                break;
+            case ACTION_NEXT:
+                onNext();
+                break;
+            case ACTION_CONNECT:
+                onMPDConnect();
+                break;
+            case ACTION_DISCONNECT:
                 onMPDDisconnect();
-                // FIXME timeout?
-            }
-            mNotificationHidden = true;
-        } else if (action.equals(ACTION_START_MPD_STREAM_PLAYBACK)) {
-            startStreamingPlayback();
-        } else if (action.equals(AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
-            stopStreamingPlayback();
+                break;
+            case ACTION_PROFILE_CHANGED:
+                onProfileChanged();
+                break;
+            case ACTION_SHOW_NOTIFICATION:
+                mNotificationHidden = false;
+                checkMPDConnection();
+                mNotificationManager.showNotification();
+                break;
+            case ACTION_HIDE_NOTIFICATION:
+                // Only hide notification if no playback is active
+                if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
+                    mNotificationManager.hideNotification();
+                }
+                mNotificationHidden = true;
+                break;
+            case ACTION_QUIT_BACKGROUND_SERVICE:
+                // Only quit service if no playback is active
+                if (mPlaybackManager == null || !mPlaybackManager.isPlaying()) {
+                    // Just disconnect from the server. Everything else happens when the connection is disconnected.
+                    onMPDDisconnect();
+                    // FIXME timeout?
+                }
+                mNotificationHidden = true;
+                break;
+            case ACTION_START_MPD_STREAM_PLAYBACK:
+                startStreamingPlayback();
+                break;
+            case AudioManager.ACTION_AUDIO_BECOMING_NOISY:
+                stopStreamingPlayback();
+                break;
         }
     }
 
@@ -619,8 +634,9 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private static class BackgroundMPDStateChangeListener extends MPDConnectionStateChangeHandler {
         WeakReference<BackgroundService> mService;
 
-        BackgroundMPDStateChangeListener(BackgroundService service) {
-            mService = new WeakReference<BackgroundService>(service);
+        BackgroundMPDStateChangeListener(BackgroundService service, Looper looper) {
+            super(looper);
+            mService = new WeakReference<>(service);
         }
 
         @Override
@@ -650,7 +666,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         WeakReference<BackgroundService> mService;
 
         BackgroundMPDStatusChangeListener(BackgroundService service) {
-            mService = new WeakReference<BackgroundService>(service);
+            mService = new WeakReference<>(service);
         }
 
         @Override

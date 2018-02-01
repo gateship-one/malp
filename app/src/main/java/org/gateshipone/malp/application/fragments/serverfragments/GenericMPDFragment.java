@@ -23,18 +23,17 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 
+import android.app.Activity;
+import android.os.Looper;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
-import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 
 public abstract class GenericMPDFragment<T extends Object> extends DialogFragment implements LoaderManager.LoaderCallbacks<T> {
     private static final String TAG = GenericMPDFragment.class.getSimpleName();
@@ -44,15 +43,17 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
     protected SwipeRefreshLayout mSwipeRefreshLayout = null;
 
     protected GenericMPDFragment() {
-        mConnectionStateListener = new ConnectionStateListener(this);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         refreshContent();
-        MPDQueryHandler.registerConnectionStateListener(mConnectionStateListener);
-
+        Activity activity = getActivity();
+        if (activity != null) {
+            mConnectionStateListener = new ConnectionStateListener(this, activity.getMainLooper());
+            MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionStateListener);
+        }
     }
 
     @Override
@@ -60,19 +61,15 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
         super.onPause();
         synchronized (this) {
             getLoaderManager().destroyLoader(0);
-            MPDQueryHandler.unregisterConnectionStateListener(mConnectionStateListener);
+            MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionStateListener);
+            mConnectionStateListener = null;
         }
     }
 
 
     protected void refreshContent() {
         if (mSwipeRefreshLayout != null) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(true);
-                }
-            });
+            mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(true));
         }
         if ( !isDetached()) {
             getLoaderManager().restartLoader(0, getArguments(), this);
@@ -83,8 +80,9 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
     private static class ConnectionStateListener extends MPDConnectionStateChangeHandler {
         private WeakReference<GenericMPDFragment> pFragment;
 
-        public ConnectionStateListener(GenericMPDFragment fragment) {
-            pFragment = new WeakReference<GenericMPDFragment>(fragment);
+        public ConnectionStateListener(GenericMPDFragment fragment, Looper looper) {
+            super(looper);
+            pFragment = new WeakReference<>(fragment);
         }
 
         @Override
@@ -105,12 +103,7 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
 
     private void finishedLoading() {
         if (null != mSwipeRefreshLayout) {
-            mSwipeRefreshLayout.post(new Runnable() {
-                @Override
-                public void run() {
-                    mSwipeRefreshLayout.setRefreshing(false);
-                }
-            });
+            mSwipeRefreshLayout.post(() -> mSwipeRefreshLayout.setRefreshing(false));
         }
     }
 

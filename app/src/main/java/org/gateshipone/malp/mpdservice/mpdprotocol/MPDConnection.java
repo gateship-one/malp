@@ -23,9 +23,11 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 import android.os.SystemClock;
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.gateshipone.malp.BuildConfig;
+import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDIdleChangeHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDArtist;
@@ -63,7 +65,7 @@ import java.util.concurrent.Semaphore;
  * For more information check the protocol definition of the mpd server or contact me via mail.
  */
 
-public class MPDConnection {
+class MPDConnection {
     enum CONNECTION_STATES {
         /**
          * Obvious
@@ -181,7 +183,7 @@ public class MPDConnection {
     /**
      * One listener for the state of the connection (connected, disconnected)
      */
-    private final ArrayList<MPDConnectionStateChangeListener> mStateListeners;
+    private final ArrayList<MPDConnectionStateChangeHandler> mStateListeners;
 
     /**
      * One listener for the idle state of the connection. Can be used to react
@@ -191,18 +193,12 @@ public class MPDConnection {
     private final ArrayList<MPDIdleChangeHandler> mIdleListeners;
 
 
-    /**
-     * Singleton instance
-     */
-    public final static MPDConnection mInstance = new MPDConnection();
-
-
-    private final ConnectionSemaphore mConnectionLock;
+    private final Semaphore mConnectionLock;
 
     /**
      * Creates disconnected MPDConnection with following parameters
      */
-    private MPDConnection() {
+    MPDConnection() {
         mSocket = null;
         mReader = null;
         mServerCapabilities = new MPDCapabilities("", null, null);
@@ -267,7 +263,7 @@ public class MPDConnection {
      * @param password Password for the server to authenticate with. Can be left empty.
      * @param port     TCP port to connect to.
      */
-    public synchronized void setServerParameters(String hostname, String password, int port) {
+    void setServerParameters(String hostname, String password, int port) {
         mHostname = hostname;
         mPassword = password;
         mPort = port;
@@ -281,7 +277,7 @@ public class MPDConnection {
      * This is the actual start of the connection. It tries to resolve the hostname
      * and initiates the connection to the address and the configured tcp-port.
      */
-    public void connectToServer() throws MPDException {
+    void connectToServer() throws MPDException {
         /* If a socket is already open, close it and destroy it. */
         if ((null != mSocket) && (mSocket.isConnected())) {
             disconnectFromServer();
@@ -299,6 +295,7 @@ public class MPDConnection {
 
         synchronized (this) {
             if (mConnectionState == CONNECTION_STATES.CONNECTING || (null == mHostname) || mHostname.isEmpty()) {
+                mConnectionLock.release();
                 return;
             }
             changeState(CONNECTION_STATES.CONNECTING);
@@ -356,7 +353,7 @@ public class MPDConnection {
             while (readyRead()) {
                 readString = readLine();
                     /* Look out for the greeting message */
-                if (readString.startsWith("OK MPD ")) {
+                if (readString != null && readString.startsWith("OK MPD ")) {
                     versionString = readString.substring(7);
 
                     String[] versions = versionString.split("\\.");
@@ -459,7 +456,7 @@ public class MPDConnection {
      * After this call it should be safe to reconnect to another server. If this connection is
      * currently in idle state, then it will be deidled before.
      */
-    public void disconnectFromServer() {
+    void disconnectFromServer() {
         stopIDLE();
 
         try {
@@ -516,7 +513,7 @@ public class MPDConnection {
      * @return Returns the {@link MPDCapabilities} object of the current connected server
      * or a dummy object.
      */
-    public synchronized MPDCapabilities getServerCapabilities() {
+    synchronized MPDCapabilities getServerCapabilities() {
         if (isConnected()) {
             return mServerCapabilities;
         } else {
@@ -621,7 +618,6 @@ public class MPDConnection {
          * FIXME Should be validated in the future.
          */
         writeLine(command);
-
     }
 
     /**
@@ -688,21 +684,18 @@ public class MPDConnection {
      * the server to correctly unidle. Otherwise the mpd server will disconnect
      * the disobeying client.
      */
-    private void stopIDLE() {
-        cancelIDLEWait();
-
-        synchronized (this) {
-            // Check if state is idle, otherwise nothing to do
-            if (mConnectionState != CONNECTION_STATES.IDLE) {
-                // Abort
-                return;
-            } else {
-                changeState(CONNECTION_STATES.GOING_NOIDLE);
-            }
-        }
-
+    private synchronized void stopIDLE() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Stop Idling");
+        }
+
+        cancelIDLEWait();
+        // Check if state is idle, otherwise nothing to do
+        if (mConnectionState != CONNECTION_STATES.IDLE) {
+            // Abort
+            return;
+        } else {
+            changeState(CONNECTION_STATES.GOING_NOIDLE);
         }
 
         try {
@@ -740,7 +733,7 @@ public class MPDConnection {
      * Important: This method should only be called with the mConnectionLock acquired. Otherwise
      * undefined behaviour will occur.
      */
-    private void startIDLE() {
+    private synchronized void startIDLE() {
         if (DEBUG_ENABLED) {
             Log.v(TAG, "Start IDLE mode");
         }
@@ -835,7 +828,7 @@ public class MPDConnection {
      *
      * @return True if connected to MPD server, false otherwise
      */
-    public synchronized boolean isConnected() {
+    synchronized boolean isConnected() {
         return null != mSocket && mSocket.isConnected();
     }
 
@@ -858,8 +851,10 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is now ready to be used.
      */
     private void notifyConnected() {
-        for (MPDConnectionStateChangeListener listener : mStateListeners) {
-            listener.onConnected();
+        synchronized (mStateListeners) {
+            for (MPDConnectionStateChangeHandler listener : mStateListeners) {
+                listener.connected();
+            }
         }
     }
 
@@ -867,8 +862,10 @@ public class MPDConnection {
      * Will notify a connected listener that the connection is disconnect and not ready for use.
      */
     private void notifyDisconnect() {
-        for (MPDConnectionStateChangeListener listener : mStateListeners) {
-            listener.onDisconnected();
+        synchronized (mStateListeners) {
+            for (MPDConnectionStateChangeHandler listener : mStateListeners) {
+                listener.disconnected();
+            }
         }
     }
 
@@ -877,9 +874,20 @@ public class MPDConnection {
      *
      * @param listener Listener to be connected
      */
-    public void setStateListener(MPDConnectionStateChangeListener listener) {
+    void addConnectionStateChangeHandler(MPDConnectionStateChangeHandler listener) {
         synchronized (mStateListeners) {
             mStateListeners.add(listener);
+        }
+    }
+
+    /**
+     * Unregisters a listener to be notified about connection state changes
+     *
+     * @param listener Listener to be connected
+     */
+    void removeConnectionStateChangeHandler(MPDConnectionStateChangeHandler listener) {
+        synchronized (mStateListeners) {
+            mStateListeners.remove(listener);
         }
     }
 
@@ -888,19 +896,10 @@ public class MPDConnection {
      *
      * @param listener Listener to register to this connection
      */
-    public void setIdleListener(MPDIdleChangeHandler listener) {
+    void setIdleListener(MPDIdleChangeHandler listener) {
         synchronized (mIdleListeners) {
             mIdleListeners.add(listener);
         }
-    }
-
-    /**
-     * Interface to used to be informed about connection state changes.
-     */
-    public interface MPDConnectionStateChangeListener {
-        void onConnected();
-
-        void onDisconnected();
     }
 
     /**
@@ -972,22 +971,22 @@ public class MPDConnection {
                 // External change
                 if (DEBUG_ENABLED) {
                     Log.v(TAG, "External changes");
-
-                    while (!response.equals("OK")) {
-                        try {
-                            response = readLineInternal();
-                        } catch (MPDException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
-
-                    mConnectionLock.release();
-                    notifyIdleListener();
-
-                    scheduleIDLE();
                 }
+
+                while (!response.equals("OK")) {
+                    try {
+                        response = readLineInternal();
+                    } catch (MPDException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                changeState(CONNECTION_STATES.READY_FOR_COMMANDS);
+
+                mConnectionLock.release();
+                notifyIdleListener();
+
+                scheduleIDLE();
             } else if (response.isEmpty()) {
                 if (DEBUG_ENABLED) {
                     Log.e(TAG, "Error during idling");
@@ -1011,7 +1010,7 @@ public class MPDConnection {
      *
      * @return The read string. null if no data is available.
      */
-    String readLine() throws MPDException {
+    @Nullable String readLine() throws MPDException {
         if (mReader != null) {
             String line;
             try {
@@ -1044,7 +1043,7 @@ public class MPDConnection {
             }
             return line;
         }
-        return "";
+        return null;
     }
 
     /**
@@ -1245,6 +1244,13 @@ public class MPDConnection {
     private class StartIDLETask extends TimerTask {
         @Override
         public void run() {
+            synchronized (mIDLETimer) {
+                if(mIDLETask == null) {
+                    // Wait was cancelled.
+                    return;
+                }
+            }
+
             boolean locked = mConnectionLock.tryAcquire();
             if (locked) {
                 startIDLE();

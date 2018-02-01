@@ -24,9 +24,6 @@ package org.gateshipone.malp.application.listviewitems;
 
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.widget.AbsListView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import org.gateshipone.malp.R;
@@ -41,8 +38,8 @@ public class ImageListItem extends AbsImageListViewItem {
     public ImageListItem(Context context, String text, String details, ScrollSpeedAdapter adapter) {
         super(context, R.layout.listview_item_image, R.id.item_image, R.id.item_image_viewswitcher, adapter);
 
-        mMainView = (TextView)findViewById(R.id.item_text);
-        mDetailsView = (TextView)findViewById(R.id.item_details);
+        mMainView = findViewById(R.id.item_text);
+        mDetailsView = findViewById(R.id.item_details);
 
         if ( details == null || details.isEmpty() ) {
             mDetailsView.setVisibility(GONE);

@@ -25,7 +25,6 @@ package org.gateshipone.malp.mpdservice.mpdprotocol;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 

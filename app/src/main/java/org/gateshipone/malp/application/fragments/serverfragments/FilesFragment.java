@@ -27,6 +27,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -51,10 +52,12 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.callbacks.PlaylistCallback;
 import org.gateshipone.malp.application.loaders.FilesLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDDirectory;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
@@ -98,18 +101,21 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
      */
     public final static String FILESFRAGMENT_SAVED_INSTANCE_SEARCH_STRING = "FilesFragment.SearchString";
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         boolean useTags = sharedPref.getBoolean(getString(R.string.pref_use_tags_in_filebrowser_key), getResources().getBoolean(R.bool.pref_use_tags_in_filebrowser_default));
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         Bundle args = getArguments();
         if (null != args) {
@@ -127,18 +133,12 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         registerForContextMenu(mListView);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         // try to resume the saved search string
         if (savedInstanceState != null) {
@@ -258,7 +258,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             case R.id.action_song_play_next:
                 MPDQueryHandler.playSongNext(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
-            case R.id.action_add_to_saved_playlist:
+            case R.id.action_add_to_saved_playlist: {
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
@@ -267,6 +267,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
+            }
             case R.id.action_play_playlist:
                 MPDQueryHandler.playPlaylist(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
@@ -279,6 +280,15 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
             case R.id.action_play_directory:
                 MPDQueryHandler.playDirectory(((MPDFileEntry) mAdapter.getItem(info.position)).getPath());
                 return true;
+            case R.id.action_show_details: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mAdapter.getItem(info.position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return true;
+            }
             default:
                 return super.onContextItemSelected(item);
         }
@@ -310,7 +320,7 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
         DrawableCompat.setTint(drawable, tintColor);
         menu.findItem(R.id.action_search).setIcon(drawable);
 
-        MPDCapabilities serverCaps = MPDQueryHandler.getServerCapabilities();
+        MPDCapabilities serverCaps = MPDInterface.mInstance.getServerCapabilities();
         if ( null != serverCaps ) {
             if ( serverCaps.hasListFiltering()) {
                 menu.findItem(R.id.action_show_albums_from_here).setVisible(true);
@@ -401,22 +411,45 @@ public class FilesFragment extends GenericMPDFragment<List<MPDFileEntry>> implem
     }
 
     @Override
-    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-        mLastPosition = i;
+    public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+        mLastPosition = position;
 
-        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(i);
+        MPDFileEntry file = (MPDFileEntry) mAdapter.getItem(position);
 
         if (file instanceof MPDDirectory) {
             mCallback.openPath(file.getPath());
         } else if (file instanceof MPDPlaylist) {
             mPlaylistCallback.openPlaylist(file.getPath());
         } else if (file instanceof MPDTrack) {
-            // Open song details dialog
-            SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-            Bundle args = new Bundle();
-            args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack)file);
-            songDetailsDialog.setArguments(args);
-            songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+            switch (mClickAction) {
+                case ACTION_SHOW_DETAILS: {
+                    // Open song details dialog
+                    SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                    Bundle args = new Bundle();
+                    args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mAdapter.getItem(position));
+                    songDetailsDialog.setArguments(args);
+                    songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                    return;
+                }
+                case ACTION_ADD_SONG:{
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.addPath(track.getPath());
+                    return;
+                }
+                case ACTION_PLAY_SONG: {
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.playSong(track.getPath());
+                    return;
+                }
+                case ACTION_PLAY_SONG_NEXT: {
+                    MPDTrack track = (MPDTrack) mAdapter.getItem(position);
+
+                    MPDQueryHandler.playSongNext(track.getPath());
+                    return;
+                }
+            }
         }
     }
 

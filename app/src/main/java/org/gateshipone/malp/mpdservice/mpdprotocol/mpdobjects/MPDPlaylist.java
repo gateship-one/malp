@@ -23,6 +23,8 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
+import android.support.annotation.NonNull;
+
 public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
 
 
@@ -37,11 +39,7 @@ public class MPDPlaylist extends MPDFileEntry implements MPDGenericItem {
         return getFilename();
     }
 
-    public int compareTo(MPDPlaylist another) {
-        if ( another == null ) {
-            return -1;
-        }
-
+    public int compareTo(@NonNull MPDPlaylist another) {
         String title = getFilename();
         String anotherTitle = another.getFilename();
 

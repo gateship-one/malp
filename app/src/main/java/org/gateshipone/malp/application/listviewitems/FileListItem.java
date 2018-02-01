@@ -68,14 +68,14 @@ public class FileListItem extends AbsImageListViewItem {
     public FileListItem(Context context, boolean showIcon) {
         super(context, R.layout.listview_item_file, 0, 0, null);
 
-        mTitleView = (TextView) findViewById(R.id.track_title);
-        mAdditionalInfoView = (TextView) findViewById(R.id.track_additional_information);
-        mSeparator = (TextView) findViewById(R.id.track_separator);
-        mDurationView = (TextView) findViewById(R.id.track_duration);
-        mNumberView = (TextView) findViewById(R.id.track_number);
+        mTitleView = findViewById(R.id.track_title);
+        mAdditionalInfoView = findViewById(R.id.track_additional_information);
+        mSeparator = findViewById(R.id.track_separator);
+        mDurationView = findViewById(R.id.track_duration);
+        mNumberView = findViewById(R.id.track_number);
 
-        mItemIcon = (ImageView) findViewById(R.id.item_icon);
-        mTextLayout = (LinearLayout) findViewById(R.id.item_track_text_layout);
+        mItemIcon = findViewById(R.id.item_icon);
+        mTextLayout = findViewById(R.id.item_track_text_layout);
         mIsSectionHeader = false;
 
         mShowIcon = showIcon;
@@ -104,19 +104,19 @@ public class FileListItem extends AbsImageListViewItem {
         mIsSectionHeader = true;
 
         // Inflate the view with the given layout
-        mSectionHeader = (TextView) findViewById(R.id.section_header_text);
-        mSectionHeaderLayout = (LinearLayout) findViewById(R.id.section_header);
+        mSectionHeader = findViewById(R.id.section_header_text);
+        mSectionHeaderLayout = findViewById(R.id.section_header);
         setSectionHeader(sectionTitle);
 
 
-        mTitleView = (TextView) findViewById(R.id.track_title);
-        mAdditionalInfoView = (TextView) findViewById(R.id.track_additional_information);
-        mSeparator = (TextView) findViewById(R.id.track_separator);
-        mDurationView = (TextView) findViewById(R.id.track_duration);
-        mNumberView = (TextView) findViewById(R.id.track_number);
+        mTitleView = findViewById(R.id.track_title);
+        mAdditionalInfoView = findViewById(R.id.track_additional_information);
+        mSeparator = findViewById(R.id.track_separator);
+        mDurationView = findViewById(R.id.track_duration);
+        mNumberView = findViewById(R.id.track_number);
 
-        mItemIcon = (ImageView) findViewById(R.id.item_icon);
-        mTextLayout = (LinearLayout) findViewById(R.id.item_track_text_layout);
+        mItemIcon = findViewById(R.id.item_icon);
+        mTextLayout = findViewById(R.id.item_track_text_layout);
         mShowIcon = showIcon;
         if (showIcon) {
             mItemIcon.setVisibility(VISIBLE);
@@ -193,17 +193,7 @@ public class FileListItem extends AbsImageListViewItem {
                     mDurationView.setVisibility(GONE);
                 }
                 // Get track title
-                String trackTitle = track.getTrackTitle();
-
-                // Check for track name
-                if (null == trackTitle || trackTitle.isEmpty()) {
-                    trackTitle = track.getTrackName();
-                }
-
-                // If no track title is available (e.g. streaming URLs) show path
-                if (null == trackTitle || trackTitle.isEmpty()) {
-                    trackTitle = FormatHelper.getFilenameFromPath(track.getPath());
-                }
+                String trackTitle = track.getVisibleTitle();
                 mTitleView.setText(trackTitle);
 
                 // additional information (artist + album)

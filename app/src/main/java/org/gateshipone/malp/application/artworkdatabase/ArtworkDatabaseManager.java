@@ -27,7 +27,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 import org.gateshipone.malp.application.utils.FileUtils;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -487,7 +486,7 @@ public class ArtworkDatabaseManager extends SQLiteOpenHelper {
 
             requestCursor.close();
 
-            FileUtils.removeArtworkFile(context, artworkFilename, DIRECTORY_ARTIST_IMAGES);
+            FileUtils.removeArtworkFile(context, artworkFilename, DIRECTORY_ALBUM_IMAGES);
         }
 
         database.delete(AlbumArtTable.TABLE_NAME, where, whereArgs);

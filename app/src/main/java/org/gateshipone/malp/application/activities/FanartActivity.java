@@ -32,7 +32,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -41,18 +40,11 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartFetchError;
-import org.gateshipone.malp.application.artworkdatabase.network.responses.FanartResponse;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.fanartcache.FanartCacheManager;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.application.utils.VolumeButtonLongClickListener;
 import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
@@ -63,7 +55,6 @@ import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 
 import java.io.File;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -121,6 +112,9 @@ public class FanartActivity extends GenericActivity {
     private ImageButton mVolumeMinus;
     private ImageButton mVolumePlus;
 
+    private VolumeButtonLongClickListener mPlusListener;
+    private VolumeButtonLongClickListener mMinusListener;
+
     private LinearLayout mHeaderTextLayout;
 
     private LinearLayout mVolumeSeekbarLayout;
@@ -128,6 +122,8 @@ public class FanartActivity extends GenericActivity {
 
 
     private FanartCacheManager mFanartCache;
+
+    private int mVolumeStepSize = 1;
 
 
     View mDecorView;
@@ -140,51 +136,31 @@ public class FanartActivity extends GenericActivity {
 
         setContentView(R.layout.activity_artist_fanart);
 
-        mInfoLayout = (LinearLayout) findViewById(R.id.information_layout);
+        mInfoLayout = findViewById(R.id.information_layout);
 
-        mTrackTitle = (TextView) findViewById(R.id.textview_track_title);
-        mTrackAlbum = (TextView) findViewById(R.id.textview_track_album);
-        mTrackArtist = (TextView) findViewById(R.id.textview_track_artist);
+        mTrackTitle = findViewById(R.id.textview_track_title);
+        mTrackAlbum = findViewById(R.id.textview_track_album);
+        mTrackArtist = findViewById(R.id.textview_track_artist);
 
-        mSwitcher = (ViewSwitcher) findViewById(R.id.fanart_switcher);
+        mSwitcher = findViewById(R.id.fanart_switcher);
 
-        mFanartView0 = (ImageView) findViewById(R.id.fanart_view_0);
-        mFanartView1 = (ImageView) findViewById(R.id.fanart_view_1);
-
-
-        mPreviousButton = (ImageButton) findViewById(R.id.button_previous_track);
-        mNextButton = (ImageButton) findViewById(R.id.button_next_track);
-        mStopButton = (ImageButton) findViewById(R.id.button_stop);
-        mPlayPauseButton = (ImageButton) findViewById(R.id.button_playpause);
+        mFanartView0 = findViewById(R.id.fanart_view_0);
+        mFanartView1 = findViewById(R.id.fanart_view_1);
 
 
-        mPreviousButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.previousSong();
-            }
-        });
+        mPreviousButton = findViewById(R.id.button_previous_track);
+        mNextButton = findViewById(R.id.button_next_track);
+        mStopButton = findViewById(R.id.button_stop);
+        mPlayPauseButton = findViewById(R.id.button_playpause);
 
-        mNextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.nextSong();
-            }
-        });
 
-        mStopButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.stop();
-            }
-        });
+        mPreviousButton.setOnClickListener(v -> MPDCommandHandler.previousSong());
 
-        mPlayPauseButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.togglePause();
-            }
-        });
+        mNextButton.setOnClickListener(v -> MPDCommandHandler.nextSong());
+
+        mStopButton.setOnClickListener(view -> MPDCommandHandler.stop());
+
+        mPlayPauseButton.setOnClickListener(view -> MPDCommandHandler.togglePause());
 
 
         if (null == mStateListener) {
@@ -192,79 +168,53 @@ public class FanartActivity extends GenericActivity {
         }
 
 
-        mInfoLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        mInfoLayout.setOnClickListener(view -> {
 
-            }
         });
 
-        mSwitcher.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                cancelSwitching();
-                mSwitchTimer = new Timer();
-                mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
-                updateFanartViews();
-            }
+        mSwitcher.setOnClickListener(v -> {
+            cancelSwitching();
+            mSwitchTimer = new Timer();
+            mSwitchTimer.schedule(new ViewSwitchTask(), FANART_SWITCH_TIME, FANART_SWITCH_TIME);
+            updateFanartViews();
         });
 
         // seekbar (position)
-        mPositionSeekbar = (SeekBar) findViewById(R.id.now_playing_seekBar);
+        mPositionSeekbar = findViewById(R.id.now_playing_seekBar);
         mPositionSeekbar.setOnSeekBarChangeListener(new PositionSeekbarListener());
 
-        mVolumeSeekbar = (SeekBar) findViewById(R.id.volume_seekbar);
-        mVolumeIcon = (ImageView) findViewById(R.id.volume_icon);
-        mVolumeIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.setVolume(0);
-            }
-        });
+        mVolumeSeekbar = findViewById(R.id.volume_seekbar);
+        mVolumeIcon = findViewById(R.id.volume_icon);
+        mVolumeIcon.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
         mVolumeSeekbar.setMax(100);
         mVolumeSeekbar.setOnSeekBarChangeListener(new VolumeSeekBarListener());
 
         /* Volume control buttons */
-        mVolumeIconButtons = (ImageView) findViewById(R.id.volume_icon_buttons);
-        mVolumeIconButtons.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MPDCommandHandler.setVolume(0);
-            }
-        });
+        mVolumeIconButtons = findViewById(R.id.volume_icon_buttons);
+        mVolumeIconButtons.setOnClickListener(view -> MPDCommandHandler.setVolume(0));
 
-        mVolumeText = (TextView) findViewById(R.id.volume_button_text);
+        mVolumeText = findViewById(R.id.volume_button_text);
 
-        mVolumeMinus = (ImageButton) findViewById(R.id.volume_button_minus);
+        mVolumeMinus = findViewById(R.id.volume_button_minus);
 
-        mVolumeMinus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.decreaseVolume();
-            }
-        });
+        mVolumeMinus.setOnClickListener(v -> MPDCommandHandler.decreaseVolume(mVolumeStepSize));
 
-        mVolumePlus = (ImageButton) findViewById(R.id.volume_button_plus);
-        mVolumePlus.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MPDCommandHandler.increaseVolume();
-            }
-        });
+        mVolumePlus = findViewById(R.id.volume_button_plus);
+        mVolumePlus.setOnClickListener(v -> MPDCommandHandler.increaseVolume(mVolumeStepSize));
 
         /* Create two listeners that start a repeating timer task to repeat the volume plus/minus action */
-        VolumeButtonLongClickListener plusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP);
-        VolumeButtonLongClickListener minusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN);
+        mPlusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_UP,mVolumeStepSize);
+        mMinusListener = new VolumeButtonLongClickListener(VolumeButtonLongClickListener.LISTENER_ACTION.VOLUME_DOWN,mVolumeStepSize);
 
         /* Set the listener to the plus/minus button */
-        mVolumeMinus.setOnLongClickListener(minusListener);
-        mVolumeMinus.setOnTouchListener(minusListener);
+        mVolumeMinus.setOnLongClickListener(mMinusListener);
+        mVolumeMinus.setOnTouchListener(mMinusListener);
 
-        mVolumePlus.setOnLongClickListener(plusListener);
-        mVolumePlus.setOnTouchListener(plusListener);
+        mVolumePlus.setOnLongClickListener(mPlusListener);
+        mVolumePlus.setOnTouchListener(mPlusListener);
 
-        mVolumeSeekbarLayout = (LinearLayout) findViewById(R.id.volume_seekbar_layout);
-        mVolumeButtonLayout = (LinearLayout) findViewById(R.id.volume_button_layout);
+        mVolumeSeekbarLayout = findViewById(R.id.volume_seekbar_layout);
+        mVolumeButtonLayout = findViewById(R.id.volume_button_layout);
 
         mFanartCache = new FanartCacheManager(getApplicationContext());
     }
@@ -385,27 +335,15 @@ public class FanartActivity extends GenericActivity {
      */
     private void updateMPDCurrentTrack(final MPDTrack track) {
         String title;
-        if(!(title = track.getTrackTitle()).isEmpty()) {
 
-        } else if (!(title = track.getTrackName()).isEmpty()) {
-
-        } else if (!track.getPath().isEmpty()) {
-            title = FormatHelper.getFilenameFromPath(track.getPath());
-        } else {
-            title = "";
-        }
+        title = track.getVisibleTitle();
 
         mTrackTitle.setText(title);
         mTrackAlbum.setText(track.getTrackAlbum());
         mTrackArtist.setText(track.getTrackArtist());
         if (null == mLastTrack || !track.getTrackArtist().equals(mLastTrack.getTrackArtist())) {
             // FIXME only cancel fanart requests
-            MALPRequestQueue.getInstance(getApplicationContext()).cancelAll(new RequestQueue.RequestFilter() {
-                @Override
-                public boolean apply(Request<?> request) {
-                    return true;
-                }
-            });
+            MALPRequestQueue.getInstance(getApplicationContext()).cancelAll(request -> true);
 
             cancelSwitching();
             mFanartView0.setImageBitmap(null);
@@ -432,13 +370,10 @@ public class FanartActivity extends GenericActivity {
     private void checkTracksMBID() {
         // Check if this track has an MBID otherwise try to get one.
         if ((mLastTrack.getTrackArtistMBID() == null || mLastTrack.getTrackArtistMBID().isEmpty()) && downloadAllowed()) {
-            FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(mLastTrack, new Response.Listener<String>() {
-                @Override
-                public void onResponse(String response) {
-                    mLastTrack.setTrackArtistMBID(response);
-                    if (mLastTrack == mLastTrack) {
-                        checkFanartAvailable();
-                    }
+            FanartTVManager.getInstance(getApplicationContext()).getTrackArtistMBID(mLastTrack, response -> {
+                mLastTrack.setTrackArtistMBID(response);
+                if (mLastTrack == mLastTrack) {
+                    checkFanartAvailable();
                 }
             }, new FanartFetchError() {
                 @Override
@@ -481,36 +416,27 @@ public class FanartActivity extends GenericActivity {
         if (!downloadAllowed()) {
             return;
         }
-        FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), new Response.Listener<List<String>>() {
-            @Override
-            public void onResponse(List<String> response) {
-                for (final String url : response) {
-                    // Check if the given image is in the cache already.
-                    if (mFanartCache.inCache(track.getTrackArtistMBID(), String.valueOf(url.hashCode()))) {
-                        continue;
-                    }
-
-                    // If not try to download the image.
-                    FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, new Response.Listener<FanartResponse>() {
-                        @Override
-                        public void onResponse(FanartResponse response) {
-                            mFanartCache.addFanart(track.getTrackArtistMBID(), String.valueOf(response.url.hashCode()), response.image);
-
-                            int fanartCount = mFanartCache.getFanartCount(response.track.getTrackArtistMBID());
-                            if (fanartCount == 1) {
-                                updateFanartViews();
-                            }
-                            if (mCurrentFanart == (fanartCount - 2)) {
-                                mNextFanart = (mCurrentFanart + 1) % fanartCount;
-                            }
-                        }
-                    }, new Response.ErrorListener() {
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-
-                        }
-                    });
+        FanartTVManager.getInstance(getApplicationContext()).getArtistFanartURLs(track.getTrackArtistMBID(), response -> {
+            for (final String url : response) {
+                // Check if the given image is in the cache already.
+                if (mFanartCache.inCache(track.getTrackArtistMBID(), String.valueOf(url.hashCode()))) {
+                    continue;
                 }
+
+                // If not try to download the image.
+                FanartTVManager.getInstance(getApplicationContext()).getFanartImage(track, url, response1 -> {
+                    mFanartCache.addFanart(track.getTrackArtistMBID(), String.valueOf(response1.url.hashCode()), response1.image);
+
+                    int fanartCount = mFanartCache.getFanartCount(response1.track.getTrackArtistMBID());
+                    if (fanartCount == 1) {
+                        updateFanartViews();
+                    }
+                    if (mCurrentFanart == (fanartCount - 2)) {
+                        mNextFanart = (mCurrentFanart + 1) % fanartCount;
+                    }
+                }, error -> {
+
+                });
             }
         }, new FanartFetchError() {
             @Override
@@ -548,12 +474,7 @@ public class FanartActivity extends GenericActivity {
 
         @Override
         public void run() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    updateFanartViews();
-                }
-            });
+            runOnUiThread(FanartActivity.this::updateFanartViews);
         }
     }
 
@@ -774,6 +695,10 @@ public class FanartActivity extends GenericActivity {
             mVolumeSeekbarLayout.setVisibility(View.GONE);
             mVolumeButtonLayout.setVisibility(View.VISIBLE);
         }
+
+        mVolumeStepSize = sharedPref.getInt(getString(R.string.pref_volume_steps_key), getResources().getInteger(R.integer.pref_volume_steps_default));
+        mPlusListener.setVolumeStepSize(mVolumeStepSize);
+        mMinusListener.setVolumeStepSize(mVolumeStepSize);
     }
 
 }

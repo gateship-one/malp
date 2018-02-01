@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
@@ -37,7 +38,6 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.application.background.BackgroundServiceConnection;
 import org.gateshipone.malp.application.utils.HardwareKeyHandler;
-import org.gateshipone.malp.application.views.NowPlayingView;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionErrorHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
@@ -45,6 +45,7 @@ import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDException;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 
 import java.lang.ref.WeakReference;
 
@@ -113,7 +114,6 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         if (themePref.equals(getString(R.string.pref_oleddark_key))) {
             setTheme(R.style.AppTheme_oledDark);
         }
-        mConnectionCallback = new MPDConnectionStateCallbackHandler(this);
         mErrorListener = new MPDErrorListener(this);
     }
 
@@ -126,7 +126,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         MPDCommandHandler.getHandler().addErrorListener(mErrorListener);
         MPDQueryHandler.getHandler().addErrorListener(mErrorListener);
 
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
+        mConnectionCallback = new MPDConnectionStateCallbackHandler(this, getMainLooper());
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionCallback);
 
         ConnectionManager.getInstance(getApplicationContext()).registerMPDUse(getApplicationContext());
 
@@ -148,6 +149,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+        HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPref.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
     }
 
     @Override
@@ -163,7 +165,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
 
         sharedPref.unregisterOnSharedPreferenceChangeListener(this);
 
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionCallback);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionCallback);
+        mConnectionCallback = null;
 
         getApplicationContext().unregisterReceiver(mStreamingStatusReceiver);
 
@@ -178,6 +181,9 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(getString(R.string.pref_hardware_controls_key))) {
             mHardwareControls = sharedPreferences.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
+        } else if (key.equals(getString(R.string.pref_volume_steps_key))) {
+            // Set the hardware key handler to the new value
+            HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPreferences.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
         }
     }
 
@@ -191,9 +197,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     public boolean dispatchKeyEvent(KeyEvent event) {
         boolean streamingActive = !(mStreamingStatus == BackgroundService.STREAMING_STATUS.STOPPED);
         if (mHardwareControls) {
-            if (!HardwareKeyHandler.getInstance().handleKeyEvent(event,!streamingActive)) {
-                return super.dispatchKeyEvent(event);
-            } else return true;
+            return HardwareKeyHandler.getInstance().handleKeyEvent(event, !streamingActive) || super.dispatchKeyEvent(event);
         } else {
             return super.dispatchKeyEvent(event);
         }
@@ -210,34 +214,19 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     private static class MPDConnectionStateCallbackHandler extends MPDConnectionStateChangeHandler {
         private WeakReference<GenericActivity> mActivity;
 
-        MPDConnectionStateCallbackHandler(GenericActivity activity) {
-            mActivity = new WeakReference<GenericActivity>(activity);
+        MPDConnectionStateCallbackHandler(GenericActivity activity, Looper looper) {
+            super(looper);
+            mActivity = new WeakReference<>(activity);
         }
 
         @Override
         public void onConnected() {
-            final GenericActivity activity = mActivity.get();
-            if (null != activity) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.onConnected();
-                    }
-                });
-            }
+            mActivity.get().onConnected();
         }
 
         @Override
         public void onDisconnected() {
-            final GenericActivity activity = mActivity.get();
-            if (null != activity) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        activity.onDisconnected();
-                    }
-                });
-            }
+            mActivity.get().onDisconnected();
         }
     }
 
@@ -281,7 +270,7 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         private WeakReference<GenericActivity> mActivity;
 
         public MPDErrorListener(GenericActivity activity) {
-            mActivity = new WeakReference<GenericActivity>(activity);
+            mActivity = new WeakReference<>(activity);
         }
 
 

@@ -25,6 +25,7 @@ package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
 import java.util.Comparator;
 import java.util.Date;
@@ -130,7 +131,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
     }
 
     @Override
-    public int compareTo(MPDAlbum another) {
+    public int compareTo(@NonNull MPDAlbum another) {
         if ( another.equals(this) ) {
             return 0;
         }
@@ -175,7 +176,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
 
         @Override
         public boolean equals(Object obj) {
-            return obj.equals(this);
+            return obj instanceof MPDAlbum && obj.equals(this);
         }
     }
 }

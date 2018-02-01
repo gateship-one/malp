@@ -26,12 +26,12 @@ package org.gateshipone.malp.application.fragments;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.text.InputFilter;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,8 +39,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CompoundButton;
-import android.widget.NumberPicker;
 import android.widget.Switch;
 
 import org.gateshipone.malp.R;
@@ -86,21 +84,21 @@ public class EditProfileFragment extends Fragment {
     private boolean mOptionsMenuHandled = false;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
 
-        mProfilenameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_profilename);
-        mHostnameView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_hostname);
-        mPasswordView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_password);
-        mPortView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_port);
+        mProfilenameView = rootView.findViewById(R.id.fragment_profile_profilename);
+        mHostnameView = rootView.findViewById(R.id.fragment_profile_hostname);
+        mPasswordView = rootView.findViewById(R.id.fragment_profile_password);
+        mPortView = rootView.findViewById(R.id.fragment_profile_port);
 
-        mStreamingURLView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_streaming_url);
-        mStreamingEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_streaming_enabled);
+        mStreamingURLView = rootView.findViewById(R.id.fragment_profile_streaming_url);
+        mStreamingEnabledView = rootView.findViewById(R.id.fragment_profile_streaming_enabled);
 
-        mHTTPCoverRegexView = (TextInputEditText) rootView.findViewById(R.id.fragment_profile_cover_regex);
-        mHTTPCoverEnabledView = (Switch) rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
+        mHTTPCoverRegexView = rootView.findViewById(R.id.fragment_profile_cover_regex);
+        mHTTPCoverEnabledView = rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
 
 
         // Set to maximum tcp port
@@ -148,21 +146,18 @@ public class EditProfileFragment extends Fragment {
 
         // Show/Hide streaming url view depending on state
         mStreamingEnabledView.setChecked(mStreamingEnabled);
-        mStreamingEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if ( mStreamingURLView.getText().toString().isEmpty()) {
-                        // Check if a text was already set otherwise show an example
-                        mStreamingURL = "http://" + mHostnameView.getText().toString() + ":8080";
-                        mStreamingURLView.setText(mStreamingURL);
-                    }
-                    mStreamingURLView.setVisibility(View.VISIBLE);
-                } else {
-                    mStreamingURLView.setVisibility(View.GONE);
+        mStreamingEnabledView.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                if ( mStreamingURLView.getText().toString().isEmpty()) {
+                    // Check if a text was already set otherwise show an example
+                    mStreamingURL = "http://" + mHostnameView.getText().toString() + ":8080";
+                    mStreamingURLView.setText(mStreamingURL);
                 }
-
+                mStreamingURLView.setVisibility(View.VISIBLE);
+            } else {
+                mStreamingURLView.setVisibility(View.GONE);
             }
+
         });
 
         if (!mStreamingEnabled) {
@@ -172,17 +167,14 @@ public class EditProfileFragment extends Fragment {
 
         // Show/Hide HTTP cover regex view depending on state
         mHTTPCoverEnabledView.setChecked(mHTTPCoverEnabled);
-        mHTTPCoverEnabledView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    mHTTPCoverRegexView.setText(mHTTPCoverRegex);
-                    mHTTPCoverRegexView.setVisibility(View.VISIBLE);
-                } else {
-                    mHTTPCoverRegexView.setVisibility(View.GONE);
-                }
-
+        mHTTPCoverEnabledView.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked) {
+                mHTTPCoverRegexView.setText(mHTTPCoverRegex);
+                mHTTPCoverRegexView.setVisibility(View.VISIBLE);
+            } else {
+                mHTTPCoverRegexView.setVisibility(View.GONE);
             }
+
         });
         if (!mHTTPCoverEnabled) {
             mHTTPCoverRegexView.setVisibility(View.GONE);

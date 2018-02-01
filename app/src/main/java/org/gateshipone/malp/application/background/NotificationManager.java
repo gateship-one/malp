@@ -35,27 +35,21 @@ import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.VolumeProviderCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.app.NotificationCompat.MediaStyle;
-import android.util.Log;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
-import org.gateshipone.malp.application.utils.FormatHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
-
-import java.util.concurrent.locks.ReentrantLock;
 
 public class NotificationManager implements CoverBitmapLoader.CoverBitmapListener, ArtworkManager.onNewAlbumImageListener {
     private static final String TAG = NotificationManager.class.getSimpleName();
@@ -273,17 +267,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             notificationStyle.setShowActionsInCompactView(1, 3);
             mNotificationBuilder.setStyle(notificationStyle);
 
-            String title;
-            if(!(title = track.getTrackTitle()).isEmpty()) {
-
-            } else if (!(title = track.getTrackName()).isEmpty()) {
-
-            } else if (!track.getPath().isEmpty()) {
-                title = FormatHelper.getFilenameFromPath(track.getPath());
-            } else {
-                title = "";
-            }
-
+            String title = track.getVisibleTitle();
 
             mNotificationBuilder.setContentTitle(title);
 
@@ -405,16 +389,16 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
      */
     public synchronized void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
+            // Check if playing or not. If activate the service as foreground
+            if( status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+                mService.stopForeground(false);
+            } else {
+                mService.startForeground(NOTIFICATION_ID, mNotification);
+            }
+
             // Only update the notification if playback state really changed
             if ( mLastStatus.getPlaybackState() != status.getPlaybackState()) {
                 updateNotification(mLastTrack, status.getPlaybackState());
-
-                // Check if playing or not. If activate the service as foreground
-                if( status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
-                    mService.stopForeground(false);
-                } else {
-                    mService.startForeground(NOTIFICATION_ID, mNotification);
-                }
             }
             if (mVolumeControlProvider != null) {
                 // Notify the mediasession about the new volume
@@ -564,9 +548,9 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         @Override
         public void onAdjustVolume(int direction) {
             if (direction == 1) {
-                MPDCommandHandler.increaseVolume();
+                MPDCommandHandler.increaseVolume(1);
             } else if (direction == -1) {
-                MPDCommandHandler.decreaseVolume();
+                MPDCommandHandler.decreaseVolume(1);
             }
         }
     }

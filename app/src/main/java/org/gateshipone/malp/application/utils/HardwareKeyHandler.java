@@ -33,9 +33,11 @@ public class HardwareKeyHandler {
     /**
      * Interval for repeating the volume events in ms.
      */
-    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 100;
+    private final static int VOLUME_CONTROL_REPEAT_PERIOD = 200;
 
     private static HardwareKeyHandler mInstance;
+
+    private int mVolumeStepSize = 1;
 
     private Timer mRepeatTimer;
 
@@ -66,13 +68,14 @@ public class HardwareKeyHandler {
                     return false;
                 }
                 if (action == KeyEvent.ACTION_DOWN) {
+                    MPDCommandHandler.increaseVolume(mVolumeStepSize);
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
-                        mRepeatTimer.scheduleAtFixedRate(new IncreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
+                        mRepeatTimer.scheduleAtFixedRate(new IncreaseVolumeTask(), VOLUME_CONTROL_REPEAT_PERIOD, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
-                    // Key is released. Stop running timmer.
+                    // Key is released. Stop running timer.
                     if (null != mRepeatTimer) {
                         mRepeatTimer.cancel();
                         mRepeatTimer.purge();
@@ -85,10 +88,11 @@ public class HardwareKeyHandler {
                     return false;
                 }
                 if (action == KeyEvent.ACTION_DOWN) {
+                    MPDCommandHandler.decreaseVolume(mVolumeStepSize);
                     // If this event is emitted the first time start an timer to repeat this action
                     if (mRepeatTimer == null) {
                         mRepeatTimer = new Timer();
-                        mRepeatTimer.scheduleAtFixedRate(new DecreaseVolumeTask(), 0, VOLUME_CONTROL_REPEAT_PERIOD);
+                        mRepeatTimer.scheduleAtFixedRate(new DecreaseVolumeTask(), VOLUME_CONTROL_REPEAT_PERIOD, VOLUME_CONTROL_REPEAT_PERIOD);
                     }
                 } else {
                     // Key is released. Stop running timmer.
@@ -140,6 +144,10 @@ public class HardwareKeyHandler {
         }
     }
 
+    public void setVolumeStepSize(int stepSize) {
+        mVolumeStepSize = stepSize;
+    }
+
     /**
      * Simple class to repeatably increase the volume.
      */
@@ -147,7 +155,7 @@ public class HardwareKeyHandler {
 
         @Override
         public void run() {
-            MPDCommandHandler.increaseVolume();
+            MPDCommandHandler.increaseVolume(mVolumeStepSize);
         }
     }
 
@@ -159,7 +167,7 @@ public class HardwareKeyHandler {
 
         @Override
         public void run() {
-            MPDCommandHandler.decreaseVolume();
+            MPDCommandHandler.decreaseVolume(mVolumeStepSize);
         }
     }
 }

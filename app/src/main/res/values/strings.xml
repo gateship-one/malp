@@ -94,6 +94,8 @@
     <string name="action_switch_to_output">Switch to Output</string>
     <string name="action_toggle_outputs">Toggle Outputs</string>
 
+    <string name="action_share_current_song">Share current song</string>
+
     <!-- Menu entries -->
     <string name="menu_library">Library</string>
     <string name="menu_settings">Settings</string>
@@ -104,11 +106,14 @@
     <string name="menu_files">Files</string>
     <string name="menu_statistic">Statistic</string>
     <string name="menu_app_settings">App settings</string>
+    <string name="menu_information">Information</string>
 
     <string name="menu_search">Search</string>
 
     <string name="menu_albums">Albums</string>
+    <string name="menu_album">Album</string>
     <string name="menu_artists">Artists</string>
+    <string name="menu_artist">Artist</string>
     <string name="artwork_settings">Artwork settings</string>
 
     <!-- seperator -->
@@ -189,7 +194,10 @@
 
     <!-- Snackbar text -->
     <string name="snackbar_mpd_server_error_format">Error %d/%d: %s</string>
-    <string name="snackbar_mpd_connection_error_format">Error: %s</string>
+    <string name="snackbar_mpd_connection_error_format">EtrackUrirror: %s</string>
+
+    <!-- Sharing text -->
+    <string name="sharing_song_details">I\'m listening to %s by %s from album %s</string>
 
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Save Playlist</string>
@@ -204,11 +212,16 @@
     <string name="dialog_message_delete_playlist">Do you want really want to delete the playlist:</string>
     <string name="dialog_message_delete_current_playlist">Do you want really want to delete the playlist?</string>
 
+    <string name="dialog_share_song_details">Share song details</string>
+
     <!-- dialog default names  -->
     <string name="default_playlist_title">New Playlist</string>
     <string name="create_new_playlist">Create new playlist</string>
 
+    <string name="preference_launch_faq">F.A.Q.</string>
+    <string name="preference_launch_faq_text">Information how to get help for this application</string>
     <string name="preference_launch_about">About</string>
+    <string name="preference_launch_about_text">Version, license and contributors information</string>
 
     <string name="preference_theme_title">Theme</string>
     <string name="preference_theme_summary">Select a different design for the application.</string>
@@ -288,6 +301,23 @@
     <string name="preference_use_tags_in_filebrowser_title">Use tags in file browser</string>
     <string name="preference_use_tags_in_filebrowser_text">Use tags in file browser instead of filenames if available. Disable this option to show filenames in file browser.</string>
 
+    <string name="preference_library_click_action_title">Track click action</string>
+    <string name="preference_library_click_action_summary">Select action for tracks in library</string>
+    <string name="preference_library_click_action_message">Select the default action to take if you click on a track in the library views</string>
+
+    <string name="preference_library_click_action_details" translatable="false">@string/action_show_details</string>
+    <string name="preference_library_click_action_add" translatable="false">@string/action_add</string>
+    <string name="preference_library_click_action_play" translatable="false">@string/action_play_song</string>
+    <string name="preference_library_click_action_play_next" translatable="false">@string/action_enqueue_as_next</string>
+
+    <string-array name="preference_library_click">
+        <item>@string/preference_library_click_action_details</item>
+        <item>@string/preference_library_click_action_add</item>
+        <item>@string/preference_library_click_action_play</item>
+        <item>@string/preference_library_click_action_play_next</item>
+    </string-array>
+
+
     <string name="preference_volume_control_title">Select volume control view</string>
     <string name="preference_volume_control_message">Select volume control view</string>
     <string name="preference_volume_control_summary">Select the type of view that is used to control the volume of music playback</string>
@@ -305,8 +335,14 @@
     <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
     <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>
 
+    <string name="preference_volume_step_title">Volume step size</string>
+    <string name="preference_volume_step_text">The size of volume steps of the hardware and software volume buttons.</string>
+
+    <string name="volume_step_size_dialog_title">Step size: %d%%</string>
+    <string name="volume_step_size_dialog_warning">You are selecting a high value for your volume step size. Be careful not to harm your ears or your equipment!</string>
+
     <string name="preference_show_notification_title">Show notification</string>
-    <string name="preference_show_notification_text">Show a notification when leaving the main user interface.</string>
+    <string name="preference_show_notification_text">Show a notification when leaving the main user interface. This is necessary for the widget to work. If you click on \'connect\' on the widget, the notification will be shown in any case.</string>
 
     <string name="preference_use_english_wikipedia_title">Use English Wikipedia</string>
     <string name="preference_use_english_wikipedia_text">Use the English Wikipedia version to lookup pages</string>
@@ -396,6 +432,7 @@
     <string name="url_musicbrainz" translatable="false">https://www.musicbrainz.org</string>
     <string name="url_lastfm" translatable="false">https://www.last.fm</string>
     <string name="url_fanarttv" translatable="false">https://fanart.tv</string>
+    <string name="url_faq" translatable="false">https://github.com/gateship-one/malp/wiki/FAQ</string>
 
     <!-- Bulk downloader service -->
     <string name="downloader_notification_title">Bulk download running</string>

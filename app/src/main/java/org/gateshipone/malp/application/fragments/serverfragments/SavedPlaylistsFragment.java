@@ -24,8 +24,8 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
@@ -72,12 +72,12 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
 
         // Create the needed adapter for the ListView
@@ -90,18 +90,12 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
 
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
 
         // Return the ready inflated and configured fragment view.
@@ -180,20 +174,14 @@ public class SavedPlaylistsFragment extends GenericMPDFragment<List<MPDFileEntry
                 final AlertDialog.Builder removeListBuilder = new AlertDialog.Builder(getContext());
                 removeListBuilder.setTitle(getContext().getString(R.string.action_delete_playlist));
                 removeListBuilder.setMessage(getContext().getString(R.string.dialog_message_delete_playlist) + ' ' + playlist.getSectionTitle() + '?');
-                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        MPDQueryHandler.removePlaylist(playlist.getPath());
-                        mPlaylistAdapter.swapModel(null);
-                        getLoaderManager().destroyLoader(0);
-                        getLoaderManager().initLoader(0, getArguments(), SavedPlaylistsFragment.this);
-                    }
+                removeListBuilder.setPositiveButton(R.string.dialog_action_yes, (dialog, which) -> {
+                    MPDQueryHandler.removePlaylist(playlist.getPath());
+                    mPlaylistAdapter.swapModel(null);
+                    getLoaderManager().destroyLoader(0);
+                    getLoaderManager().initLoader(0, getArguments(), SavedPlaylistsFragment.this);
                 });
-                removeListBuilder.setNegativeButton(R.string.dialog_action_no, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                removeListBuilder.setNegativeButton(R.string.dialog_action_no, (dialog, which) -> {
 
-                    }
                 });
                 removeListBuilder.create().show();
 

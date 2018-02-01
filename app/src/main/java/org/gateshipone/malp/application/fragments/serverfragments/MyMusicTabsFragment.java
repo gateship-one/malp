@@ -27,6 +27,7 @@ import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -34,7 +35,6 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SearchView;
-import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -76,7 +76,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
@@ -84,7 +84,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
 
         // create tabs
-        TabLayout tabLayout = (TabLayout) rootView.findViewById(R.id.my_music_tab_layout);
+        TabLayout tabLayout = rootView.findViewById(R.id.my_music_tab_layout);
 
         // Icons
         final ColorStateList tabColors = tabLayout.getTabTextColors();
@@ -104,7 +104,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
 
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
 
-        mViewPager = (ViewPager) rootView.findViewById(R.id.my_music_viewpager);
+        mViewPager = rootView.findViewById(R.id.my_music_viewpager);
         mMyMusicPagerAdapter = new MyMusicPagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(mMyMusicPagerAdapter);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -148,7 +148,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
             }
 
 
-            ViewPager myMusicViewPager = (ViewPager) view.findViewById(R.id.my_music_viewpager);
+            ViewPager myMusicViewPager = view.findViewById(R.id.my_music_viewpager);
             myMusicViewPager.setCurrentItem(tab.getPosition());
         }
     }
@@ -181,7 +181,7 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
+    public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
 
         // save the already typed search string (or null if nothing is entered)
@@ -255,10 +255,11 @@ public class MyMusicTabsFragment extends Fragment implements TabLayout.OnTabSele
         }
 
         @Override
-        public int getItemPosition(Object object) {
+        public int getItemPosition(@NonNull Object object) {
             return POSITION_NONE;
         }
 
+        @NonNull
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
             GenericMPDFragment fragment = (GenericMPDFragment) super.instantiateItem(container, position);

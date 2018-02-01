@@ -22,6 +22,8 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
+import android.support.annotation.NonNull;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -78,11 +80,7 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
      * @return
      */
     @Override
-    public int compareTo(MPDFileEntry another) {
-        if (another == null) {
-            return -1;
-        }
-
+    public int compareTo(@NonNull MPDFileEntry another) {
         if (this instanceof MPDDirectory) {
             if (another instanceof MPDDirectory) {
                 return ((MPDDirectory) this).compareTo((MPDDirectory) another);

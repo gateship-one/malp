@@ -25,8 +25,6 @@ package org.gateshipone.malp.application.adapters;
 
 import android.os.AsyncTask;
 import android.support.v4.util.Pair;
-import android.util.Log;
-import android.widget.BaseAdapter;
 import android.widget.SectionIndexer;
 
 import java.util.ArrayList;
@@ -311,7 +309,7 @@ public abstract class GenericSectionAdapter<T extends MPDGenericItem> extends Sc
             }
             mLock.readLock().unlock();
 
-            return new Pair<List<T>, String>(resultList, filterString);
+            return new Pair<>(resultList, filterString);
         }
 
         protected void onPostExecute(Pair<List<T>, String> result) {

@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.loaders;
 import android.content.Context;
 import android.support.v4.content.Loader;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
@@ -39,32 +40,36 @@ public class FilesLoader extends Loader<List<MPDFileEntry>> {
     private FilesResponseHandler mFilesResponseHandler;
 
     /**
-     * Used context
-     */
-    Context mContext;
-
-    /**
      * Path to request file entries from
      */
     String mPath;
 
     public FilesLoader(Context context, String path) {
         super(context);
-        mContext = context;
         mPath = path;
 
         // Response handler for receiving the file list asynchronously
-        mFilesResponseHandler = new FilesResponseHandler();
+        mFilesResponseHandler = new FilesResponseHandler(this);
     }
 
 
     /**
      * Delivers the results to the GUI thread
      */
-    private class FilesResponseHandler extends MPDResponseFileList {
+    private static class FilesResponseHandler extends MPDResponseFileList {
+        private WeakReference<FilesLoader> mFilesLoader;
+
+        private FilesResponseHandler(FilesLoader loader) {
+            mFilesLoader = new WeakReference<>(loader);
+        }
+
         @Override
         public void handleTracks(List<MPDFileEntry> fileList, int start, int end) {
-            deliverResult(fileList);
+            FilesLoader loader = mFilesLoader.get();
+
+            if (loader != null) {
+                loader.deliverResult(fileList);
+            }
         }
     }
 

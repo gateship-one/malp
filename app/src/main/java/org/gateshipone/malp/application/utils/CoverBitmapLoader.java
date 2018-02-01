@@ -24,7 +24,6 @@ package org.gateshipone.malp.application.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.util.Log;
 
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BitmapCache;

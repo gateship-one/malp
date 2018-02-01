@@ -26,6 +26,7 @@ package org.gateshipone.malp.application.fragments;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -70,12 +71,12 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
 
         // Create the needed adapter for the ListView

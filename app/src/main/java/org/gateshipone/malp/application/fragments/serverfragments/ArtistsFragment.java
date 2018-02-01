@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.ContextMenu;
@@ -49,7 +50,6 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.listviewitems.AbsImageListViewItem;
 import org.gateshipone.malp.application.loaders.ArtistsLoader;
-import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ScrollSpeedListener;
 import org.gateshipone.malp.application.utils.ThemeUtils;
@@ -86,7 +86,7 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
     private MPDAlbum.MPD_ALBUM_SORT_ORDER mAlbumSortOrder;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String libraryView = sharedPref.getString(getString(R.string.pref_library_view_key), getString(R.string.pref_library_view_default));
@@ -120,18 +120,12 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
 
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         return rootView;
     }
@@ -145,14 +139,14 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
             mFABCallback.setupFAB(false, null);
             mFABCallback.setupToolbar(getString(R.string.app_name), true, true, false);
         }
-        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).registerOnNewArtistImageListener(mArtistAdapter);
     }
 
     @Override
     public void onPause() {
         super.onPause();
 
-        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener((ArtistsAdapter)mArtistAdapter);
+        ArtworkManager.getInstance(getContext().getApplicationContext()).unregisterOnNewArtistImageListener(mArtistAdapter);
     }
 
     /**

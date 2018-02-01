@@ -29,7 +29,6 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
 
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
@@ -89,57 +88,42 @@ public class MusicBrainzManager implements AlbumImageProvider {
 
         String artistURLName = Uri.encode(artist.getArtistName());
 
-        getArtists(artistURLName, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                JSONArray artists = null;
-                try {
-                    artists = response.getJSONArray("artists");
+        getArtists(artistURLName, response -> {
+            JSONArray artists = null;
+            try {
+                artists = response.getJSONArray("artists");
 
-                    if (!artists.isNull(0)) {
-                        JSONObject artist = artists.getJSONObject(0);
-                        String artistMBID = artist.getString("id");
+                if (!artists.isNull(0)) {
+                    JSONObject artist1 = artists.getJSONObject(0);
+                    String artistMBID = artist1.getString("id");
 
-                        getArtistImageURL(artistMBID, new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                JSONArray relations = null;
-                                try {
-                                    relations = response.getJSONArray("relations");
-                                    for (int i = 0; i < relations.length(); i++) {
-                                        JSONObject obj = relations.getJSONObject(i);
+                    getArtistImageURL(artistMBID, response1 -> {
+                        JSONArray relations = null;
+                        try {
+                            relations = response1.getJSONArray("relations");
+                            for (int i = 0; i < relations.length(); i++) {
+                                JSONObject obj = relations.getJSONObject(i);
 
-                                        if (obj.getString("type").equals("image")) {
-                                            JSONObject url = obj.getJSONObject("url");
+                                if (obj.getString("type").equals("image")) {
+                                    JSONObject url = obj.getJSONObject("url");
 
-                                            getArtistImage(url.getString("resource"), listener, new Response.ErrorListener() {
-                                                @Override
-                                                public void onErrorResponse(VolleyError error) {
-                                                    // FIXME error handling
-                                                }
-                                            });
-                                        }
-                                    }
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
+                                    getArtistImage(url.getString("resource"), listener, error -> {
+                                        // FIXME error handling
+                                    });
                                 }
                             }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }, error -> {
 
-                            }
-                        });
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                    });
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                // FIXME error handling
-            }
+        }, error -> {
+            // FIXME error handling
         });
     }
 
@@ -204,15 +188,12 @@ public class MusicBrainzManager implements AlbumImageProvider {
             resolveAlbumMBID(album, listener, errorListener);
         } else {
             String url = COVERART_ARCHIVE_API_URL + "/" + "release/" + album.getMBID() + "/front-500";
-            getAlbumImage(url, album, listener, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError error) {
-                    if(error.networkResponse != null && error.networkResponse.statusCode == 404) {
-                        // Try without MBID from MPD
-                        resolveAlbumMBID(album, listener, errorListener);
-                    } else {
-                        errorListener.fetchVolleyError(album, error);
-                    }
+            getAlbumImage(url, album, listener, error -> {
+                if(error.networkResponse != null && error.networkResponse.statusCode == 404) {
+                    // Try without MBID from MPD
+                    resolveAlbumMBID(album, listener, errorListener);
+                } else {
+                    errorListener.fetchVolleyError(album, error);
                 }
             });
         }
@@ -225,17 +206,7 @@ public class MusicBrainzManager implements AlbumImageProvider {
      * @param errorListener Callback to handle lookup errors
      */
     private void resolveAlbumMBID( final MPDAlbum album, final Response.Listener<AlbumImageResponse> listener, final AlbumFetchError errorListener ) {
-        getAlbumMBID(album, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                parseMusicBrainzReleaseJSON(album, 0, response, listener, errorListener);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                errorListener.fetchVolleyError(album, error);
-            }
-        });
+        getAlbumMBID(album, response -> parseMusicBrainzReleaseJSON(album, 0, response, listener, errorListener), error -> errorListener.fetchVolleyError(album, error));
     }
 
     /**
@@ -259,14 +230,11 @@ public class MusicBrainzManager implements AlbumImageProvider {
                 String mbid = releases.getJSONObject(releaseIndex).getString("id");
                 String url = COVERART_ARCHIVE_API_URL + "/" + "release/" + mbid + "/front-500";
 
-                getAlbumImage(url, album, listener, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        if ( releaseIndex + 1 < releases.length() && (error.networkResponse != null && error.networkResponse.statusCode == 404) ) {
-                            parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
-                        } else {
-                            errorListener.fetchVolleyError(album, error);
-                        }
+                getAlbumImage(url, album, listener, error -> {
+                    if ( releaseIndex + 1 < releases.length() && (error.networkResponse != null && error.networkResponse.statusCode == 404) ) {
+                        parseMusicBrainzReleaseJSON(album, releaseIndex + 1, response, listener, errorListener);
+                    } else {
+                        errorListener.fetchVolleyError(album, error);
                     }
                 });
             } else {

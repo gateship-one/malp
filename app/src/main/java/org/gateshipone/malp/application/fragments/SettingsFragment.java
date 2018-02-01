@@ -32,6 +32,7 @@ import android.support.v7.preference.PreferenceFragmentCompat;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
+import org.gateshipone.malp.application.views.VolumeStepPreferenceDialog;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
     public static final String TAG = SettingsFragment.class.getSimpleName();
@@ -46,12 +47,16 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         // add listener to open artwork settings
         Preference openArtwork = findPreference(getString(R.string.pref_artwork_settings_key));
-        openArtwork.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        openArtwork.setOnPreferenceClickListener(preference -> {
+            mArtworkCallback.openArtworkSettings();
+            return true;
+        });
 
-            public boolean onPreferenceClick(Preference preference) {
-                mArtworkCallback.openArtworkSettings();
-                return true;
-            }
+        Preference openVolumeStepDialog = findPreference(getString(R.string.pref_volume_steps_dialog_key));
+        openVolumeStepDialog.setOnPreferenceClickListener(preference -> {
+            VolumeStepPreferenceDialog dialog = new VolumeStepPreferenceDialog();
+            dialog.show(getFragmentManager(), "Volume steps");
+            return true;
         });
     }
 

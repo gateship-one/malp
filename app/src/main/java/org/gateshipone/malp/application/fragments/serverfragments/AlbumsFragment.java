@@ -29,6 +29,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
@@ -110,7 +111,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         String libraryView = sharedPref.getString(getString(R.string.pref_library_view_key), getString(R.string.pref_library_view_default));
@@ -160,18 +161,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         setHasOptionsMenu(true);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         mBitmapLoader = new CoverBitmapLoader(getContext(), this);
 
@@ -187,7 +182,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
 
 
         ArtworkManager.getInstance(getContext()).registerOnNewArtistImageListener(this);
-        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).registerOnNewAlbumImageListener(mAlbumsAdapter);
     }
 
     /**
@@ -220,7 +215,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         super.onPause();
 
         ArtworkManager.getInstance(getContext()).unregisterOnNewArtistImageListener(this);
-        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener((AlbumsAdapter) mAlbumsAdapter);
+        ArtworkManager.getInstance(getContext()).unregisterOnNewAlbumImageListener(mAlbumsAdapter);
     }
 
 
@@ -393,13 +388,10 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         if (type == CoverBitmapLoader.IMAGE_TYPE.ARTIST_IMAGE && null != mFABCallback && bm != null) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
-                        mFABCallback.setupToolbarImage(bm);
-                        getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
-                    }
+                activity.runOnUiThread(() -> {
+                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
+                    mFABCallback.setupToolbarImage(bm);
+                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
                 });
             }
         }
@@ -411,12 +403,9 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                 mFABCallback.setupFAB(true, new FABOnClickListener());
                 if (mBitmap == null) {
                     final View rootView = getView();
-                    rootView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            int width = rootView.getWidth();
-                            mBitmapLoader.getArtistImage(mArtist, true, width, width);
-                        }
+                    rootView.post(() -> {
+                        int width = rootView.getWidth();
+                        mBitmapLoader.getArtistImage(mArtist, true, width, width);
                     });
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
                 } else {
@@ -424,15 +413,12 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                     mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, true);
                     mFABCallback.setupToolbarImage(mBitmap);
                     final View rootView = getView();
-                    rootView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            int width = rootView.getWidth();
+                    rootView.post(() -> {
+                        int width = rootView.getWidth();
 
-                            // Image too small
-                            if(mBitmap.getWidth() < width) {
-                                mBitmapLoader.getArtistImage(mArtist, true, width, width);
-                            }
+                        // Image too small
+                        if(mBitmap.getWidth() < width) {
+                            mBitmapLoader.getArtistImage(mArtist, true, width, width);
                         }
                     });
                 }

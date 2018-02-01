@@ -23,7 +23,6 @@
 package org.gateshipone.malp.application.fragments;
 
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -38,7 +37,6 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
-import org.gateshipone.malp.mpdservice.ConnectionManager;
 
 
 public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -55,75 +53,58 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
 
         // add listener to clear album data
         Preference clearAlbums = findPreference(getString(R.string.pref_clear_album_key));
-        clearAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            public boolean onPreferenceClick(Preference preference) {
-                final Context context = getContext();
-                ArtworkDatabaseManager.getInstance(context).clearAlbumImages(context);
-                return true;
-            }
+        clearAlbums.setOnPreferenceClickListener(preference -> {
+            final Context context = getContext();
+            ArtworkDatabaseManager.getInstance(context).clearAlbumImages(context);
+            return true;
         });
 
         // add listener to clear artist data
         Preference clearArtist = findPreference(getString(R.string.pref_clear_artist_key));
-        clearArtist.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            public boolean onPreferenceClick(Preference preference) {
-                final Context context = getContext();
-                ArtworkDatabaseManager.getInstance(context).clearArtistImages(context);
-                return true;
-            }
+        clearArtist.setOnPreferenceClickListener(preference -> {
+            final Context context = getContext();
+            ArtworkDatabaseManager.getInstance(context).clearArtistImages(context);
+            return true;
         });
 
         Preference clearBlockedAlbums = findPreference(getString(R.string.pref_clear_blocked_album_key));
-        clearBlockedAlbums.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            public boolean onPreferenceClick(Preference preference) {
-                ArtworkDatabaseManager.getInstance(getContext()).clearBlockedAlbumImages();
-                return true;
-            }
+        clearBlockedAlbums.setOnPreferenceClickListener(preference -> {
+            ArtworkDatabaseManager.getInstance(getContext()).clearBlockedAlbumImages();
+            return true;
         });
 
         Preference clearBlockedArtists = findPreference(getString(R.string.pref_clear_blocked_artist_key));
-        clearBlockedArtists.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
-
-            public boolean onPreferenceClick(Preference preference) {
-                ArtworkDatabaseManager.getInstance(getContext()).clearBlockedArtistImages();
-                return true;
-            }
+        clearBlockedArtists.setOnPreferenceClickListener(preference -> {
+            ArtworkDatabaseManager.getInstance(getContext()).clearBlockedArtistImages();
+            return true;
         });
 
         Preference bulkLoad = findPreference(getString(R.string.pref_bulk_load_key));
-        bulkLoad.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        bulkLoad.setOnPreferenceClickListener(preference -> {
 
-            public boolean onPreferenceClick(Preference preference) {
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-                builder.setTitle(getResources().getString(R.string.bulk_download_notice_title));
-                builder.setMessage(getResources().getString(R.string.bulk_download_notice_text));
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle(getResources().getString(R.string.bulk_download_notice_title));
+            builder.setMessage(getResources().getString(R.string.bulk_download_notice_text));
 
 
-                builder.setPositiveButton(R.string.dialog_action_ok, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        Intent serviceIntent = new Intent(getActivity(), BulkDownloadService.class);
-                        serviceIntent.setAction(BulkDownloadService.ACTION_START_BULKDOWNLOAD);
-                        SharedPreferences sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
-                        serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ARTIST_PROVIDER, sharedPref.getString(getString(R.string.pref_artist_provider_key),
-                                getString(R.string.pref_artwork_provider_artist_default)));
-                        serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ALBUM_PROVIDER, sharedPref.getString(getString(R.string.pref_album_provider_key),
-                                getString(R.string.pref_artwork_provider_album_default)));
-                        serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_WIFI_ONLY, sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key),
-                                getResources().getBoolean(R.bool.pref_download_wifi_default)));
-                        serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_HTTP_COVER_REGEX,HTTPAlbumImageProvider.getInstance(getContext().getApplicationContext()).getRegex());
-                        getActivity().startService(serviceIntent);
-                    }
-                });
-                AlertDialog dialog = builder.create();
-                dialog.show();
+            builder.setPositiveButton(R.string.dialog_action_ok, (dialog, id) -> {
+                Intent serviceIntent = new Intent(getActivity(), BulkDownloadService.class);
+                serviceIntent.setAction(BulkDownloadService.ACTION_START_BULKDOWNLOAD);
+                SharedPreferences sharedPref = android.support.v7.preference.PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ARTIST_PROVIDER, sharedPref.getString(getString(R.string.pref_artist_provider_key),
+                        getString(R.string.pref_artwork_provider_artist_default)));
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_ALBUM_PROVIDER, sharedPref.getString(getString(R.string.pref_album_provider_key),
+                        getString(R.string.pref_artwork_provider_album_default)));
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_WIFI_ONLY, sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key),
+                        getResources().getBoolean(R.bool.pref_download_wifi_default)));
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_HTTP_COVER_REGEX,HTTPAlbumImageProvider.getInstance(getContext().getApplicationContext()).getRegex());
+                getActivity().startService(serviceIntent);
+            });
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
 
-                return true;
-            }
+            return true;
         });
     }
 

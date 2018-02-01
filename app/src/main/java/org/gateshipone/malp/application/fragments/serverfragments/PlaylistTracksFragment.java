@@ -28,6 +28,7 @@ import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -50,6 +51,7 @@ import org.gateshipone.malp.application.adapters.FileAdapter;
 import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.PlaylistTrackLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -78,14 +80,16 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
     private FABFragmentCallback mFABCallback = null;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         Bundle args = getArguments();
         if (null != args) {
@@ -95,6 +99,7 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         // Check if sections should be shown
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean showVisibleSections = sharedPref.getBoolean(getContext().getString(R.string.pref_show_playlist_sections_key), getContext().getResources().getBoolean(R.bool.pref_show_playlist_sections_default));
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         // Create the needed adapter for the ListView
         mFileAdapter = new FileAdapter(getActivity(), false, false, showVisibleSections, true);
@@ -105,18 +110,12 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
         registerForContextMenu(mListView);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
         setHasOptionsMenu(true);
 
@@ -192,19 +191,29 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
             case R.id.action_song_play_next:
                 playNext(info.position);
                 return true;
-            case R.id.action_add_to_saved_playlist:
+            case R.id.action_add_to_saved_playlist: {
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
                 args.putBoolean(ChoosePlaylistDialog.EXTRA_SHOW_NEW_ENTRY, true);
-                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry)mFileAdapter.getItem(info.position),getActivity()));
+                choosePlaylistDialog.setCallback(new AddPathToPlaylist((MPDFileEntry) mFileAdapter.getItem(info.position), getActivity()));
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
+            }
             case R.id.action_remove_from_list:
                 MPDQueryHandler.removeSongFromSavedPlaylist(mPath,info.position);
                 refreshContent();
                 return true;
+            case R.id.action_show_details: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(info.position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return true;
+            }
             default:
                 return super.onContextItemSelected(item);
         }
@@ -324,12 +333,29 @@ public class PlaylistTracksFragment extends GenericMPDFragment<List<MPDFileEntry
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                enqueueTrack(position);
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                play(position);
+                return;
+            }
+            case ACTION_PLAY_SONG_NEXT: {
+                playNext(position);
+                return;
+            }
+        }
     }
 
     private class FABOnClickListener implements View.OnClickListener {

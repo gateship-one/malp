@@ -23,15 +23,17 @@
 package org.gateshipone.malp.application.fragments.serverfragments;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.Loader;
 import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -49,6 +51,7 @@ import org.gateshipone.malp.application.callbacks.AddPathToPlaylist;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 import org.gateshipone.malp.application.loaders.AlbumTracksLoader;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
+import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.application.utils.ThemeUtils;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
@@ -88,13 +91,15 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     private CoverBitmapLoader mBitmapLoader;
 
+    private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
+
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout_refreshable, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView) rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
         /* Check if an artistname/albumame was given in the extras */
         Bundle args = getArguments();
@@ -113,19 +118,16 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         mListView.setOnItemClickListener(this);
 
         // get swipe layout
-        mSwipeRefreshLayout = (SwipeRefreshLayout) rootView.findViewById(R.id.refresh_layout);
+        mSwipeRefreshLayout = rootView.findViewById(R.id.refresh_layout);
         // set swipe colors
         mSwipeRefreshLayout.setColorSchemeColors(ThemeUtils.getThemeColor(getContext(), R.attr.colorAccent),
                 ThemeUtils.getThemeColor(getContext(), R.attr.colorPrimary));
         // set swipe refresh listener
-        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(this::refreshContent);
 
-            @Override
-            public void onRefresh() {
-                refreshContent();
-            }
-        });
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
+        mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
 
         setHasOptionsMenu(true);
 
@@ -151,12 +153,9 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         if (mAlbum != null && mBitmap == null) {
             final View rootView = getView();
             if (rootView != null) {
-                getView().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        int width = rootView.getWidth();
-                        mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
-                    }
+                getView().post(() -> {
+                    int width = rootView.getWidth();
+                    mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
                 });
             }
         } else if (mAlbum != null) {
@@ -165,14 +164,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             mFABCallback.setupToolbarImage(mBitmap);
             final View rootView = getView();
             if (rootView != null) {
-                getView().post(new Runnable() {
-                    @Override
-                    public void run() {
-                        int width = rootView.getWidth();
-                        // Image too small
-                        if(mBitmap.getWidth() < width) {
-                            mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
-                        }
+                getView().post(() -> {
+                    int width = rootView.getWidth();
+                    // Image too small
+                    if(mBitmap.getWidth() < width) {
+                        mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
                     }
                 });
             }
@@ -245,12 +241,29 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        // Open song details dialog
-        SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
-        Bundle args = new Bundle();
-        args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
-        songDetailsDialog.setArguments(args);
-        songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+        switch (mClickAction) {
+            case ACTION_SHOW_DETAILS: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return;
+            }
+            case ACTION_ADD_SONG:{
+                enqueueTrack(position);
+                return;
+            }
+            case ACTION_PLAY_SONG: {
+                play(position);
+                return;
+            }
+            case ACTION_PLAY_SONG_NEXT: {
+                playNext(position);
+                return;
+            }
+        }
     }
 
     /**
@@ -287,7 +300,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
             case R.id.action_song_play_next:
                 playNext(info.position);
                 return true;
-            case R.id.action_add_to_saved_playlist:
+            case R.id.action_add_to_saved_playlist: {
                 // open dialog in order to save the current playlist as a playlist in the mediastore
                 ChoosePlaylistDialog choosePlaylistDialog = new ChoosePlaylistDialog();
                 Bundle args = new Bundle();
@@ -296,6 +309,16 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 choosePlaylistDialog.setArguments(args);
                 choosePlaylistDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "ChoosePlaylistDialog");
                 return true;
+            }
+            case R.id.action_show_details: {
+                // Open song details dialog
+                SongDetailsDialog songDetailsDialog = new SongDetailsDialog();
+                Bundle args = new Bundle();
+                args.putParcelable(SongDetailsDialog.EXTRA_FILE, (MPDTrack) mFileAdapter.getItem(info.position));
+                songDetailsDialog.setArguments(args);
+                songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
+                return true;
+            }
             default:
                 return super.onContextItemSelected(item);
         }
@@ -393,13 +416,10 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && null != mFABCallback && bm != null) {
             FragmentActivity activity = getActivity();
             if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
-                        mFABCallback.setupToolbarImage(bm);
-                        getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
-                    }
+                activity.runOnUiThread(() -> {
+                    mFABCallback.setupToolbar(mAlbum.getName(), false, false, true);
+                    mFABCallback.setupToolbarImage(bm);
+                    getArguments().putParcelable(BUNDLE_STRING_EXTRA_BITMAP, bm);
                 });
             }
         }

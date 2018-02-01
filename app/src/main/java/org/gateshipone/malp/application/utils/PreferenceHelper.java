@@ -30,6 +30,12 @@ import org.gateshipone.malp.R;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 
 public class PreferenceHelper {
+    public enum LIBRARY_TRACK_CLICK_ACTION {
+        ACTION_SHOW_DETAILS,
+        ACTION_ADD_SONG,
+        ACTION_PLAY_SONG,
+        ACTION_PLAY_SONG_NEXT,
+    }
 
     public static MPDAlbum.MPD_ALBUM_SORT_ORDER getMPDAlbumSortOrder(SharedPreferences prefs, Context context) {
         String sortOrderPref = prefs.getString(context.getString(R.string.pref_album_sort_order_key), context.getString(R.string.pref_artist_albums_sort_default));
@@ -43,5 +49,19 @@ public class PreferenceHelper {
 
         // Default value
         return MPDAlbum.MPD_ALBUM_SORT_ORDER.TITLE;
+    }
+
+    public static LIBRARY_TRACK_CLICK_ACTION getClickAction(SharedPreferences prefs, Context context) {
+        String clickActionPref = prefs.getString(context.getString(R.string.pref_library_click_action_key), context.getString(R.string.pref_library_click_action_default));
+        if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_details_key))) {
+            return LIBRARY_TRACK_CLICK_ACTION.ACTION_SHOW_DETAILS;
+        } else if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_add_key))) {
+            return LIBRARY_TRACK_CLICK_ACTION.ACTION_ADD_SONG;
+        } else if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_play_key))) {
+            return LIBRARY_TRACK_CLICK_ACTION.ACTION_PLAY_SONG;
+        } else if (clickActionPref.equals(context.getString(R.string.pref_library_click_action_play_next_key))) {
+            return LIBRARY_TRACK_CLICK_ACTION.ACTION_PLAY_SONG_NEXT;
+        }
+        return LIBRARY_TRACK_CLICK_ACTION.ACTION_ADD_SONG;
     }
 }

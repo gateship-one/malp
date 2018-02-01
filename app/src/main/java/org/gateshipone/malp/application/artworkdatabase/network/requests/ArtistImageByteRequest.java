@@ -23,7 +23,6 @@
 package org.gateshipone.malp.application.artworkdatabase.network.requests;
 
 import com.android.volley.NetworkResponse;
-import com.android.volley.Request;
 import com.android.volley.Response;
 
 import org.gateshipone.malp.application.artworkdatabase.network.responses.ArtistImageResponse;

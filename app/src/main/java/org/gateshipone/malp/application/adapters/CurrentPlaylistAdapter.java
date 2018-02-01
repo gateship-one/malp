@@ -25,6 +25,7 @@ package org.gateshipone.malp.application.adapters;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -39,11 +40,14 @@ import org.gateshipone.malp.mpdservice.handlers.MPDStatusChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDStateMonitoringHandler;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDCapabilities;
+import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDCurrentStatus;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -179,7 +183,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
 
         mTrackResponseHandler = new PlaylistFetchResponseHandler();
         mStateListener = new PlaylistStateListener();
-        mConnectionListener = new ConnectionStateChangeListener();
+        mConnectionListener = new ConnectionStateChangeListener(this, context.getMainLooper());
 
         if (null != listView) {
             listView.setAdapter(this);
@@ -480,7 +484,13 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
     /**
      * Handler used to react on connects/disconnects from the MPD server.
      */
-    private class ConnectionStateChangeListener extends MPDConnectionStateChangeHandler {
+    private static class ConnectionStateChangeListener extends MPDConnectionStateChangeHandler {
+        private WeakReference<CurrentPlaylistAdapter> mAdapter;
+
+        private ConnectionStateChangeListener(CurrentPlaylistAdapter adapter, Looper looper) {
+            super(looper);
+            mAdapter = new WeakReference<>(adapter);
+        }
 
         /**
          * Called when the connection to the MPD server is established successfully. This will
@@ -491,12 +501,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
         @Override
         public void onConnected() {
             // Check if connected server version is recent enough
-            if (MPDQueryHandler.getServerCapabilities() != null && MPDQueryHandler.getServerCapabilities().hasRangedCurrentPlaylist()) {
-                mWindowEnabled = true;
-            } else {
-                mWindowEnabled = false;
-            }
-            updatePlaylist();
+            MPDCapabilities capabilities = MPDInterface.mInstance.getServerCapabilities();
+            mAdapter.get().mWindowEnabled = capabilities != null && capabilities.hasRangedCurrentPlaylist();
+
+            mAdapter.get().updatePlaylist();
         }
 
         /**
@@ -504,10 +512,10 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
          */
         @Override
         public void onDisconnected() {
-            mPlaylist = null;
-            mLastStatus = null;
-            updatePlaylist();
-            notifyDataSetChanged();
+            mAdapter.get().mPlaylist = null;
+            mAdapter.get().mLastStatus = null;
+            mAdapter.get().updatePlaylist();
+            mAdapter.get().notifyDataSetChanged();
         }
     }
 
@@ -518,7 +526,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
     public void onResume() {
         // Register to the MPDStateNotifyHandler singleton
         MPDStateMonitoringHandler.getHandler().registerStatusListener(mStateListener);
-        MPDStateMonitoringHandler.getHandler().registerConnectionStateListener(mConnectionListener);
+        MPDInterface.mInstance.addMPDConnectionStateChangeListener(mConnectionListener);
 
 
         // Reset old states because it is not ensured that it has any meaning.
@@ -537,7 +545,7 @@ public class CurrentPlaylistAdapter extends ScrollSpeedAdapter implements Artwor
     public void onPause() {
         // Unregister to the MPDStateNotifyHandler singleton
         MPDStateMonitoringHandler.getHandler().unregisterStatusListener(mStateListener);
-        MPDStateMonitoringHandler.getHandler().unregisterConnectionStateListener(mConnectionListener);
+        MPDInterface.mInstance.removeMPDConnectionStateChangeListener(mConnectionListener);
 
         mPlaylist = null;
         ArtworkManager.getInstance(mContext.getApplicationContext()).unregisterOnNewAlbumImageListener(this);

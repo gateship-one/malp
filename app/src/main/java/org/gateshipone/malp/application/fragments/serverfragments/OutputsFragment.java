@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -51,12 +52,12 @@ public class OutputsFragment extends GenericMPDFragment<List<MPDOutput>> impleme
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.listview_layout, container, false);
 
         // Get the main ListView of this fragment
-        mListView = (ListView)rootView.findViewById(R.id.main_listview);
+        mListView = rootView.findViewById(R.id.main_listview);
 
 
         // Create the needed adapter for the ListView

@@ -56,12 +56,7 @@ public class AddPathToPlaylist implements OnSaveDialogListener {
         args.putString(TextDialog.EXTRA_DIALOG_TITLE, mContext.getResources().getString(R.string.dialog_save_playlist));
         args.putString(TextDialog.EXTRA_DIALOG_TEXT, mContext.getResources().getString(R.string.default_playlist_title));
 
-        textDialog.setCallback(new TextDialogCallback() {
-            @Override
-            public void onFinished(String text) {
-                MPDQueryHandler.addURLToSavedPlaylist(text, mFile.getPath());
-            }
-        });
+        textDialog.setCallback(text -> MPDQueryHandler.addURLToSavedPlaylist(text, mFile.getPath()));
         textDialog.setArguments(args);
         textDialog.show(((AppCompatActivity)mContext).getSupportFragmentManager(), "SavePLTextDialog");
     }
