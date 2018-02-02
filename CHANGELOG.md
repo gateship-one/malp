@@ -1,9 +1,18 @@
+### Version: 1.1.13 Tag: release-22 (2018-xx-xx) ###
+ * MPD and connection errors are shown to the user
+ * Configurable volume button step size
+ * Default action for library tracks selectable (play song, add song (default), add as next song, details)
+ * Lots of code cleanup and refactoring (especially the MPD connection handling)
+ * Crash fixes in artist handling
+ * Updated korean translation
+ * Hidden feature to open MusicBrainz pages from the song details dialog
+
 ### Version: 1.1.12 Tag: release-21 (2017-12-31) ###
-* Experimental feature: local HTTP cover download (see [FAQ](https://github.com/gateship-one/malp/wiki/FAQ))
-* Minor bug fixes
-* Restructure cover art storage to support larger images (previous downloaded cover art will be lost)
-* Improve image processing (scaling and caching)
-* Happy new year!
+ * Experimental feature: local HTTP cover download (see [FAQ](https://github.com/gateship-one/malp/wiki/FAQ))
+ * Minor bug fixes
+ * Restructure cover art storage to support larger images (previous downloaded cover art will be lost)
+ * Improve image processing (scaling and caching)
+ * Happy new year!
 
 ### Version: 1.1.11 Tag: release-20 (2017-11-13) ###
  * Hotfix for: https://issuetracker.google.com/issues/64434571
