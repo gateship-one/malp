@@ -333,7 +333,7 @@
     </string-array>
 
     <string name="preference_generic_keep_display_on_title">Keep the display on</string>
-    <string name="preference_generic_keep_display_on_text">The display will not turn off as long as the M.A.L.P. user interface is active.</string>
+    <string name="preference_generic_keep_display_on_text">The display will be kept active as long as the user interface is in foreground.</string>
 
     <string name="preference_generic_hardware_keys_title">Use hardware buttons</string>
     <string name="preference_generic_hardware_keys_text">Use the devices hardware buttons to control the playback.</string>

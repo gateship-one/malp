@@ -266,4 +266,6 @@
     <string name="action_share_current_song">Teile aktuelles Lied</string>
     <string name="sharing_song_details">Ich höre gerade %s von %s von dem Album %s</string>
     <string name="dialog_share_song_details">Teile Lieddetails</string>
+    <string name="preference_generic_keep_display_on_title">Display angeschaltet lassen</string>
+    <string name="preference_generic_keep_display_on_text">Das Display bleibt solange aktiv, wie die Oberfläche im Vordergrund ist.</string>
 </resources>
