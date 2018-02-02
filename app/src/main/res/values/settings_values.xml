@@ -30,6 +30,10 @@
     <string name="pref_library_click_action_key" translatable="false">pref_library_click_action_key</string>
     <string name="pref_volume_controls_key" translatable="false">pref_volume_controls_key</string>
 
+
+    <string name="pref_keep_display_on_key" translatable="false">pref_keep_display_on_key</string>
+    <bool name="pref_keep_display_on_default">false</bool>
+
     <string name="pref_hardware_controls_key" translatable="false">pref_hardware_controls_key</string>
     <bool name="pref_hardware_controls_default">true</bool>
 

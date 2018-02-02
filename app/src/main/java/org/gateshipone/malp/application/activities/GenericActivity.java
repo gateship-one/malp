@@ -33,6 +33,7 @@ import android.os.RemoteException;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.WindowManager;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.background.BackgroundService;
@@ -54,6 +55,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
     private static final String TAG = GenericActivity.class.getSimpleName();
 
     private boolean mHardwareControls;
+
+    private boolean mKeepDisplayOn;
 
     private BackgroundServiceConnection mBackgroundServiceConnection;
 
@@ -150,6 +153,8 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         sharedPref.registerOnSharedPreferenceChangeListener(this);
         mHardwareControls = sharedPref.getBoolean(getString(R.string.pref_hardware_controls_key), getResources().getBoolean(R.bool.pref_hardware_controls_default));
         HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPref.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
+        mKeepDisplayOn = sharedPref.getBoolean(getString(R.string.pref_keep_display_on_key),getResources().getBoolean(R.bool.pref_keep_display_on_default));
+        handleKeepDisplayOnSetting();
     }
 
     @Override
@@ -184,6 +189,9 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
         } else if (key.equals(getString(R.string.pref_volume_steps_key))) {
             // Set the hardware key handler to the new value
             HardwareKeyHandler.getInstance().setVolumeStepSize(sharedPreferences.getInt(getString(R.string.pref_volume_steps_key),getResources().getInteger(R.integer.pref_volume_steps_default)));
+        } else if (key.equals(getString(R.string.pref_keep_display_on_key))) {
+            mKeepDisplayOn = sharedPreferences.getBoolean(getString(R.string.pref_keep_display_on_key),getResources().getBoolean(R.bool.pref_keep_display_on_default));
+            handleKeepDisplayOnSetting();
         }
     }
 
@@ -200,6 +208,14 @@ public abstract class GenericActivity extends AppCompatActivity implements Share
             return HardwareKeyHandler.getInstance().handleKeyEvent(event, !streamingActive) || super.dispatchKeyEvent(event);
         } else {
             return super.dispatchKeyEvent(event);
+        }
+    }
+
+    private void handleKeepDisplayOnSetting() {
+        if (mKeepDisplayOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        } else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
     }
 

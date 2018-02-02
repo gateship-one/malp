@@ -104,6 +104,12 @@
             android:key="@string/pref_show_notification_key"
             android:summary="@string/preference_show_notification_text"
             android:title="@string/preference_show_notification_title" />
+        <CheckBoxPreference
+            android:defaultValue="@bool/pref_keep_display_on_default"
+            android:key="@string/pref_keep_display_on_key"
+            android:persistent="true"
+            android:summary="@string/preference_generic_keep_display_on_text"
+            android:title="@string/preference_generic_keep_display_on_title" />
         <ListPreference
             android:defaultValue="@string/pref_volume_control_view_default"
             android:dialogTitle="@string/preference_volume_control_message"
