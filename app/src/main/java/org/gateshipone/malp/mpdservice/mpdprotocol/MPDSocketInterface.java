@@ -22,9 +22,6 @@
 
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
-import android.support.annotation.Nullable;
-import android.util.Log;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,19 +37,21 @@ public class MPDSocketInterface {
     /**
      * Buffered input stream to improve the performance
      */
-    private InputStream mInputStream;
+    private final InputStream mInputStream;
 
     /**
      * Object to write to the socket
      */
-    private PrintWriter mWriter;
+    private final PrintWriter mWriter;
 
     private static final int READ_BUFFER_SIZE = 512 * 1024; // 512kB
 
-    private byte[] mReadBuffer;
+    private final byte[] mReadBuffer;
 
     private int mReadBufferWritePos;
     private int mReadBufferReadPos;
+
+    private final ByteArrayOutputStream mLineBuffer;
 
 
     /**
@@ -68,6 +67,8 @@ public class MPDSocketInterface {
 
         mReadBufferReadPos = 0;
         mReadBufferWritePos = 0;
+
+        mLineBuffer = new ByteArrayOutputStream();
     }
 
 
@@ -96,35 +97,34 @@ public class MPDSocketInterface {
      * @throws IOException Exception during read
      */
     public String readLine() throws IOException {
-        if (dataReady() == 0) {
-            fillReadBuffer();
-        }
-
-        ByteArrayOutputStream readBuffer = new ByteArrayOutputStream();
+        mLineBuffer.reset();
 
         int localReadPos = mReadBufferReadPos;
         // Read until newline
-        while (mReadBuffer[localReadPos] != '\n') {
-            localReadPos++;
-
+        while (true) {
+            // End of buffer reached
             if (localReadPos == mReadBufferWritePos) {
-                // End of filled buffer found, copy whats read so far
-                readBuffer.write(mReadBuffer, mReadBufferReadPos, mReadBufferWritePos-mReadBufferReadPos);
-                mReadBufferReadPos = mReadBufferWritePos;
+                // Copy what we've read so far to the string buffer
+                mLineBuffer.write(mReadBuffer, mReadBufferReadPos, (localReadPos - mReadBufferReadPos));
+
                 fillReadBuffer();
                 localReadPos = 0;
+                continue;
             }
 
-            // Found newline
+            // Newline found, write buffer and break loop here
             if (mReadBuffer[localReadPos] == '\n') {
-                readBuffer.write(mReadBuffer, mReadBufferReadPos, localReadPos-mReadBufferReadPos);
-                mReadBufferReadPos = (localReadPos + 1);
+                mLineBuffer.write(mReadBuffer, mReadBufferReadPos, (localReadPos-mReadBufferReadPos));
+                mReadBufferReadPos = localReadPos + 1;
                 break;
             }
-        }
 
+            localReadPos++;
+         }
+
+        // Log.v(TAG,"retString: " + retString);
         // Return the string data from MPD as UTF-8 (default charset on android) strings
-        return readBuffer.toString("UTF-8");
+        return mLineBuffer.toString("UTF-8");
     }
 
     /**
