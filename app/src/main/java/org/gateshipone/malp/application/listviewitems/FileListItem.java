@@ -257,6 +257,10 @@ public class FileListItem extends AbsImageListViewItem {
         mTitleView.setText(directory.getSectionTitle());
         mAdditionalInfoView.setText(directory.getLastModifiedString());
 
+        mSeparator.setVisibility(GONE);
+        mNumberView.setVisibility(GONE);
+        mDurationView.setVisibility(GONE);
+
         if (mShowIcon) {
             Drawable icon = context.getDrawable(R.drawable.ic_folder_48dp);
 
