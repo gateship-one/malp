@@ -2,6 +2,7 @@
  * MPD and connection errors are shown to the user
  * Configurable volume button step size
  * Default action for library tracks selectable (play song, add song (default), add as next song, details)
+ * Option to keep the display on when application is active
  * Lots of code cleanup and refactoring (especially the MPD connection handling)
  * Crash fixes in artist handling
  * Updated korean translation
