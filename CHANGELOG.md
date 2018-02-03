@@ -1,4 +1,4 @@
-### Version: 1.1.13 Tag: release-22 (2018-xx-xx) ###
+### Version: 1.1.13 Tag: release-22 (2018-02-03) ###
  * MPD and connection errors are shown to the user
  * Configurable volume button step size
  * Default action for library tracks selectable (play song, add song (default), add as next song, details)
