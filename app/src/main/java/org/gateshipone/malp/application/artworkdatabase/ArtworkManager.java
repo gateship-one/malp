@@ -32,6 +32,7 @@ import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
@@ -43,6 +44,7 @@ import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.FanartTVManager;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.LastFMManager;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MPDAlbumImageProvider;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MusicBrainzManager;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumFetchError;
 import org.gateshipone.malp.application.artworkdatabase.network.responses.AlbumImageResponse;
@@ -204,6 +206,8 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         mArtistProvider = sharedPref.getString(context.getString(R.string.pref_artist_provider_key), context.getString(R.string.pref_artwork_provider_artist_default));
         mAlbumProvider = sharedPref.getString(context.getString(R.string.pref_album_provider_key), context.getString(R.string.pref_artwork_provider_album_default));
         mWifiOnly = sharedPref.getBoolean(context.getString(R.string.pref_download_wifi_only_key), context.getResources().getBoolean(R.bool.pref_download_wifi_default));
+
+        MPDAlbumImageProvider.mInstance.setResponseLooper(Looper.getMainLooper());
     }
 
     public static synchronized ArtworkManager getInstance(Context context) {
@@ -561,6 +565,28 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         album.setMBID(track.getTrackAlbumMBID());
         album.setArtistName(track.getTrackAlbumArtist());
 
+        // Check if MPD cover transfer is activated
+        if (MPDAlbumImageProvider.mInstance.getActive()) {
+            MPDAlbumImageProvider.mInstance.fetchAlbumImage(track, response -> new InsertTrackAlbumImageTask().execute(response), new TrackAlbumFetchError() {
+                @Override
+                public void fetchJSONException(MPDTrack track, JSONException exception) {
+
+                }
+
+                @Override
+                public void fetchVolleyError(MPDTrack track, VolleyError error) {
+                    if (error.networkResponse.statusCode == 404) {
+                        Log.v(TAG, "Could not get cover from MPD for track: " + track.toString());
+                        fetchAlbumImage(album);
+                        synchronized (mTrackList) {
+                            if (!mTrackList.isEmpty()) {
+                                fetchNextBulkTrackAlbum();
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
         // Check if user-specified HTTP cover download is activated
         if (HTTPAlbumImageProvider.getInstance(mContext).getActive()) {
@@ -1060,7 +1086,7 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
         mBulkLoadArtistsReady = false;
         Log.v(TAG, "Start bulk loading");
 
-        if(HTTPAlbumImageProvider.getInstance(mContext).getActive()) {
+        if(HTTPAlbumImageProvider.getInstance(mContext).getActive() || MPDAlbumImageProvider.mInstance.getActive()) {
             Log.v(TAG,"Try to get all tracks from MPD");
             MPDQueryHandler.getAllTracks(new MPDResponseFileList() {
                 @Override

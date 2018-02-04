@@ -36,6 +36,7 @@ import org.gateshipone.malp.application.artworkdatabase.ArtworkDatabaseManager;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.artworkdatabase.BulkDownloadService;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MPDAlbumImageProvider;
 import org.gateshipone.malp.application.callbacks.FABFragmentCallback;
 
 
@@ -98,6 +99,7 @@ public class ArtworkSettingsFragment extends PreferenceFragmentCompat implements
                 serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_WIFI_ONLY, sharedPref.getBoolean(getString(R.string.pref_download_wifi_only_key),
                         getResources().getBoolean(R.bool.pref_download_wifi_default)));
                 serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_HTTP_COVER_REGEX,HTTPAlbumImageProvider.getInstance(getContext().getApplicationContext()).getRegex());
+                serviceIntent.putExtra(BulkDownloadService.BUNDLE_KEY_MPD_COVER_ENABLED, MPDAlbumImageProvider.mInstance.getActive());
                 getActivity().startService(serviceIntent);
             });
             AlertDialog dialog = builder.create();

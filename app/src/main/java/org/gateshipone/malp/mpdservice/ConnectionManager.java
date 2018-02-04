@@ -33,6 +33,7 @@ import java.util.TimerTask;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MPDAlbumImageProvider;
 import org.gateshipone.malp.application.background.BackgroundService;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -216,6 +217,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         if(mServerProfile.getHTTPCoverEnabled()) {
             HTTPAlbumImageProvider.getInstance(mContext).setRegex(mServerProfile.getHTTPRegex());
         }
+
+        MPDAlbumImageProvider.mInstance.setActive(mServerProfile.getMPDCoverEnabled());
     }
 
     public synchronized void setAutoconnect(boolean enabled) {

@@ -23,16 +23,20 @@
 package org.gateshipone.malp.mpdservice.handlers.responsehandler;
 
 import android.os.Bundle;
+import android.os.Looper;
 import android.os.Message;
 
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
-import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDTrack;
+
 
 
 public abstract class MPDResponseAlbumArt extends MPDResponseHandler {
     private static final String BUNDLE_EXTRA_IMAGE_DATA = "imageData";
     private static final String BUNDLE_EXTRA_FILE = "file";
+
+    public MPDResponseAlbumArt(Looper looper) {
+        super(looper);
+    }
 
     /**
      * Handle function that calls the abstract method implemented by the user
@@ -69,5 +73,5 @@ public abstract class MPDResponseAlbumArt extends MPDResponseHandler {
     }
 
 
-    abstract void handleAlbumArt(byte[] artworkData, String url);
+    public abstract void handleAlbumArt(byte[] artworkData, String url);
 }

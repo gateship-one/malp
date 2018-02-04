@@ -24,10 +24,18 @@ package org.gateshipone.malp.mpdservice.handlers.responsehandler;
 
 
 import android.os.Handler;
+import android.os.Looper;
 
 /**
  * Parent class for all response handlers
  */
 public abstract class MPDResponseHandler extends Handler {
 
+    public MPDResponseHandler() {
+        super();
+    }
+
+    public MPDResponseHandler(Looper looper) {
+        super(looper);
+    }
 }

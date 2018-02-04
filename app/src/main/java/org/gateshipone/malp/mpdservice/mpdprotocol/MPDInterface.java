@@ -994,9 +994,9 @@ public class MPDInterface {
         mConnection.sendSimpleMPDCommand(MPDCommands.MPD_COMMAND_UPDATE_DATABASE(path));
     }
 
-    public synchronized byte[] getAlbumArt(String path) throws MPDException {
+    public synchronized byte[] getAlbumArt(String path)  {
         if (!mConnection.getServerCapabilities().hasAlbumArt()) {
-            throw new MPDException("Not implemented on this MPD server");
+            return null;
         }
         int imageSize = 0;
         int dataToRead = -1;
@@ -1015,7 +1015,11 @@ public class MPDInterface {
             } else {
                 mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_ALBUMART(path, (imageSize - dataToRead)));
             }
-            line = mConnection.readLine();
+            try {
+                line = mConnection.readLine();
+            } catch (MPDException e) {
+                return null;
+            }
 
             while (!line.startsWith("OK")) {
                 if (line.startsWith("size")) {
@@ -1029,14 +1033,23 @@ public class MPDInterface {
                     // This means that after this line a binary chunk is incoming
                     chunkSize = Integer.valueOf(line.substring(MPDResponses.MPD_RESPONSE_BINARY_SIZE.length()));
 
-                    byte readData[] = mConnection.readBinary(chunkSize);
+                    byte readData[] = new byte[0];
+                    try {
+                        readData = mConnection.readBinary(chunkSize);
+                    } catch (MPDException e) {
+                        return null;
+                    }
 
                     // Copy chunk to final output array
                     System.arraycopy(readData, 0, imageData, (imageSize - dataToRead), chunkSize);
                     dataToRead -= chunkSize;
                 }
 
-                line = mConnection.readLine();
+                try {
+                    line = mConnection.readLine();
+                } catch (MPDException e) {
+                    return null;
+                }
             }
         }
 

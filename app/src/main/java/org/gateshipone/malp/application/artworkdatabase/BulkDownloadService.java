@@ -49,6 +49,7 @@ import android.util.Log;
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.artworkdatabase.network.MALPRequestQueue;
 import org.gateshipone.malp.application.artworkdatabase.network.artprovider.HTTPAlbumImageProvider;
+import org.gateshipone.malp.application.artworkdatabase.network.artprovider.MPDAlbumImageProvider;
 import org.gateshipone.malp.mpdservice.ConnectionManager;
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.MPDInterface;
@@ -67,6 +68,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
     public static final String BUNDLE_KEY_ARTIST_PROVIDER = "org.gateshipone.malp.artist_provider";
     public static final String BUNDLE_KEY_ALBUM_PROVIDER = "org.gateshipone.malp.album_provider";
     public static final String BUNDLE_KEY_HTTP_COVER_REGEX = "org.gateshipone.malp.http_cover_regex";
+    public static final String BUNDLE_KEY_MPD_COVER_ENABLED = "org.gateshipone.malp.mpd_cover_enabled";
     public static final String BUNDLE_KEY_WIFI_ONLY = "org.gateshipone.malp.wifi_only";
 
     private NotificationManager mNotificationManager;
@@ -150,6 +152,7 @@ public class BulkDownloadService extends Service implements ArtworkManager.BulkL
                 if (mHTTPRegex != null && !mHTTPRegex.isEmpty()) {
                     HTTPAlbumImageProvider.getInstance(getApplicationContext()).setRegex(mHTTPRegex);
                 }
+                MPDAlbumImageProvider.mInstance.setActive(intent.getBooleanExtra(BUNDLE_KEY_MPD_COVER_ENABLED, false));
             }
 
 
