@@ -94,6 +94,12 @@
                     android:inputType="textPassword" />
             </android.support.design.widget.TextInputLayout>
             <Switch
+                android:id="@+id/fragment_profile_use_mpd_cover"
+                android:text="@string/fragment_profile_use_mpd_covers"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Switch
                 android:id="@+id/fragment_profile_streaming_enabled"
                 android:text="@string/fragment_profile_streaming_enabled"
                 android:layout_width="match_parent"

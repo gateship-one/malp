@@ -59,6 +59,8 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
     private String mHTTPCoverRegex = "";
     private boolean mHTTPCoverEnabled;
 
+    private boolean mMPDCoverEnabled;
+
     private long mCreated;
 
     public MPDServerProfile(String profileName, boolean autoConnect) {
@@ -92,6 +94,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         mStreamingEnabled = in.readByte() != 0;
         mHTTPCoverRegex = in.readString();
         mHTTPCoverEnabled = in.readByte() != 0;
+        mMPDCoverEnabled = in.readByte() != 0;
         mCreated = in.readLong();
     }
 
@@ -106,6 +109,7 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
         dest.writeByte((byte) (mStreamingEnabled ? 1 : 0));
         dest.writeString(mHTTPCoverRegex);
         dest.writeByte((byte) (mHTTPCoverEnabled ? 1 : 0));
+        dest.writeByte((byte) (mMPDCoverEnabled ? 1 : 0));
         dest.writeLong(mCreated);
     }
 
@@ -242,6 +246,14 @@ public class MPDServerProfile implements MPDGenericItem, Parcelable {
 
     public boolean getHTTPCoverEnabled() {
         return mHTTPCoverEnabled;
+    }
+
+    public void setMPDCoverEnabled(boolean enabled) {
+        mMPDCoverEnabled = enabled;
+    }
+
+    public boolean getMPDCoverEnabled() {
+        return mMPDCoverEnabled;
     }
 
     /**

@@ -64,6 +64,8 @@ public class EditProfileFragment extends Fragment {
     private String mHTTPCoverRegex;
     private boolean mHTTPCoverEnabled;
 
+    private boolean mMPDCoverEnabled;
+
     private TextInputEditText mProfilenameView;
     private TextInputEditText mHostnameView;
     private TextInputEditText mPasswordView;
@@ -74,6 +76,8 @@ public class EditProfileFragment extends Fragment {
 
     private Switch mHTTPCoverEnabledView;
     private TextInputEditText mHTTPCoverRegexView;
+
+    private Switch mMPDCoverEnabledView;
 
     private MPDServerProfile mOldProfile;
 
@@ -100,6 +104,8 @@ public class EditProfileFragment extends Fragment {
         mHTTPCoverRegexView = rootView.findViewById(R.id.fragment_profile_cover_regex);
         mHTTPCoverEnabledView = rootView.findViewById(R.id.fragment_profile_http_covers_enabled);
 
+        mMPDCoverEnabledView = rootView.findViewById(R.id.fragment_profile_use_mpd_cover);
+
 
         // Set to maximum tcp port
         InputFilter portFilter = new PortNumberFilter();
@@ -123,6 +129,8 @@ public class EditProfileFragment extends Fragment {
                 mHTTPCoverRegex = mOldProfile.getHTTPRegex();
                 mHTTPCoverEnabled = mOldProfile.getHTTPCoverEnabled();
 
+                mMPDCoverEnabled = mOldProfile.getMPDCoverEnabled();
+
                 mProfilenameView.setText(mProfilename);
             } else {
                 mHostname = "";
@@ -135,6 +143,8 @@ public class EditProfileFragment extends Fragment {
 
                 mHTTPCoverEnabled = false;
                 mHTTPCoverRegex = "";
+
+                mMPDCoverEnabled = false;
 
                 mProfilenameView.setText(getString(R.string.fragment_profile_default_name));
             }
@@ -181,6 +191,7 @@ public class EditProfileFragment extends Fragment {
         }
         mHTTPCoverRegexView.setText(mHTTPCoverRegex);
 
+        mMPDCoverEnabledView.setChecked(mMPDCoverEnabled);
 
         mProfilenameView.setSelectAllOnFocus(true);
 
@@ -263,6 +274,10 @@ public class EditProfileFragment extends Fragment {
             profileChanged = true;
             mHTTPCoverEnabled = mHTTPCoverEnabledView.isChecked();
         }
+        if (mMPDCoverEnabledView.isChecked() != mMPDCoverEnabled) {
+            profileChanged = true;
+            mMPDCoverEnabled = mMPDCoverEnabledView.isChecked();
+        }
 
         if (profileChanged) {
             if (null != mOldProfile) {
@@ -278,6 +293,7 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
             mOldProfile.setHTTPCoverEnabled(mHTTPCoverEnabled);
             mOldProfile.setHTTPRegex(mHTTPCoverRegex);
+            mOldProfile.setMPDCoverEnabled(mMPDCoverEnabled);
             ConnectionManager.getInstance(getContext().getApplicationContext()).addProfile(mOldProfile, getContext());
         }
     }

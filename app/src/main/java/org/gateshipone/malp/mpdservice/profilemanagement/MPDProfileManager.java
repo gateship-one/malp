@@ -87,6 +87,9 @@ public class MPDProfileManager extends Observable {
                 String httpCoverRegex = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX));
                 boolean httpCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED)) == 1;
 
+                // MPD Cover parameter
+                boolean mpdCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_MPD_COVER_ENABLED)) == 1;
+
                 /* Create temporary object to append to list. */
                 MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
                 profile.setHostname(serverHostname);
@@ -98,6 +101,8 @@ public class MPDProfileManager extends Observable {
 
                 profile.setHTTPRegex(httpCoverRegex);
                 profile.setHTTPCoverEnabled(httpCoverEnabled);
+
+                profile.setMPDCoverEnabled(mpdCoverEnabled);
 
                 /* Finish and add to list */
                 profileList.add(profile);
@@ -146,6 +151,9 @@ public class MPDProfileManager extends Observable {
         /* HTTP cover parameters */
         values.put(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX, profile.getHTTPRegex());
         values.put(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED, profile.getHTTPCoverEnabled());
+
+        // MPD cover parameter
+        values.put(MPDServerProfileTable.COLUMN_PROFILE_MPD_COVER_ENABLED, profile.getMPDCoverEnabled());
 
         /* Insert the table in the database */
         db.insert(MPDServerProfileTable.SQL_TABLE_NAME, null, values);
@@ -204,6 +212,9 @@ public class MPDProfileManager extends Observable {
             String httpCoverRegex = cursor.getString(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX));
             boolean httpCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED)) == 1;
 
+            // MPD Cover parameter
+            boolean mpdCoverEnabled = cursor.getInt(cursor.getColumnIndex(MPDServerProfileTable.COLUMN_PROFILE_MPD_COVER_ENABLED)) == 1;
+
             /* Create temporary object to append to list. */
             MPDServerProfile profile = new MPDServerProfile(profileName, autoConnect, creationDate);
             profile.setHostname(serverHostname);
@@ -215,6 +226,8 @@ public class MPDProfileManager extends Observable {
 
             profile.setHTTPRegex(httpCoverRegex);
             profile.setHTTPCoverEnabled(httpCoverEnabled);
+
+            profile.setMPDCoverEnabled(mpdCoverEnabled);
 
             cursor.close();
             db.close();

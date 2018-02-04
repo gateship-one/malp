@@ -148,6 +148,9 @@
     <string name="fragment_profile_streaming_url">Streaming url:</string>
     <string name="fragment_profile_streaming_enabled">Enable streaming from server</string>
 
+    <string name="fragment_profile_use_mpd_covers">Use MPD covers if available</string>
+    <string name="fragment_profile_use_mpd_covers_text">Use MPD covers if available</string>
+
     <string name="fragment_profile_http_cover_enabled">Prefer HTTP cover files</string>
     <string name="fragment_profile_http_cover_regex">Cover path (%d replaced by the files directory)</string>
 
