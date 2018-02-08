@@ -53,7 +53,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
         mName = name;
         mMBID = "";
         mArtistName = "";
-        mDate = new Date();
+        mDate = new Date(0);
     }
 
     /* Getters */
@@ -154,6 +154,11 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
     @Override
     public int describeContents() {
         return 0;
+    }
+
+    @Override
+    public String toString() {
+        return mName + "_" + mArtistName + "_" + mMBID + "_" + mDate;
     }
 
     @Override
