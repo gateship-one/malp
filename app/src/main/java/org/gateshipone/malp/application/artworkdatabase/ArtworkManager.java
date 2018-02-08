@@ -923,14 +923,16 @@ public class ArtworkManager implements ArtistFetchError, AlbumFetchError {
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
-            if ((options.outHeight > MAXIMUM_IMAGE_SIZE || options.outWidth > MAXIMUM_IMAGE_SIZE)) {
+            if ((options.outHeight > MAXIMUM_IMAGE_RESOLUTION || options.outWidth > MAXIMUM_IMAGE_RESOLUTION)) {
                 Log.v(TAG, "Image to big, rescaling");
                 options.inJustDecodeBounds = false;
                 Bitmap bm = BitmapFactory.decodeByteArray(response.image, 0, response.image.length, options);
                 ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, MAXIMUM_IMAGE_SIZE, MAXIMUM_IMAGE_SIZE, true);
+                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bm, MAXIMUM_IMAGE_RESOLUTION, MAXIMUM_IMAGE_RESOLUTION, true);
                 scaledBitmap.compress(Bitmap.CompressFormat.JPEG, IMAGE_COMPRESSION_SETTING, byteStream);
-                mDBManager.insertAlbumImage(mContext, fakeAlbum, byteStream.toByteArray());
+                if(byteStream.size() <= MAXIMUM_IMAGE_SIZE) {
+                    mDBManager.insertAlbumImage(mContext, fakeAlbum, byteStream.toByteArray());
+                }
             } else {
                 mDBManager.insertAlbumImage(mContext, fakeAlbum, response.image);
             }
