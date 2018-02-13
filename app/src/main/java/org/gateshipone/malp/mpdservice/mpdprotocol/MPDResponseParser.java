@@ -249,11 +249,20 @@ class MPDResponseParser {
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_MBID)) {
                 ((MPDTrack) tempFileEntry).setTrackMBID(response.substring(MPDResponses.MPD_RESPONSE_TRACK_MBID.length()));
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TRACK_TIME)) {
-                ((MPDTrack) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+                try {
+                    ((MPDTrack) tempFileEntry).setLength(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_TRACK_TIME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_ID)) {
-                ((MPDTrack) tempFileEntry).setSongID(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_ID.length())));
+                try {
+                    ((MPDTrack) tempFileEntry).setSongID(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_ID.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_SONG_POS)) {
-                ((MPDTrack) tempFileEntry).setSongPosition(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_POS.length())));
+                try {
+                    ((MPDTrack) tempFileEntry).setSongPosition(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_SONG_POS.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_DISC_NUMBER)) {
                 /*
                 * Check if MPD returned a discnumber like: "1" or "1/3" and set disc count accordingly.
@@ -414,16 +423,25 @@ class MPDResponseParser {
                         break;
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX)) {
-                status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));
+                try {
+                    status.setCurrentSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_CURRENT_SONG_INDEX.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX)) {
-                status.setNextSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX.length())));
+                try {
+                    status.setNextSongIndex(Integer.valueOf(response.substring(MPDResponses.MPD_RESPONSE_NEXT_SONG_INDEX.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD)) {
                 String timeInfo = response.substring(MPDResponses.MPD_RESPONSE_TIME_INFORMATION_OLD.length());
 
                 String timeInfoSep[] = timeInfo.split(":");
                 if (timeInfoSep.length == 2) {
-                    status.setElapsedTime(Integer.valueOf(timeInfoSep[0]));
-                    status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
+                    try {
+                        status.setElapsedTime(Integer.valueOf(timeInfoSep[0]));
+                        status.setTrackLength(Integer.valueOf(timeInfoSep[1]));
+                    } catch (NumberFormatException e) {
+                    }
                 }
             } else if (response.startsWith(MPDResponses.MPD_RESPONSE_ELAPSED_TIME)) {
                 try {
@@ -473,7 +491,6 @@ class MPDResponseParser {
      *
      * @param connection {@link MPDConnection} to use
      * @return
-     * @throws IOException  Thrown if an IO error occured
      * @throws MPDException Thrown if MPD throws an error
      */
     static MPDStatistics parseMPDStatistic(final MPDConnection connection) throws MPDException {
@@ -483,19 +500,40 @@ class MPDResponseParser {
         String response = connection.readLine();
         while (response != null && !response.startsWith("OK")) {
             if (response.startsWith(MPDResponses.MPD_STATS_UPTIME)) {
-                stats.setServerUptime(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_UPTIME.length())));
+                try {
+                    stats.setServerUptime(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_UPTIME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_PLAYTIME)) {
-                stats.setPlayDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_PLAYTIME.length())));
+                try {
+                    stats.setPlayDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_PLAYTIME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_ARTISTS)) {
-                stats.setArtistsCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ARTISTS.length())));
+                try {
+                    stats.setArtistsCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ARTISTS.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_ALBUMS)) {
-                stats.setAlbumCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ALBUMS.length())));
+                try {
+                    stats.setAlbumCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_ALBUMS.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_SONGS)) {
-                stats.setSongCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_SONGS.length())));
+                try {
+                    stats.setSongCount(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_SONGS.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_DB_PLAYTIME)) {
-                stats.setAllSongDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_DB_PLAYTIME.length())));
+                try {
+                    stats.setAllSongDuration(Integer.valueOf(response.substring(MPDResponses.MPD_STATS_DB_PLAYTIME.length())));
+                } catch (NumberFormatException e) {
+                }
             } else if (response.startsWith(MPDResponses.MPD_STATS_DB_LAST_UPDATE)) {
-                stats.setLastDBUpdate(Long.valueOf(response.substring(MPDResponses.MPD_STATS_DB_LAST_UPDATE.length())));
+                try {
+                    stats.setLastDBUpdate(Long.valueOf(response.substring(MPDResponses.MPD_STATS_DB_LAST_UPDATE.length())));
+                } catch (NumberFormatException e) {
+                }
             }
 
             response = connection.readLine();
