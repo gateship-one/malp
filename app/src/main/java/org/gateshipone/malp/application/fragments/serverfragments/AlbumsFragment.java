@@ -291,10 +291,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_reset_artwork:
-                if (null != mArtist && !mArtist.getArtistName().equals("")) {
-                    mFABCallback.setupFAB(true, new FABOnClickListener());
-                    mFABCallback.setupToolbar(mArtist.getArtistName(), false, false, false);
-                }
+                setupToolbarAndStuff();
                 ArtworkManager.getInstance(getContext()).resetArtistImage(mArtist);
                 return true;
             case R.id.action_add_artist:
@@ -400,7 +397,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private void setupToolbarAndStuff() {
         if (null != mFABCallback) {
             if (null != mArtist && !mArtist.getArtistName().isEmpty()) {
-                mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupFAB(true, v -> MPDQueryHandler.playArtist(mArtist.getArtistName(), mSortOrder));
                 if (mBitmap == null) {
                     final View rootView = getView();
                     rootView.post(() -> {
@@ -428,7 +425,7 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
                 if (pathSplit.length > 0) {
                     lastPath = pathSplit[pathSplit.length - 1];
                 }
-                mFABCallback.setupFAB(true, new FABOnClickListener());
+                mFABCallback.setupFAB(true, v -> MPDQueryHandler.playAlbumsInPath(mAlbumsPath));
                 mFABCallback.setupToolbar(lastPath, false, false, false);
             } else {
                 mFABCallback.setupFAB(false, null);
@@ -482,14 +479,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     private void enqueueArtist() {
         MPDQueryHandler.addArtist(mArtist.getArtistName(), mSortOrder);
-    }
-
-    private class FABOnClickListener implements View.OnClickListener {
-
-        @Override
-        public void onClick(View v) {
-            MPDQueryHandler.playArtist(mArtist.getArtistName(), mSortOrder);
-        }
     }
 
     public void applyFilter(String name) {
