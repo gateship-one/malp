@@ -53,27 +53,52 @@ public class MPDException extends Exception {
             // Parse the error message (s. https://www.musicpd.org/doc/protocol/response_syntax.html#failure_response_syntax)
             String substring;
             // Start with the [ErrorCode@Offset]
-            substring = error.substring(error.indexOf('[') + 1,error.lastIndexOf('@'));
-            try {
-                mErrorCode = Integer.valueOf(substring);
-            } catch (NumberFormatException e) {
-                mErrorCode = -4711;
+            int subStringStart, subStringStop;
+
+            subStringStart = error.indexOf('[');
+            subStringStop = error.indexOf('@');
+
+            // If subStringStop is -1 try the ], probably no offset sent (Quod Libet)
+            if (subStringStop == -1) {
+                subStringStop = error.indexOf(']');
             }
 
-            substring = error.substring(error.indexOf('@') + 1,error.lastIndexOf(']'));
-            try {
-                mCommandOffset = Integer.valueOf(substring);
-            } catch (NumberFormatException e) {
-                mCommandOffset = -1;
+            if (subStringStart != -1 && subStringStop != -1 ) {
+                substring = error.substring(error.indexOf('[') + 1, error.lastIndexOf('@'));
+                try {
+                    mErrorCode = Integer.valueOf(substring);
+                } catch (NumberFormatException e) {
+                    mErrorCode = -4711;
+                }
+            }
+
+            subStringStart = error.indexOf('@');
+            subStringStop = error.indexOf(']');
+
+            if (subStringStart != -1 && subStringStop != -1 ) {
+                substring = error.substring(error.indexOf('@') + 1, error.lastIndexOf(']'));
+                try {
+                    mCommandOffset = Integer.valueOf(substring);
+                } catch (NumberFormatException e) {
+                    mCommandOffset = -1;
+                }
             }
 
             // Get the command from {command}
-            substring = error.substring(error.indexOf('{') + 1,error.lastIndexOf('}'));
-            mCommand = substring;
+
+            subStringStart = error.indexOf('{');
+            subStringStop = error.indexOf('}');
+            if (subStringStart != -1 && subStringStop != -1 ) {
+                substring = error.substring(error.indexOf('{') + 1, error.lastIndexOf('}'));
+                mCommand = substring;
+            }
 
             // Get the message from } on.
-            substring = error.substring(error.lastIndexOf('}') + 2,error.length());
-            mErrorMessage = substring;
+            subStringStart = error.indexOf('}');
+            if (subStringStart != -1) {
+                substring = error.substring(error.lastIndexOf('}') + 2, error.length());
+                mErrorMessage = substring;
+            }
         }
 
         public int getErrorCode() {
