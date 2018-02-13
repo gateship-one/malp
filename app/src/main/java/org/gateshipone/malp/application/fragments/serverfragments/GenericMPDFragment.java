@@ -92,10 +92,16 @@ public abstract class GenericMPDFragment<T extends Object> extends DialogFragmen
 
         @Override
         public void onDisconnected() {
-            synchronized (pFragment.get()) {
-                if (!pFragment.get().isDetached()) {
-                    pFragment.get().getLoaderManager().destroyLoader(0);
-                    pFragment.get().finishedLoading();
+            GenericMPDFragment fragment = pFragment.get();
+            if(fragment == null) {
+                    return;
+            }
+            synchronized (fragment) {
+                if (!fragment.isDetached()) {
+                    if(fragment.getLoaderManager().hasRunningLoaders()) {
+                        fragment.getLoaderManager().destroyLoader(0);
+                        fragment.finishedLoading();
+                    }
                 }
             }
         }
