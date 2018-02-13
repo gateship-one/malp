@@ -842,6 +842,10 @@ public class MainActivity extends GenericActivity
 
     public void setNavbarHeader(String text) {
         TextView header = findViewById(R.id.navdrawer_header_text);
+        if (header == null) {
+            return;
+        }
+
         if (text == null) {
             header.setText("");
         }
