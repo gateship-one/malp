@@ -24,6 +24,7 @@ package org.gateshipone.malp.application.fragments.serverfragments;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -134,9 +135,14 @@ public class ServerStatisticFragment extends Fragment {
             mAlbumsCount.setText(String.valueOf(statistics.getAlbumCount()));
             mSongsCount.setText(String.valueOf(statistics.getSongCount()));
 
-            mUptime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getServerUptime(),getContext()));
-            mPlaytime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getPlayDuration(),getContext()));
-            mDBLength.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getAllSongDuration(),getContext()));
+            // Context could be null already because of asynchronous back call
+            Context context = getContext();
+            if (context != null) {
+                mUptime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getServerUptime(), context));
+                mPlaytime.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getPlayDuration(), context));
+                mDBLength.setText(FormatHelper.formatTracktimeFromSWithDays(statistics.getAllSongDuration(), context));
+            }
+
             mLastUpdate.setText(FormatHelper.formatTimeStampToString(statistics.getLastDBUpdate() * 1000));
 
             MPDCapabilities capabilities = MPDInterface.mInstance.getServerCapabilities();
