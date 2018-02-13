@@ -379,7 +379,9 @@ class MPDConnection {
                 try {
                     waitForResponse();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    handleSocketError();
+                    mConnectionLock.release();
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
 
                 List<String> commands;
@@ -395,7 +397,9 @@ class MPDConnection {
                 try {
                     waitForResponse();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    handleSocketError();
+                    mConnectionLock.release();
+                    throw new MPDException.MPDConnectionException(e.getLocalizedMessage());
                 }
                 List<String> tags;
                 try {
