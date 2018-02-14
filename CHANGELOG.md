@@ -1,3 +1,6 @@
+### Version 1.1.14 Tag: release-23 (2018-02-14)
+ * Stability fixes
+
 ### Version: 1.1.13 Tag: release-22 (2018-02-03) ###
  * MPD and connection errors are shown to the user
  * Configurable volume button step size
