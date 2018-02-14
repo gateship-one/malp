@@ -28,11 +28,12 @@ public class MPDResponses {
     public static final String MPD_RESPONSE_ALBUM_MBID = "MUSICBRAINZ_ALBUMID: ";
 
     public static final String MPD_RESPONSE_ARTIST_NAME = "Artist: ";
+    public static final String MPD_RESPONSE_ARTIST_SORT_NAME = "ArtistSort: ";
     public static final String MPD_RESPONSE_ALBUMARTIST_NAME = "AlbumArtist: ";
+    public static final String MPD_RESPONSE_ALBUMARTIST_SORT_NAME = "AlbumArtistSort: ";
     public static final String MPD_RESPONSE_FILE = "file: ";
     public static final String MPD_RESPONSE_DIRECTORY = "directory: ";
     public static final String MPD_RESPONSE_TRACK_TITLE = "Title: ";
-    public static final String MPD_RESPONSE_ALBUM_ARTIST_NAME = "AlbumArtist: ";
     public static final String MPD_RESPONSE_TRACK_TIME = "Time: ";
     public static final String MPD_RESPONSE_DATE = "Date: ";
     public static final String MPD_RESPONSE_TRACK_NAME = "Name: ";

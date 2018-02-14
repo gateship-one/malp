@@ -298,6 +298,9 @@
     <string name="preference_use_album_artists_title">Use AlbumArtist tag</string>
     <string name="preference_use_album_artists_text">Use the AlbumArtist tag for the artist list (This method is slower and may result in erroneous artist images).</string>
 
+    <string name="preference_use_artist_sort_title">Use ArtistSort or AlbumArtistSort tag</string>
+    <string name="preference_use_artist_sort_text">Use the ArtistSort tag (or AlbumartistSort) if the server provides the tag.</string>
+
     <string name="preference_use_tags_in_filebrowser_title">Use tags in file browser</string>
     <string name="preference_use_tags_in_filebrowser_text">Use tags in file browser instead of filenames if available. Disable this option to show filenames in file browser.</string>
 
