@@ -61,6 +61,11 @@ public class MPDCommands {
         }
     }
 
+
+    public static String MPD_COMMAND_REQUEST_ARTISTSORT_ALBUMS(String artistName, MPDCapabilities caps) {
+        return "list album artistsort \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+    }
+
     public static final String MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(String path, MPDCapabilities caps) {
         if ( caps.hasListGroup()) {
             return "list album base \"" + path + "\"" + createAlbumGroupString(caps);
@@ -71,8 +76,13 @@ public class MPDCommands {
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName, MPDCapabilities caps) {
-        return "list album AlbumArtist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+        return "list album albumartist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
     }
+
+    public static String MPD_COMMAND_REQUEST_ALBUMARTISTSORT_ALBUMS(String artistName, MPDCapabilities caps) {
+        return "list album albumartistsort \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+    }
+
 
     public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {
         return "find album \"" + albumName.replaceAll("\"","\\\\\"") + "\"";
@@ -91,6 +101,22 @@ public class MPDCommands {
             return "list albumartist";
         } else {
             return "list albumartist group MUSICBRAINZ_ARTISTID";
+        }
+    }
+
+    public static String MPD_COMMAND_REQUEST_ARTISTS_SORT(boolean groupMBID) {
+        if ( !groupMBID ) {
+            return "list artistsort";
+        } else {
+            return "list artistsort group MUSICBRAINZ_ARTISTID";
+        }
+    }
+
+    public static String MPD_COMMAND_REQUEST_ALBUMARTISTS_SORT(boolean groupMBID) {
+        if ( !groupMBID ) {
+            return "list albumartistsort";
+        } else {
+            return "list albumartistsort group MUSICBRAINZ_ARTISTID";
         }
     }
 

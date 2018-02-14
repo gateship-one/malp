@@ -32,6 +32,8 @@ public class MPDCapabilities {
 
     private static final String MPD_TAG_TYPE_MUSICBRAINZ = "musicbrainz";
     private static final String MPD_TAG_TYPE_ALBUMARTIST = "albumartist";
+    private static final String MPD_TAG_TYPE_ARTISTSORT = "artistsort";
+    private static final String MPD_TAG_TYPE_ALBUMARTISTSORT = "albumartistsort";
     private static final String MPD_TAG_TYPE_DATE = "date";
 
     private int mMajorVersion;
@@ -53,6 +55,8 @@ public class MPDCapabilities {
     private boolean mMopidyDetected;
 
     private boolean mTagAlbumArtist;
+    private boolean mTagArtistSort;
+    private boolean mTagAlbumArtistSort;
     private boolean mTagDate;
 
     private boolean mHasPlaylistFind;
@@ -112,6 +116,10 @@ public class MPDCapabilities {
                     mTagAlbumArtist = true;
                 } else if (tagLC.equals(MPD_TAG_TYPE_DATE)) {
                     mTagDate = true;
+                } else if (tagLC.equals(MPD_TAG_TYPE_ARTISTSORT)) {
+                    mTagArtistSort = true;
+                } else if (tagLC.equals(MPD_TAG_TYPE_ALBUMARTISTSORT)) {
+                    mTagAlbumArtistSort = true;
                 }
             }
         }
@@ -155,6 +163,14 @@ public class MPDCapabilities {
 
     public boolean hasTagAlbumArtist() {
         return mTagAlbumArtist;
+    }
+
+    public boolean hasTagArtistSort() {
+        return mTagArtistSort;
+    }
+
+    public boolean hasTagAlbumArtistSort() {
+        return mTagAlbumArtistSort;
     }
 
     public boolean hasTagDate() {
