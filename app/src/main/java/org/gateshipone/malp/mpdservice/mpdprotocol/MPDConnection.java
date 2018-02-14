@@ -1021,6 +1021,7 @@ class MPDConnection {
                 line = mReader.readLine();
             } catch (IOException e) {
                 handleSocketError();
+                mConnectionLock.release();
                 return "";
             }
 
