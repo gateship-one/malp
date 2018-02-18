@@ -375,7 +375,7 @@ public class MPDInterface {
         List<MPDFileEntry> playlists;
         synchronized (this) {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
-            playlists = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+            playlists = MPDResponseParser.parseMPDTracks(mConnection);
         }
         Collections.sort(playlists);
         return playlists;
@@ -389,7 +389,7 @@ public class MPDInterface {
     public synchronized List<MPDFileEntry> getAllTracks() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
 
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
 
@@ -404,7 +404,8 @@ public class MPDInterface {
         synchronized (this) {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
-            result = MPDResponseParser.parseMPDTracks(mConnection, "", mbid);
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBID(result, mbid);
         }
         MPDSortHelper.sortFileListNumeric(result);
         return result;
@@ -425,7 +426,8 @@ public class MPDInterface {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
             // Filter tracks with artistName
-            result = MPDResponseParser.parseMPDTracks(mConnection, artistName, mbid);
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBIDandAlbumArtist(result, mbid, artistName);
         }
         // Sort with disc & track number
         MPDSortHelper.sortFileListNumeric(result);
@@ -441,7 +443,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -453,7 +455,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -465,7 +467,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -479,7 +481,7 @@ public class MPDInterface {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
 
             // Parse the return
-            retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+            retList = MPDResponseParser.parseMPDTracks(mConnection);
         }
         Collections.sort(retList);
         return retList;
@@ -496,7 +498,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -509,7 +511,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_PLAYLIST_FIND_URI(url));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -546,7 +548,7 @@ public class MPDInterface {
         // Reuse the parsing function for tracks here.
         List<MPDFileEntry> retList;
 
-        retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        retList = MPDResponseParser.parseMPDTracks(mConnection);
 
         if (retList.size() == 1) {
             MPDFileEntry tmpFileEntry = retList.get(0);
