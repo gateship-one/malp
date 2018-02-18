@@ -35,6 +35,9 @@ public class MPDCommands {
         if (caps.hasTagAlbumArtist()) {
             groups += " group albumartist";
         }
+        if (caps.hasTagAlbumArtistSort()) {
+            groups += " group albumartistsort";
+        }
         if (caps.hasMusicBrainzTags()) {
             groups += " group musicbrainz_albumid";
         }

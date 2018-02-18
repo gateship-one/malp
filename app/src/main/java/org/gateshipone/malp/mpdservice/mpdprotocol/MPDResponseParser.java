@@ -78,6 +78,9 @@ class MPDResponseParser {
             } else if (responseString.startsWith(MPDResponses.MPD_RESPONSE_ALBUMARTIST_NAME)) {
                 /* Check if the responseString is a album artist. */
                 tempAlbum.setArtistName(responseString.substring(MPDResponses.MPD_RESPONSE_ALBUMARTIST_NAME.length()));
+            } else if (responseString.startsWith(MPDResponses.MPD_RESPONSE_ALBUMARTIST_SORT_NAME)) {
+                /* Check if the responseString is a album artist. */
+                tempAlbum.setArtistSortName(responseString.substring(MPDResponses.MPD_RESPONSE_ALBUMARTIST_SORT_NAME.length()));
             } else if (responseString.startsWith(MPDResponses.MPD_RESPONSE_DATE)) {
                 // Try to parse Date
                 String dateString = responseString.substring(MPDResponses.MPD_RESPONSE_DATE.length());

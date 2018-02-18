@@ -23,6 +23,8 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 
+import android.util.Log;
+
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDIdleChangeHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -445,6 +447,12 @@ public class MPDInterface {
      * @return List of MPDTrack track objects
      */
     public List<MPDFileEntry> getArtistSortAlbumTracks(String albumName, String artistName, String mbid) throws MPDException {
+        MPDCapabilities capabilities = getServerCapabilities();
+        // Check if tag is supported
+        if (!capabilities.hasTagAlbumArtistSort() || !capabilities.hasTagArtistSort()) {
+            return getArtistAlbumTracks(albumName, artistName, mbid);
+        }
+
         List<MPDFileEntry> result;
         synchronized (this) {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));

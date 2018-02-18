@@ -216,7 +216,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(), mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID(), mUseArtistSort);
+        return new AlbumTracksLoader(getActivity(), mAlbum, mUseArtistSort);
     }
 
     /**

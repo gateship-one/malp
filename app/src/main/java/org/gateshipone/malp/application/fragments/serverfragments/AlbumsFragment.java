@@ -361,7 +361,6 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
         mLastPosition = position;
 
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(position);
-        Log.v(TAG,"Selected album:" + album.getName() + "album mbid:" + album.getMBID() + "artist: " + album.getArtistName());
         Bitmap bitmap = null;
 
         // Check if correct view type, to be safe
@@ -369,11 +368,11 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
             bitmap = ((AbsImageListViewItem) view).getBitmap();
         }
 
-        // If artist albums are shown set artist for the album
-        if (mArtist != null && !mArtist.getArtistName().isEmpty()) {
-            if (!mArtist.getArtistName().equals(album.getArtistName())) {
-                album.setArtistName(mArtist.getArtistName());
-            }
+        // If artist albums are shown set artist for the album (necessary for old MPD version, which don't
+        // support group commands and therefore do not provide artist tags for albums)
+        if (mArtist != null && !mArtist.getArtistName().isEmpty() && album.getArtistName().isEmpty()) {
+            album.setArtistName(mArtist.getArtistName());
+            album.setArtistSortName(mArtist.getArtistName());
         }
 
         // Check if the album already has an artist set. If not use the artist of the fragment
@@ -461,6 +460,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
     private void enqueueAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
 
+        // If artist albums are shown set artist for the album (necessary for old MPD version, which don't
+        // support group commands and therefore do not provide artist tags for albums)
+        if (mArtist != null && !mArtist.getArtistName().isEmpty() && album.getArtistName().isEmpty()) {
+            album.setArtistName(mArtist.getArtistName());
+            album.setArtistSortName(mArtist.getArtistName());
+        }
+
         MPDQueryHandler.addArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }
 
@@ -470,6 +476,13 @@ public class AlbumsFragment extends GenericMPDFragment<List<MPDAlbum>> implement
      */
     private void playAlbum(int index) {
         MPDAlbum album = (MPDAlbum) mAlbumsAdapter.getItem(index);
+
+        // If artist albums are shown set artist for the album (necessary for old MPD version, which don't
+        // support group commands and therefore do not provide artist tags for albums)
+        if (mArtist != null && !mArtist.getArtistName().isEmpty() && album.getArtistName().isEmpty()) {
+            album.setArtistName(mArtist.getArtistName());
+            album.setArtistSortName(mArtist.getArtistName());
+        }
 
         MPDQueryHandler.playArtistAlbum(album.getName(), album.getArtistName(), album.getMBID());
     }

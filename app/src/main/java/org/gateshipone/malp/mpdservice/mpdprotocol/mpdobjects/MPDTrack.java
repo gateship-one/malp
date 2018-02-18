@@ -147,8 +147,10 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pTrackTitle = "";
 
         pTrackArtist = "";
+        pTrackArtistSort = "";
         pTrackAlbum = "";
         pTrackAlbumArtist = "";
+        pTrackAlbumArtistSort = "";
         pTrackName = "";
 
         pDate = "";
