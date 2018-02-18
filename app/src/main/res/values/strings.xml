@@ -160,7 +160,9 @@
     <string name="song_title">Title:</string>
     <string name="song_album">Album:</string>
     <string name="song_artist">Artist:</string>
+    <string name="song_artist_sort">Artist (sort):</string>
     <string name="song_album_artist">Album artist:</string>
+    <string name="song_album_artist_sort">Album artist (sort):</string>
 
     <string name="song_date">Date:</string>
     <string name="song_disc">Disc:</string>
