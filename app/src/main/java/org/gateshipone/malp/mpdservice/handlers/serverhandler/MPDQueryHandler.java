@@ -271,6 +271,18 @@ public class MPDQueryHandler extends MPDGenericHandler {
                 List<MPDFileEntry> trackList = MPDInterface.mInstance.getArtistAlbumTracks(albumName, artistName, albumMBID);
 
                 ((MPDResponseFileList)responseHandler).sendFileList(trackList);
+            }  else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_SORT_ALBUM_TRACKS) {
+                String artistName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+                String albumName = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
+                String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
+                responseHandler = mpdAction.getResponseHandler();
+                if (!(responseHandler instanceof MPDResponseFileList) || (null == albumName) || (null == artistName)) {
+                    return;
+                }
+
+                List<MPDFileEntry> trackList = MPDInterface.mInstance.getArtistSortAlbumTracks(albumName, artistName, albumMBID);
+
+                ((MPDResponseFileList)responseHandler).sendFileList(trackList);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_CURRENT_PLAYLIST) {
                 responseHandler = mpdAction.getResponseHandler();
                 if (!(responseHandler instanceof MPDResponseFileList)) {
@@ -357,6 +369,14 @@ public class MPDQueryHandler extends MPDGenericHandler {
 
                 MPDInterface.mInstance.clearPlaylist();
                 MPDInterface.mInstance.addAlbumTracks(albumname, artistname, albumMBID);
+                MPDInterface.mInstance.playSongIndex(0);
+            } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_SORT_ALBUM) {
+                String albumname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME);
+                String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
+                String albumMBID = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID);
+
+                MPDInterface.mInstance.clearPlaylist();
+                MPDInterface.mInstance.addArtistSortAlbumTracks(albumname, artistname, albumMBID);
                 MPDInterface.mInstance.playSongIndex(0);
             } else if (action == MPDHandlerAction.NET_HANDLER_ACTION.ACTION_ADD_ARTIST) {
                 String artistname = mpdAction.getStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME);
@@ -739,6 +759,29 @@ public class MPDQueryHandler extends MPDGenericHandler {
     }
 
     /**
+     * Requests a list of tracks (MPDFileEntry) on an album. This method will also filter the results
+     * with a given artistname
+     *
+     * @param responseHandler The handler used to send the requested data
+     * @param albumName       Album go get tracks from
+     * @param artistName      Artist name to filter results with
+     */
+    public static void getArtistSortAlbumTracks(MPDResponseFileList responseHandler, String albumName, String artistName, String mbid) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_GET_ARTIST_SORT_ALBUM_TRACKS);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+        action.setResponseHandler(responseHandler);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME, albumName);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistName);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID, mbid);
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
      * Requests a list of all tracks enlisted in the current playlist.
      *
      * @param responseHandler The handler used to send the requested data
@@ -900,6 +943,28 @@ public class MPDQueryHandler extends MPDGenericHandler {
      */
     public static void playArtistAlbum(String albumname, String artistname, String mbid) {
         MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_ALBUM);
+        Message msg = Message.obtain();
+        if (null == msg) {
+            return;
+        }
+
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_NAME, albumname);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ARTIST_NAME, artistname);
+        action.setStringExtra(MPDHandlerAction.NET_HANDLER_EXTRA_STRING.EXTRA_ALBUM_MBID, mbid);
+
+        msg.obj = action;
+
+        MPDQueryHandler.getHandler().sendMessage(msg);
+    }
+
+    /**
+     * Adds an album to the current playlist and start playing it
+     *
+     * @param albumname  Album name of the album to add
+     * @param artistname Artist name to filter tracks before enqueueing
+     */
+    public static void playArtistSortAlbum(String albumname, String artistname, String mbid) {
+        MPDHandlerAction action = new MPDHandlerAction(MPDHandlerAction.NET_HANDLER_ACTION.ACTION_PLAY_ARTIST_SORT_ALBUM);
         Message msg = Message.obtain();
         if (null == msg) {
             return;

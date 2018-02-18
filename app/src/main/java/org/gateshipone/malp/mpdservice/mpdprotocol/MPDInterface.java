@@ -434,6 +434,30 @@ public class MPDInterface {
         return result;
     }
 
+
+    /**
+     * Returns the list of tracks that are part of albumName and from artistName
+     *
+     * @param albumName  Album name used as primary filter.
+     * @param artistName Artist to filter with. This is checked with Artist AND AlbumArtist tag.
+     * @param mbid       MusicBrainzID of the album to get tracks from. Necessary if one item with the
+     *                   same name exists multiple times.
+     * @return List of MPDTrack track objects
+     */
+    public List<MPDFileEntry> getArtistSortAlbumTracks(String albumName, String artistName, String mbid) throws MPDException {
+        List<MPDFileEntry> result;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+
+            // Filter tracks with artistName
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBIDandAlbumArtistSort(result, mbid, artistName);
+        }
+        // Sort with disc & track number
+        MPDSortHelper.sortFileListNumeric(result);
+        return result;
+    }
+
     /**
      * Requests the current playlist of the server
      *
@@ -706,6 +730,20 @@ public class MPDInterface {
         List<MPDFileEntry> tracks = getArtistAlbumTracks(albumname, artistname, mbid);
         addTrackList(tracks);
     }
+
+    /**
+     * Adds all tracks from a certain album from artistname to the current playlist.
+     *
+     * @param albumname  Name of the album to add to the current playlist.
+     * @param artistname Name of the artist of the album to add to the list. This
+     *                   allows filtering of album tracks to a specified artist. Can also
+     *                   be left empty then all tracks from the album will be added.
+     */
+    public synchronized void addArtistSortAlbumTracks(String albumname, String artistname, String mbid) throws MPDException {
+        List<MPDFileEntry> tracks = getArtistSortAlbumTracks(albumname, artistname, mbid);
+        addTrackList(tracks);
+    }
+
 
     /**
      * Adds all albums of an artist to the current playlist. Will first get a list of albums for the

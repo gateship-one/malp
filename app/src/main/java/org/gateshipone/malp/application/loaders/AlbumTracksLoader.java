@@ -54,13 +54,16 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
 
     private String mAlbumMBID;
 
+    private boolean mUseArtistSort;
+
     /**
      * Creates the loader that retrieves the information from the MPD server
-     * @param context Context used
-     * @param albumName Name of the album to retrieve
+     *
+     * @param context    Context used
+     * @param albumName  Name of the album to retrieve
      * @param artistName Name of the artist of the album to retrieve (can be left empty)
      */
-    public AlbumTracksLoader(Context context, String albumName, String artistName, String albumMBID) {
+    public AlbumTracksLoader(Context context, String albumName, String artistName, String albumMBID, boolean useArtistSort) {
         super(context);
 
         // Create a new Handler for asynchronous callback
@@ -70,6 +73,8 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
         mArtistName = artistName;
         mAlbumName = albumName;
         mAlbumMBID = albumMBID;
+
+        mUseArtistSort = useArtistSort;
     }
 
 
@@ -112,15 +117,19 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
     }
 
     /**
-     * Start the actual laoding process. Check if an artistname was provided.
+     * Start the actual loading process. Check if an artistname was provided.
      * If fetch the artistalbumtracks otherwise fetch all tracks for a specific album.
      */
     @Override
     public void onForceLoad() {
-        if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName,mAlbumMBID);
+        if ((null == mArtistName) || mArtistName.equals("")) {
+            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler, mAlbumName, mAlbumMBID);
         } else {
-            MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName,mAlbumMBID);
+            if (mUseArtistSort) {
+                MPDQueryHandler.getArtistSortAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistName, mAlbumMBID);
+            } else {
+                MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistName, mAlbumMBID);
+            }
         }
     }
 }

@@ -46,6 +46,13 @@ public class MPDFileListFilter {
                 || (albumArtist.toLowerCase().equals(track.getTrackArtist().toLowerCase())));});
     }
 
+    public static void filterAlbumMBIDandAlbumArtistSort(List<MPDFileEntry> list, String albumMBID, String albumArtist) {
+        filterMPDTrack(list, track -> {return albumMBID.toLowerCase().equals(track.getTrackAlbumMBID().toLowerCase())
+                && (albumArtist.toLowerCase().equals(track.getTrackAlbumArtistSort().toLowerCase())
+                || (albumArtist.toLowerCase().equals(track.getTrackArtistSort().toLowerCase())));});
+    }
+
+
     private static void filterMPDTrack(List<MPDFileEntry> list, MPDFileFilter filter) {
         Iterator<MPDFileEntry> iterator = list.iterator();
 
