@@ -115,6 +115,8 @@ public class MainActivity extends GenericActivity
 
     private boolean mHeaderImageActive;
 
+    private boolean mUseArtistSort;
+
     private FloatingActionButton mFAB;
 
 
@@ -162,6 +164,9 @@ public class MainActivity extends GenericActivity
 
 
         mFAB = findViewById(R.id.andrompd_play_button);
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        mUseArtistSort = sharedPref.getBoolean(getString(R.string.pref_use_artist_sort_key), getResources().getBoolean(R.bool.pref_use_artist_sort_default));
 
 
 
@@ -321,15 +326,28 @@ public class MainActivity extends GenericActivity
                     currentPlaylistView.removeAlbumFrom(info.position);
                     return true;
                 case R.id.action_show_artist:
-                    onArtistSelected(new MPDArtist(track.getTrackArtist()), null);
+                    if (mUseArtistSort) {
+                        onArtistSelected(new MPDArtist(track.getTrackArtistSort()), null);
+                    } else {
+                        onArtistSelected(new MPDArtist(track.getTrackArtist()), null);
+                    }
                     return true;
                 case R.id.action_show_album:
                     MPDAlbum tmpAlbum = new MPDAlbum(track.getTrackAlbum());
+                    // Set album artist
                     if (!track.getTrackAlbumArtist().isEmpty()) {
                         tmpAlbum.setArtistName(track.getTrackAlbumArtist());
                     } else {
                         tmpAlbum.setArtistName(track.getTrackArtist());
                     }
+
+                    // Set albumartistsort
+                    if (!track.getTrackAlbumArtistSort().isEmpty()) {
+                        tmpAlbum.setArtistSortName(track.getTrackAlbumArtistSort());
+                    } else {
+                        tmpAlbum.setArtistSortName(track.getTrackArtistSort());
+                    }
+
                     tmpAlbum.setMBID(track.getTrackAlbumMBID());
                     onAlbumSelected(tmpAlbum, null);
                     return true;

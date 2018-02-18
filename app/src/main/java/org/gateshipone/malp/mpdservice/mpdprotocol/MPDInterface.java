@@ -773,9 +773,32 @@ public class MPDInterface {
         for (MPDAlbum album : albums) {
             // This will add all tracks from album where artistname is either the artist or
             // the album artist.
-            addAlbumTracks(album.getName(), artistname, "");
+            addAlbumTracks(album.getName(), artistname, album.getMBID());
         }
     }
+
+    /**
+     * Adds all albums of an artistsort to the current playlist. Will first get a list of albums for the
+     * artist and then call addAlbumTracks for every album on this result.
+     *
+     * @param artistname Name of the artist to enqueue the albums from.
+     */
+    public synchronized void addArtistSort(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) throws MPDException {
+        List<MPDAlbum> albums = getArtistSortAlbums(artistname);
+
+
+        // Check if sort by date is active and resort collection first
+        if (sortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE) {
+            Collections.sort(albums, new MPDAlbum.MPDAlbumDateComparator());
+        }
+
+        for (MPDAlbum album : albums) {
+            // This will add all tracks from album where artistname is either the artist or
+            // the album artist.
+            addArtistSortAlbumTracks(album.getName(), artistname, album.getMBID());
+        }
+    }
+
 
     /**
      * Adds a single File/Directory to the current playlist.

@@ -412,7 +412,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     }
 
     private void enqueueAlbum() {
-        MPDQueryHandler.addArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+        if (mUseArtistSort) {
+            MPDQueryHandler.addArtistSortAlbum(mAlbum.getName(), mAlbum.getArtistSortName(), mAlbum.getMBID());
+        } else {
+            MPDQueryHandler.addArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+        }
     }
 
     @Override
@@ -443,7 +447,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         public void onClick(View v) {
             MPDCommandHandler.setRandom(false);
             MPDCommandHandler.setRepeat(false);
-            MPDQueryHandler.playArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+            if (mUseArtistSort) {
+                MPDQueryHandler.playArtistSortAlbum(mAlbum.getName(), mAlbum.getArtistSortName(), mAlbum.getMBID());
+            } else {
+                MPDQueryHandler.playArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+            }
         }
     }
 
