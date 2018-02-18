@@ -129,7 +129,7 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
         if ((null == mArtistName) || mArtistName.equals("")) {
             MPDQueryHandler.getAlbumTracks(pTrackResponseHandler, mAlbumName, mAlbumMBID);
         } else {
-            if (mUseArtistSort) {
+            if (mUseArtistSort && !mArtistSortName.isEmpty()) {
                 MPDQueryHandler.getArtistSortAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistSortName, mAlbumMBID);
             } else {
                 MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistName, mAlbumMBID);
