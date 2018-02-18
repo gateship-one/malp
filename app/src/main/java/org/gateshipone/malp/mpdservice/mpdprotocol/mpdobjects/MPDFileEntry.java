@@ -36,6 +36,8 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
     String mPath;
     private Date mLastModifiedDate;
 
+    protected MPDFileEntry() {}
+
     protected MPDFileEntry(String path) {
         mPath = path;
     }
