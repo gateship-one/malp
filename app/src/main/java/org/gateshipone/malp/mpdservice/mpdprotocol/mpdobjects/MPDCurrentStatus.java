@@ -35,9 +35,6 @@ public class MPDCurrentStatus implements Parcelable {
         MPD_STOPPED
     }
 
-    ;
-
-
     /**
      * Volume: 0 - 100;
      */
