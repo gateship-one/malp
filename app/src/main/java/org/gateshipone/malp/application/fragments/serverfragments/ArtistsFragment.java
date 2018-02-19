@@ -185,7 +185,8 @@ public class ArtistsFragment extends GenericMPDFragment<List<MPDArtist>> impleme
         // Read albumartists/artists preference
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
         boolean useAlbumArtists = sharedPref.getBoolean(getString(R.string.pref_use_album_artists_key), getResources().getBoolean(R.bool.pref_use_album_artists_default));
-        return new ArtistsLoader(getActivity(), useAlbumArtists);
+        boolean useArtistSort = sharedPref.getBoolean(getString(R.string.pref_use_artist_sort_key), getResources().getBoolean(R.bool.pref_use_artist_sort_default));
+        return new ArtistsLoader(getActivity(), useAlbumArtists, useArtistSort);
     }
 
     /**

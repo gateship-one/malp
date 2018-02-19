@@ -90,11 +90,16 @@ public class SongDetailsDialog extends DialogFragment {
 
         mTrackURI = rootView.findViewById(R.id.now_playing_text_track_uri);
 
+        TextView artistSort = rootView.findViewById(R.id.now_playing_text_track_artist_sort);
+        TextView albumArtistSort = rootView.findViewById(R.id.now_playing_text_album_artist_sort);
+
         if (null != mFile) {
             mTrackTitle.setText(mFile.getTrackTitle());
             mTrackAlbum.setText(mFile.getTrackAlbum());
             mTrackArtist.setText(mFile.getTrackArtist());
+            artistSort.setText(mFile.getTrackArtistSort());
             mTrackAlbumArtist.setText(mFile.getTrackAlbumArtist());
+            albumArtistSort.setText(mFile.getTrackAlbumArtistSort());
 
             if (mFile.getAlbumTrackCount() != 0) {
                 mTrackNo.setText(String.valueOf(mFile.getTrackNumber()) + '/' + String.valueOf(mFile.getAlbumTrackCount()));

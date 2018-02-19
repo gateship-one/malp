@@ -23,6 +23,8 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol;
 
 
+import android.util.Log;
+
 import org.gateshipone.malp.mpdservice.handlers.MPDConnectionStateChangeHandler;
 import org.gateshipone.malp.mpdservice.handlers.MPDIdleChangeHandler;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
@@ -187,6 +189,49 @@ public class MPDInterface {
     }
 
     /**
+     * Get a list of all albums by an artist where artist is part of or artist is the AlbumArtist (tag)
+     *
+     * @param artistName Artist to filter album list with.
+     * @return List of MPDAlbum objects
+     */
+    public List<MPDAlbum> getArtistSortAlbums(String artistName) throws MPDException {
+        MPDCapabilities capabilities = mConnection.getServerCapabilities();
+
+        // Check if tag is supported
+        if (!capabilities.hasTagArtistSort() || !capabilities.hasListFiltering() ) {
+            return getArtistAlbums(artistName);
+        }
+
+
+        if (capabilities.hasTagAlbumArtist() && capabilities.hasListGroup()) {
+            Set<MPDAlbum> result;
+            synchronized (this) {
+                // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTSORT_ALBUMS(artistName, capabilities));
+                // Use a hashset for the results, to filter duplicates that will exist.
+                result = new HashSet<>(MPDResponseParser.parseMPDAlbums(mConnection));
+
+                // Also get the list where artistName matches on AlbumArtistSort
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTSORT_ALBUMS(artistName, capabilities));
+
+                result.addAll(MPDResponseParser.parseMPDAlbums(mConnection));
+            }
+
+            List<MPDAlbum> resultList = new ArrayList<>(result);
+
+            // Sort the created list
+            Collections.sort(resultList);
+            return resultList;
+        } else {
+            synchronized (this) {
+                // Get all albums that artistName is part of (Also the legacy album list pre v. 0.19)
+                mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTIST_ALBUMS(artistName, capabilities));
+                return MPDResponseParser.parseMPDAlbums(mConnection);
+            }
+        }
+    }
+
+    /**
      * Get a list of all artists available in MPDs database
      *
      * @return List of MPDArtist objects
@@ -203,6 +248,31 @@ public class MPDInterface {
 
         return artists;
     }
+
+    /**
+     * Get a list of all artists (tag: artistsort) available in MPDs database
+     *
+     * @return List of MPDArtist objects
+     */
+    public synchronized List<MPDArtist> getArtistsSort() throws MPDException {
+        MPDCapabilities capabilities = mConnection.getServerCapabilities();
+        // Check if tag is supported
+        if (!capabilities.hasTagArtistSort() ) {
+            return getArtists();
+        }
+
+        // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
+        mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ARTISTS_SORT(mConnection.getServerCapabilities().hasListGroup() && mConnection.getServerCapabilities().hasMusicBrainzTags()));
+
+        // Remove first empty artist
+        List<MPDArtist> artists = MPDResponseParser.parseMPDArtists(mConnection, mConnection.getServerCapabilities().hasMusicBrainzTags(), mConnection.getServerCapabilities().hasListGroup());
+        if (artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
+            artists.remove(0);
+        }
+
+        return artists;
+    }
+
 
     /**
      * Get a list of all album artists available in MPDs database
@@ -249,6 +319,56 @@ public class MPDInterface {
     }
 
     /**
+     * Get a list of all album artists available in MPDs database
+     *
+     * @return List of MPDArtist objects
+     */
+    public List<MPDArtist> getAlbumArtistsSort() throws MPDException {
+        MPDCapabilities capabilities = mConnection.getServerCapabilities();
+
+        // Check if tag is supported
+        if (!capabilities.hasTagAlbumArtistSort()) {
+            return getAlbumArtists();
+        }
+
+        // Get list of artists for MBID correction
+        List<MPDArtist> normalArtists = getArtistsSort();
+
+
+        List<MPDArtist> artists;
+        synchronized (this) {
+
+            // Get a list of artists. If server is new enough this will contain MBIDs for artists, that are tagged correctly.
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUMARTISTS_SORT(capabilities.hasListGroup() && capabilities.hasMusicBrainzTags()));
+
+            artists = MPDResponseParser.parseMPDArtists(mConnection, capabilities.hasMusicBrainzTags(), capabilities.hasListGroup());
+        }
+
+        // If MusicBrainz support is present, try to correct the MBIDs
+        if (capabilities.hasMusicBrainzTags()) {
+            // Merge normalArtists MBIDs with album artists MBIDs
+            HashMap<String, MPDArtist> normalArtistsHashed = new HashMap<>();
+            for (MPDArtist artist : normalArtists) {
+                normalArtistsHashed.put(artist.getArtistName(), artist);
+            }
+
+            // For every albumartist try to get normal artistMBID
+            for (MPDArtist artist : artists) {
+                MPDArtist hashedArtist = normalArtistsHashed.get(artist.getArtistName());
+                if (hashedArtist != null && hashedArtist.getMBIDCount() > 0) {
+                    artist.setMBID(hashedArtist.getMBID(0));
+                }
+            }
+        }
+
+        // Remove first empty artist if present.
+        if (artists.size() > 0 && artists.get(0).getArtistName().isEmpty()) {
+            artists.remove(0);
+        }
+        return artists;
+    }
+
+    /**
      * Get a list of all playlists available in MPDs database
      *
      * @return List of MPDArtist objects
@@ -257,7 +377,7 @@ public class MPDInterface {
         List<MPDFileEntry> playlists;
         synchronized (this) {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLISTS);
-            playlists = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+            playlists = MPDResponseParser.parseMPDTracks(mConnection);
         }
         Collections.sort(playlists);
         return playlists;
@@ -271,7 +391,7 @@ public class MPDInterface {
     public synchronized List<MPDFileEntry> getAllTracks() throws MPDException {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALL_FILES);
 
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
 
@@ -286,7 +406,8 @@ public class MPDInterface {
         synchronized (this) {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
-            result = MPDResponseParser.parseMPDTracks(mConnection, "", mbid);
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBID(result, mbid);
         }
         MPDSortHelper.sortFileListNumeric(result);
         return result;
@@ -307,7 +428,38 @@ public class MPDInterface {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
 
             // Filter tracks with artistName
-            result = MPDResponseParser.parseMPDTracks(mConnection, artistName, mbid);
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBIDandAlbumArtist(result, mbid, artistName);
+        }
+        // Sort with disc & track number
+        MPDSortHelper.sortFileListNumeric(result);
+        return result;
+    }
+
+
+    /**
+     * Returns the list of tracks that are part of albumName and from artistName
+     *
+     * @param albumName  Album name used as primary filter.
+     * @param artistName Artist to filter with. This is checked with Artist AND AlbumArtist tag.
+     * @param mbid       MusicBrainzID of the album to get tracks from. Necessary if one item with the
+     *                   same name exists multiple times.
+     * @return List of MPDTrack track objects
+     */
+    public List<MPDFileEntry> getArtistSortAlbumTracks(String albumName, String artistName, String mbid) throws MPDException {
+        MPDCapabilities capabilities = getServerCapabilities();
+        // Check if tag is supported
+        if (!capabilities.hasTagAlbumArtistSort() || !capabilities.hasTagArtistSort()) {
+            return getArtistAlbumTracks(albumName, artistName, mbid);
+        }
+
+        List<MPDFileEntry> result;
+        synchronized (this) {
+            mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_REQUEST_ALBUM_TRACKS(albumName));
+
+            // Filter tracks with artistName
+            result = MPDResponseParser.parseMPDTracks(mConnection);
+            MPDFileListFilter.filterAlbumMBIDandAlbumArtistSort(result, mbid, artistName);
         }
         // Sort with disc & track number
         MPDSortHelper.sortFileListNumeric(result);
@@ -323,7 +475,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST);
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -335,7 +487,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_CURRENT_PLAYLIST_WINDOW(start, end));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -347,7 +499,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_SAVED_PLAYLIST(playlistName));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -361,7 +513,7 @@ public class MPDInterface {
             mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_GET_FILES_INFO(path));
 
             // Parse the return
-            retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+            retList = MPDResponseParser.parseMPDTracks(mConnection);
         }
         Collections.sort(retList);
         return retList;
@@ -378,7 +530,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_SEARCH_FILES(term, type));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -391,7 +543,7 @@ public class MPDInterface {
         mConnection.sendMPDCommand(MPDCommands.MPD_COMMAND_PLAYLIST_FIND_URI(url));
 
         /* Parse the return */
-        return MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        return MPDResponseParser.parseMPDTracks(mConnection);
     }
 
     /**
@@ -428,7 +580,7 @@ public class MPDInterface {
         // Reuse the parsing function for tracks here.
         List<MPDFileEntry> retList;
 
-        retList = MPDResponseParser.parseMPDTracks(mConnection, "", "");
+        retList = MPDResponseParser.parseMPDTracks(mConnection);
 
         if (retList.size() == 1) {
             MPDFileEntry tmpFileEntry = retList.get(0);
@@ -588,6 +740,20 @@ public class MPDInterface {
     }
 
     /**
+     * Adds all tracks from a certain album from artistname to the current playlist.
+     *
+     * @param albumname  Name of the album to add to the current playlist.
+     * @param artistname Name of the artist of the album to add to the list. This
+     *                   allows filtering of album tracks to a specified artist. Can also
+     *                   be left empty then all tracks from the album will be added.
+     */
+    public synchronized void addArtistSortAlbumTracks(String albumname, String artistname, String mbid) throws MPDException {
+        List<MPDFileEntry> tracks = getArtistSortAlbumTracks(albumname, artistname, mbid);
+        addTrackList(tracks);
+    }
+
+
+    /**
      * Adds all albums of an artist to the current playlist. Will first get a list of albums for the
      * artist and then call addAlbumTracks for every album on this result.
      *
@@ -607,9 +773,32 @@ public class MPDInterface {
         for (MPDAlbum album : albums) {
             // This will add all tracks from album where artistname is either the artist or
             // the album artist.
-            addAlbumTracks(album.getName(), artistname, "");
+            addAlbumTracks(album.getName(), artistname, album.getMBID());
         }
     }
+
+    /**
+     * Adds all albums of an artistsort to the current playlist. Will first get a list of albums for the
+     * artist and then call addAlbumTracks for every album on this result.
+     *
+     * @param artistname Name of the artist to enqueue the albums from.
+     */
+    public synchronized void addArtistSort(String artistname, MPDAlbum.MPD_ALBUM_SORT_ORDER sortOrder) throws MPDException {
+        List<MPDAlbum> albums = getArtistSortAlbums(artistname);
+
+
+        // Check if sort by date is active and resort collection first
+        if (sortOrder == MPDAlbum.MPD_ALBUM_SORT_ORDER.DATE) {
+            Collections.sort(albums, new MPDAlbum.MPDAlbumDateComparator());
+        }
+
+        for (MPDAlbum album : albums) {
+            // This will add all tracks from album where artistname is either the artist or
+            // the album artist.
+            addArtistSortAlbumTracks(album.getName(), artistname, album.getMBID());
+        }
+    }
+
 
     /**
      * Adds a single File/Directory to the current playlist.

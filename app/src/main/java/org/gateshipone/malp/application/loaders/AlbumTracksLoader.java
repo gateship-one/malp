@@ -25,18 +25,21 @@ package org.gateshipone.malp.application.loaders;
 
 import android.content.Context;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseFileList;
+import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDAlbum;
 import org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects.MPDFileEntry;
 
 /**
  * Loader class for albumtracks and artist album tracks
  */
 public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
+    private static final String TAG = AlbumTracksLoader.class.getSimpleName();
     /**
      * Response handler used for the asynchronous callback of the networking thread
      */
@@ -47,6 +50,7 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
      */
     private String mArtistName;
 
+    private String mArtistSortName;
     /**
      * Name of the album to retrieve
      */
@@ -54,22 +58,27 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
 
     private String mAlbumMBID;
 
+    private boolean mUseArtistSort;
+
     /**
      * Creates the loader that retrieves the information from the MPD server
-     * @param context Context used
-     * @param albumName Name of the album to retrieve
-     * @param artistName Name of the artist of the album to retrieve (can be left empty)
+     *
+     * @param context    Context used
+     * @param album album for which tracks should be loaded
      */
-    public AlbumTracksLoader(Context context, String albumName, String artistName, String albumMBID) {
+    public AlbumTracksLoader(Context context, MPDAlbum album, boolean useArtistSort) {
         super(context);
 
         // Create a new Handler for asynchronous callback
         pTrackResponseHandler = new TrackResponseHandler(this);
 
         // Set the album properties
-        mArtistName = artistName;
-        mAlbumName = albumName;
-        mAlbumMBID = albumMBID;
+        mArtistName = album.getArtistName();
+        mArtistSortName = album.getArtistSortName();
+        mAlbumName = album.getName();
+        mAlbumMBID = album.getMBID();
+
+        mUseArtistSort = useArtistSort;
     }
 
 
@@ -112,15 +121,19 @@ public class AlbumTracksLoader extends Loader<List<MPDFileEntry>> {
     }
 
     /**
-     * Start the actual laoding process. Check if an artistname was provided.
+     * Start the actual loading process. Check if an artistname was provided.
      * If fetch the artistalbumtracks otherwise fetch all tracks for a specific album.
      */
     @Override
     public void onForceLoad() {
-        if ( (null == mArtistName) || mArtistName.equals("") ) {
-            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler,mAlbumName,mAlbumMBID);
+        if ((null == mArtistName) || mArtistName.equals("")) {
+            MPDQueryHandler.getAlbumTracks(pTrackResponseHandler, mAlbumName, mAlbumMBID);
         } else {
-            MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler,mAlbumName,mArtistName,mAlbumMBID);
+            if (mUseArtistSort && !mArtistSortName.isEmpty()) {
+                MPDQueryHandler.getArtistSortAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistSortName, mAlbumMBID);
+            } else {
+                MPDQueryHandler.getArtistAlbumTracks(pTrackResponseHandler, mAlbumName, mArtistName, mAlbumMBID);
+            }
         }
     }
 }

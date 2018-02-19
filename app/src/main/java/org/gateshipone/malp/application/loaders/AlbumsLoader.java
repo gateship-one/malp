@@ -32,6 +32,7 @@ import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 
+import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.utils.PreferenceHelper;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDQueryHandler;
 import org.gateshipone.malp.mpdservice.handlers.responsehandler.MPDResponseAlbumList;
@@ -48,6 +49,8 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
     private MPDAlbum.MPD_ALBUM_SORT_ORDER mSortOrder;
 
+    private boolean mUseArtistSort;
+
     public AlbumsLoader(Context context, String artistName, String albumsPath) {
         super(context);
 
@@ -58,6 +61,7 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
         mSortOrder = PreferenceHelper.getMPDAlbumSortOrder(sharedPref, context);
+        mUseArtistSort =  sharedPref.getBoolean(context.getString(R.string.pref_use_artist_sort_key), context.getResources().getBoolean(R.bool.pref_use_artist_sort_default));
     }
 
 
@@ -102,7 +106,11 @@ public class AlbumsLoader extends Loader<List<MPDAlbum>> {
                 MPDQueryHandler.getAlbumsInPath(mAlbumsPath, pAlbumsResponseHandler);
             }
         } else {
-            MPDQueryHandler.getArtistAlbums(pAlbumsResponseHandler,mArtistName);
+            if (!mUseArtistSort) {
+                MPDQueryHandler.getArtistAlbums(pAlbumsResponseHandler, mArtistName);
+            } else {
+                MPDQueryHandler.getArtistSortAlbums(pAlbumsResponseHandler, mArtistName);
+            }
         }
     }
 }

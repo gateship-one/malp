@@ -93,6 +93,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
 
     private PreferenceHelper.LIBRARY_TRACK_CLICK_ACTION mClickAction;
 
+    private boolean mUseArtistSort;
+
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -128,6 +130,8 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         mClickAction = PreferenceHelper.getClickAction(sharedPref, getContext());
+
+        mUseArtistSort = sharedPref.getBoolean(getString(R.string.pref_use_artist_sort_key), getResources().getBoolean(R.bool.pref_use_artist_sort_default));
 
         setHasOptionsMenu(true);
 
@@ -167,7 +171,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 getView().post(() -> {
                     int width = rootView.getWidth();
                     // Image too small
-                    if(mBitmap.getWidth() < width) {
+                    if (mBitmap.getWidth() < width) {
                         mBitmapLoader.getAlbumImage(mAlbum, false, width, width);
                     }
                 });
@@ -212,7 +216,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
      */
     @Override
     public Loader<List<MPDFileEntry>> onCreateLoader(int id, Bundle args) {
-        return new AlbumTracksLoader(getActivity(), mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+        return new AlbumTracksLoader(getActivity(), mAlbum, mUseArtistSort);
     }
 
     /**
@@ -251,7 +255,7 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
                 songDetailsDialog.show(((AppCompatActivity) getContext()).getSupportFragmentManager(), "SongDetails");
                 return;
             }
-            case ACTION_ADD_SONG:{
+            case ACTION_ADD_SONG: {
                 enqueueTrack(position);
                 return;
             }
@@ -408,7 +412,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
     }
 
     private void enqueueAlbum() {
-        MPDQueryHandler.addArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+        if (mUseArtistSort) {
+            MPDQueryHandler.addArtistSortAlbum(mAlbum.getName(), mAlbum.getArtistSortName(), mAlbum.getMBID());
+        } else {
+            MPDQueryHandler.addArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+        }
     }
 
     @Override
@@ -439,7 +447,11 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         public void onClick(View v) {
             MPDCommandHandler.setRandom(false);
             MPDCommandHandler.setRepeat(false);
-            MPDQueryHandler.playArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+            if (mUseArtistSort) {
+                MPDQueryHandler.playArtistSortAlbum(mAlbum.getName(), mAlbum.getArtistSortName(), mAlbum.getMBID());
+            } else {
+                MPDQueryHandler.playArtistAlbum(mAlbum.getName(), mAlbum.getArtistName(), mAlbum.getMBID());
+            }
         }
     }
 

@@ -49,6 +49,9 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
     private String mArtistName;
 
     @NonNull
+    private String mArtistSortName;
+
+    @NonNull
     private Date mDate;
 
     private boolean mImageFetching;
@@ -57,6 +60,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
         mName = name;
         mMBID = "";
         mArtistName = "";
+        mArtistSortName = "";
         mDate = new Date(0);
     }
 
@@ -66,6 +70,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
         mName = in.readString();
         mMBID = in.readString();
         mArtistName = in.readString();
+        mArtistSortName = in.readString();
         mImageFetching = in.readByte() != 0;
         mDate = (Date) in.readSerializable();
     }
@@ -100,6 +105,15 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
 
     public void setArtistName(@NonNull String artistName) {
         mArtistName = artistName;
+    }
+
+    @NonNull
+    public String getArtistSortName() {
+        return mArtistSortName;
+    }
+
+    public void setArtistSortName(@NonNull String artistSortName) {
+        mArtistSortName = artistSortName;
     }
 
     public void setMBID(@NonNull String mbid) {
@@ -167,6 +181,7 @@ public class MPDAlbum implements MPDGenericItem, Comparable<MPDAlbum>, Parcelabl
         dest.writeString(mName);
         dest.writeString(mMBID);
         dest.writeString(mArtistName);
+        dest.writeString(mArtistSortName);
         dest.writeByte((byte) (mImageFetching ? 1 : 0));
         dest.writeSerializable(mDate);
     }
