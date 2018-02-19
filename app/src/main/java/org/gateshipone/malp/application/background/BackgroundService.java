@@ -375,7 +375,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
      */
     private void onProfileChanged() {
         onMPDDisconnect();
-        MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
+        MPDServerProfile profile = MPDProfileManager.INSTANCE.getAutoconnectProfile(this);
         ConnectionManager.getInstance(getApplicationContext()).setParameters(profile, this);
     }
 
@@ -478,7 +478,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
     private void connectMPDServer() {
         mConnecting = true;
 
-        MPDServerProfile profile = MPDProfileManager.getInstance(this).getAutoconnectProfile();
+        MPDServerProfile profile = MPDProfileManager.INSTANCE.getAutoconnectProfile(this);
         ConnectionManager.getInstance(getApplicationContext()).setParameters(profile, this);
 
         /* Open the actual server connection */
@@ -570,7 +570,7 @@ public class BackgroundService extends Service implements AudioManager.OnAudioFo
         serviceStartIntent.addFlags(Intent.FLAG_FROM_BACKGROUND);
         startService(serviceStartIntent);
 
-        String url = MPDProfileManager.getInstance(this).getAutoconnectProfile().getStreamingURL();
+        String url = MPDProfileManager.INSTANCE.getAutoconnectProfile(this).getStreamingURL();
         Log.v(TAG, "Start playback of: " + url);
 
         // Connect to MPD server for controls

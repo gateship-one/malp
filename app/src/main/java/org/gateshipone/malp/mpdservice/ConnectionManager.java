@@ -112,9 +112,9 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         mPassword = profile.getPassword();
         mPort = profile.getPort();
 
-        MPDProfileManager.getInstance(context).deleteProfile(profile);
+        MPDProfileManager.INSTANCE.deleteProfile(profile, context);
         profile.setAutoconnect(true);
-        MPDProfileManager.getInstance(context).addProfile(profile);
+        MPDProfileManager.INSTANCE.addProfile(profile, context);
 
         mConnectionManager.mServerProfile = profile;
 
@@ -141,7 +141,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public void autoConnect(Context context) {
-        mConnectionManager.mServerProfile = MPDProfileManager.getInstance(context).getAutoconnectProfile();
+        mConnectionManager.mServerProfile = MPDProfileManager.INSTANCE.getAutoconnectProfile(context);
 
         setParameters(mConnectionManager.mServerProfile,context);
     }
@@ -213,8 +213,8 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
         }
 
         // Check if this profile has user-specified HTTP cover loading active
-        if(mServerProfile.getHTTPCoverEnabled()) {
-            HTTPAlbumImageProvider.getInstance(mContext).setRegex(mServerProfile.getHTTPRegex());
+        if(mServerProfile.getHttpCoverEnabled()) {
+            HTTPAlbumImageProvider.getInstance(mContext).setRegex(mServerProfile.getHttpRegex());
         }
     }
 
@@ -308,7 +308,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
 
 
     public void addProfile(MPDServerProfile profile, Context context) {
-        MPDProfileManager.getInstance(context).addProfile(profile);
+        MPDProfileManager.INSTANCE.addProfile(profile, context);
 
         // Try connecting to the new profile
         setParameters(profile, context);
@@ -321,7 +321,7 @@ public class ConnectionManager extends MPDConnectionStateChangeHandler {
     }
 
     public void removeProfile(MPDServerProfile profile, Context context) {
-        MPDProfileManager.getInstance(context).deleteProfile(profile);
+        MPDProfileManager.INSTANCE.deleteProfile(profile, context);
     }
 
 

@@ -32,13 +32,15 @@ import org.gateshipone.malp.mpdservice.profilemanagement.MPDProfileManager;
 import org.gateshipone.malp.mpdservice.profilemanagement.MPDServerProfile;
 
 public class ProfilesLoader extends AsyncTaskLoader<List<MPDServerProfile>> {
+    private Context mContext;
     public ProfilesLoader(Context context) {
         super(context);
+        mContext = context;
     }
 
     @Override
     public List<MPDServerProfile> loadInBackground() {
-        return MPDProfileManager.getInstance(getContext()).getProfiles();
+        return MPDProfileManager.INSTANCE.getProfiles(mContext);
     }
 
     /**

@@ -204,7 +204,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onResume() {
         super.onResume();
-        MPDProfileManager.getInstance(getActivity()).addObserver(this);
+        MPDProfileManager.INSTANCE.addObserver(this);
 
         // Prepare loader ( start new one or reuse old )
         getLoaderManager().restartLoader(0, getArguments(), this);
@@ -219,7 +219,7 @@ public class ProfilesFragment extends Fragment implements LoaderManager.LoaderCa
     public void onPause() {
         super.onPause();
 
-        MPDProfileManager.getInstance(getActivity()).deleteObserver(this);
+        MPDProfileManager.INSTANCE.deleteObserver(this);
     }
 
     @Override

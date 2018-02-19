@@ -21,6 +21,7 @@
  */
 
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
 
 
 android {
@@ -86,4 +87,8 @@ dependencies {
     implementation "com.android.support:design:${supportLibraryVersion}"
     implementation "com.android.support:preference-v14:${supportLibraryVersion}"
     implementation 'com.android.volley:volley:1.0.0'
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
 }

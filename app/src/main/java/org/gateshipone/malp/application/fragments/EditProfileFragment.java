@@ -120,8 +120,8 @@ public class EditProfileFragment extends Fragment {
                 mStreamingURL = mOldProfile.getStreamingURL();
                 mStreamingEnabled = mOldProfile.getStreamingEnabled();
 
-                mHTTPCoverRegex = mOldProfile.getHTTPRegex();
-                mHTTPCoverEnabled = mOldProfile.getHTTPCoverEnabled();
+                mHTTPCoverRegex = mOldProfile.getHttpRegex();
+                mHTTPCoverEnabled = mOldProfile.getHttpCoverEnabled();
 
                 mProfilenameView.setText(mProfilename);
             } else {
@@ -276,8 +276,8 @@ public class EditProfileFragment extends Fragment {
             mOldProfile.setPort(mPort);
             mOldProfile.setStreamingURL(mStreamingURL);
             mOldProfile.setStreamingEnabled(mStreamingEnabled);
-            mOldProfile.setHTTPCoverEnabled(mHTTPCoverEnabled);
-            mOldProfile.setHTTPRegex(mHTTPCoverRegex);
+            mOldProfile.setHttpCoverEnabled(mHTTPCoverEnabled);
+            mOldProfile.setHttpRegex(mHTTPCoverRegex);
             ConnectionManager.getInstance(getContext().getApplicationContext()).addProfile(mOldProfile, getContext());
         }
     }

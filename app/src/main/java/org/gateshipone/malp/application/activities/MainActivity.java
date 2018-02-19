@@ -172,7 +172,7 @@ public class MainActivity extends GenericActivity
 
         registerForContextMenu(findViewById(R.id.main_listview));
 
-        if (MPDProfileManager.getInstance(this).getProfiles().size() == 0) {
+        if (MPDProfileManager.INSTANCE.getProfiles(this).size() == 0) {
             navId = R.id.nav_profiles;
 
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
