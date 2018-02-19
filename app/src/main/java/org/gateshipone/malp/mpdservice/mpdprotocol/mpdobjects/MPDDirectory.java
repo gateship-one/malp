@@ -27,11 +27,12 @@ import android.support.annotation.NonNull;
 
 public class MPDDirectory extends MPDFileEntry implements MPDGenericItem {
 
-    public MPDDirectory(String path) {
+    public MPDDirectory(@NonNull String path) {
         super(path);
     }
 
     @Override
+    @NonNull
     public String getSectionTitle() {
         return mPath.substring(mPath.lastIndexOf('/') + 1);
     }

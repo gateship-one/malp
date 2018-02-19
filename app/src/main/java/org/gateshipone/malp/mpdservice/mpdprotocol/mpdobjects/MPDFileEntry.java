@@ -33,28 +33,33 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFileEntry> {
-    String mPath;
-    private Date mLastModifiedDate;
+    @NonNull
+    String mPath = "";
+
+    @NonNull
+    private Date mLastModifiedDate = new Date(0);
 
     protected MPDFileEntry() {}
 
-    protected MPDFileEntry(String path) {
+    protected MPDFileEntry(@NonNull String path) {
         mPath = path;
     }
 
-    public void setPath(String path) {
+    public void setPath(@NonNull String path) {
         mPath = path;
     }
 
+    @NonNull
     public String getPath() {
         return mPath;
     }
 
+    @NonNull
     public String getFilename() {
-        return mPath.substring(mPath.lastIndexOf('/') + 1);
+        return mPath.lastIndexOf('/') != -1 ? (mPath.substring(mPath.lastIndexOf('/') + 1)) : "";
     }
 
-    public void setLastModified(String lastModified) {
+    public void setLastModified(@NonNull String lastModified) {
         // Try to parse date
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss", Locale.ROOT);
         // Assume MPD sends time as UTC time
@@ -67,11 +72,9 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
 
     }
 
+    @NonNull
     public String getLastModifiedString() {
-        if(null == mLastModifiedDate) {
-            return "";
-        }
-        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM,DateFormat.MEDIUM,Locale.getDefault());
+        DateFormat format = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, Locale.getDefault());
         return format.format(mLastModifiedDate);
     }
 

@@ -31,14 +31,16 @@ import java.util.ArrayList;
 
 public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcelable {
     /* Artist properties */
+    @NonNull
     private String pArtistName;
 
     /* Musicbrainz ID */
+    @NonNull
     private ArrayList<String> pMBIDs;
 
     private boolean mImageFetching;
 
-    public MPDArtist(String name) {
+    public MPDArtist(@NonNull String name) {
         pArtistName = name;
         pMBIDs = new ArrayList<>();
     }
@@ -61,6 +63,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         }
     };
 
+    @NonNull
     public String getArtistName() {
         return pArtistName;
     }
@@ -73,34 +76,35 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         return pMBIDs.get(position);
     }
 
-    public void addMBID(String mbid) {
+    public void addMBID(@NonNull String mbid) {
         pMBIDs.add(mbid);
     }
 
-    public void setMBID(String mbid) {
+    public void setMBID(@NonNull String mbid) {
         pMBIDs.clear();
         pMBIDs.add(mbid);
     }
 
 
     @Override
+    @NonNull
     public String getSectionTitle() {
         return pArtistName;
     }
 
     @Override
     public boolean equals(Object object) {
-        if ( !(object instanceof MPDArtist)) {
+        if (!(object instanceof MPDArtist)) {
             return false;
         }
 
-        MPDArtist artist = (MPDArtist)object;
-        if ( !artist.pArtistName.toLowerCase().equals(pArtistName.toLowerCase()) || (artist.pMBIDs.size() !=  pMBIDs.size())) {
+        MPDArtist artist = (MPDArtist) object;
+        if (!artist.pArtistName.toLowerCase().equals(pArtistName.toLowerCase()) || (artist.pMBIDs.size() != pMBIDs.size())) {
             return false;
         }
 
-        for ( int i = 0; i < pMBIDs.size(); i++) {
-            if ( !pMBIDs.get(i).equals(artist.pMBIDs.get(i))) {
+        for (int i = 0; i < pMBIDs.size(); i++) {
+            if (!pMBIDs.get(i).equals(artist.pMBIDs.get(i))) {
                 return false;
             }
         }
@@ -113,13 +117,13 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
             return 0;
         }
 
-        if ( another.pArtistName.toLowerCase().equals(pArtistName.toLowerCase()) ) {
+        if (another.pArtistName.toLowerCase().equals(pArtistName.toLowerCase())) {
             //Log.v(MPDArtist.class.getSimpleName(),"another mbids: " + another.pMBIDs.size() + "self mbids:" + pMBIDs.size());
             // Try to position artists with one mbid at the end
 
             int size = pMBIDs.size();
             int anotherSize = another.pMBIDs.size();
-            if(size > anotherSize) {
+            if (size > anotherSize) {
                 // This object is "greater" than another
                 return 1;
             } else if (size < anotherSize) {
@@ -127,7 +131,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
                 return -1;
             } else {
                 // Create some random order for MBID arrays (must be consistent)
-                if(size > 0) {
+                if (size > 0) {
                     return pMBIDs.get(0).compareTo(another.pMBIDs.get(0));
                 } else {
                     return 0;
@@ -154,7 +158,7 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
     @Override
     public String toString() {
         StringBuilder retVal = new StringBuilder(this.pArtistName + "_");
-        for(String mbid : pMBIDs ) {
+        for (String mbid : pMBIDs) {
             retVal.append("_").append(mbid);
         }
         return retVal.toString();
@@ -165,6 +169,6 @@ public class MPDArtist implements MPDGenericItem, Comparable<MPDArtist>, Parcela
         dest.writeString(pArtistName);
         String[] mbids = pMBIDs.toArray(new String[pMBIDs.size()]);
         dest.writeStringArray(mbids);
-        dest.writeByte(mImageFetching ? (byte)1 : (byte)0);
+        dest.writeByte(mImageFetching ? (byte) 1 : (byte) 0);
     }
 }

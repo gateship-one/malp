@@ -25,16 +25,19 @@ package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 
-public class MPDCurrentStatus implements Parcelable{
+public class MPDCurrentStatus implements Parcelable {
 
     public enum MPD_PLAYBACK_STATE {
         MPD_PLAYING,
         MPD_PAUSING,
         MPD_STOPPED
-    };
+    }
 
-   
+    ;
+
+
     /**
      * Volume: 0 - 100;
      */
@@ -88,6 +91,7 @@ public class MPDCurrentStatus implements Parcelable{
     /**
      * Sample resolution in bits. (also audio-field)
      */
+    @NonNull
     private String pBitDepth;
 
     /**
@@ -119,6 +123,7 @@ public class MPDCurrentStatus implements Parcelable{
     /**
      * State of the MPD server (playing, pause, stop)
      */
+    @NonNull
     private MPD_PLAYBACK_STATE pPlaybackState;
 
     protected MPDCurrentStatus(Parcel in) {
@@ -164,9 +169,10 @@ public class MPDCurrentStatus implements Parcelable{
 
     /**
      * Copy constructor.
+     *
      * @param status Object to copy values from
      */
-    public MPDCurrentStatus(MPDCurrentStatus status ) {
+    public MPDCurrentStatus(MPDCurrentStatus status) {
         pVolume = status.pVolume;
         pRepeat = status.pRepeat;
         pRandom = status.pRandom;
@@ -192,7 +198,7 @@ public class MPDCurrentStatus implements Parcelable{
     }
 
     public void setVolume(int pVolume) {
-        if ( pVolume >= 0 && pVolume <= 100 ) {
+        if (pVolume >= 0 && pVolume <= 100) {
             this.pVolume = pVolume;
         } else {
             this.pVolume = 0;
@@ -271,11 +277,12 @@ public class MPDCurrentStatus implements Parcelable{
         this.pSamplerate = pSamplerate;
     }
 
+    @NonNull
     public String getBitDepth() {
         return pBitDepth;
     }
 
-    public void setBitDepth(String pBitDepth) {
+    public void setBitDepth(@NonNull String pBitDepth) {
         this.pBitDepth = pBitDepth;
     }
 
@@ -319,11 +326,12 @@ public class MPDCurrentStatus implements Parcelable{
         this.pUpdateDBJob = pUpdateDBJob;
     }
 
+    @NonNull
     public MPD_PLAYBACK_STATE getPlaybackState() {
         return pPlaybackState;
     }
 
-    public void setPlaybackState(MPD_PLAYBACK_STATE pPlaybackState) {
+    public void setPlaybackState(@NonNull MPD_PLAYBACK_STATE pPlaybackState) {
         this.pPlaybackState = pPlaybackState;
     }
 
@@ -369,8 +377,8 @@ public class MPDCurrentStatus implements Parcelable{
     };
 
 
-
-    public String printStatus() {
+    @Override
+    public String toString() {
         /* String output for debug purposes */
         String retString = "";
 
