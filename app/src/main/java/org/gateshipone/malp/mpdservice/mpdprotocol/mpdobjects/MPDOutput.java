@@ -23,18 +23,22 @@
 package org.gateshipone.malp.mpdservice.mpdprotocol.mpdobjects;
 
 
+import android.support.annotation.NonNull;
+
 public class MPDOutput implements MPDGenericItem {
 
+    @NonNull
     private String mOutputName;
     private boolean mActive;
     private int mOutputId;
 
-    public MPDOutput(String name, boolean enabled, int id) {
+    public MPDOutput(@NonNull String name, boolean enabled, int id) {
         mOutputName = name;
         mActive = enabled;
         mOutputId = id;
     }
 
+    @NonNull
     public String getOutputName() {
         return mOutputName;
     }
@@ -47,12 +51,13 @@ public class MPDOutput implements MPDGenericItem {
         return mOutputId;
     }
 
-    public void setOutputState(boolean active ) {
+    public void setOutputState(boolean active) {
         mActive = active;
     }
 
 
     @Override
+    @NonNull
     public String getSectionTitle() {
         return mOutputName;
     }

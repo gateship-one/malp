@@ -38,51 +38,61 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     /**
      * Title of the song
      */
+    @NonNull
     private String pTrackTitle;
 
     /**
      * Artist of the song
      */
+    @NonNull
     private String pTrackArtist;
 
     /**
      * Associated album of the song
      */
+    @NonNull
     private String pTrackAlbum;
 
     /**
      * The artist of the album of this song. E.g. Various Artists for compilations
      */
+    @NonNull
     private String pTrackAlbumArtist;
 
     /**
      * Track "Name" unspecified tag, could be shown if trackTitle is not set
      */
+    @NonNull
     private String pTrackName;
 
     /**
      * The date of the song
      */
+    @NonNull
     private String pDate;
 
     /**
      * MusicBrainz ID for the artist
      */
+    @NonNull
     private String pTrackArtistMBID;
 
     /**
      * MusicBrainz ID for the song itself
      */
+    @NonNull
     private String pTrackMBID;
 
     /**
      * MusicBrainz ID for the album of the song
      */
+    @NonNull
     private String pTrackAlbumMBID;
 
     /**
      * MusicBrainz ID for the album artist
      */
+    @NonNull
     private String pTrackAlbumArtistMBID;
 
     /**
@@ -132,7 +142,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
      *
      * @param path The path of the file. This should never change.
      */
-    public MPDTrack(String path) {
+    public MPDTrack(@NonNull String path) {
         super(path);
         pTrackTitle = "";
 
@@ -161,7 +171,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     protected MPDTrack(Parcel in) {
         super(in.readString());
 
-        /**
+        /*
          * Deserialize all properties. Check with serialization method. BOTH NEED TO BE EQUIVALENT
          */
         pTrackTitle = in.readString();
@@ -188,84 +198,93 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
         pImageFetching = in.readInt() == 1;
     }
 
+    @NonNull
     public String getTrackTitle() {
         return pTrackTitle;
     }
 
-    public void setTrackTitle(String pTrackTitle) {
+    public void setTrackTitle(@NonNull String pTrackTitle) {
         this.pTrackTitle = pTrackTitle;
     }
 
-
+    @NonNull
     public String getTrackArtist() {
         return pTrackArtist;
     }
 
-    public void setTrackArtist(String pTrackArtist) {
+    public void setTrackArtist(@NonNull String pTrackArtist) {
         this.pTrackArtist = pTrackArtist;
     }
 
+    @NonNull
     public String getTrackAlbum() {
         return pTrackAlbum;
     }
 
-    public void setTrackAlbum(String pTrackAlbum) {
+    public void setTrackAlbum(@NonNull String pTrackAlbum) {
         this.pTrackAlbum = pTrackAlbum;
     }
 
+    @NonNull
     public String getTrackAlbumArtist() {
         return pTrackAlbumArtist;
     }
 
-    public void setTrackAlbumArtist(String pTrackAlbumArtist) {
+    public void setTrackAlbumArtist(@NonNull String pTrackAlbumArtist) {
         this.pTrackAlbumArtist = pTrackAlbumArtist;
     }
 
+    @NonNull
     public String getTrackName() {
         return pTrackName;
     }
 
-    public void setTrackName(String name) {
+    public void setTrackName(@NonNull String name) {
         pTrackName = name;
     }
 
+    @NonNull
     public String getDate() {
         return pDate;
     }
 
-    public void setDate(String pDate) {
+    public void setDate(@NonNull String pDate) {
         this.pDate = pDate;
     }
 
+    @NonNull
     public String getTrackArtistMBID() {
         return pTrackArtistMBID;
     }
 
-    public void setTrackArtistMBID(String pTrackArtistMBID) {
+    public void setTrackArtistMBID(@NonNull String pTrackArtistMBID) {
         this.pTrackArtistMBID = pTrackArtistMBID;
     }
 
+    @NonNull
     public String getTrackAlbumArtistMBID() {
         return pTrackAlbumArtistMBID;
     }
 
-    public void setTrackAlbumArtistMBID(String pTrackArtistMBID) {
+    public void setTrackAlbumArtistMBID(@NonNull String pTrackArtistMBID) {
         this.pTrackAlbumArtistMBID = pTrackArtistMBID;
     }
 
+    @NonNull
     public String getTrackMBID() {
         return pTrackMBID;
     }
 
-    public void setTrackMBID(String pTrackMBID) {
+    public void setTrackMBID(@NonNull String pTrackMBID) {
         this.pTrackMBID = pTrackMBID;
     }
 
+    @NonNull
     public String getTrackAlbumMBID() {
         return pTrackAlbumMBID;
     }
 
-    public void setTrackAlbumMBID(String pTrackAlbumMBID) {
+    public void setTrackAlbumMBID(@NonNull String pTrackAlbumMBID) {
         this.pTrackAlbumMBID = pTrackAlbumMBID;
     }
 
@@ -336,6 +355,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     /**
      * Returns either the track title, name or filename depending on which is set.
      */
+    @NonNull
     public String getVisibleTitle() {
         if (!pTrackTitle.isEmpty()) {
             return pTrackTitle;
@@ -350,6 +370,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
      * @return String that is used for section based scrolling
      */
     @Override
+    @NonNull
     public String getSectionTitle() {
         return pTrackTitle.equals("") ? mPath : pTrackTitle;
     }
@@ -448,6 +469,7 @@ public class MPDTrack extends MPDFileEntry implements MPDGenericItem, Parcelable
     /**
      * Compares the file names of two tracks with each other. The prefix path is discarded before
      * comparing.
+     *
      * @param another {@link MPDTrack} to compare
      * @return see super class
      */

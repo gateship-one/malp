@@ -34,7 +34,7 @@ public class MPDStatistics {
     private long mLastDBUpdate;
     private int mPlayDuration;
 
-    public MPDStatistics () {
+    public MPDStatistics() {
         mArtistsCount = 0;
         mAlbumCount = 0;
         mSongCount = 0;
