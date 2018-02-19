@@ -51,34 +51,25 @@ class MPDProfileDBHelper
      */
     override fun onUpgrade(database: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         Log.v(TAG, "Upgrading database from version: $oldVersion to new version: $newVersion")
-        when (oldVersion) {
-        // Upgrade from version 1 to 2 needs introduction of the streaming port and streaming
-        // enable column.
-            1 -> {
-                run {
-                    var sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT + " integer;"
-                    database.execSQL(sqlString)
+        var currentVersion = oldVersion
+        if (currentVersion == 1) {
+            var sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_PORT + " integer;"
+            database.execSQL(sqlString)
 
-                    sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED + " integer;"
-                    database.execSQL(sqlString)
-                }
-                run {
-                    // Upgrading from version 2 to 3 needs new http regex columns
-                    var sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX + " text;"
-                    database.execSQL(sqlString)
+            sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_STREAMING_ENABLED + " integer;"
+            database.execSQL(sqlString)
 
-                    sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED + " integer;"
-                    database.execSQL(sqlString)
-                }
-            }
-            2 -> run {
-                var sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX + " text;"
-                database.execSQL(sqlString)
-                sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED + " integer;"
-                database.execSQL(sqlString)
-            }
-            else -> {
-            }
+            currentVersion++
+        }
+        if (currentVersion == 2) {
+            // Upgrading from version 2 to 3 needs new http regex columns
+            var sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_REGEX + " text;"
+            database.execSQL(sqlString)
+
+            sqlString = "ALTER TABLE " + MPDServerProfileTable.SQL_TABLE_NAME + " ADD COLUMN " + MPDServerProfileTable.COLUMN_PROFILE_HTTP_COVER_ENABLED + " integer;"
+            database.execSQL(sqlString)
+
+            currentVersion++
         }
     }
 
