@@ -49,7 +49,7 @@ public abstract class MPDFileEntry implements MPDGenericItem, Comparable<MPDFile
     }
 
     public String getFilename() {
-        return mPath.substring(mPath.lastIndexOf('/') + 1);
+        return mPath.lastIndexOf('/') != -1 ? (mPath.substring(mPath.lastIndexOf('/') + 1)) : "";
     }
 
     public void setLastModified(String lastModified) {
