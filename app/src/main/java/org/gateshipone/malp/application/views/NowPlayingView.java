@@ -352,9 +352,16 @@ public class NowPlayingView extends RelativeLayout implements PopupMenu.OnMenuIt
                 });
                 removeListBuilder.create().show();
                 break;
-            case R.id.action_shuffle_playlist:
-                MPDQueryHandler.shufflePlaylist();
-                return true;
+            case R.id.action_shuffle_playlist: {
+                final AlertDialog.Builder shuffleListBuilder = new AlertDialog.Builder(getContext());
+                shuffleListBuilder.setTitle(getContext().getString(R.string.action_shuffle_playlist));
+                shuffleListBuilder.setMessage(getContext().getString(R.string.dialog_message_shuffle_current_playlist));
+                shuffleListBuilder.setPositiveButton(R.string.dialog_action_yes, (dialog, which) -> MPDQueryHandler.shufflePlaylist());
+                shuffleListBuilder.setNegativeButton(R.string.dialog_action_no, (dialog, which) -> {
+                });
+                shuffleListBuilder.create().show();
+            }
+                break;
             case R.id.action_save_playlist:
                 OnSaveDialogListener plDialogCallback = new OnSaveDialogListener() {
                     @Override

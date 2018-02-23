@@ -211,8 +211,10 @@
     <string name="dialog_choose_playlist">Choose playlist</string>
 
     <string name="dialog_message_overwrite_playlist">Do you want to overwrite the playlist:</string>
-    <string name="dialog_message_delete_playlist">Do you want really want to delete the playlist:</string>
-    <string name="dialog_message_delete_current_playlist">Do you want really want to delete the playlist?</string>
+    <string name="dialog_message_delete_playlist">Do you want to delete the playlist:</string>
+    <string name="dialog_message_delete_current_playlist">Do you want to delete the playlist?</string>
+
+    <string name="dialog_message_shuffle_current_playlist">Do you want to shuffle the playlist?</string>
 
     <string name="dialog_share_song_details">Share song details</string>
 
