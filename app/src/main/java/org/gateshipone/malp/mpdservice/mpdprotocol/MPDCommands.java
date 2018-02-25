@@ -27,7 +27,7 @@ public class MPDCommands {
     public static final String MPD_COMMAND_CLOSE = "close";
 
     public static String MPD_COMMAND_PASSWORD(String password) {
-        return "password \"" + password.replace("\"","\\\"") + "\"";
+        return "password \"" + escapeString(password) + "\"";
     }
 
     private static String createAlbumGroupString(MPDCapabilities caps) {
@@ -58,20 +58,20 @@ public class MPDCommands {
 
     public static String MPD_COMMAND_REQUEST_ARTIST_ALBUMS(String artistName, MPDCapabilities caps) {
         if ( caps.hasListGroup() ) {
-            return "list album artist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+            return "list album artist \"" + escapeString(artistName) + "\"" + createAlbumGroupString(caps);
         } else {
-            return "list album \"" + artistName.replaceAll("\"", "\\\\\"") + "\"";
+            return "list album \"" + escapeString(artistName)+ "\"";
         }
     }
 
 
     public static String MPD_COMMAND_REQUEST_ARTISTSORT_ALBUMS(String artistName, MPDCapabilities caps) {
-        return "list album artistsort \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+        return "list album artistsort \"" + escapeString(artistName) + "\"" + createAlbumGroupString(caps);
     }
 
     public static final String MPD_COMMAND_REQUEST_ALBUMS_FOR_PATH(String path, MPDCapabilities caps) {
         if ( caps.hasListGroup()) {
-            return "list album base \"" + path + "\"" + createAlbumGroupString(caps);
+            return "list album base \"" + escapeString(path) + "\"" + createAlbumGroupString(caps);
         } else {
             // FIXME check if correct. Possible fallback for group missing -> base command also missing.
             return "list album";
@@ -79,16 +79,16 @@ public class MPDCommands {
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUMARTIST_ALBUMS(String artistName, MPDCapabilities caps) {
-        return "list album albumartist \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+        return "list album albumartist \"" + escapeString(artistName) + "\"" + createAlbumGroupString(caps);
     }
 
     public static String MPD_COMMAND_REQUEST_ALBUMARTISTSORT_ALBUMS(String artistName, MPDCapabilities caps) {
-        return "list album albumartistsort \"" + artistName.replaceAll("\"","\\\\\"") + "\"" + createAlbumGroupString(caps);
+        return "list album albumartistsort \"" + escapeString(artistName) + "\"" + createAlbumGroupString(caps);
     }
 
 
     public static String MPD_COMMAND_REQUEST_ALBUM_TRACKS(String albumName) {
-        return "find album \"" + albumName.replaceAll("\"","\\\\\"") + "\"";
+        return "find album \"" + escapeString(albumName) + "\"";
     }
 
     public static String MPD_COMMAND_REQUEST_ARTISTS(boolean groupMBID) {
@@ -146,31 +146,31 @@ public class MPDCommands {
     }
 
     public static String MPD_COMMAND_GET_SAVED_PLAYLIST(String playlistName) {
-        return "listplaylistinfo \"" + playlistName + "\"";
+        return "listplaylistinfo \"" + escapeString(playlistName) + "\"";
     }
 
     public static String MPD_COMMAND_GET_FILES_INFO(String path) {
-        return "lsinfo \"" + path + "\"";
+        return "lsinfo \"" + escapeString(path) + "\"";
     }
 
     public static String MPD_COMMAND_SAVE_PLAYLIST(String playlistName) {
-        return "save \"" + playlistName + "\"";
+        return "save \"" + escapeString(playlistName) + "\"";
     }
 
     public static String MPD_COMMAND_REMOVE_PLAYLIST(String playlistName) {
-        return "rm \"" + playlistName + "\"";
+        return "rm \"" + escapeString(playlistName) + "\"";
     }
 
     public static String MPD_COMMAND_LOAD_PLAYLIST(String playlistName) {
-        return "load \"" + playlistName + "\"";
+        return "load \"" + escapeString(playlistName) + "\"";
     }
 
     public static String MPD_COMMAND_ADD_TRACK_TO_PLAYLIST(String playlistName, String url) {
-        return "playlistadd \"" + playlistName + "\" \"" + url + '\"';
+        return "playlistadd \"" + escapeString(playlistName) + "\" \"" + url + '\"';
     }
 
     public static String MPD_COMMAND_REMOVE_TRACK_FROM_PLAYLIST(String playlistName, int position) {
-        return "playlistdelete \"" + playlistName + "\" " + String.valueOf(position);
+        return "playlistdelete \"" + escapeString(playlistName) + "\" " + String.valueOf(position);
     }
 
     public static final String MPD_COMMAND_GET_CURRENT_SONG = "currentsong";
@@ -182,11 +182,11 @@ public class MPDCommands {
     public static final String MPD_END_COMMAND_LIST = "command_list_end";
 
     public static  String MPD_COMMAND_ADD_FILE(String url) {
-        return "add \"" + url + "\"";
+        return "add \"" + escapeString(url) + "\"";
     }
 
     public static  String MPD_COMMAND_ADD_FILE_AT_INDEX(String url, int index) {
-        return "addid \"" + url + "\"  " + String.valueOf(index);
+        return "addid \"" + escapeString(url) + "\"  " + String.valueOf(index);
     }
 
     public static String MPD_COMMAND_REMOVE_SONG_FROM_CURRENT_PLAYLIST(int index) {
@@ -257,7 +257,7 @@ public class MPDCommands {
 
     public static String MPD_COMMAND_UPDATE_DATABASE(String path) {
         if (null != path && !path.isEmpty()) {
-            return "update \"" + path + "\"";
+            return "update \"" + escapeString(path) + "\"";
         } else {
             return "update";
         }
@@ -274,15 +274,15 @@ public class MPDCommands {
     public static String MPD_COMMAND_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
         switch (type) {
             case MPD_SEARCH_TRACK:
-                return "search title \"" + searchTerm + '\"';
+                return "search title \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ALBUM:
-                return "search album \"" + searchTerm + '\"';
+                return "search album \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ARTIST:
-                return "search artist \"" + searchTerm + '\"';
+                return "search artist \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_FILE:
-                return "search file \"" + searchTerm + '\"';
+                return "search file \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ANY:
-                return "search any \"" + searchTerm + '\"';
+                return "search any \"" + escapeString(searchTerm) + '\"';
         }
         return "ping";
     }
@@ -292,15 +292,15 @@ public class MPDCommands {
     public static final String MPD_COMMAND_ADD_SEARCH_FILES(String searchTerm, MPD_SEARCH_TYPE type) {
         switch (type) {
             case MPD_SEARCH_TRACK:
-                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " title \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " title \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ALBUM:
-                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " album \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " album \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ARTIST:
-                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " artist \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " artist \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_FILE:
-                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " file \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " file \"" + escapeString(searchTerm) + '\"';
             case MPD_SEARCH_ANY:
-                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " any \"" + searchTerm + '\"';
+                return MPD_COMMAND_ADD_SEARCH_FILES_CMD_NAME + " any \"" + escapeString(searchTerm) + '\"';
         }
         return "ping";
     }
@@ -318,8 +318,12 @@ public class MPDCommands {
      * @return command string for MPD
      */
     public static String MPD_COMMAND_PLAYLIST_FIND_URI(String url) {
-        return "playlistfind file \"" + url + "\"";
+        return "playlistfind file \"" + escapeString(url) + "\"";
     }
 
     public static final String MPD_COMMAND_SHUFFLE_PLAYLIST = "shuffle";
+
+    private static String escapeString(String input) {
+        return input.replaceAll("\"","\\\\\"");
+    }
 }
