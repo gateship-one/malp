@@ -29,6 +29,7 @@
     <string name="action_connect_profile">Connexion au profil</string>
     <string name="action_remove_profile">Supprimer le profil</string>
     <string name="action_add_profile">Ajouter un profil</string>
+    <string name="action_save_profile">Enregistrer le profil</string>
     <string name="action_add">Ajouter</string>
     <string name="action_add_album">Ajouter un album</string>
     <string name="action_play_album">Jouer l\'album</string>
@@ -66,6 +67,9 @@
     <string name="action_update_database_here">Mettre à jour la base de données ici</string>
     <string name="action_wikipedia_album">Afficher l\'album</string>
     <string name="action_wikipedia_artist">Afficher l\'artiste</string>
+    <string name="action_switch_to_output">Passer à la sortie</string>
+    <string name="action_toggle_outputs">Basculer entre les sorties</string>
+    <string name="action_share_current_song">Partager la chanson en cours</string>
     <!-- Menu entries -->
     <string name="menu_library">Bibliothèque</string>
     <string name="menu_settings">Paramètres</string>
@@ -76,9 +80,12 @@
     <string name="menu_files">Fichiers</string>
     <string name="menu_statistic">Statistiques</string>
     <string name="menu_app_settings">Paramètres de l\'application</string>
+    <string name="menu_information">Information</string>
     <string name="menu_search">Rechercher</string>
     <string name="menu_albums">Albums</string>
+    <string name="menu_album">Album</string>
     <string name="menu_artists">Artistes</string>
+    <string name="menu_artist">Artiste</string>
     <string name="artwork_settings">Paramètres des artworks</string>
     <!-- seperator -->
     <string name="track_item_loading">Chargement de la piste</string>
@@ -90,6 +97,8 @@
     <!-- popup menu titles -->
     <string name="action_clear_playlist">Effacer la playlist</string>
     <string name="action_save_playlist">Sauvegarder la playlist</string>
+    <string name="action_start_streaming">Démarrer le streaming</string>
+    <string name="action_stop_streaming">Arrêter le streaming</string>
     <string name="action_shuffle_playlist">Mélanger la playlist</string>
     <!-- edit profile fragment strings -->
     <string name="fragment_profile_title">Éditer le profil</string>
@@ -97,6 +106,10 @@
     <string name="fragment_profile_hostname">Nom d\'hôte ou IP :</string>
     <string name="fragment_profile_password">Mot de passe :</string>
     <string name="fragment_profile_port">Port :</string>
+    <string name="fragment_profile_streaming_url">URL de diffusion</string>
+    <string name="fragment_profile_streaming_enabled">Activer la diffusion depuis le serveur</string>
+    <string name="fragment_profile_http_cover_enabled">Préférer les fichiers de pochette d\'album HTTP</string>
+    <string name="fragment_profile_http_cover_regex">Chemin des pochettes (%d remplacé par le répertoire des fichiers)</string>
     <string name="fragment_profile_default_name">Nouveau profil</string>
     <!-- Now playing view text view values -->
     <string name="song_track_no">N° de piste :</string>
@@ -107,7 +120,9 @@
     <string name="song_title">Titre :</string>
     <string name="song_album">Album :</string>
     <string name="song_artist">Artiste :</string>
+    <string name="song_artist_sort">Artiste (trier) :</string>
     <string name="song_album_artist">Artiste de l\'album :</string>
+    <string name="song_album_artist_sort">Artiste de l\'album (trier) :</string>
     <string name="song_date">Date :</string>
     <string name="song_disc">Disque :</string>
     <string name="song_duration">Durée :</string>
@@ -127,8 +142,14 @@
     <string name="server_statistic_playtime">Durée d\'écoute enregistrée :</string>
     <string name="server_statistic_db_update">Dernière mise à jour de la base de données :</string>
     <string name="server_statistic_malp_server_info">Fonctionnalités du serveur :</string>
+    <string name="duration_days">Jours</string>
     <string name="server_statistic_update_database">Mettre à jour la base de données</string>
     <string name="server_statistic_updateing_database">Le serveur met à jour sa base de données, veuillez patienter !</string>
+    <!-- Snackbar text -->
+    <string name="snackbar_mpd_server_error_format">Erreur %d/%d : %s</string>
+    <string name="snackbar_mpd_connection_error_format">EtrackUrirror : %s</string>
+    <!-- Sharing text -->
+    <string name="sharing_song_details">J\'écoute %s par %s de l\'album %s</string>
     <!-- dialog titles -->
     <string name="dialog_save_playlist">Sauvegarder la playlist</string>
     <string name="dialog_action_cancel">Annuler</string>
@@ -140,10 +161,15 @@
     <string name="dialog_message_overwrite_playlist">Voulez-vous écraser la playlist :</string>
     <string name="dialog_message_delete_playlist">Voulez-vous vraiment effacer la playlist :</string>
     <string name="dialog_message_delete_current_playlist">Voulez-vous vraiment effacer la playlist ?</string>
+    <string name="dialog_message_shuffle_current_playlist">Voulez-vous mélanger la playlist ?</string>
+    <string name="dialog_share_song_details">Partager les détails de la chanson</string>
     <!-- dialog default names  -->
     <string name="default_playlist_title">Nouvelle Playlist</string>
     <string name="create_new_playlist">Créer une nouvelle playlist</string>
+    <string name="preference_launch_faq">F.A.Q</string>
+    <string name="preference_launch_faq_text">Informations sur la façon d\'obtenir de l\'aide pour cette application</string>
     <string name="preference_launch_about">À propos</string>
+    <string name="preference_launch_about_text">Version, licence et informations sur les contributeurs</string>
     <string name="preference_theme_title">Thème</string>
     <string name="preference_theme_summary">Choisir un thème différent pour l\'application.</string>
     <string name="preference_theme_message">Sélectionner un thème</string>
@@ -185,18 +211,34 @@
     <string name="preference_library_view_list">Liste</string>
     <string name="preference_library_view_grid">Grille</string>
     <string name="preference_use_album_artists_title">Utiliser le tag AlbumArtist</string>
+    <string name="preference_use_album_artists_text">Utiliser le tag AlbumArtist pour la liste d\'artistes (cette méthode est plus lente et peut entraîner des images d\'artiste erronées).</string>
+    <string name="preference_use_artist_sort_title">Utiliser le tag ArtistSort ou AlbumArtistSort</string>
+    <string name="preference_use_artist_sort_text">Utilisez le tag ArtistSort (ou AlbumartistSort) si le serveur fournit le tag.</string>
+    <string name="preference_use_tags_in_filebrowser_title">Utiliser des tags dans le navigateur de fichiers</string>
+    <string name="preference_use_tags_in_filebrowser_text">Si disponibles, utilisez les tags dans l\'explorateur de fichiers au lieu des noms de fichiers. Désactivez cette option pour afficher les noms de fichiers dans l\'explorateur de fichiers.</string>
+    <string name="preference_library_click_action_title">Action au clic sur la piste</string>
+    <string name="preference_library_click_action_summary">Sélectionnez l\'action pour les pistes dans la bibliothèque</string>
+    <string name="preference_library_click_action_message">Sélectionnez l\'action par défaut à effectuer si vous cliquez sur une piste dans les vues de la bibliothèque</string>
     <string name="preference_volume_control_title">Choisir la vue du contrôle de volume</string>
     <string name="preference_volume_control_message">Choisir la vue du contrôle de volume</string>
     <string name="preference_volume_control_summary">Choisir le type de vue utilisé pour contrôler le volume de la musique</string>
     <string name="preference_volume_control_off">Off</string>
     <string name="preference_volume_control_seekbar">Slider</string>
     <string name="preference_volume_control_buttons">Boutons</string>
+    <string name="preference_generic_keep_display_on_title">Garder l\'affichage actif</string>
+    <string name="preference_generic_keep_display_on_text">L\'affichage restera actif tant que l\'interface utilisateur sera au premier plan.</string>
     <string name="preference_generic_hardware_keys_title">Utiliser les boutons physiques</string>
     <string name="preference_generic_hardware_keys_text">Utiliser les boutons physiques pour contrôler la lecture.</string>
+    <string name="preference_volume_step_title">Résolution du volume</string>
+    <string name="preference_volume_step_text">La résolution du volume pour les boutons de volume matériel et logiciel.</string>
+    <string name="volume_step_size_dialog_title">Résolution : %d%%</string>
+    <string name="volume_step_size_dialog_warning">Vous avez sélectionné une valeur élevée pour la résolution du volume. Veillez à ne pas endommager vos oreilles ou votre équipement !</string>
     <string name="preference_show_notification_title">Afficher une notification</string>
-    <string name="preference_show_notification_text">Afficher une notification en quittant l\'interface utilisateur principale.</string>
+    <string name="preference_show_notification_text">Afficher une notification en quittant l\'interface utilisateur principale. Ceci est nécessaire pour que le widget fonctionne. Si vous cliquez sur \'connecter\' sur le widget, la notification sera affichée dans tous les cas.</string>
     <string name="preference_use_english_wikipedia_title">Utiliser Wikipedia en anglais</string>
     <string name="preference_use_english_wikipedia_text">Utilisez la version anglaise de Wikipedia pour rechercher des pages</string>
+    <string name="preference_show_playlist_sections_title">Afficher les sections dans les playlists</string>
+    <string name="preference_show_playlist_sections_text">Afficher les sections avec les images des pochettes dans les vues de playlist</string>
     <string name="preference_category_design">Design</string>
     <string name="preference_category_library">Bibliothèque</string>
     <string name="preference_category_controls">Contrôles</string>
@@ -242,6 +284,8 @@
     <!-- Bulk downloader service -->
     <string name="downloader_notification_title">Téléchargement en masse en cours</string>
     <string name="downloader_notification_remaining_images">Images téléchargées :</string>
+    <string name="notification_channel_name_playback">Lecture</string>
+    <string name="notification_channel_name_bulk_download">Télécharger en masse</string>
     <!-- Widget -->
     <string name="widget_disconnected">Déconnecté</string>
     <string name="widget_connect">Connecté</string>
@@ -249,6 +293,8 @@
     <string name="contributors_title">Contributeurs</string>
     <string name="contributor_translator_japanese">Traduction Japonaise</string>
     <string name="contributor_translator_french">Traduction Française</string>
+    <string name="contributor_translator_spanish">Traduction Espagnole</string>
+    <string name="contributor_translator_korean">Traduction Coréenne</string>
     <!-- Thirdparty Licenses dialog -->
     <string name="thirdparty_licenses_dialog_title">Licences tierces</string>
 </resources>
