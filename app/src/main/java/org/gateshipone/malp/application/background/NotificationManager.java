@@ -44,6 +44,7 @@ import android.support.v4.media.app.NotificationCompat.MediaStyle;
 
 import org.gateshipone.malp.R;
 import org.gateshipone.malp.application.activities.MainActivity;
+import org.gateshipone.malp.application.activities.SplashActivity;
 import org.gateshipone.malp.application.artworkdatabase.ArtworkManager;
 import org.gateshipone.malp.application.utils.CoverBitmapLoader;
 import org.gateshipone.malp.mpdservice.handlers.serverhandler.MPDCommandHandler;
@@ -137,7 +138,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         updateNotification(mLastTrack, mLastStatus.getPlaybackState());
         Intent intent = new Intent(mService, BackgroundService.class);
 
-        if ( null != mNotification) {
+        if (null != mNotification) {
             // Change to foreground service otherwise android will just kill it
             mService.startForeground(NOTIFICATION_ID, mNotification);
         }
@@ -201,10 +202,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     }
 
     /*
-    * Creates a android system notification with two different remoteViews. One
-    * for the normal layout and one for the big one. Sets the different
-    * attributes of the remoteViews and starts a thread for Cover generation.
-    */
+     * Creates a android system notification with two different remoteViews. One
+     * for the normal layout and one for the big one. Sets the different
+     * attributes of the remoteViews and starts a thread for Cover generation.
+     */
     public synchronized void updateNotification(MPDTrack track, MPDCurrentStatus.MPD_PLAYBACK_STATE state) {
         if (track != null) {
             openChannel();
@@ -213,10 +214,10 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.setChannelId(NOTIFICATION_CHANNEL_ID);
 
             // Open application intent
-            Intent contentIntent = new Intent(mService, MainActivity.class);
-            contentIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
-            contentIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION | Intent.FLAG_ACTIVITY_NO_HISTORY);
-            PendingIntent contentPendingIntent = PendingIntent.getActivity(mService, INTENT_OPENGUI, contentIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent mainIntent = new Intent(mService, SplashActivity.class);
+            mainIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            mainIntent.putExtra(MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW, MainActivity.MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW);
+            PendingIntent contentPendingIntent = PendingIntent.getActivity(mService, INTENT_OPENGUI, mainIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             mNotificationBuilder.setContentIntent(contentPendingIntent);
 
             // Set pendingintents
@@ -261,7 +262,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             mNotificationBuilder.addAction(stopActon);
             mNotificationBuilder.addAction(nextAction);
             MediaStyle notificationStyle = new MediaStyle();
-            if(mMediaSession != null) {
+            if (mMediaSession != null) {
                 notificationStyle.setMediaSession(mMediaSession.getSessionToken());
             }
             notificationStyle.setShowActionsInCompactView(1, 3);
@@ -295,7 +296,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
             if (mNotification == null || !track.getTrackAlbum().equals(mLastTrack.getTrackAlbum()) || !track.getTrackAlbumMBID().equals(mLastTrack.getTrackAlbumMBID())) {
                 mLastTrack = track;
                 mLastBitmap = null;
-                mCoverLoader.getImage(mLastTrack, true,-1,-1);
+                mCoverLoader.getImage(mLastTrack, true, -1, -1);
             }
 
             // Only set image if an saved one is available
@@ -390,14 +391,14 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     public synchronized void setMPDStatus(MPDCurrentStatus status) {
         if (mSessionActive) {
             // Check if playing or not. If activate the service as foreground
-            if( status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
+            if (status.getPlaybackState() != MPDCurrentStatus.MPD_PLAYBACK_STATE.MPD_PLAYING) {
                 mService.stopForeground(false);
             } else {
                 mService.startForeground(NOTIFICATION_ID, mNotification);
             }
 
             // Only update the notification if playback state really changed
-            if ( mLastStatus.getPlaybackState() != status.getPlaybackState()) {
+            if (mLastStatus.getPlaybackState() != status.getPlaybackState()) {
                 updateNotification(mLastTrack, status.getPlaybackState());
             }
             if (mVolumeControlProvider != null) {
@@ -452,7 +453,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
         // Check if notification exists and set picture
         mLastBitmap = bm;
         if (type == CoverBitmapLoader.IMAGE_TYPE.ALBUM_IMAGE && mNotification != null && bm != null) {
-            updateNotification(mLastTrack,mLastStatus.getPlaybackState());
+            updateNotification(mLastTrack, mLastStatus.getPlaybackState());
 
             /* Set lockscreen picture and stuff */
             if (mMediaSession != null) {
@@ -470,7 +471,7 @@ public class NotificationManager implements CoverBitmapLoader.CoverBitmapListene
     @Override
     public void newAlbumImage(MPDAlbum album) {
         if (mLastTrack.getTrackAlbum().equals(album.getName())) {
-            mCoverLoader.getImage(mLastTrack, true,-1,-1);
+            mCoverLoader.getImage(mLastTrack, true, -1, -1);
         }
     }
 
