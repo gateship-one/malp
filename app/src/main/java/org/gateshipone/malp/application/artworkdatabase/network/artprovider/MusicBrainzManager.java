@@ -253,10 +253,8 @@ public class MusicBrainzManager implements AlbumImageProvider {
      * @param errorListener Error listener
      */
     private void getAlbumMBID(MPDAlbum album, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        String albumName = Uri.encode(album.getName());
-        albumName = FormatHelper.escapeSpecialCharsLucene(albumName);
-        String artistName = Uri.encode(album.getArtistName());
-        artistName = FormatHelper.escapeSpecialCharsLucene(artistName);
+        String albumName = Uri.encode(FormatHelper.escapeSpecialCharsLucene(album.getName()));
+        String artistName = Uri.encode(FormatHelper.escapeSpecialCharsLucene(album.getArtistName()));
         String url;
         if (!artistName.isEmpty()) {
             url = MUSICBRAINZ_API_URL + "/" + "release/?query=release:" + albumName + "%20AND%20artist:" + artistName + MUSICBRAINZ_LIMIT_RESULT + MUSICBRAINZ_FORMAT_JSON;
