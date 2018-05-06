@@ -33,3 +33,4 @@ Features:
 Cover images shown on screenshots gratefully used with permission from Carbon Based Lifeforms ( http://carbonbasedlifeforms.net )
 
 This software is free software, licensed under the GPLv3 or later license. The source code is available on GitHub ( https://github.com/gateship-one/malp )
+

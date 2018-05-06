@@ -1,3 +1,8 @@
+### Version 1.1.15 Tag: release-24 (2018-05-06)
+ * Add experimental support for ArtistSort & AlbumArtistSort tags
+ * Updated translations
+ * Protocol fixes (Escaped strings)
+
 ### Version 1.1.14 Tag: release-23 (2018-02-14)
  * Stability fixes
 
