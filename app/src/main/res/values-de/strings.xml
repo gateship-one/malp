@@ -268,4 +268,9 @@
     <string name="dialog_share_song_details">Teile Lieddetails</string>
     <string name="preference_generic_keep_display_on_title">Display angeschaltet lassen</string>
     <string name="preference_generic_keep_display_on_text">Das Display bleibt solange aktiv, wie die Oberfläche im Vordergrund ist.</string>
+    <string name="song_artist_sort">Interpret (Sortierung)</string>
+    <string name="song_album_artist_sort">Albeninterpret (Sortierung)</string>
+    <string name="dialog_message_shuffle_current_playlist">Möchten Sie wirklich die aktuelle Wiedergabeliste durch würfeln?</string>
+    <string name="preference_use_artist_sort_title">ArtistSort-Tag verwenden</string>
+    <string name="preference_use_artist_sort_text">Verwenden des ArtistSort (oder AlbumArtistSort) Tags, falls der Server diesen anbietet.</string>
 </resources>
