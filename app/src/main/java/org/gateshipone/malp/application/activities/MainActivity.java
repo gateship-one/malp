@@ -169,7 +169,6 @@ public class MainActivity extends GenericActivity
         mUseArtistSort = sharedPref.getBoolean(getString(R.string.pref_use_artist_sort_key), getResources().getBoolean(R.bool.pref_use_artist_sort_default));
 
 
-
         registerForContextMenu(findViewById(R.id.main_listview));
 
         if (MPDProfileManager.getInstance(this).getProfiles().size() == 0) {
@@ -190,7 +189,7 @@ public class MainActivity extends GenericActivity
             if (savedInstanceState != null) {
                 return;
             }
-            
+
             Fragment fragment = null;
 
             if (navId == R.id.nav_library) {
@@ -446,6 +445,17 @@ public class MainActivity extends GenericActivity
                     resumeIntent.getExtras().getString(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW).equals(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW_NOWPLAYINGVIEW)) {
                 nowPlayingView.setDragOffset(0.0f);
                 getIntent().removeExtra(MAINACTIVITY_INTENT_EXTRA_REQUESTEDVIEW);
+
+                // check preferences if the playlist should be shown
+                final SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+                final boolean showPlaylist = sharedPref.getBoolean(getString(R.string.pref_npv_show_playlist_key), getResources().getBoolean(R.bool.pref_npv_show_playlist_default));
+
+                if (showPlaylist) {
+                    mNowPlayingViewSwitcherStatus = VIEW_SWITCHER_STATUS.PLAYLIST_VIEW;
+                    nowPlayingView.setViewSwitcherStatus(mNowPlayingViewSwitcherStatus);
+                }
+
             } else {
                 // set drag status
                 if (mSavedNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP) {
@@ -494,7 +504,7 @@ public class MainActivity extends GenericActivity
     protected void onMPDError(MPDException.MPDServerException e) {
         View layout = findViewById(R.id.drawer_layout);
         if (layout != null) {
-            String errorText = getString(R.string.snackbar_mpd_server_error_format,e.getErrorCode(), e.getCommandOffset(), e.getServerMessage());
+            String errorText = getString(R.string.snackbar_mpd_server_error_format, e.getErrorCode(), e.getCommandOffset(), e.getServerMessage());
             Snackbar sb = Snackbar.make(layout, errorText, Snackbar.LENGTH_LONG);
 
             // style the snackbar text
@@ -508,7 +518,7 @@ public class MainActivity extends GenericActivity
     protected void onMPDConnectionError(MPDException.MPDConnectionException e) {
         View layout = findViewById(R.id.drawer_layout);
         if (layout != null) {
-            String errorText = getString(R.string.snackbar_mpd_connection_error_format,e.getError());
+            String errorText = getString(R.string.snackbar_mpd_connection_error_format, e.getError());
 
             Snackbar sb = Snackbar.make(layout, errorText, Snackbar.LENGTH_LONG);
 
@@ -620,7 +630,7 @@ public class MainActivity extends GenericActivity
 
     @Override
     public void onDragPositionChanged(float pos) {
-        if(mHeaderImageActive) {
+        if (mHeaderImageActive) {
             // Get the primary color of the active theme from the helper.
             int newColor = ThemeUtils.getThemeColor(this, R.attr.colorPrimaryDark);
 
@@ -677,7 +687,6 @@ public class MainActivity extends GenericActivity
         // Commit the transaction
         transaction.commit();
     }
-
 
 
     @Override
@@ -739,7 +748,7 @@ public class MainActivity extends GenericActivity
 
                 // Calculate the offset depending on the floating point position (0.0-1.0 of the view)
                 // Shift by 24 bit to set it as the A from ARGB and set all remaining 24 bits to 1 to
-                int alphaOffset = (((255 - (int) (255.0 * (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP  ? 0.0 : 1.0 ))) << 24) | 0xFFFFFF);
+                int alphaOffset = (((255 - (int) (255.0 * (mNowPlayingDragStatus == DRAG_STATUS.DRAGGED_UP ? 0.0 : 1.0))) << 24) | 0xFFFFFF);
                 // and with this mask to set the new alpha value.
                 newColor &= (alphaOffset);
                 getWindow().setStatusBarColor(newColor);
@@ -784,7 +793,7 @@ public class MainActivity extends GenericActivity
         ImageView collapsingImage = findViewById(R.id.collapsing_image);
         if (collapsingImage != null) {
             collapsingImage.setImageBitmap(bm);
-            
+
             // FIXME DIRTY HACK: Manually fix the toolbar size to the screen width
             CollapsingToolbarLayout toolbar = findViewById(R.id.collapsing_toolbar);
             AppBarLayout.LayoutParams params = (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
@@ -793,10 +802,9 @@ public class MainActivity extends GenericActivity
 
             // Always expand the toolbar to show the complete image
             AppBarLayout appbar = findViewById(R.id.appbar);
-            appbar.setExpanded(true,false);
+            appbar.setExpanded(true, false);
         }
     }
-
 
 
     @Override
