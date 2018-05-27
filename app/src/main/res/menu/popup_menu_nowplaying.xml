@@ -56,11 +56,21 @@
             android:title="@string/action_clear_playlist"
             app:showAsAction="never" />
 
-        <item
-            android:id="@+id/action_add_url"
-            android:orderInCategory="4"
-            android:title="@string/action_add_url"
-            app:showAsAction="never" />
+        <item android:id="@+id/group_playlist_add_actions"
+            android:title="@string/action_add_group">
+            <menu>
+                <item
+                    android:id="@+id/action_add_url"
+                    android:orderInCategory="4"
+                    android:title="@string/action_add_url"
+                    app:showAsAction="never" />
+                <item
+                    android:id="@+id/action_add_url_playlist"
+                    android:orderInCategory="5"
+                    android:title="@string/action_add_url_playlist"
+                    app:showAsAction="never" />
+            </menu>
+        </item>
         <item
             android:id="@+id/action_jump_to_current"
             android:orderInCategory="5"

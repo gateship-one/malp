@@ -275,4 +275,6 @@
     <string name="preference_use_artist_sort_text">Verwenden des ArtistSort (oder AlbumArtistSort) Tags, falls der Server diesen anbietet.</string>
     <string name="preference_npv_show_playlist_title">Starte mit Wiedergabeliste</string>
     <string name="preference_npv_show_playlist_text">Zeige die Wiedergabeliste wenn während der Wiedergabe M.A.L.P. über ein Widget oder Benachrichtigung gestartet wird</string>
+    <string name="action_add_group">Hinzufügen</string>
+    <string name="action_add_url_playlist">Playlist-URL hinzufügen</string>
 </resources>
