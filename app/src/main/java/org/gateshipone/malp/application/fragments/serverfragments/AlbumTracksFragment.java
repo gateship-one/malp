@@ -348,6 +348,12 @@ public class AlbumTracksFragment extends GenericMPDFragment<List<MPDFileEntry>> 
         DrawableCompat.setTint(drawable, tintColor);
         menu.findItem(R.id.action_add_album).setIcon(drawable);
 
+        if(!mAlbum.getMBID().isEmpty()) {
+            // Disable legacy feature to remove filter criteria for album tracks if an MBID is
+            // available. Albums tagged with a MBID can be considered shown correctly.
+            menu.findItem(R.id.action_show_all_tracks).setVisible(false);
+        }
+
         super.onCreateOptionsMenu(menu, menuInflater);
     }
 
