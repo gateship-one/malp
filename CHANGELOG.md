@@ -1,3 +1,8 @@
+### Version 1.1.16 Tag: release-25 (2018-06-02)
+ * Fix malformed musicbrainz requests
+ * New settings option to jump directly to playlist view instead of album cover from notification or widget
+ * Menu entry to manually add a playlist URL to the current playlist. (e.g. use it for soundcloud playlists)
+
 ### Version 1.1.15 Tag: release-24 (2018-05-06)
  * Add experimental support for ArtistSort & AlbumArtistSort tags
  * Updated translations
