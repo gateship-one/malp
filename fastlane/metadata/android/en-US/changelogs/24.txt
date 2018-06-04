@@ -1,4 +1,0 @@
- * Add experimental support for ArtistSort & AlbumArtistSort tags
- * Updated translations
- * Protocol fixes (Escaped strings)
-
