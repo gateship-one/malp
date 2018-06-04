@@ -62,7 +62,9 @@
     <string name="action_play_albums">Jouer les albums</string>
     <string name="action_remove_track">Supprimer la piste</string>
     <string name="action_remove_album">Supprimer l\'album</string>
-    <string name="action_add_url">Ajouter l\'URL</string>
+    <string name="action_add_group">Ajouter</string>
+    <string name="action_add_url">Ajouter l\'URL du fichier</string>
+    <string name="action_add_url_playlist">Ajouter une URL de playlist</string>
     <string name="action_show_albums_from_here">Afficher les albums de ce répertoire</string>
     <string name="action_update_database_here">Mettre à jour la base de données ici</string>
     <string name="action_wikipedia_album">Afficher l\'album</string>
@@ -198,6 +200,8 @@
     <string name="preference_show_artist_image_text">Alterner entre la pochette de l\'album et une image de l\'artiste dans la vue de la piste en cours de lecture</string>#
 
     
+    <string name="preference_npv_show_playlist_title">Démarrer avec la vue playlist</string>
+    <string name="preference_npv_show_playlist_text">Affiche la playlist si M.A.L.P. est ouvert via un widget ou une notification pendant que la lecture est active</string>
     <string name="preference_default_view_title">Vue par défaut</string>
     <string name="preference_default_view_message">Choisir la vue par défaut</string>
     <string name="preference_default_view_summary">Choisir la vue par défaut pour l\'application.</string>
@@ -212,7 +216,7 @@
     <string name="preference_library_view_grid">Grille</string>
     <string name="preference_use_album_artists_title">Utiliser le tag AlbumArtist</string>
     <string name="preference_use_album_artists_text">Utiliser le tag AlbumArtist pour la liste d\'artistes (cette méthode est plus lente et peut entraîner des images d\'artiste erronées).</string>
-    <string name="preference_use_artist_sort_title">Utiliser le tag ArtistSort ou AlbumArtistSort</string>
+    <string name="preference_use_artist_sort_title">Utiliser le tag ArtistSort</string>
     <string name="preference_use_artist_sort_text">Utilisez le tag ArtistSort (ou AlbumartistSort) si le serveur fournit le tag.</string>
     <string name="preference_use_tags_in_filebrowser_title">Utiliser des tags dans le navigateur de fichiers</string>
     <string name="preference_use_tags_in_filebrowser_text">Si disponibles, utilisez les tags dans l\'explorateur de fichiers au lieu des noms de fichiers. Désactivez cette option pour afficher les noms de fichiers dans l\'explorateur de fichiers.</string>
